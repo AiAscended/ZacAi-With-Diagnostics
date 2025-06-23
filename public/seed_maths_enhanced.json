@@ -1,0 +1,205 @@
+{
+  "times_tables": {
+    "definition": "Multiplication tables from 1x1 to 12x12",
+    "category": "arithmetic",
+    "difficulty": 2,
+    "data": {
+      "1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      "2": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24],
+      "3": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+      "4": [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48],
+      "5": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
+      "6": [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72],
+      "7": [7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84],
+      "8": [8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96],
+      "9": [9, 18, 27, 36, 45, 54, 63, 72, 81, 90, 99, 108],
+      "10": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120],
+      "11": [11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121, 132],
+      "12": [12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144]
+    },
+    "examples": ["3 × 4 = 12", "7 × 8 = 56", "9 × 9 = 81"]
+  },
+  "addition_facts": {
+    "definition": "Basic addition facts up to 20+20",
+    "category": "arithmetic",
+    "difficulty": 1,
+    "patterns": {
+      "doubles": {
+        "1+1": 2,
+        "2+2": 4,
+        "3+3": 6,
+        "4+4": 8,
+        "5+5": 10,
+        "6+6": 12,
+        "7+7": 14,
+        "8+8": 16,
+        "9+9": 18,
+        "10+10": 20
+      },
+      "near_doubles": {
+        "1+2": 3,
+        "2+3": 5,
+        "3+4": 7,
+        "4+5": 9,
+        "5+6": 11,
+        "6+7": 13,
+        "7+8": 15,
+        "8+9": 17,
+        "9+10": 19
+      },
+      "make_ten": { "1+9": 10, "2+8": 10, "3+7": 10, "4+6": 10, "5+5": 10 }
+    },
+    "examples": ["5 + 5 = 10", "8 + 7 = 15", "12 + 8 = 20"]
+  },
+  "subtraction_facts": {
+    "definition": "Basic subtraction facts from 20 down to 0",
+    "category": "arithmetic",
+    "difficulty": 1,
+    "patterns": {
+      "from_doubles": {
+        "2-1": 1,
+        "4-2": 2,
+        "6-3": 3,
+        "8-4": 4,
+        "10-5": 5,
+        "12-6": 6,
+        "14-7": 7,
+        "16-8": 8,
+        "18-9": 9,
+        "20-10": 10
+      },
+      "from_ten": { "10-1": 9, "10-2": 8, "10-3": 7, "10-4": 6, "10-5": 5, "10-6": 4, "10-7": 3, "10-8": 2, "10-9": 1 }
+    },
+    "examples": ["10 - 3 = 7", "15 - 8 = 7", "20 - 12 = 8"]
+  },
+  "geometry_formulas": {
+    "definition": "Essential geometry formulas for common shapes",
+    "category": "geometry",
+    "difficulty": 3,
+    "shapes": {
+      "rectangle": {
+        "area": "length × width",
+        "perimeter": "2 × (length + width)",
+        "examples": ["Area: 5 × 3 = 15", "Perimeter: 2 × (5 + 3) = 16"]
+      },
+      "square": {
+        "area": "side²",
+        "perimeter": "4 × side",
+        "examples": ["Area: 4² = 16", "Perimeter: 4 × 4 = 16"]
+      },
+      "triangle": {
+        "area": "½ × base × height",
+        "perimeter": "side₁ + side₂ + side₃",
+        "examples": ["Area: ½ × 6 × 4 = 12", "Perimeter: 3 + 4 + 5 = 12"]
+      },
+      "circle": {
+        "area": "π × radius²",
+        "circumference": "2 × π × radius",
+        "examples": ["Area: π × 3² = 9π", "Circumference: 2 × π × 3 = 6π"]
+      },
+      "cube": {
+        "volume": "side³",
+        "surface_area": "6 × side²",
+        "examples": ["Volume: 3³ = 27", "Surface Area: 6 × 3² = 54"]
+      },
+      "rectangular_prism": {
+        "volume": "length × width × height",
+        "surface_area": "2 × (lw + lh + wh)",
+        "examples": ["Volume: 4 × 3 × 2 = 24", "Surface Area: 2 × (12 + 8 + 6) = 52"]
+      },
+      "cylinder": {
+        "volume": "π × radius² × height",
+        "surface_area": "2π × radius × (radius + height)",
+        "examples": ["Volume: π × 2² × 5 = 20π", "Surface Area: 2π × 2 × (2 + 5) = 28π"]
+      },
+      "sphere": {
+        "volume": "⁴⁄₃ × π × radius³",
+        "surface_area": "4 × π × radius²",
+        "examples": ["Volume: ⁴⁄₃ × π × 3³ = 36π", "Surface Area: 4 × π × 3² = 36π"]
+      }
+    }
+  },
+  "vortex_mathematics": {
+    "definition": "Vortex-based mathematics and number patterns",
+    "category": "advanced_patterns",
+    "difficulty": 5,
+    "concepts": {
+      "vortex_cycle": {
+        "pattern": [1, 2, 4, 8, 7, 5, 1],
+        "description": "Doubling sequence modulo 9",
+        "formula": "2ⁿ mod 9",
+        "examples": ["2¹ = 2", "2² = 4", "2³ = 8", "2⁴ = 16 → 1+6 = 7"]
+      },
+      "tesla_369": {
+        "pattern": [3, 6, 9],
+        "description": "Tesla's divine numbers",
+        "properties": ["3+6=9", "6+9=15→1+5=6", "9+3=12→1+2=3"],
+        "significance": "Key to universal energy"
+      },
+      "digital_root": {
+        "definition": "Recursive sum of digits until single digit",
+        "formula": "n mod 9 (if n ≠ 0 and n mod 9 = 0, then 9)",
+        "examples": ["123 → 1+2+3 = 6", "789 → 7+8+9 = 24 → 2+4 = 6"]
+      },
+      "doubling_circuit": {
+        "sequence": [1, 2, 4, 8, 7, 5, 1, 2, 4, 8, 7, 5],
+        "description": "Infinite doubling pattern in base 9",
+        "applications": ["Energy patterns", "Frequency analysis", "Sacred geometry"]
+      }
+    }
+  },
+  "number_theory": {
+    "definition": "Fundamental number theory concepts",
+    "category": "advanced_mathematics",
+    "difficulty": 4,
+    "concepts": {
+      "prime_numbers": {
+        "definition": "Numbers divisible only by 1 and themselves",
+        "first_20": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71],
+        "properties": ["Only even prime is 2", "All primes > 2 are odd", "Infinite quantity"]
+      },
+      "fibonacci_sequence": {
+        "definition": "Each number is sum of two preceding ones",
+        "sequence": [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610],
+        "formula": "F(n) = F(n-1) + F(n-2)",
+        "golden_ratio": "φ = (1 + √5) / 2 ≈ 1.618"
+      },
+      "perfect_numbers": {
+        "definition": "Numbers equal to sum of proper divisors",
+        "examples": [6, 28, 496, 8128],
+        "formula": "2^(p-1) × (2^p - 1) where 2^p - 1 is prime"
+      }
+    }
+  },
+  "constants": {
+    "definition": "Important mathematical constants",
+    "category": "constants",
+    "difficulty": 3,
+    "values": {
+      "pi": {
+        "symbol": "π",
+        "value": 3.141592653589793,
+        "definition": "Ratio of circle's circumference to diameter",
+        "approximations": ["22/7", "355/113"]
+      },
+      "e": {
+        "symbol": "e",
+        "value": 2.718281828459045,
+        "definition": "Base of natural logarithm",
+        "formula": "lim(n→∞) (1 + 1/n)ⁿ"
+      },
+      "golden_ratio": {
+        "symbol": "φ",
+        "value": 1.618033988749895,
+        "definition": "Divine proportion",
+        "formula": "(1 + √5) / 2"
+      },
+      "sqrt_2": {
+        "symbol": "√2",
+        "value": 1.4142135623730951,
+        "definition": "Square root of 2",
+        "significance": "Diagonal of unit square"
+      }
+    }
+  }
+}

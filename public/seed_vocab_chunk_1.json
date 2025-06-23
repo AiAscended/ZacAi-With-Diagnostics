@@ -1,0 +1,677 @@
+{
+  "i": {
+    "d": "First person singular pronoun",
+    "p": "pronoun",
+    "ph": "aɪ",
+    "s": ["me", "myself"],
+    "a": ["you", "they"],
+    "e": ["I am happy", "I like this"],
+    "f": 100
+  },
+  "you": {
+    "d": "Second person pronoun",
+    "p": "pronoun",
+    "ph": "juː",
+    "s": ["yourself"],
+    "a": ["I", "me"],
+    "e": ["You are kind", "How are you?"],
+    "f": 100
+  },
+  "he": {
+    "d": "Third person singular masculine pronoun",
+    "p": "pronoun",
+    "ph": "hiː",
+    "s": ["him", "himself"],
+    "a": ["she", "it"],
+    "e": ["He is tall", "He likes music"],
+    "f": 95
+  },
+  "she": {
+    "d": "Third person singular feminine pronoun",
+    "p": "pronoun",
+    "ph": "ʃiː",
+    "s": ["her", "herself"],
+    "a": ["he", "it"],
+    "e": ["She is smart", "She works hard"],
+    "f": 95
+  },
+  "it": {
+    "d": "Third person singular neuter pronoun",
+    "p": "pronoun",
+    "ph": "ɪt",
+    "s": ["itself"],
+    "a": ["he", "she"],
+    "e": ["It is raining", "It works well"],
+    "f": 98
+  },
+  "we": {
+    "d": "First person plural pronoun",
+    "p": "pronoun",
+    "ph": "wiː",
+    "s": ["us", "ourselves"],
+    "a": ["they", "you"],
+    "e": ["We are friends", "We like pizza"],
+    "f": 92
+  },
+  "they": {
+    "d": "Third person plural pronoun",
+    "p": "pronoun",
+    "ph": "ðeɪ",
+    "s": ["them", "themselves"],
+    "a": ["we", "I"],
+    "e": ["They are coming", "They work together"],
+    "f": 90
+  },
+  "this": {
+    "d": "Demonstrative pronoun indicating something near",
+    "p": "pronoun",
+    "ph": "ðɪs",
+    "s": ["these"],
+    "a": ["that", "those"],
+    "e": ["This is good", "I like this"],
+    "f": 88
+  },
+  "that": {
+    "d": "Demonstrative pronoun indicating something distant",
+    "p": "pronoun",
+    "ph": "ðæt",
+    "s": ["those"],
+    "a": ["this", "these"],
+    "e": ["That is far", "I want that"],
+    "f": 85
+  },
+  "who": {
+    "d": "Interrogative pronoun asking about a person",
+    "p": "pronoun",
+    "ph": "huː",
+    "s": ["whom"],
+    "a": ["what", "which"],
+    "e": ["Who is there?", "Who did this?"],
+    "f": 82
+  },
+  "what": {
+    "d": "Interrogative pronoun asking about a thing",
+    "p": "pronoun",
+    "ph": "wʌt",
+    "s": ["which"],
+    "a": ["who", "where"],
+    "e": ["What is this?", "What do you want?"],
+    "f": 90
+  },
+  "where": {
+    "d": "Interrogative adverb asking about location",
+    "p": "adverb",
+    "ph": "weər",
+    "s": ["wherever"],
+    "a": ["here", "there"],
+    "e": ["Where are you?", "Where is it?"],
+    "f": 85
+  },
+  "when": {
+    "d": "Interrogative adverb asking about time",
+    "p": "adverb",
+    "ph": "wen",
+    "s": ["whenever"],
+    "a": ["never", "always"],
+    "e": ["When will you come?", "When is dinner?"],
+    "f": 80
+  },
+  "why": {
+    "d": "Interrogative adverb asking for reason",
+    "p": "adverb",
+    "ph": "waɪ",
+    "s": ["wherefore"],
+    "a": ["because"],
+    "e": ["Why are you sad?", "Why did this happen?"],
+    "f": 78
+  },
+  "how": {
+    "d": "Interrogative adverb asking about manner or method",
+    "p": "adverb",
+    "ph": "haʊ",
+    "s": ["however"],
+    "a": [],
+    "e": ["How are you?", "How does this work?"],
+    "f": 85
+  },
+  "not": {
+    "d": "Adverb expressing negation",
+    "p": "adverb",
+    "ph": "nɒt",
+    "s": ["no"],
+    "a": ["yes"],
+    "e": ["I am not ready", "This is not right"],
+    "f": 95
+  },
+  "all": {
+    "d": "Determiner meaning the whole quantity",
+    "p": "determiner",
+    "ph": "ɔːl",
+    "s": ["every", "entire"],
+    "a": ["none", "some"],
+    "e": ["All people are equal", "I ate all the food"],
+    "f": 88
+  },
+  "some": {
+    "d": "Determiner meaning an unspecified amount",
+    "p": "determiner",
+    "ph": "sʌm",
+    "s": ["several", "few"],
+    "a": ["all", "none"],
+    "e": ["Some people like coffee", "Give me some water"],
+    "f": 85
+  },
+  "many": {
+    "d": "Determiner meaning a large number of",
+    "p": "determiner",
+    "ph": "ˈmeni",
+    "s": ["numerous", "lots"],
+    "a": ["few", "little"],
+    "e": ["Many people came", "There are many options"],
+    "f": 80
+  },
+  "few": {
+    "d": "Determiner meaning a small number of",
+    "p": "determiner",
+    "ph": "fjuː",
+    "s": ["several", "some"],
+    "a": ["many", "lots"],
+    "e": ["Few people know this", "I have few friends"],
+    "f": 75
+  },
+  "one": {
+    "d": "Number representing a single unit",
+    "p": "number",
+    "ph": "wʌn",
+    "s": ["single", "unity"],
+    "a": ["many", "multiple"],
+    "e": ["One apple", "I have one car"],
+    "f": 95
+  },
+  "two": {
+    "d": "Number representing a pair",
+    "p": "number",
+    "ph": "tuː",
+    "s": ["pair", "couple"],
+    "a": ["one", "single"],
+    "e": ["Two dogs", "I need two minutes"],
+    "f": 90
+  },
+  "three": {
+    "d": "Number representing a trio",
+    "p": "number",
+    "ph": "θriː",
+    "s": ["trio"],
+    "a": ["one", "two"],
+    "e": ["Three cats", "Count to three"],
+    "f": 85
+  },
+  "four": {
+    "d": "Number representing a quartet",
+    "p": "number",
+    "ph": "fɔːr",
+    "s": ["quartet"],
+    "a": ["one", "few"],
+    "e": ["Four wheels", "Four seasons"],
+    "f": 80
+  },
+  "five": {
+    "d": "Number representing a quintet",
+    "p": "number",
+    "ph": "faɪv",
+    "s": ["quintet"],
+    "a": ["one", "few"],
+    "e": ["Five fingers", "High five"],
+    "f": 78
+  },
+  "be": {
+    "d": "Verb expressing existence or identity",
+    "p": "verb",
+    "ph": "biː",
+    "s": ["exist", "am", "is", "are"],
+    "a": ["cease", "disappear"],
+    "e": ["I am happy", "She is tall"],
+    "f": 100
+  },
+  "have": {
+    "d": "Verb expressing possession",
+    "p": "verb",
+    "ph": "hæv",
+    "s": ["possess", "own"],
+    "a": ["lack", "need"],
+    "e": ["I have a car", "She has blue eyes"],
+    "f": 98
+  },
+  "do": {
+    "d": "Verb expressing action or performance",
+    "p": "verb",
+    "ph": "duː",
+    "s": ["perform", "execute"],
+    "a": ["undo", "avoid"],
+    "e": ["Do your homework", "What do you do?"],
+    "f": 95
+  },
+  "say": {
+    "d": "Verb expressing speech",
+    "p": "verb",
+    "ph": "seɪ",
+    "s": ["speak", "tell"],
+    "a": ["listen", "hear"],
+    "e": ["Say hello", "What did you say?"],
+    "f": 92
+  },
+  "get": {
+    "d": "Verb expressing acquisition",
+    "p": "verb",
+    "ph": "ɡet",
+    "s": ["obtain", "receive"],
+    "a": ["give", "lose"],
+    "e": ["Get the book", "I got a gift"],
+    "f": 90
+  },
+  "make": {
+    "d": "Verb expressing creation",
+    "p": "verb",
+    "ph": "meɪk",
+    "s": ["create", "build"],
+    "a": ["destroy", "break"],
+    "e": ["Make dinner", "Make a decision"],
+    "f": 88
+  },
+  "go": {
+    "d": "Verb expressing movement",
+    "p": "verb",
+    "ph": "ɡoʊ",
+    "s": ["move", "travel"],
+    "a": ["stay", "remain"],
+    "e": ["Go home", "Let's go"],
+    "f": 95
+  },
+  "know": {
+    "d": "Verb expressing knowledge or awareness",
+    "p": "verb",
+    "ph": "noʊ",
+    "s": ["understand", "realize"],
+    "a": ["ignore", "forget"],
+    "e": ["I know you", "Do you know this?"],
+    "f": 85
+  },
+  "take": {
+    "d": "Verb expressing grasping or accepting",
+    "p": "verb",
+    "ph": "teɪk",
+    "s": ["grab", "accept"],
+    "a": ["give", "leave"],
+    "e": ["Take this", "Take your time"],
+    "f": 88
+  },
+  "see": {
+    "d": "Verb expressing vision",
+    "p": "verb",
+    "ph": "siː",
+    "s": ["look", "view"],
+    "a": ["blind", "ignore"],
+    "e": ["I see you", "See the movie"],
+    "f": 90
+  },
+  "come": {
+    "d": "Verb expressing approach",
+    "p": "verb",
+    "ph": "kʌm",
+    "s": ["arrive", "approach"],
+    "a": ["go", "leave"],
+    "e": ["Come here", "Come with me"],
+    "f": 85
+  },
+  "think": {
+    "d": "Verb expressing mental activity",
+    "p": "verb",
+    "ph": "θɪŋk",
+    "s": ["consider", "ponder"],
+    "a": ["ignore", "forget"],
+    "e": ["I think so", "Think about it"],
+    "f": 82
+  },
+  "look": {
+    "d": "Verb expressing directed vision",
+    "p": "verb",
+    "ph": "lʊk",
+    "s": ["see", "watch"],
+    "a": ["ignore", "avoid"],
+    "e": ["Look at me", "Look around"],
+    "f": 80
+  },
+  "want": {
+    "d": "Verb expressing desire",
+    "p": "verb",
+    "ph": "wɑːnt",
+    "s": ["desire", "wish"],
+    "a": ["reject", "refuse"],
+    "e": ["I want food", "What do you want?"],
+    "f": 88
+  },
+  "give": {
+    "d": "Verb expressing transfer",
+    "p": "verb",
+    "ph": "ɡɪv",
+    "s": ["provide", "offer"],
+    "a": ["take", "receive"],
+    "e": ["Give me that", "Give a gift"],
+    "f": 85
+  },
+  "use": {
+    "d": "Verb expressing utilization",
+    "p": "verb",
+    "ph": "juːz",
+    "s": ["utilize", "employ"],
+    "a": ["waste", "ignore"],
+    "e": ["Use this tool", "How to use it?"],
+    "f": 82
+  },
+  "find": {
+    "d": "Verb expressing discovery",
+    "p": "verb",
+    "ph": "faɪnd",
+    "s": ["discover", "locate"],
+    "a": ["lose", "miss"],
+    "e": ["Find the key", "I found it"],
+    "f": 80
+  },
+  "tell": {
+    "d": "Verb expressing communication",
+    "p": "verb",
+    "ph": "tel",
+    "s": ["inform", "say"],
+    "a": ["hide", "conceal"],
+    "e": ["Tell me", "Tell the truth"],
+    "f": 78
+  },
+  "ask": {
+    "d": "Verb expressing inquiry",
+    "p": "verb",
+    "ph": "æsk",
+    "s": ["inquire", "question"],
+    "a": ["answer", "tell"],
+    "e": ["Ask a question", "Ask for help"],
+    "f": 75
+  },
+  "work": {
+    "d": "Verb expressing labor or function",
+    "p": "verb",
+    "ph": "wɜːrk",
+    "s": ["labor", "function"],
+    "a": ["rest", "break"],
+    "e": ["Work hard", "This works well"],
+    "f": 85
+  },
+  "seem": {
+    "d": "Verb expressing appearance",
+    "p": "verb",
+    "ph": "siːm",
+    "s": ["appear", "look"],
+    "a": ["be", "actually"],
+    "e": ["You seem happy", "It seems right"],
+    "f": 70
+  },
+  "feel": {
+    "d": "Verb expressing sensation or emotion",
+    "p": "verb",
+    "ph": "fiːl",
+    "s": ["sense", "experience"],
+    "a": ["numb", "ignore"],
+    "e": ["I feel good", "Feel the texture"],
+    "f": 82
+  },
+  "try": {
+    "d": "Verb expressing attempt",
+    "p": "verb",
+    "ph": "traɪ",
+    "s": ["attempt", "endeavor"],
+    "a": ["quit", "give up"],
+    "e": ["Try again", "Try your best"],
+    "f": 78
+  },
+  "leave": {
+    "d": "Verb expressing departure",
+    "p": "verb",
+    "ph": "liːv",
+    "s": ["depart", "exit"],
+    "a": ["arrive", "stay"],
+    "e": ["Leave now", "Leave it alone"],
+    "f": 75
+  },
+  "call": {
+    "d": "Verb expressing summoning or naming",
+    "p": "verb",
+    "ph": "kɔːl",
+    "s": ["summon", "name"],
+    "a": ["ignore", "dismiss"],
+    "e": ["Call me", "Call it a day"],
+    "f": 80
+  },
+  "good": {
+    "d": "Adjective expressing positive quality",
+    "p": "adjective",
+    "ph": "ɡʊd",
+    "s": ["excellent", "fine"],
+    "a": ["bad", "poor"],
+    "e": ["Good job", "This is good"],
+    "f": 95
+  },
+  "new": {
+    "d": "Adjective expressing recent origin",
+    "p": "adjective",
+    "ph": "nuː",
+    "s": ["fresh", "recent"],
+    "a": ["old", "ancient"],
+    "e": ["New car", "Something new"],
+    "f": 88
+  },
+  "first": {
+    "d": "Adjective expressing initial position",
+    "p": "adjective",
+    "ph": "fɜːrst",
+    "s": ["initial", "primary"],
+    "a": ["last", "final"],
+    "e": ["First time", "First place"],
+    "f": 85
+  },
+  "last": {
+    "d": "Adjective expressing final position",
+    "p": "adjective",
+    "ph": "læst",
+    "s": ["final", "ultimate"],
+    "a": ["first", "initial"],
+    "e": ["Last chance", "Last week"],
+    "f": 82
+  },
+  "long": {
+    "d": "Adjective expressing extended length",
+    "p": "adjective",
+    "ph": "lɔːŋ",
+    "s": ["lengthy", "extended"],
+    "a": ["short", "brief"],
+    "e": ["Long road", "Long time"],
+    "f": 80
+  },
+  "great": {
+    "d": "Adjective expressing excellence",
+    "p": "adjective",
+    "ph": "ɡreɪt",
+    "s": ["excellent", "wonderful"],
+    "a": ["terrible", "awful"],
+    "e": ["Great job", "Great idea"],
+    "f": 85
+  },
+  "little": {
+    "d": "Adjective expressing small size",
+    "p": "adjective",
+    "ph": "ˈlɪtəl",
+    "s": ["small", "tiny"],
+    "a": ["big", "large"],
+    "e": ["Little house", "A little bit"],
+    "f": 82
+  },
+  "own": {
+    "d": "Adjective expressing possession",
+    "p": "adjective",
+    "ph": "oʊn",
+    "s": ["personal", "individual"],
+    "a": ["shared", "borrowed"],
+    "e": ["My own car", "Own decision"],
+    "f": 78
+  },
+  "other": {
+    "d": "Adjective expressing difference",
+    "p": "adjective",
+    "ph": "ˈʌðər",
+    "s": ["different", "another"],
+    "a": ["same", "identical"],
+    "e": ["Other people", "The other way"],
+    "f": 85
+  },
+  "old": {
+    "d": "Adjective expressing age",
+    "p": "adjective",
+    "ph": "oʊld",
+    "s": ["aged", "ancient"],
+    "a": ["new", "young"],
+    "e": ["Old man", "Old building"],
+    "f": 88
+  },
+  "right": {
+    "d": "Adjective expressing correctness",
+    "p": "adjective",
+    "ph": "raɪt",
+    "s": ["correct", "proper"],
+    "a": ["wrong", "left"],
+    "e": ["Right answer", "Turn right"],
+    "f": 85
+  },
+  "big": {
+    "d": "Adjective expressing large size",
+    "p": "adjective",
+    "ph": "bɪɡ",
+    "s": ["large", "huge"],
+    "a": ["small", "tiny"],
+    "e": ["Big house", "Big problem"],
+    "f": 90
+  },
+  "high": {
+    "d": "Adjective expressing elevation",
+    "p": "adjective",
+    "ph": "haɪ",
+    "s": ["tall", "elevated"],
+    "a": ["low", "short"],
+    "e": ["High mountain", "High price"],
+    "f": 78
+  },
+  "different": {
+    "d": "Adjective expressing distinction",
+    "p": "adjective",
+    "ph": "ˈdɪfərənt",
+    "s": ["distinct", "unlike"],
+    "a": ["same", "similar"],
+    "e": ["Different colors", "Something different"],
+    "f": 80
+  },
+  "small": {
+    "d": "Adjective expressing little size",
+    "p": "adjective",
+    "ph": "smɔːl",
+    "s": ["little", "tiny"],
+    "a": ["big", "large"],
+    "e": ["Small dog", "Small problem"],
+    "f": 85
+  },
+  "large": {
+    "d": "Adjective expressing big size",
+    "p": "adjective",
+    "ph": "lɑːrdʒ",
+    "s": ["big", "huge"],
+    "a": ["small", "tiny"],
+    "e": ["Large pizza", "Large crowd"],
+    "f": 82
+  },
+  "next": {
+    "d": "Adjective expressing following position",
+    "p": "adjective",
+    "ph": "nekst",
+    "s": ["following", "subsequent"],
+    "a": ["previous", "last"],
+    "e": ["Next week", "Next person"],
+    "f": 80
+  },
+  "early": {
+    "d": "Adjective expressing before expected time",
+    "p": "adjective",
+    "ph": "ˈɜːrli",
+    "s": ["soon", "ahead"],
+    "a": ["late", "delayed"],
+    "e": ["Early morning", "Come early"],
+    "f": 75
+  },
+  "young": {
+    "d": "Adjective expressing youth",
+    "p": "adjective",
+    "ph": "jʌŋ",
+    "s": ["youthful", "juvenile"],
+    "a": ["old", "aged"],
+    "e": ["Young person", "Young at heart"],
+    "f": 78
+  },
+  "important": {
+    "d": "Adjective expressing significance",
+    "p": "adjective",
+    "ph": "ɪmˈpɔːrtənt",
+    "s": ["significant", "crucial"],
+    "a": ["unimportant", "trivial"],
+    "e": ["Important meeting", "Very important"],
+    "f": 82
+  },
+  "few": {
+    "d": "Adjective expressing small number",
+    "p": "adjective",
+    "ph": "fjuː",
+    "s": ["several", "some"],
+    "a": ["many", "numerous"],
+    "e": ["Few people", "A few minutes"],
+    "f": 75
+  },
+  "public": {
+    "d": "Adjective expressing openness to all",
+    "p": "adjective",
+    "ph": "ˈpʌblɪk",
+    "s": ["open", "communal"],
+    "a": ["private", "personal"],
+    "e": ["Public park", "Public speaking"],
+    "f": 70
+  },
+  "bad": {
+    "d": "Adjective expressing negative quality",
+    "p": "adjective",
+    "ph": "bæd",
+    "s": ["poor", "terrible"],
+    "a": ["good", "excellent"],
+    "e": ["Bad weather", "Bad idea"],
+    "f": 85
+  },
+  "same": {
+    "d": "Adjective expressing identity",
+    "p": "adjective",
+    "ph": "seɪm",
+    "s": ["identical", "equal"],
+    "a": ["different", "other"],
+    "e": ["Same person", "Same time"],
+    "f": 80
+  },
+  "able": {
+    "d": "Adjective expressing capability",
+    "p": "adjective",
+    "ph": "ˈeɪbəl",
+    "s": ["capable", "competent"],
+    "a": ["unable", "incapable"],
+    "e": ["Able to help", "Very able"],
+    "f": 75
+  }
+}
