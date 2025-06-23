@@ -1,0 +1,58 @@
+{
+  "artificial_intelligence": {
+    "summary": "Artificial Intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans. It includes machine learning, natural language processing, computer vision, and robotics.",
+    "category": "technology",
+    "source": "general_knowledge",
+    "key_concepts": ["machine learning", "neural networks", "deep learning", "natural language processing"],
+    "applications": ["automation", "healthcare", "finance", "transportation", "entertainment"]
+  },
+  "mathematics": {
+    "summary": "Mathematics is the abstract science of number, quantity, and space, either as abstract concepts or as applied to other disciplines such as physics and engineering.",
+    "category": "science",
+    "source": "general_knowledge",
+    "branches": ["arithmetic", "algebra", "geometry", "calculus", "statistics", "trigonometry"],
+    "importance": "Foundation for science, technology, engineering, and many other fields"
+  },
+  "physics": {
+    "summary": "Physics is the natural science that studies matter, its motion and behavior through space and time, and the related entities of energy and force.",
+    "category": "science",
+    "source": "general_knowledge",
+    "key_areas": ["mechanics", "thermodynamics", "electromagnetism", "quantum mechanics", "relativity"],
+    "applications": ["engineering", "technology", "medicine", "astronomy"]
+  },
+  "chemistry": {
+    "summary": "Chemistry is the scientific discipline involved with elements and compounds composed of atoms, molecules and ions: their composition, structure, properties, behavior and the changes they undergo.",
+    "category": "science",
+    "source": "general_knowledge",
+    "branches": ["organic chemistry", "inorganic chemistry", "physical chemistry", "analytical chemistry"],
+    "periodic_table": "Organizes all known chemical elements by atomic number"
+  },
+  "biology": {
+    "summary": "Biology is the natural science that studies life and living organisms, including their physical structure, chemical processes, molecular interactions, physiological mechanisms, development and evolution.",
+    "category": "science",
+    "source": "general_knowledge",
+    "fields": ["botany", "zoology", "genetics", "ecology", "microbiology", "biochemistry"],
+    "importance": "Understanding life and living systems"
+  },
+  "computer_science": {
+    "summary": "Computer Science is the study of computational systems, algorithms and the design of computer systems and their applications.",
+    "category": "technology",
+    "source": "general_knowledge",
+    "areas": ["programming", "algorithms", "data structures", "software engineering", "artificial intelligence"],
+    "applications": ["software development", "web development", "mobile apps", "games", "AI systems"]
+  },
+  "history": {
+    "summary": "History is the study of past events, particularly in human affairs. It involves the discovery, collection, organization, and presentation of information about past events.",
+    "category": "humanities",
+    "source": "general_knowledge",
+    "periods": ["ancient history", "medieval history", "modern history", "contemporary history"],
+    "importance": "Understanding how past events shape the present"
+  },
+  "geography": {
+    "summary": "Geography is a field of science devoted to the study of the lands, features, inhabitants, and phenomena of Earth and planets.",
+    "category": "earth_science",
+    "source": "general_knowledge",
+    "branches": ["physical geography", "human geography", "environmental geography"],
+    "tools": ["maps", "GPS", "GIS", "remote sensing"]
+  }
+}

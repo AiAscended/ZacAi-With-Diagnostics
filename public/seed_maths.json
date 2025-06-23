@@ -1,0 +1,95 @@
+{
+  "addition": {
+    "definition": "The process of adding numbers together",
+    "formula": "a + b = c",
+    "examples": ["2 + 3 = 5", "15 + 27 = 42", "100 + 200 = 300"],
+    "category": "arithmetic",
+    "difficulty": 1,
+    "properties": ["commutative", "associative"],
+    "symbol": "+",
+    "applications": ["counting", "measurement", "finance"]
+  },
+  "subtraction": {
+    "definition": "The process of taking one number away from another",
+    "formula": "a - b = c",
+    "examples": ["10 - 3 = 7", "50 - 25 = 25", "100 - 37 = 63"],
+    "category": "arithmetic",
+    "difficulty": 1,
+    "properties": ["non-commutative"],
+    "symbol": "-",
+    "applications": ["difference", "decrease", "comparison"]
+  },
+  "multiplication": {
+    "definition": "The process of adding a number to itself a specified number of times",
+    "formula": "a × b = c",
+    "examples": ["3 × 4 = 12", "7 × 8 = 56", "12 × 5 = 60"],
+    "category": "arithmetic",
+    "difficulty": 2,
+    "properties": ["commutative", "associative", "distributive"],
+    "symbol": "×",
+    "applications": ["scaling", "area", "repeated addition"]
+  },
+  "division": {
+    "definition": "The process of splitting a number into equal parts",
+    "formula": "a ÷ b = c",
+    "examples": ["12 ÷ 3 = 4", "56 ÷ 7 = 8", "100 ÷ 5 = 20"],
+    "category": "arithmetic",
+    "difficulty": 2,
+    "properties": ["non-commutative"],
+    "symbol": "÷",
+    "applications": ["sharing", "grouping", "ratio"]
+  },
+  "square_root": {
+    "definition": "A number that when multiplied by itself gives the original number",
+    "formula": "√a = b where b² = a",
+    "examples": ["√16 = 4", "√25 = 5", "√144 = 12"],
+    "category": "algebra",
+    "difficulty": 3,
+    "symbol": "√",
+    "applications": ["geometry", "physics", "engineering"]
+  },
+  "exponentiation": {
+    "definition": "Raising a number to a power",
+    "formula": "a^b = c",
+    "examples": ["2³ = 8", "5² = 25", "10⁴ = 10000"],
+    "category": "algebra",
+    "difficulty": 3,
+    "symbol": "^",
+    "applications": ["compound interest", "population growth", "physics"]
+  },
+  "sine": {
+    "definition": "The ratio of the opposite side to the hypotenuse in a right triangle",
+    "formula": "sin(θ) = opposite/hypotenuse",
+    "examples": ["sin(30°) = 0.5", "sin(45°) = 0.707", "sin(90°) = 1"],
+    "category": "trigonometry",
+    "difficulty": 4,
+    "symbol": "sin",
+    "applications": ["waves", "oscillations", "engineering"]
+  },
+  "cosine": {
+    "definition": "The ratio of the adjacent side to the hypotenuse in a right triangle",
+    "formula": "cos(θ) = adjacent/hypotenuse",
+    "examples": ["cos(0°) = 1", "cos(45°) = 0.707", "cos(90°) = 0"],
+    "category": "trigonometry",
+    "difficulty": 4,
+    "symbol": "cos",
+    "applications": ["waves", "rotations", "physics"]
+  },
+  "pi": {
+    "definition": "The ratio of a circle's circumference to its diameter",
+    "formula": "π ≈ 3.14159",
+    "examples": ["C = 2πr", "A = πr²", "π ≈ 22/7"],
+    "category": "geometry",
+    "difficulty": 3,
+    "symbol": "π",
+    "applications": ["circles", "spheres", "waves"]
+  },
+  "fibonacci": {
+    "definition": "A sequence where each number is the sum of the two preceding ones",
+    "formula": "F(n) = F(n-1) + F(n-2)",
+    "examples": ["0, 1, 1, 2, 3, 5, 8, 13, 21, 34"],
+    "category": "sequences",
+    "difficulty": 4,
+    "applications": ["nature", "art", "computer science"]
+  }
+}

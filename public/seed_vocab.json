@@ -1,0 +1,101 @@
+{
+  "hello": {
+    "definition": "A greeting or expression of goodwill when meeting someone",
+    "part_of_speech": "interjection",
+    "phonetic": "həˈləʊ",
+    "synonyms": ["hi", "hey", "greetings", "salutations"],
+    "antonyms": ["goodbye", "farewell"],
+    "examples": ["Hello, how are you?", "She said hello to everyone at the party"],
+    "frequency": 95
+  },
+  "calculate": {
+    "definition": "To determine by mathematical computation; to compute",
+    "part_of_speech": "verb",
+    "phonetic": "ˈkælkjəˌleɪt",
+    "synonyms": ["compute", "determine", "figure", "work out", "reckon"],
+    "antonyms": ["estimate", "guess", "approximate"],
+    "examples": ["Calculate the total cost", "I need to calculate this equation"],
+    "frequency": 78
+  },
+  "remember": {
+    "definition": "To recall to mind; to keep in memory",
+    "part_of_speech": "verb",
+    "phonetic": "rɪˈmembər",
+    "synonyms": ["recall", "recollect", "retain", "memorize"],
+    "antonyms": ["forget", "overlook", "ignore"],
+    "examples": ["Remember to call me", "I remember that day clearly"],
+    "frequency": 89
+  },
+  "learn": {
+    "definition": "To acquire knowledge or skill through study, experience, or instruction",
+    "part_of_speech": "verb",
+    "phonetic": "lɜːrn",
+    "synonyms": ["study", "master", "acquire", "absorb", "grasp"],
+    "antonyms": ["forget", "unlearn", "ignore"],
+    "examples": ["Learn something new every day", "She learns quickly"],
+    "frequency": 85
+  },
+  "understand": {
+    "definition": "To comprehend the meaning or importance of something",
+    "part_of_speech": "verb",
+    "phonetic": "ˌʌndərˈstænd",
+    "synonyms": ["comprehend", "grasp", "perceive", "realize", "fathom"],
+    "antonyms": ["misunderstand", "confuse", "misinterpret"],
+    "examples": ["I understand your point", "Do you understand the instructions?"],
+    "frequency": 92
+  },
+  "knowledge": {
+    "definition": "Information, understanding, or skill acquired through experience or education",
+    "part_of_speech": "noun",
+    "phonetic": "ˈnɒlɪdʒ",
+    "synonyms": ["information", "wisdom", "learning", "expertise", "understanding"],
+    "antonyms": ["ignorance", "inexperience", "unfamiliarity"],
+    "examples": ["Knowledge is power", "She has extensive knowledge of history"],
+    "frequency": 76
+  },
+  "intelligent": {
+    "definition": "Having or showing intelligence; able to learn and understand quickly",
+    "part_of_speech": "adjective",
+    "phonetic": "ɪnˈtelɪdʒənt",
+    "synonyms": ["smart", "clever", "bright", "brilliant", "wise"],
+    "antonyms": ["stupid", "dumb", "ignorant", "foolish"],
+    "examples": ["She is very intelligent", "An intelligent response to the problem"],
+    "frequency": 71
+  },
+  "artificial": {
+    "definition": "Made or produced by human beings rather than occurring naturally",
+    "part_of_speech": "adjective",
+    "phonetic": "ˌɑːrtɪˈfɪʃəl",
+    "synonyms": ["synthetic", "man-made", "manufactured", "simulated"],
+    "antonyms": ["natural", "genuine", "real", "authentic"],
+    "examples": ["Artificial intelligence", "Artificial flowers look real"],
+    "frequency": 68
+  },
+  "mathematics": {
+    "definition": "The abstract science of number, quantity, and space",
+    "part_of_speech": "noun",
+    "phonetic": "ˌmæθəˈmætɪks",
+    "synonyms": ["math", "arithmetic", "algebra", "geometry", "calculus"],
+    "antonyms": [],
+    "examples": ["Mathematics is fundamental to science", "She excels in mathematics"],
+    "frequency": 65
+  },
+  "science": {
+    "definition": "The systematic study of the physical and natural world through observation and experiment",
+    "part_of_speech": "noun",
+    "phonetic": "ˈsaɪəns",
+    "synonyms": ["research", "study", "investigation", "analysis"],
+    "antonyms": ["superstition", "ignorance"],
+    "examples": ["Science has advanced rapidly", "The science of physics"],
+    "frequency": 82
+  },
+  "technology": {
+    "definition": "The application of scientific knowledge for practical purposes",
+    "part_of_speech": "noun",
+    "phonetic": "tekˈnɒlədʒi",
+    "synonyms": ["tech", "innovation", "advancement", "engineering"],
+    "antonyms": ["primitiveness", "backwardness"],
+    "examples": ["Modern technology", "Technology has changed our lives"],
+    "frequency": 79
+  }
+}

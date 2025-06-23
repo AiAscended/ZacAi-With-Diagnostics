@@ -1,9 +1,9 @@
-import DiagnosticChatWindow from "@/components/diagnostic-chat-window"
+import EnhancedAIChat from "@/components/enhanced-ai-chat"
 
 export default function Home() {
   return (
     <main className="h-screen">
-      <DiagnosticChatWindow />
+      <EnhancedAIChat />
     </main>
   )
 }
