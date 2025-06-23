@@ -1,5 +1,3 @@
-import { ProgressiveLoader } from "./progressive-loader"
-
 interface LearnedKnowledge {
   vocabulary: Map<string, VocabularyEntry>
   mathematics: Map<string, MathEntry>
@@ -111,43 +109,42 @@ export class KnowledgeManagerV2 {
 
   public async loadSeedData(): Promise<void> {
     try {
-      console.log("🌱 Loading seed data with progressive loading...")
+      console.log("🌱 Loading seed data...")
 
-      const progressiveLoader = ProgressiveLoader.getInstance()
-      await progressiveLoader.initializeCore()
+      // Load all seed files directly for now
+      const [vocab, maths, system, learning] = await Promise.all([
+        this.loadSeedFile("/seed_vocab.json").catch(() => ({})),
+        this.loadSeedFile("/seed_maths.json").catch(() => ({})),
+        this.loadSeedFile("/seed_system.json").catch(() => ({})),
+        this.loadSeedFile("/seed_learning.json").catch(() => ({})),
+      ])
 
-      // Load system and learning data from localStorage (already loaded by progressive loader)
-      const systemData = JSON.parse(localStorage.getItem("ai_system_data") || "{}")
-      const learningData = JSON.parse(localStorage.getItem("ai_learning_data") || "{}")
-      const vocabChunks = JSON.parse(localStorage.getItem("ai_vocab_chunks") || "{}")
-      const mathData = JSON.parse(localStorage.getItem("ai_math_data") || "{}")
-
-      // Process vocabulary from loaded chunks
-      if (vocabChunks.chunk_1) {
-        Object.entries(vocabChunks.chunk_1).forEach(([word, data]: [string, any]) => {
+      // Process vocabulary seed
+      if (vocab && Object.keys(vocab).length > 0) {
+        Object.entries(vocab).forEach(([word, data]: [string, any]) => {
           this.learnedKnowledge.vocabulary.set(word, {
             word,
-            definition: data.d || "",
-            partOfSpeech: data.p || "unknown",
-            phonetic: data.ph,
-            synonyms: data.s || [],
-            antonyms: data.a || [],
-            examples: data.e || [],
-            frequency: data.f || 50,
+            definition: data.definition || data.d || "",
+            partOfSpeech: data.part_of_speech || data.p || "unknown",
+            phonetic: data.phonetic || data.ph,
+            synonyms: data.synonyms || data.s || [],
+            antonyms: data.antonyms || data.a || [],
+            examples: data.examples || data.e || [],
+            frequency: data.frequency || data.f || 1,
             learned: Date.now(),
             category: "seed",
           })
         })
       }
 
-      // Process mathematics data
-      if (mathData) {
-        Object.entries(mathData).forEach(([concept, data]: [string, any]) => {
+      // Process mathematics seed
+      if (maths && Object.keys(maths).length > 0) {
+        Object.entries(maths).forEach(([concept, data]: [string, any]) => {
           this.learnedKnowledge.mathematics.set(concept, {
             concept,
             formula: data.formula,
             examples: data.examples || [],
-            category: data.category || "general",
+            category: data.category || "arithmetic",
             difficulty: data.difficulty || 1,
             learned: Date.now(),
           })
@@ -155,18 +152,18 @@ export class KnowledgeManagerV2 {
       }
 
       // Store system and learning data
-      this.sessionData.system = systemData
-      this.sessionData.learning = learningData
+      if (system && Object.keys(system).length > 0) {
+        this.sessionData.system = system
+      }
+      if (learning && Object.keys(learning).length > 0) {
+        this.sessionData.learning = learning
+      }
 
       await this.saveToIndexedDB()
-      console.log("✅ Progressive seed data loaded successfully")
-
-      // Queue additional vocabulary chunks for background loading
-      progressiveLoader.loadOnDemand("vocabulary", 2)
-      progressiveLoader.loadOnDemand("vocabulary", 3)
-      progressiveLoader.loadOnDemand("vocabulary", 4)
+      console.log("✅ Seed data loaded successfully")
     } catch (error) {
       console.error("❌ Failed to load seed data:", error)
+      // Don't throw the error, just log it so the system can still function
     }
   }
 
