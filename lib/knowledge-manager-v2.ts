@@ -111,26 +111,27 @@ export class KnowledgeManagerV2 {
     try {
       console.log("🌱 Loading seed data...")
 
-      // Load all seed files directly for now
-      const [vocab, maths, system, learning] = await Promise.all([
-        this.loadSeedFile("/seed_vocab.json").catch(() => ({})),
-        this.loadSeedFile("/seed_maths.json").catch(() => ({})),
-        this.loadSeedFile("/seed_system.json").catch(() => ({})),
-        this.loadSeedFile("/seed_learning.json").catch(() => ({})),
+      // Load all seed files
+      const [vocab, maths, system, learning, knowledge] = await Promise.all([
+        this.loadSeedFile("/seed_vocab.json"),
+        this.loadSeedFile("/seed_maths.json"),
+        this.loadSeedFile("/seed_system.json"),
+        this.loadSeedFile("/seed_learning.json"),
+        this.loadSeedFile("/seed_knowledge.json").catch(() => null), // Optional
       ])
 
       // Process vocabulary seed
-      if (vocab && Object.keys(vocab).length > 0) {
+      if (vocab) {
         Object.entries(vocab).forEach(([word, data]: [string, any]) => {
           this.learnedKnowledge.vocabulary.set(word, {
             word,
-            definition: data.definition || data.d || "",
-            partOfSpeech: data.part_of_speech || data.p || "unknown",
-            phonetic: data.phonetic || data.ph,
-            synonyms: data.synonyms || data.s || [],
-            antonyms: data.antonyms || data.a || [],
-            examples: data.examples || data.e || [],
-            frequency: data.frequency || data.f || 1,
+            definition: data.definition || "",
+            partOfSpeech: data.partOfSpeech || "unknown",
+            phonetic: data.phonetic,
+            synonyms: data.synonyms || [],
+            antonyms: data.antonyms || [],
+            examples: data.examples || [],
+            frequency: data.frequency || 1,
             learned: Date.now(),
             category: "seed",
           })
@@ -138,7 +139,7 @@ export class KnowledgeManagerV2 {
       }
 
       // Process mathematics seed
-      if (maths && Object.keys(maths).length > 0) {
+      if (maths) {
         Object.entries(maths).forEach(([concept, data]: [string, any]) => {
           this.learnedKnowledge.mathematics.set(concept, {
             concept,
@@ -151,19 +152,33 @@ export class KnowledgeManagerV2 {
         })
       }
 
-      // Store system and learning data
-      if (system && Object.keys(system).length > 0) {
+      // Store system data
+      if (system) {
         this.sessionData.system = system
       }
-      if (learning && Object.keys(learning).length > 0) {
+
+      // Store learning instructions
+      if (learning) {
         this.sessionData.learning = learning
+      }
+
+      // Process encyclopedic knowledge
+      if (knowledge) {
+        Object.entries(knowledge).forEach(([topic, data]: [string, any]) => {
+          this.learnedKnowledge.facts.set(topic, {
+            fact: data.summary || data.content || "",
+            source: data.source || "seed",
+            category: data.category || "general",
+            confidence: 0.9,
+            timestamp: Date.now(),
+          })
+        })
       }
 
       await this.saveToIndexedDB()
       console.log("✅ Seed data loaded successfully")
     } catch (error) {
       console.error("❌ Failed to load seed data:", error)
-      // Don't throw the error, just log it so the system can still function
     }
   }
 
@@ -358,7 +373,7 @@ export class KnowledgeManagerV2 {
       console.warn(`Failed to lookup definition for "${word}":`, error)
     }
 
-    return null
+    return { definition: "Definition not found", partOfSpeech: "unknown" }
   }
 
   private isCommonWord(word: string): boolean {

@@ -722,7 +722,8 @@ export class ReliableAISystem {
   private saveMemory(): void {
     try {
       const memoryArray = Array.from(this.memory.entries())
-      localStorage.setItem("reliable-ai-memory", JSON.stringify(memoryArray))
+      const data = JSON.stringify(memoryArray)
+      localStorage.setItem("reliable-ai-memory", data)
     } catch (error) {
       console.warn("Failed to save memory:", error)
     }
@@ -746,7 +747,8 @@ export class ReliableAISystem {
   private saveVocabulary(): void {
     try {
       const vocabArray = Array.from(this.vocabulary.entries())
-      localStorage.setItem("reliable-ai-vocabulary", JSON.stringify(vocabArray))
+      const data = JSON.stringify(vocabArray)
+      localStorage.setItem("reliable-ai-vocabulary", data)
     } catch (error) {
       console.warn("Failed to save vocabulary:", error)
     }
@@ -781,7 +783,8 @@ export class ReliableAISystem {
           // Note: We don't save the actual function, just metadata
         },
       ])
-      localStorage.setItem("reliable-ai-math", JSON.stringify(mathArray))
+      const data = JSON.stringify(mathArray)
+      localStorage.setItem("reliable-ai-math", data)
     } catch (error) {
       console.warn("Failed to save math functions:", error)
     }
