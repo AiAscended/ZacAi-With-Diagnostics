@@ -2,23 +2,33 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { KnowledgeManager } from "../lib/knowledge-manager"
-
-const knowledgeManager = new KnowledgeManager()
+import { KnowledgeManagerV2 } from "@/lib/knowledge-manager-v2"
+import { ReliableAISystem } from "@/lib/reliable-ai-system"
 
 const EnhancedAIChat: React.FC = () => {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([])
   const [input, setInput] = useState("")
   const [loadingStatus, setLoadingStatus] = useState<string>("Initializing...")
   const [isSystemReady, setIsSystemReady] = useState(false)
+  const [knowledgeManager] = useState(() => new KnowledgeManagerV2())
+  const [aiSystem] = useState(() => new ReliableAISystem())
 
   useEffect(() => {
     const initializeSystem = async () => {
       try {
         setLoadingStatus("Loading core systems...")
-        await knowledgeManager.loadSeedData()
-        await knowledgeManager.loadFromIndexedDB()
+
+        // Load session data first
         knowledgeManager.loadSessionFromLocalStorage()
+
+        // Load knowledge from IndexedDB
+        await knowledgeManager.loadFromIndexedDB()
+
+        // Load seed data
+        await knowledgeManager.loadSeedData()
+
+        // Initialize AI system
+        await aiSystem.initialize()
 
         setLoadingStatus("System ready!")
         setIsSystemReady(true)
@@ -34,12 +44,27 @@ const EnhancedAIChat: React.FC = () => {
   }, [])
 
   const sendMessage = async () => {
-    if (input.trim() === "") return
+    if (input.trim() === "" || !isSystemReady) return
 
-    setMessages([...messages, { role: "user", content: input }])
-    const response = await knowledgeManager.query(input)
-    setMessages([...messages, { role: "user", content: input }, { role: "assistant", content: response }])
+    const userMessage = input.trim()
     setInput("")
+    setMessages((prev) => [...prev, { role: "user", content: userMessage }])
+
+    try {
+      // Get AI response using the reliable AI system
+      const response = await aiSystem.processMessage(userMessage)
+
+      // Learn from the interaction
+      await knowledgeManager.learnFromMessage(userMessage, response.content)
+
+      setMessages((prev) => [...prev, { role: "assistant", content: response.content }])
+    } catch (error) {
+      console.error("Error processing message:", error)
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Sorry, I encountered an error processing your message." },
+      ])
+    }
   }
 
   return (
