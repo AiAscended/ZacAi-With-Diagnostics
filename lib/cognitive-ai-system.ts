@@ -4,29 +4,38 @@ import { BrowserStorageManager } from "./browser-storage-manager"
 class CognitiveProcessor {
   private contextMemory: Map<string, ContextNode> = new Map()
   private semanticPatterns: Map<string, SemanticPattern> = new Map()
-  private intentClassifier = new IntentClassifier()
-  private responseGenerator = new ResponseGenerator()
 
   constructor() {
     this.initializeSemanticPatterns()
   }
 
   // Core Cognitive Processing Pipeline
-  public async processThought(input: string, conversationContext: any[]): Promise<CognitiveResponse> {
+  public async processThought(
+    input: string,
+    conversationContext: any[],
+    personalInfo: Map<string, any>,
+  ): Promise<CognitiveResponse> {
+    console.log("🧠 Starting cognitive processing for:", input)
+
     // Stage 1: Semantic Decomposition
     const semantics = this.decomposeSemantics(input)
+    console.log("📝 Semantics:", semantics)
 
     // Stage 2: Context Synthesis
-    const context = this.synthesizeContext(semantics, conversationContext)
+    const context = this.synthesizeContext(semantics, conversationContext, personalInfo)
+    console.log("🔗 Context:", context)
 
     // Stage 3: Intent Inference
     const intent = this.inferIntent(semantics, context)
+    console.log("🎯 Intent:", intent)
 
     // Stage 4: Knowledge Activation
-    const knowledge = this.activateRelevantKnowledge(intent, context)
+    const knowledge = this.activateRelevantKnowledge(intent, context, personalInfo)
+    console.log("📚 Knowledge:", knowledge)
 
     // Stage 5: Response Synthesis
-    const response = this.synthesizeResponse(intent, context, knowledge)
+    const response = this.synthesizeResponse(intent, context, knowledge, personalInfo)
+    console.log("💬 Response:", response)
 
     // Stage 6: Confidence Calculation
     const confidence = this.calculateConfidence(semantics, intent, context, knowledge)
@@ -58,10 +67,14 @@ class CognitiveProcessor {
     }
   }
 
-  private synthesizeContext(semantics: SemanticComponents, history: any[]): ContextSynthesis {
+  private synthesizeContext(
+    semantics: SemanticComponents,
+    history: any[],
+    personalInfo: Map<string, any>,
+  ): ContextSynthesis {
     const recentContext = history.slice(-5) // Last 5 exchanges
     const topicalContext = this.extractTopicalContext(recentContext)
-    const personalContext = this.extractPersonalContext(recentContext)
+    const personalContext = this.extractPersonalContext(personalInfo)
     const emotionalContext = this.extractEmotionalContext(recentContext)
 
     return {
@@ -88,8 +101,12 @@ class CognitiveProcessor {
     }
   }
 
-  private activateRelevantKnowledge(intent: IntentInference, context: ContextSynthesis): KnowledgeActivation {
-    const relevantFacts = this.retrieveRelevantFacts(intent, context)
+  private activateRelevantKnowledge(
+    intent: IntentInference,
+    context: ContextSynthesis,
+    personalInfo: Map<string, any>,
+  ): KnowledgeActivation {
+    const relevantFacts = this.retrieveRelevantFacts(intent, context, personalInfo)
     const patterns = this.matchPatterns(intent, context)
     const analogies = this.findAnalogies(intent, context)
 
@@ -105,9 +122,10 @@ class CognitiveProcessor {
     intent: IntentInference,
     context: ContextSynthesis,
     knowledge: KnowledgeActivation,
+    personalInfo: Map<string, any>,
   ): ResponseSynthesis {
     const responseTemplate = this.selectResponseTemplate(intent, context)
-    const content = this.generateContent(responseTemplate, intent, context, knowledge)
+    const content = this.generateContent(responseTemplate, intent, context, knowledge, personalInfo)
     const tone = this.determineTone(context, intent)
     const reasoning = this.generateReasoning(intent, context, knowledge)
 
@@ -133,12 +151,12 @@ class CognitiveProcessor {
     return (semanticConfidence + intentConfidence + contextConfidence + knowledgeConfidence) / 4
   }
 
-  // Semantic Analysis Methods
+  // Enhanced Semantic Analysis Methods
   private extractEntities(input: string): Entity[] {
     const entities: Entity[] = []
 
     // Names
-    const namePattern = /(?:my name is|i'm|i am) (\w+)/gi
+    const namePattern = /(?:my name is|i'm|i am|call me) (\w+)/gi
     let match = namePattern.exec(input)
     if (match) entities.push({ type: "name", value: match[1], confidence: 0.9 })
 
@@ -149,7 +167,7 @@ class CognitiveProcessor {
     }
 
     // Relationships
-    const relationshipPattern = /(?:wife|husband|partner|spouse|girlfriend|boyfriend)/gi
+    const relationshipPattern = /(?:wife|husband|partner|spouse|girlfriend|boyfriend|married)/gi
     if (relationshipPattern.test(input)) {
       entities.push({ type: "relationship", value: "partner", confidence: 0.8 })
     }
@@ -160,13 +178,18 @@ class CognitiveProcessor {
       entities.push({ type: "pet", value: "animal", confidence: 0.8 })
     }
 
+    // Jobs
+    const jobPattern = /(?:work as|job is|i'm a|i am a) (.+?)(?:\.|$|,)/gi
+    match = jobPattern.exec(input)
+    if (match) entities.push({ type: "job", value: match[1].trim(), confidence: 0.8 })
+
     return entities
   }
 
   private detectEmotions(input: string): EmotionalState {
-    const positiveWords = ["happy", "great", "good", "excellent", "wonderful", "love", "like"]
-    const negativeWords = ["sad", "bad", "terrible", "hate", "dislike", "awful"]
-    const questionWords = ["what", "how", "why", "when", "where", "who"]
+    const positiveWords = ["happy", "great", "good", "excellent", "wonderful", "love", "like", "amazing", "fantastic"]
+    const negativeWords = ["sad", "bad", "terrible", "hate", "dislike", "awful", "horrible", "angry"]
+    const questionWords = ["what", "how", "why", "when", "where", "who", "which"]
 
     const words = input.toLowerCase().split(/\s+/)
     const positive = words.filter((w) => positiveWords.includes(w)).length
@@ -183,12 +206,16 @@ class CognitiveProcessor {
 
   private identifyConcepts(words: string[]): Concept[] {
     const conceptMap = new Map([
-      ["mathematics", ["math", "calculate", "number", "add", "subtract", "multiply", "divide"]],
-      ["personal", ["name", "age", "work", "job", "live", "family"]],
-      ["memory", ["remember", "recall", "forget", "know"]],
-      ["greeting", ["hello", "hi", "hey", "goodbye", "bye"]],
-      ["question", ["what", "how", "why", "when", "where", "who"]],
-      ["emotion", ["feel", "happy", "sad", "angry", "excited"]],
+      [
+        "mathematics",
+        ["math", "calculate", "number", "add", "subtract", "multiply", "divide", "times", "plus", "minus", "equals"],
+      ],
+      ["personal", ["name", "age", "work", "job", "live", "family", "married", "wife", "husband", "pet", "cat", "dog"]],
+      ["memory", ["remember", "recall", "forget", "know", "learned", "stored"]],
+      ["greeting", ["hello", "hi", "hey", "goodbye", "bye", "good morning", "good afternoon", "good evening"]],
+      ["question", ["what", "how", "why", "when", "where", "who", "which", "can", "could", "would"]],
+      ["emotion", ["feel", "happy", "sad", "angry", "excited", "love", "like", "hate"]],
+      ["learning", ["teach", "learn", "understand", "explain", "show", "tell"]],
     ])
 
     const concepts: Concept[] = []
@@ -213,17 +240,17 @@ class CognitiveProcessor {
     const topConcept = concepts[0]
 
     // Mathematical intent
-    if (topConcept.name === "mathematics" && topConcept.strength > 0.2) {
+    if (topConcept.name === "mathematics" && topConcept.strength > 0.15) {
       return "mathematics"
     }
 
     // Memory intent
-    if (topConcept.name === "memory" && topConcept.strength > 0.15) {
+    if (topConcept.name === "memory" && topConcept.strength > 0.1) {
       return "memory"
     }
 
     // Personal information sharing
-    if (topConcept.name === "personal" && topConcept.strength > 0.15) {
+    if (topConcept.name === "personal" && topConcept.strength > 0.1) {
       return "personal_sharing"
     }
 
@@ -233,8 +260,13 @@ class CognitiveProcessor {
     }
 
     // Greeting
-    if (topConcept.name === "greeting" && topConcept.strength > 0.2) {
+    if (topConcept.name === "greeting" && topConcept.strength > 0.15) {
       return "greeting"
+    }
+
+    // Learning
+    if (topConcept.name === "learning" && topConcept.strength > 0.1) {
+      return "learning"
     }
 
     return "conversation"
@@ -245,43 +277,66 @@ class CognitiveProcessor {
     intent: IntentInference,
     context: ContextSynthesis,
     knowledge: KnowledgeActivation,
+    personalInfo: Map<string, any>,
   ): string {
     switch (intent.primary) {
       case "personal_sharing":
-        return this.generatePersonalResponse(context, knowledge)
+        return this.generatePersonalResponse(context, knowledge, personalInfo)
       case "inquiry":
-        return this.generateInquiryResponse(context, knowledge)
+        return this.generateInquiryResponse(context, knowledge, personalInfo)
       case "mathematics":
         return this.generateMathResponse(context, knowledge)
       case "memory":
-        return this.generateMemoryResponse(context, knowledge)
+        return this.generateMemoryResponse(context, knowledge, personalInfo)
       case "greeting":
-        return this.generateGreetingResponse(context)
+        return this.generateGreetingResponse(context, personalInfo)
+      case "learning":
+        return this.generateLearningResponse(context, knowledge, personalInfo)
       default:
-        return this.generateConversationalResponse(context, knowledge)
+        return this.generateConversationalResponse(context, knowledge, personalInfo)
     }
   }
 
-  private generatePersonalResponse(context: ContextSynthesis, knowledge: KnowledgeActivation): string {
+  private generatePersonalResponse(
+    context: ContextSynthesis,
+    knowledge: KnowledgeActivation,
+    personalInfo: Map<string, any>,
+  ): string {
+    const userName = this.getUserName(personalInfo)
+    const namePrefix = userName ? `Thanks for sharing that, ${userName}! ` : "Thanks for sharing that! "
+
     const responses = [
-      "That's wonderful to know! I'll remember that about you.",
-      "Thanks for sharing that with me. I've stored that information.",
-      "Interesting! I'll keep that in mind for our future conversations.",
-      "I appreciate you telling me that. It helps me understand you better.",
+      `${namePrefix}I'll remember that about you.`,
+      `${namePrefix}I've stored that information and will keep it in mind.`,
+      `${namePrefix}That's interesting to know - it helps me understand you better.`,
+      `${namePrefix}I appreciate you telling me that. I'll remember it for our future conversations.`,
     ]
     return responses[Math.floor(Math.random() * responses.length)]
   }
 
-  private generateInquiryResponse(context: ContextSynthesis, knowledge: KnowledgeActivation): string {
+  private generateInquiryResponse(
+    context: ContextSynthesis,
+    knowledge: KnowledgeActivation,
+    personalInfo: Map<string, any>,
+  ): string {
+    const userName = this.getUserName(personalInfo)
+    const namePrefix = userName ? `${userName}, ` : ""
+
     if (knowledge.facts.length > 0) {
-      return `Based on what I know: ${knowledge.facts[0].content}`
+      return `${namePrefix}based on what I know: ${knowledge.facts[0].content}`
+    }
+
+    // Check if asking about personal info
+    if (context.personal.facts.length > 0) {
+      const personalFacts = context.personal.facts.map((f) => `${f.type}: ${f.value}`).join(", ")
+      return `${namePrefix}here's what I remember about you: ${personalFacts}`
     }
 
     const responses = [
-      "That's a great question! Let me think about that...",
-      "I'd be happy to help you with that. Can you provide more context?",
-      "That's interesting to consider. What specifically would you like to know?",
-      "Good question! I'm processing that and would love to explore it further.",
+      `${namePrefix}that's a great question! Let me think about that...`,
+      `${namePrefix}I'd be happy to help you with that. Can you provide more context?`,
+      `${namePrefix}that's interesting to consider. What specifically would you like to know?`,
+      `${namePrefix}good question! I'm processing that and would love to explore it further.`,
     ]
     return responses[Math.floor(Math.random() * responses.length)]
   }
@@ -290,34 +345,87 @@ class CognitiveProcessor {
     return "I can help you with that calculation. Let me process the mathematical expression."
   }
 
-  private generateMemoryResponse(context: ContextSynthesis, knowledge: KnowledgeActivation): string {
-    if (knowledge.facts.length > 0) {
-      return `I remember: ${knowledge.facts.map((f) => f.content).join(", ")}`
+  private generateMemoryResponse(
+    context: ContextSynthesis,
+    knowledge: KnowledgeActivation,
+    personalInfo: Map<string, any>,
+  ): string {
+    const userName = this.getUserName(personalInfo)
+    const namePrefix = userName ? `${userName}, ` : ""
+
+    if (personalInfo.size > 0) {
+      const facts = Array.from(personalInfo.entries())
+        .map(([key, entry]) => {
+          const value = typeof entry === "object" ? entry.value : entry
+          return `${key}: ${value}`
+        })
+        .slice(0, 3)
+        .join(", ")
+      return `${namePrefix}I remember: ${facts}`
     }
-    return "I'm searching my memory for that information..."
+
+    if (knowledge.facts.length > 0) {
+      return `${namePrefix}I remember: ${knowledge.facts.map((f) => f.content).join(", ")}`
+    }
+
+    return `${namePrefix}I'm searching my memory for that information...`
   }
 
-  private generateGreetingResponse(context: ContextSynthesis): string {
+  private generateGreetingResponse(context: ContextSynthesis, personalInfo: Map<string, any>): string {
     const timeOfDay = new Date().getHours()
     const greeting = timeOfDay < 12 ? "Good morning" : timeOfDay < 18 ? "Good afternoon" : "Good evening"
+    const userName = this.getUserName(personalInfo)
+    const namePrefix = userName ? ` ${userName}` : ""
 
     const responses = [
-      `${greeting}! How can I help you today?`,
-      "Hello! Great to see you again!",
-      "Hi there! What's on your mind?",
-      "Hey! I'm here and ready to chat.",
+      `${greeting}${namePrefix}! How can I help you today?`,
+      `Hello${namePrefix}! Great to see you again!`,
+      `Hi there${namePrefix}! What's on your mind?`,
+      `Hey${namePrefix}! I'm here and ready to chat.`,
     ]
     return responses[Math.floor(Math.random() * responses.length)]
   }
 
-  private generateConversationalResponse(context: ContextSynthesis, knowledge: KnowledgeActivation): string {
+  private generateLearningResponse(
+    context: ContextSynthesis,
+    knowledge: KnowledgeActivation,
+    personalInfo: Map<string, any>,
+  ): string {
+    const userName = this.getUserName(personalInfo)
+    const namePrefix = userName ? `${userName}, ` : ""
+
     const responses = [
-      "That's really interesting! Tell me more about that.",
-      "I see what you mean. What's your perspective on this?",
-      "That makes sense. How do you feel about it?",
-      "I understand. What would you like to explore about this topic?",
+      `${namePrefix}I'd be happy to help you learn about that! What would you like to know?`,
+      `${namePrefix}that's a great topic to explore. Let me share what I know...`,
+      `${namePrefix}I love helping with learning! What specific aspect interests you?`,
+      `${namePrefix}let's dive into that together. What would you like to understand better?`,
     ]
     return responses[Math.floor(Math.random() * responses.length)]
+  }
+
+  private generateConversationalResponse(
+    context: ContextSynthesis,
+    knowledge: KnowledgeActivation,
+    personalInfo: Map<string, any>,
+  ): string {
+    const userName = this.getUserName(personalInfo)
+    const namePrefix = userName ? `${userName}, ` : ""
+
+    const responses = [
+      `${namePrefix}that's really interesting! Tell me more about that.`,
+      `${namePrefix}I see what you mean. What's your perspective on this?`,
+      `${namePrefix}that makes sense. How do you feel about it?`,
+      `${namePrefix}I understand. What would you like to explore about this topic?`,
+    ]
+    return responses[Math.floor(Math.random() * responses.length)]
+  }
+
+  private getUserName(personalInfo: Map<string, any>): string | null {
+    const nameEntry = personalInfo.get("name")
+    if (nameEntry) {
+      return typeof nameEntry === "object" ? nameEntry.value : nameEntry
+    }
+    return null
   }
 
   // Helper methods for context and pattern matching
@@ -330,23 +438,13 @@ class CognitiveProcessor {
     )
   }
 
-  private extractPersonalContext(history: any[]): PersonalContext {
+  private extractPersonalContext(personalInfo: Map<string, any>): PersonalContext {
     const personal: PersonalContext = { facts: [], preferences: [], relationships: [] }
 
-    history.forEach((h) => {
-      if (h.role === "user") {
-        const content = h.content.toLowerCase()
-        if (content.includes("my name is")) {
-          personal.facts.push({ type: "name", value: content.match(/my name is (\w+)/)?.[1] || "" })
-        }
-        if (content.includes("i have")) {
-          personal.facts.push({ type: "possession", value: content })
-        }
-        if (content.includes("i like") || content.includes("i love")) {
-          personal.preferences.push({ type: "positive", value: content })
-        }
-      }
-    })
+    for (const [key, entry] of personalInfo.entries()) {
+      const value = typeof entry === "object" ? entry.value : entry
+      personal.facts.push({ type: key, value: value })
+    }
 
     return personal
   }
@@ -404,8 +502,24 @@ class CognitiveProcessor {
     return 0.8
   }
 
-  private retrieveRelevantFacts(intent: IntentInference, context: ContextSynthesis): Fact[] {
-    return []
+  private retrieveRelevantFacts(
+    intent: IntentInference,
+    context: ContextSynthesis,
+    personalInfo: Map<string, any>,
+  ): Fact[] {
+    const facts: Fact[] = []
+
+    // Add personal info as facts
+    for (const [key, entry] of personalInfo.entries()) {
+      const value = typeof entry === "object" ? entry.value : entry
+      facts.push({
+        content: `${key}: ${value}`,
+        confidence: 0.9,
+        source: "personal",
+      })
+    }
+
+    return facts
   }
 
   private matchPatterns(intent: IntentInference, context: ContextSynthesis): Pattern[] {
@@ -417,7 +531,7 @@ class CognitiveProcessor {
   }
 
   private calculateKnowledgeConfidence(facts: Fact[], patterns: Pattern[]): number {
-    return 0.7
+    return facts.length > 0 ? 0.8 : 0.5
   }
 
   private selectResponseTemplate(intent: IntentInference, context: ContextSynthesis): string {
@@ -433,7 +547,12 @@ class CognitiveProcessor {
     context: ContextSynthesis,
     knowledge: KnowledgeActivation,
   ): string[] {
-    return [`Identified intent: ${intent.primary}`, `Context continuity: ${context.continuity}`]
+    return [
+      `Identified intent: ${intent.primary}`,
+      `Context continuity: ${context.continuity.toFixed(2)}`,
+      `Knowledge confidence: ${knowledge.confidence.toFixed(2)}`,
+      `Personal context: ${context.personal.facts.length} facts available`,
+    ]
   }
 }
 
@@ -477,28 +596,31 @@ export class CognitiveAISystem {
       await this.initialize()
     }
 
+    console.log("🚀 Processing message:", userMessage)
+
     // Extract and store personal information FIRST
     this.extractAndStorePersonalInfo(userMessage)
 
-    // Use cognitive processing for intelligent response
-    const cognitiveResponse = await this.cognitiveProcessor.processThought(userMessage, this.conversationHistory)
-
-    // Handle specific intents
-    if (cognitiveResponse.intent.primary === "mathematics") {
-      const mathAnalysis = this.mathProcessor.analyzeMathExpression(userMessage)
-      if (mathAnalysis.isMatch && mathAnalysis.result !== undefined) {
-        const response: AIResponse = {
-          content: `The result is: ${mathAnalysis.result}`,
-          confidence: mathAnalysis.confidence,
-          reasoning: mathAnalysis.reasoning,
-          mathAnalysis: mathAnalysis,
-        }
-        await this.saveConversation(userMessage, response.content)
-        return response
+    // Check for math first
+    const mathAnalysis = this.mathProcessor.analyzeMathExpression(userMessage)
+    if (mathAnalysis.isMatch && mathAnalysis.result !== undefined) {
+      const response: AIResponse = {
+        content: `The result is: ${mathAnalysis.result}`,
+        confidence: mathAnalysis.confidence,
+        reasoning: mathAnalysis.reasoning,
+        mathAnalysis: mathAnalysis,
       }
+      await this.saveConversation(userMessage, response.content)
+      return response
     }
 
-    // Use cognitive response
+    // Use cognitive processing for intelligent response
+    const cognitiveResponse = await this.cognitiveProcessor.processThought(
+      userMessage,
+      this.conversationHistory,
+      this.personalInfo,
+    )
+
     const response: AIResponse = {
       content: cognitiveResponse.content,
       confidence: cognitiveResponse.confidence,
@@ -512,7 +634,7 @@ export class CognitiveAISystem {
   private extractAndStorePersonalInfo(message: string): void {
     const personalPatterns = [
       {
-        pattern: /my name is (\w+)/i,
+        pattern: /(?:my name is|i'm|i am|call me) (\w+)/i,
         key: "name",
         importance: 0.9,
         extract: (match: RegExpMatchArray) => match[1],
@@ -524,13 +646,13 @@ export class CognitiveAISystem {
         extract: (match: RegExpMatchArray) => `${match[1]} ${match[2]}`,
       },
       {
-        pattern: /i have a (wife|husband|partner)/i,
+        pattern: /i (?:have a|am married to a|married a) (wife|husband|partner)/i,
         key: "marital_status",
         importance: 0.8,
         extract: (match: RegExpMatchArray) => `married (${match[1]})`,
       },
       {
-        pattern: /one is named (\w+)/i,
+        pattern: /(?:one is named|first one is|cat is named|dog is named) (\w+)/i,
         key: "pet_name_1",
         importance: 0.6,
         extract: (match: RegExpMatchArray) => match[1],
@@ -542,16 +664,22 @@ export class CognitiveAISystem {
         extract: (match: RegExpMatchArray) => match[1],
       },
       {
-        pattern: /i work as (?:a |an )?(.+?)(?:\.|$)/i,
+        pattern: /i work as (?:a |an )?(.+?)(?:\.|$|,)/i,
         key: "job",
         importance: 0.8,
         extract: (match: RegExpMatchArray) => match[1].trim(),
       },
       {
-        pattern: /i live in (.+?)(?:\.|$)/i,
+        pattern: /i live in (.+?)(?:\.|$|,)/i,
         key: "location",
         importance: 0.7,
         extract: (match: RegExpMatchArray) => match[1].trim(),
+      },
+      {
+        pattern: /i am (\d+) years old/i,
+        key: "age",
+        importance: 0.7,
+        extract: (match: RegExpMatchArray) => match[1],
       },
     ]
 
@@ -580,7 +708,7 @@ export class CognitiveAISystem {
         ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
         : 0
 
-    // Count all user information sources
+    // FIXED: Count all user information sources properly
     const totalUserInfo = this.personalInfo.size + this.memory.size + this.facts.size
 
     return {
