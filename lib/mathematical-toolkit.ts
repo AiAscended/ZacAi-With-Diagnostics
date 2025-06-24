@@ -176,54 +176,6 @@ export class MathematicalToolkit {
     return b === 0 ? a : this.greatestCommonDivisor(b, a % b)
   }
 
-  // Advanced calculations
-  power(base: number, exponent: number): MathOperation {
-    const result = Math.pow(base, exponent)
-    const steps = [`Calculating ${base}^${exponent}`, `${base} raised to the power of ${exponent}`, `Result: ${result}`]
-
-    if (exponent === 2) {
-      steps[1] = `${base} squared`
-    } else if (exponent === 3) {
-      steps[1] = `${base} cubed`
-    }
-
-    const operation: MathOperation = {
-      operation: "exponentiation",
-      operands: [base, exponent],
-      result,
-      method: "power calculation",
-      steps,
-    }
-
-    this.calculationHistory.push(operation)
-    return operation
-  }
-
-  sqrt(number: number): MathOperation {
-    if (number < 0) {
-      throw new Error("Square root of negative number is not real")
-    }
-
-    const result = Math.sqrt(number)
-    const steps = [`Finding square root of ${number}`, `√${number} = ${result}`]
-
-    // Add perfect square recognition
-    if (result % 1 === 0) {
-      steps.splice(1, 0, `${number} is a perfect square`)
-    }
-
-    const operation: MathOperation = {
-      operation: "square root",
-      operands: [number],
-      result,
-      method: "square root calculation",
-      steps,
-    }
-
-    this.calculationHistory.push(operation)
-    return operation
-  }
-
   // Safe expression evaluation
   evaluateExpression(expression: string): MathOperation {
     try {
