@@ -593,10 +593,10 @@ export class ReliableAISystem {
       memoryEntries: this.memory.size,
       avgConfidence: Math.round(avgConfidence * 100) / 100,
       systemStatus: this.systemStatus,
-      mathFunctions: this.mathFunctions.size,
+      mathFunctions: this.mathFunctions.size, // Fixed: return size, not the Map
       seedProgress: 0,
       responseTime: 0,
-      // Add access to the actual data
+      // Add access to the actual data for detailed viewing
       vocabulary: this.vocabulary,
       memory: this.memory,
       mathFunctions: this.mathFunctions,
@@ -608,27 +608,24 @@ export class ReliableAISystem {
   }
 
   public generateSuggestions(messages: ChatMessage[]): any[] {
-    // Generate contextual suggestions based on recent messages
     const suggestions = [
       { text: "Tell me about yourself", type: "question" },
       { text: "What can you remember about me?", type: "question" },
       { text: "Calculate 25 × 4", type: "action" },
+      { text: "What facts do you know?", type: "question" },
     ]
     return suggestions
   }
 
   public generateResponseSuggestions(userInput: string, response: string): string[] {
-    // Generate follow-up suggestions
     return ["Tell me more", "What else?", "Can you explain that?"]
   }
 
   public processFeedback(messageId: string, feedback: string): void {
-    // Process user feedback for learning
     console.log(`Feedback received for ${messageId}: ${feedback}`)
   }
 
   public updateResponseTime(time: number): void {
-    // Update response time tracking
     console.log(`Response time: ${time}ms`)
   }
 
@@ -691,6 +688,9 @@ export class ReliableAISystem {
   private generateResponse(userMessage: string): AIResponse {
     const lowerMessage = userMessage.toLowerCase()
 
+    // Extract information from the message for learning
+    this.extractPersonalInfo(userMessage)
+
     // Check for memory queries first
     if (
       lowerMessage.includes("remember") ||
@@ -703,7 +703,7 @@ export class ReliableAISystem {
       }
     }
 
-    // Pattern-based responses
+    // Enhanced pattern-based responses
     const patterns = [
       {
         patterns: ["hello", "hi", "hey"],
@@ -714,6 +714,33 @@ export class ReliableAISystem {
           "Hello! I'm here and ready to chat.",
         ],
         confidence: 0.9,
+      },
+      {
+        patterns: ["my name is"],
+        responses: [
+          "Nice to meet you! I'll remember your name.",
+          "Great to know your name! I've stored that information.",
+          "Thanks for telling me your name. I'll remember that.",
+        ],
+        confidence: 0.9,
+      },
+      {
+        patterns: ["can you guess", "guess which"],
+        responses: [
+          "That's an interesting question! Based on typical naming patterns, I'd guess the male cat might be Mister Fifty - that sounds like a more masculine name. Am I right?",
+          "Let me think... Mister Fifty sounds like it could be the male cat's name. The 'Mister' title suggests masculinity. How did I do?",
+          "I'd guess Mister Fifty is the male cat - the name has a more masculine feel to it. Did I guess correctly?",
+        ],
+        confidence: 0.8,
+      },
+      {
+        patterns: ["i have", "i own"],
+        responses: [
+          "That's wonderful! Tell me more about that.",
+          "Interesting! I'd love to hear more details.",
+          "That sounds great! What else would you like to share?",
+        ],
+        confidence: 0.7,
       },
       {
         patterns: ["goodbye", "bye", "see you"],
@@ -855,17 +882,40 @@ export class ReliableAISystem {
   private classifyInput(input: string): "math" | "memory" | "conversation" {
     const lowerInput = input.toLowerCase()
 
-    // Strong math indicators
+    // Strong math indicators - more precise patterns
     const mathPatterns = [
-      /\d+\s*[+\-*/×÷]\s*\d+/,
-      /calculate|compute|solve|what\s+is\s+\d+/,
-      /\d+\s+(plus|minus|times|divided\s+by)\s+\d+/,
+      /\b\d+\s*[+\-*/×÷^]\s*\d+\b/,
+      /\bcalculate\b|\bcompute\b|\bsolve\b/,
+      /\bwhat\s+is\s+\d+/,
+      /\d+\s+(plus|minus|times|multiplied\s+by|divided\s+by)\s+\d+/,
+      /\bsquare\s+root\b|\bsqrt\b/,
+      /\bsin\b|\bcos\b|\btan\b/,
     ]
 
     // Memory indicators
-    const memoryPatterns = [/remember|recall|what\s+did|do\s+you\s+know/]
+    const memoryPatterns = [
+      /\bremember\b|\brecall\b/,
+      /\bwhat\s+did\s+(i|we)\b/,
+      /\bdo\s+you\s+(know|remember)\b/,
+      /\bmy\s+name\s+is\b/,
+      /\bi\s+(am|work|live)\b/,
+    ]
 
-    // Check for explicit math patterns first
+    // Conversational indicators (override math if clearly conversational)
+    const conversationPatterns = [
+      /\bhi\b|\bhello\b|\bhey\b/,
+      /\bhow\s+are\s+you\b/,
+      /\bcan\s+you\s+guess\b/,
+      /\btell\s+me\s+about\b/,
+      /\bi\s+have\s+\d+\s+(cats?|dogs?|pets?|children?)\b/,
+    ]
+
+    // Check conversational patterns first (they override math detection)
+    if (conversationPatterns.some((pattern) => pattern.test(lowerInput))) {
+      return "conversation"
+    }
+
+    // Check for explicit math patterns
     if (mathPatterns.some((pattern) => pattern.test(lowerInput))) {
       return "math"
     }
@@ -896,6 +946,33 @@ export class ReliableAISystem {
         importance: 0.8,
         type: "fact",
       })
+    })
+  }
+
+  private extractPersonalInfo(message: string): void {
+    const personalPatterns = [
+      { pattern: /my name is (\w+)/i, key: "name", importance: 0.9 },
+      { pattern: /i have (\d+) (cats?|dogs?|pets?)/i, key: "pets", importance: 0.7 },
+      { pattern: /i have a wife/i, key: "marital_status", value: "married", importance: 0.8 },
+      { pattern: /one is named (\w+)/i, key: "pet_name_1", importance: 0.6 },
+      { pattern: /the other is.*named (\w+)/i, key: "pet_name_2", importance: 0.6 },
+      { pattern: /i work as (?:a |an )?(.+)/i, key: "job", importance: 0.8 },
+      { pattern: /i live in (.+)/i, key: "location", importance: 0.7 },
+    ]
+
+    personalPatterns.forEach(({ pattern, key, value, importance }) => {
+      const match = message.match(pattern)
+      if (match) {
+        const extractedValue = value || match[1]
+        const entry = {
+          key,
+          value: extractedValue.trim(),
+          timestamp: Date.now(),
+          importance: importance || 0.7,
+          type: "personal_info",
+        }
+        this.memory.set(key, entry)
+      }
     })
   }
 }

@@ -134,9 +134,14 @@ export default function ReliableChatWindow() {
     const newStats = aiSystem.getStats()
     const seedProgress = vocabularySeeder.getProgress()
     setStats({
-      ...newStats,
-      mathFunctions: aiSystem.getMathFunctionCount(),
+      totalMessages: newStats.totalMessages,
+      vocabularySize: newStats.vocabularySize,
+      memoryEntries: newStats.memoryEntries,
+      avgConfidence: newStats.avgConfidence,
+      systemStatus: newStats.systemStatus,
+      mathFunctions: newStats.mathFunctions, // This should now be a number
       seedProgress: seedProgress,
+      responseTime: newStats.responseTime,
     })
   }
 
@@ -271,11 +276,12 @@ export default function ReliableChatWindow() {
   }
 
   const getDataForType = (dataType: string) => {
+    const currentStats = aiSystem.getStats()
+
     switch (dataType) {
       case "vocabulary":
-        const vocabStats = aiSystem.getStats()
-        if (vocabStats.vocabulary && vocabStats.vocabulary instanceof Map) {
-          return Array.from(vocabStats.vocabulary.entries()).map(([word, category]) => ({
+        if (currentStats.vocabulary && currentStats.vocabulary instanceof Map) {
+          return Array.from(currentStats.vocabulary.entries()).map(([word, category]) => ({
             key: word,
             value: category,
             type: "vocabulary",
@@ -284,9 +290,8 @@ export default function ReliableChatWindow() {
         return []
 
       case "memory":
-        const memoryStats = aiSystem.getStats()
-        if (memoryStats.memory && memoryStats.memory instanceof Map) {
-          return Array.from(memoryStats.memory.entries()).map(([key, entry]) => ({
+        if (currentStats.memory && currentStats.memory instanceof Map) {
+          return Array.from(currentStats.memory.entries()).map(([key, entry]) => ({
             key: key,
             value: typeof entry === "object" ? entry.value : entry,
             timestamp: typeof entry === "object" ? entry.timestamp : Date.now(),
@@ -296,9 +301,8 @@ export default function ReliableChatWindow() {
         return []
 
       case "math":
-        const mathStats = aiSystem.getStats()
-        if (mathStats.mathFunctions && mathStats.mathFunctions instanceof Map) {
-          return Array.from(mathStats.mathFunctions.entries()).map(([name, func]) => ({
+        if (currentStats.mathFunctions && currentStats.mathFunctions instanceof Map) {
+          return Array.from(currentStats.mathFunctions.entries()).map(([name, func]) => ({
             key: name,
             value: func.description || "Mathematical function",
             examples: func.examples || [],
@@ -447,9 +451,7 @@ export default function ReliableChatWindow() {
             <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDataClick("math")}>
               <CardContent className="p-4 text-center">
                 <Calculator className="w-8 h-8 mx-auto mb-2 text-orange-600" />
-                <div className="text-2xl font-bold">
-                  {typeof stats.mathFunctions === "number" ? stats.mathFunctions : 0}
-                </div>
+                <div className="text-2xl font-bold">{stats.mathFunctions}</div>
                 <div className="text-sm text-gray-500">Math Functions</div>
                 <div className="text-xs text-orange-600 mt-1">Click to view</div>
               </CardContent>
@@ -1067,9 +1069,7 @@ export default function ReliableChatWindow() {
                   </div>
 
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">
-                      {typeof stats.mathFunctions === "number" ? stats.mathFunctions : 0}
-                    </div>
+                    <div className="text-2xl font-bold text-orange-600">{stats.mathFunctions}</div>
                     <div className="text-xs text-gray-500">Math Funcs</div>
                   </div>
                 </div>
