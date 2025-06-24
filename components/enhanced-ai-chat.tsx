@@ -406,29 +406,6 @@ export default function EnhancedAIChat() {
     reader.readAsText(file)
   }
 
-  const handleClearData = async () => {
-    if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
-      try {
-        knowledgeManager.importKnowledge({
-          vocabulary: [],
-          mathematics: [],
-          userInfo: [],
-          facts: [],
-          conversations: [],
-        })
-
-        await aiSystem.clearAllData()
-
-        updateStats()
-        setActiveDataView(null)
-        alert("All data cleared successfully")
-      } catch (error) {
-        console.error("Failed to clear data:", error)
-        alert("Failed to clear data")
-      }
-    }
-  }
-
   const handleRetrainModel = async () => {
     try {
       setIsLoading(true)
@@ -506,9 +483,6 @@ export default function EnhancedAIChat() {
                 <Button variant="outline" onClick={handleOptimizeKnowledge}>
                   <Settings className="w-4 h-4 mr-2" />
                   Optimize
-                </Button>
-                <Button variant="destructive" onClick={handleClearData}>
-                  Clear All Data
                 </Button>
                 <div className="flex items-center gap-2">
                   <span className="text-sm">Chat</span>
@@ -864,10 +838,6 @@ export default function EnhancedAIChat() {
                         <Button onClick={() => updateStats()} className="w-full" variant="outline">
                           <TrendingUp className="w-4 h-4 mr-2" />
                           Refresh Statistics
-                        </Button>
-                        <Button onClick={handleClearData} className="w-full" variant="destructive">
-                          <Database className="w-4 h-4 mr-2" />
-                          Clear All Data
                         </Button>
                       </div>
                     </div>
