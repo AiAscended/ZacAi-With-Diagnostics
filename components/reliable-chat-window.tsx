@@ -28,6 +28,11 @@ import {
   RefreshCw,
   Download,
   Upload,
+  Plus,
+  Edit,
+  Trash2,
+  Check,
+  X,
 } from "lucide-react"
 
 interface ChatMessage {
@@ -75,8 +80,14 @@ export default function ReliableChatWindow() {
   })
   const [error, setError] = useState<string | null>(null)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-  const [isSeeding, setIsSeeding] = useState(false)
+  const [isSeeding, setIsSeeding] = useState(isSeeding)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const [selectedDataType, setSelectedDataType] = useState<string | null>(null)
+  const [editingData, setEditingData] = useState<any>(null)
+  const [showDataModal, setShowDataModal] = useState(false)
+  const [newEntry, setNewEntry] = useState("")
+  const [newEntryValue, setNewEntryValue] = useState("")
 
   useEffect(() => {
     initializeSystem()
@@ -122,10 +133,19 @@ export default function ReliableChatWindow() {
   const updateStats = () => {
     const newStats = aiSystem.getStats()
     const seedProgress = vocabularySeeder.getProgress()
+
+    // Debug log to check what we're getting
+    console.log("Math functions from getStats:", newStats.mathFunctions, typeof newStats.mathFunctions)
+
     setStats({
-      ...newStats,
-      mathFunctions: aiSystem.getMathFunctionCount(),
+      totalMessages: newStats.totalMessages,
+      vocabularySize: newStats.vocabularySize,
+      memoryEntries: newStats.memoryEntries,
+      avgConfidence: newStats.avgConfidence,
+      systemStatus: newStats.systemStatus,
+      mathFunctions: typeof newStats.mathFunctions === "number" ? newStats.mathFunctions : 0,
       seedProgress: seedProgress,
+      responseTime: newStats.responseTime,
     })
   }
 
@@ -251,6 +271,126 @@ export default function ReliableChatWindow() {
     return "text-red-600"
   }
 
+  const handleDataClick = (dataType: string) => {
+    setSelectedDataType(dataType)
+    setShowDataModal(true)
+    setEditingData(null)
+    setNewEntry("")
+    setNewEntryValue("")
+  }
+
+  const getDataForType = (dataType: string) => {
+    const currentStats = aiSystem.getStats()
+
+    switch (dataType) {
+      case "vocabulary":
+        if (currentStats.vocabularyData && currentStats.vocabularyData instanceof Map) {
+          return Array.from(currentStats.vocabularyData.entries()).map(([word, category]) => ({
+            key: word,
+            value: category,
+            type: "vocabulary",
+          }))
+        }
+        return []
+
+      case "memory":
+        if (currentStats.memoryData && currentStats.memoryData instanceof Map) {
+          return Array.from(currentStats.memoryData.entries()).map(([key, entry]) => ({
+            key: key,
+            value: typeof entry === "object" ? entry.value : entry,
+            timestamp: typeof entry === "object" ? entry.timestamp : Date.now(),
+            type: typeof entry === "object" && entry.type ? entry.type : "memory",
+          }))
+        }
+        return []
+
+      case "math":
+        if (currentStats.mathFunctionsData && currentStats.mathFunctionsData instanceof Map) {
+          return Array.from(currentStats.mathFunctionsData.entries()).map(([name, func]) => ({
+            key: name,
+            value: func.description || "Mathematical function",
+            examples: func.examples || [],
+            type: "math",
+          }))
+        }
+        return []
+
+      case "conversations":
+        return aiSystem
+          .getConversationHistory()
+          .slice(-20)
+          .map((msg, idx) => ({
+            key: `${msg.role}-${idx}`,
+            value: msg.content.substring(0, 100) + (msg.content.length > 100 ? "..." : ""),
+            timestamp: msg.timestamp,
+            role: msg.role,
+            type: "conversations",
+          }))
+
+      default:
+        return []
+    }
+  }
+
+  const handleEditEntry = (entry: any) => {
+    setEditingData(entry)
+    setNewEntry(entry.key)
+    setNewEntryValue(entry.value)
+  }
+
+  const handleSaveEntry = async () => {
+    if (!selectedDataType || !newEntry.trim()) return
+
+    try {
+      switch (selectedDataType) {
+        case "vocabulary":
+          await aiSystem.addVocabularyWord(newEntry.trim(), newEntryValue || "user-added")
+          break
+        case "memory":
+          await aiSystem.addMemoryEntry(newEntry.trim(), newEntryValue || newEntry.trim())
+          break
+        case "math":
+          // For math, we'll just add to vocabulary as a math term
+          await aiSystem.addVocabularyWord(newEntry.trim(), "math-term")
+          break
+      }
+
+      updateStats()
+      setEditingData(null)
+      setNewEntry("")
+      setNewEntryValue("")
+    } catch (error) {
+      console.error("Failed to save entry:", error)
+    }
+  }
+
+  const handleDeleteEntry = async (entry: any) => {
+    if (!selectedDataType) return
+
+    try {
+      switch (selectedDataType) {
+        case "vocabulary":
+          await aiSystem.removeVocabularyWord(entry.key)
+          break
+        case "memory":
+          await aiSystem.removeMemoryEntry(entry.key)
+          break
+      }
+
+      updateStats()
+    } catch (error) {
+      console.error("Failed to delete entry:", error)
+    }
+  }
+
+  const closeDataModal = () => {
+    setShowDataModal(false)
+    setSelectedDataType(null)
+    setEditingData(null)
+    setNewEntry("")
+    setNewEntryValue("")
+  }
+
   if (showMetrics) {
     return (
       <div className="h-screen bg-gray-50 p-4">
@@ -274,37 +414,50 @@ export default function ReliableChatWindow() {
             </div>
           </div>
 
-          {/* Quick Stats */}
+          {/* Quick Stats - Make them clickable */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleDataClick("conversations")}
+            >
               <CardContent className="p-4 text-center">
                 <MessageCircle className="w-8 h-8 mx-auto mb-2 text-blue-600" />
                 <div className="text-2xl font-bold">{stats.totalMessages}</div>
                 <div className="text-sm text-gray-500">Total Messages</div>
+                <div className="text-xs text-blue-600 mt-1">Click to view</div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleDataClick("vocabulary")}
+            >
               <CardContent className="p-4 text-center">
                 <BookOpen className="w-8 h-8 mx-auto mb-2 text-green-600" />
                 <div className="text-2xl font-bold">{stats.vocabularySize}</div>
                 <div className="text-sm text-gray-500">Vocabulary Size</div>
+                <div className="text-xs text-green-600 mt-1">Click to view</div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleDataClick("memory")}
+            >
               <CardContent className="p-4 text-center">
                 <Database className="w-8 h-8 mx-auto mb-2 text-purple-600" />
                 <div className="text-2xl font-bold">{stats.memoryEntries}</div>
-                <div className="text-sm text-gray-500">Memory Entries</div>
+                <div className="text-sm text-gray-500">User Info</div>
+                <div className="text-xs text-purple-600 mt-1">Click to view</div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDataClick("math")}>
               <CardContent className="p-4 text-center">
                 <Calculator className="w-8 h-8 mx-auto mb-2 text-orange-600" />
                 <div className="text-2xl font-bold">{stats.mathFunctions}</div>
                 <div className="text-sm text-gray-500">Math Functions</div>
+                <div className="text-xs text-orange-600 mt-1">Click to view</div>
               </CardContent>
             </Card>
           </div>
@@ -497,6 +650,148 @@ export default function ReliableChatWindow() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Data Viewing/Editing Modal */}
+          {showDataModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+                <div className="p-6 border-b">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold capitalize">
+                      {selectedDataType === "memory" ? "User Information" : selectedDataType} Data
+                    </h2>
+                    <Button variant="ghost" onClick={closeDataModal}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="p-6 overflow-y-auto max-h-[60vh]">
+                  {/* Add New Entry Form */}
+                  <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 className="font-medium mb-3">Add New Entry</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <Input
+                        placeholder={
+                          selectedDataType === "memory"
+                            ? 'Memory key (e.g., "name", "job")'
+                            : selectedDataType === "vocabulary"
+                              ? "Word"
+                              : selectedDataType === "math"
+                                ? "Function name"
+                                : "Entry"
+                        }
+                        value={newEntry}
+                        onChange={(e) => setNewEntry(e.target.value)}
+                      />
+                      <Input
+                        placeholder={
+                          selectedDataType === "memory"
+                            ? 'Value (e.g., "John", "Developer")'
+                            : selectedDataType === "vocabulary"
+                              ? "Category"
+                              : selectedDataType === "math"
+                                ? "Description"
+                                : "Value"
+                        }
+                        value={newEntryValue}
+                        onChange={(e) => setNewEntryValue(e.target.value)}
+                      />
+                    </div>
+                    <Button onClick={handleSaveEntry} className="mt-3" disabled={!newEntry.trim()}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Entry
+                    </Button>
+                  </div>
+
+                  {/* Data List */}
+                  <div className="space-y-3">
+                    {getDataForType(selectedDataType || "").map((entry, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 hover:bg-gray-50">
+                        {editingData?.key === entry.key ? (
+                          // Edit Mode
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <Input value={newEntry} onChange={(e) => setNewEntry(e.target.value)} placeholder="Key" />
+                              <Input
+                                value={newEntryValue}
+                                onChange={(e) => setNewEntryValue(e.target.value)}
+                                placeholder="Value"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={handleSaveEntry}>
+                                <Check className="w-4 h-4 mr-1" />
+                                Save
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setEditingData(null)}>
+                                <X className="w-4 h-4 mr-1" />
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          // View Mode - enhance this section
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3">
+                                <div className="font-medium text-sm">{entry.key}</div>
+                                {entry.type === "fact" && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Fact
+                                  </Badge>
+                                )}
+                                {entry.type === "memory" && entry.timestamp && (
+                                  <div className="text-xs text-gray-500">
+                                    {new Date(entry.timestamp).toLocaleDateString()}
+                                  </div>
+                                )}
+                                {entry.type === "conversations" && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {entry.role}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">{entry.value}</div>
+                              {entry.examples && entry.examples.length > 0 && (
+                                <div className="text-xs text-gray-500 mt-1">Examples: {entry.examples.join(", ")}</div>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleEditEntry(entry)}
+                                disabled={entry.type === "conversations"}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteEntry(entry)}
+                                disabled={entry.type === "conversations" || entry.type === "math"}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {getDataForType(selectedDataType || "").length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        <Database className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No {selectedDataType} data found</p>
+                        <p className="text-sm">Add some entries using the form above</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )

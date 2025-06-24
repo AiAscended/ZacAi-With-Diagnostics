@@ -59,7 +59,7 @@ export class EnhancedAISystemV2 {
   }
 
   public async initialize(): Promise<void> {
-    if (this.isInitialized) return
+    if (!this.isInitialized) return
 
     console.log("Initializing Enhanced AI System V2...")
 
@@ -194,23 +194,27 @@ export class EnhancedAISystemV2 {
   }
 
   private async learnNewWords(tokens: any[]): Promise<void> {
-    for (const token of tokens) {
-      if (!token.isKnown && token.token.length > 2) {
-        // This is a new word - add it to vocabulary with basic info
-        const newWordEntry = {
-          word: token.token,
-          definitions: ["User-introduced word - meaning to be learned"],
-          partOfSpeech: ["unknown"],
-          synonyms: [],
-          antonyms: [],
-          frequency: 1,
-          examples: [],
-        }
+    try {
+      for (const token of tokens) {
+        if (!token.isKnown && token.token && token.token.length > 2) {
+          // This is a new word - add it to vocabulary with basic info
+          const newWordEntry = {
+            word: token.token,
+            definitions: ["User-introduced word - meaning to be learned"],
+            partOfSpeech: ["unknown"],
+            synonyms: [],
+            antonyms: [],
+            frequency: 1,
+            examples: [],
+          }
 
-        this.vocabularyLoader.addWord(newWordEntry)
-        this.learningStats.wordsLearned++
-        console.log(`Learned new word: ${token.token}`)
+          this.vocabularyLoader.addWord(newWordEntry)
+          this.learningStats.wordsLearned++
+          console.log(`Learned new word: ${token.token}`)
+        }
       }
+    } catch (error) {
+      console.error("Error in learnNewWords:", error)
     }
   }
 
