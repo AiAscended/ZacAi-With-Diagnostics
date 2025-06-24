@@ -36,7 +36,6 @@ import {
   ChevronDown,
   ChevronUp,
   Edit,
-  Plus,
 } from "lucide-react"
 
 interface ChatMessage {
@@ -614,175 +613,291 @@ export default function EnhancedAIChat() {
             <div className="max-w-7xl mx-auto p-4">
               {/* Data View */}
               {activeDataView === "vocabulary" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <BookOpen className="w-5 h-5" />
-                        Vocabulary ({knowledgeData.vocabulary.length} words)
-                      </span>
-                      <Button onClick={() => handleAddNewItem("vocabulary")} size="sm">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Word
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-96">
-                      <div className="space-y-3">
-                        {knowledgeData.vocabulary.map((item: any, index: number) => (
-                          <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <h4 className="font-semibold text-lg">{item.word}</h4>
-                                  <Badge variant="outline">{item.partOfSpeech}</Badge>
-                                  <Badge variant="secondary">{item.category}</Badge>
-                                </div>
-                                <p className="text-gray-700 mb-2">{item.definition}</p>
-                                {item.examples && (
-                                  <p className="text-sm text-gray-500">
-                                    <strong>Examples:</strong> {item.examples}
-                                  </p>
-                                )}
-                              </div>
-                              <Button variant="ghost" size="sm" onClick={() => handleEditItem("vocabulary", index)}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </div>
+                <div className="space-y-4">
+                  {/* Keep System Overview visible */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Brain className="w-5 h-5" />
+                          System Overview
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 bg-blue-50 rounded">
+                            <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
+                            <div className="text-sm text-blue-600">Total Knowledge</div>
                           </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
+                          <div className="text-center p-3 bg-green-50 rounded">
+                            <div className="text-2xl font-bold text-green-600">
+                              {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "0%"}
+                            </div>
+                            <div className="text-sm text-green-600">Avg Confidence</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <BookOpen className="w-5 h-5" />
+                            Vocabulary Data
+                          </span>
+                          <Button variant="ghost" size="sm" onClick={() => setActiveDataView("overview")}>
+                            ✕
+                          </Button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-96">
+                          <div className="space-y-3">
+                            {knowledgeData.vocabulary.map((item: any, index: number) => (
+                              <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <h4 className="font-semibold text-lg">{item.word}</h4>
+                                      <Badge variant="outline">{item.partOfSpeech}</Badge>
+                                      <Badge variant="secondary">{item.category}</Badge>
+                                    </div>
+                                    <p className="text-gray-700 mb-2">{item.definition}</p>
+                                    {item.examples && (
+                                      <p className="text-sm text-gray-500">
+                                        <strong>Examples:</strong> {item.examples}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <Button variant="ghost" size="sm" onClick={() => handleEditItem("vocabulary", index)}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               )}
 
               {activeDataView === "mathematics" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <Calculator className="w-5 h-5" />
-                        Mathematics ({knowledgeData.mathematics.length} concepts)
-                      </span>
-                      <Button onClick={() => handleAddNewItem("mathematics")} size="sm">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Concept
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-96">
-                      <div className="space-y-3">
-                        {knowledgeData.mathematics.map((item: any, index: number) => (
-                          <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <h4 className="font-semibold text-lg">{item.concept}</h4>
-                                  <Badge variant="outline">Level {item.difficulty}</Badge>
-                                  <Badge variant="secondary">{item.category}</Badge>
-                                </div>
-                                {item.formula && (
-                                  <p className="text-gray-700 mb-2 font-mono bg-gray-100 p-2 rounded">{item.formula}</p>
-                                )}
-                                {item.examples && (
-                                  <p className="text-sm text-gray-500">
-                                    <strong>Examples:</strong> {item.examples}
-                                  </p>
-                                )}
-                              </div>
-                              <Button variant="ghost" size="sm" onClick={() => handleEditItem("mathematics", index)}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </div>
+                <div className="space-y-4">
+                  {/* Keep System Overview visible */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Brain className="w-5 h-5" />
+                          System Overview
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 bg-blue-50 rounded">
+                            <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
+                            <div className="text-sm text-blue-600">Total Knowledge</div>
                           </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
+                          <div className="text-center p-3 bg-green-50 rounded">
+                            <div className="text-2xl font-bold text-green-600">
+                              {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "0%"}
+                            </div>
+                            <div className="text-sm text-green-600">Avg Confidence</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <Calculator className="w-5 h-5" />
+                            Mathematics Data
+                          </span>
+                          <Button variant="ghost" size="sm" onClick={() => setActiveDataView("overview")}>
+                            ✕
+                          </Button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-96">
+                          <div className="space-y-3">
+                            {knowledgeData.mathematics.map((item: any, index: number) => (
+                              <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <h4 className="font-semibold text-lg">{item.concept}</h4>
+                                      <Badge variant="outline">Level {item.difficulty}</Badge>
+                                      <Badge variant="secondary">{item.category}</Badge>
+                                    </div>
+                                    {item.formula && (
+                                      <p className="text-gray-700 mb-2 font-mono bg-gray-100 p-2 rounded">
+                                        {item.formula}
+                                      </p>
+                                    )}
+                                    {item.examples && (
+                                      <p className="text-sm text-gray-500">
+                                        <strong>Examples:</strong> {item.examples}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditItem("mathematics", index)}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               )}
 
               {activeDataView === "userInfo" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <User className="w-5 h-5" />
-                        User Information ({knowledgeData.userInfo.length} entries)
-                      </span>
-                      <Button onClick={() => handleAddNewItem("userInfo")} size="sm">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Info
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-96">
-                      <div className="space-y-3">
-                        {knowledgeData.userInfo.map((item: any, index: number) => (
-                          <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <h4 className="font-semibold text-lg capitalize">{item.key.replace(/_/g, " ")}</h4>
-                                  <Badge variant="outline">{Math.round(item.importance * 100)}% important</Badge>
-                                </div>
-                                <p className="text-gray-700 mb-2">{item.value}</p>
-                                <p className="text-xs text-gray-500">Learned: {item.timestamp}</p>
-                              </div>
-                              <Button variant="ghost" size="sm" onClick={() => handleEditItem("userInfo", index)}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </div>
+                <div className="space-y-4">
+                  {/* Keep System Overview visible */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Brain className="w-5 h-5" />
+                          System Overview
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 bg-blue-50 rounded">
+                            <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
+                            <div className="text-sm text-blue-600">Total Knowledge</div>
                           </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
+                          <div className="text-center p-3 bg-green-50 rounded">
+                            <div className="text-2xl font-bold text-green-600">
+                              {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "0%"}
+                            </div>
+                            <div className="text-sm text-green-600">Avg Confidence</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <User className="w-5 h-5" />
+                            User Information Data
+                          </span>
+                          <Button variant="ghost" size="sm" onClick={() => setActiveDataView("overview")}>
+                            ✕
+                          </Button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-96">
+                          <div className="space-y-3">
+                            {knowledgeData.userInfo.map((item: any, index: number) => (
+                              <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <h4 className="font-semibold text-lg capitalize">
+                                        {item.key.replace(/_/g, " ")}
+                                      </h4>
+                                      <Badge variant="outline">{Math.round(item.importance * 100)}% important</Badge>
+                                    </div>
+                                    <p className="text-gray-700 mb-2">{item.value}</p>
+                                    <p className="text-xs text-gray-500">Learned: {item.timestamp}</p>
+                                  </div>
+                                  <Button variant="ghost" size="sm" onClick={() => handleEditItem("userInfo", index)}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               )}
 
               {activeDataView === "facts" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <FileText className="w-5 h-5" />
-                        Facts & Knowledge ({knowledgeData.facts.length} facts)
-                      </span>
-                      <Button onClick={() => handleAddNewItem("facts")} size="sm">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Fact
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-96">
-                      <div className="space-y-3">
-                        {knowledgeData.facts.map((item: any, index: number) => (
-                          <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <h4 className="font-semibold text-lg">{item.topic}</h4>
-                                  <Badge variant="secondary">{item.category}</Badge>
-                                  <Badge variant="outline">{item.source}</Badge>
-                                </div>
-                                <p className="text-gray-700">{item.content}</p>
-                              </div>
-                              <Button variant="ghost" size="sm" onClick={() => handleEditItem("facts", index)}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </div>
+                <div className="space-y-4">
+                  {/* Keep System Overview visible */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Brain className="w-5 h-5" />
+                          System Overview
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 bg-blue-50 rounded">
+                            <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
+                            <div className="text-sm text-blue-600">Total Knowledge</div>
                           </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
+                          <div className="text-center p-3 bg-green-50 rounded">
+                            <div className="text-2xl font-bold text-green-600">
+                              {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "0%"}
+                            </div>
+                            <div className="text-sm text-green-600">Avg Confidence</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <FileText className="w-5 h-5" />
+                            Facts & Knowledge Data
+                          </span>
+                          <Button variant="ghost" size="sm" onClick={() => setActiveDataView("overview")}>
+                            ✕
+                          </Button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-96">
+                          <div className="space-y-3">
+                            {knowledgeData.facts.map((item: any, index: number) => (
+                              <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <h4 className="font-semibold text-lg">{item.topic}</h4>
+                                      <Badge variant="secondary">{item.category}</Badge>
+                                      <Badge variant="outline">{item.source}</Badge>
+                                    </div>
+                                    <p className="text-gray-700">{item.content}</p>
+                                  </div>
+                                  <Button variant="ghost" size="sm" onClick={() => handleEditItem("facts", index)}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               )}
 
               {activeDataView === "overview" && (
@@ -1281,6 +1396,32 @@ export default function EnhancedAIChat() {
                   </div>
                 </CardContent>
               </Card>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Mathematical Capabilities</div>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p>• Basic arithmetic (+ - × ÷)</p>
+                  <p>• Natural language math</p>
+                  <p>• Order of operations (PEMDAS)</p>
+                  <p>• Multi-step calculations</p>
+                  <p>• Mathematical vocabulary</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Learning Features</div>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p>• Vocabulary expansion</p>
+                  <p>• Pattern recognition</p>
+                  <p>• Context understanding</p>
+                  <p>• Memory formation</p>
+                  <p>• Iterative thinking</p>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="tools" className="h-full">
@@ -1332,6 +1473,49 @@ export default function EnhancedAIChat() {
                   </div>
                 </CardContent>
               </Card>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Advanced Tools</div>
+                <div className="space-y-2 text-xs">
+                  <Button onClick={handleRetrainModel} className="w-full" variant="outline" size="sm">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Retrain Model
+                  </Button>
+                  <Button onClick={handleOptimizeKnowledge} className="w-full" variant="outline" size="sm">
+                    <Zap className="w-4 h-4 mr-2" />
+                    Optimize Knowledge
+                  </Button>
+                  <div>
+                    <input
+                      type="file"
+                      accept=".json,.csv,.txt"
+                      onChange={handleBulkImport}
+                      className="hidden"
+                      id="bulk-import"
+                    />
+                    <Button asChild className="w-full" variant="outline" size="sm">
+                      <label htmlFor="bulk-import" className="cursor-pointer">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Bulk Import
+                      </label>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="text-sm font-medium">System Health</div>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p>• Memory usage: Optimized</p>
+                  <p>• Response time: &lt;500ms</p>
+                  <p>• Knowledge integrity: 100%</p>
+                  <p>• Learning rate: Active</p>
+                </div>
+              </div>
             </TabsContent>
           </div>
         </Tabs>

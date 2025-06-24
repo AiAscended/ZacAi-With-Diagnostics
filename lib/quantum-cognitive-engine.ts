@@ -120,6 +120,10 @@ export class QuantumCognitiveEngine {
         confidence = 0.9
         this.addThought("⚡ Implicit multiplication detected - preparing numerical reasoning", "mathematical", 0.9)
       }
+    } else if (this.containsNaturalLanguageMath(input)) {
+      sparkType = "mathematical"
+      confidence = 0.9
+      this.addThought("⚡ Natural language math detected - preparing numerical reasoning", "mathematical", 0.9)
     } else if (inputAnalysis.hasPersonalInfo) {
       sparkType = "personal"
       confidence = 0.8
@@ -144,6 +148,37 @@ export class QuantumCognitiveEngine {
       Object.values(factors).reduce((a, b) => a + b, 0),
       1,
     )
+  }
+
+  private containsNaturalLanguageMath(input: string): boolean {
+    const mathTerms = [
+      "multiply",
+      "multiplied",
+      "times",
+      "product",
+      "divide",
+      "divided",
+      "quotient",
+      "split",
+      "add",
+      "added",
+      "plus",
+      "sum",
+      "total",
+      "subtract",
+      "subtracted",
+      "minus",
+      "difference",
+      "calculate",
+      "compute",
+      "solve",
+      "what is",
+    ]
+
+    const hasNumbers = /\d/.test(input)
+    const hasMathTerms = mathTerms.some((term) => input.toLowerCase().includes(term))
+
+    return hasNumbers && hasMathTerms
   }
 
   private async activateQuantumKnowledge(input: string, iterativeResults: any): Promise<QuantumActivation> {
@@ -309,7 +344,58 @@ export class QuantumCognitiveEngine {
   }
 
   private async initializeQuantumKnowledge(): Promise<void> {
-    // Initialize with basic mathematical and factual knowledge
+    // Load seed math data
+    try {
+      const response = await fetch("/seed_maths.json")
+      const mathData = await response.json()
+
+      // Load mathematical vocabulary
+      if (mathData.mathematical_vocabulary) {
+        for (const [term, definition] of Object.entries(mathData.mathematical_vocabulary)) {
+          this.knowledgeQuantum.set(`math_vocab_${term}`, {
+            concept: term,
+            type: "mathematical_vocabulary",
+            description: definition as string,
+            keywords: [term],
+            confidence: 0.95,
+          })
+        }
+      }
+
+      // Load mathematical symbols
+      if (mathData.mathematical_symbols) {
+        for (const [symbol, data] of Object.entries(mathData.mathematical_symbols)) {
+          const symbolData = data as any
+          this.knowledgeQuantum.set(`math_symbol_${symbol}`, {
+            concept: symbol,
+            type: "mathematical_symbol",
+            description: symbolData.meaning,
+            keywords: symbolData.synonyms || [],
+            confidence: 0.95,
+          })
+        }
+      }
+
+      // Load calculation methods
+      if (mathData.calculation_methods) {
+        this.knowledgeQuantum.set("arithmetic_methods", {
+          concept: "arithmetic_calculation_methods",
+          type: "mathematical_methods",
+          description: "Step-by-step methods for basic arithmetic operations",
+          keywords: ["calculate", "method", "algorithm", "steps"],
+          confidence: 0.95,
+        })
+      }
+
+      console.log(`✅ Loaded ${this.knowledgeQuantum.size} quantum knowledge entries from seed data`)
+    } catch (error) {
+      console.warn("⚠️ Failed to load seed math data:", error)
+      // Fallback to basic knowledge
+      this.initializeBasicKnowledge()
+    }
+  }
+
+  private initializeBasicKnowledge(): void {
     this.knowledgeQuantum.set("arithmetic", {
       concept: "arithmetic",
       type: "mathematical",
@@ -691,20 +777,32 @@ class UniversalMathCalculator {
   private normalizeInput(input: string, thoughtStream: ThoughtNode[]): string {
     this.addThought("🔧 Normalizing input format...", thoughtStream)
 
-    // Convert common formats
-    let normalized = input
+    let normalized = input.toLowerCase()
+
+    // Handle natural language math terms
+    normalized = normalized
+      .replace(/multiply\s+(\d+)\s+by\s+(\d+)/g, "$1*$2")
+      .replace(/(\d+)\s+multiplied\s+by\s+(\d+)/g, "$1*$2")
+      .replace(/(\d+)\s+times\s+(\d+)/g, "$1*$2")
+      .replace(/divide\s+(\d+)\s+by\s+(\d+)/g, "$1/$2")
+      .replace(/(\d+)\s+divided\s+by\s+(\d+)/g, "$1/$2")
+      .replace(/add\s+(\d+)\s+and\s+(\d+)/g, "$1+$2")
+      .replace(/(\d+)\s+plus\s+(\d+)/g, "$1+$2")
+      .replace(/subtract\s+(\d+)\s+from\s+(\d+)/g, "$2-$1")
+      .replace(/(\d+)\s+minus\s+(\d+)/g, "$1-$2")
+
+    // Convert symbols
+    normalized = normalized
       .replace(/x/g, "*") // 2x2 -> 2*2
       .replace(/×/g, "*") // 2×2 -> 2*2
       .replace(/÷/g, "/") // 2÷2 -> 2/2
+      .replace(/\s+/g, "") // Remove spaces
 
     // Handle implicit multiplication like "3x3x3" -> "3*3*3"
     if (/\d+x\d+/.test(normalized)) {
       normalized = normalized.replace(/(\d+)x(\d+)/g, "$1*$2")
       this.addThought(`🔄 Converted implicit multiplication: "${normalized}"`, thoughtStream)
     }
-
-    // Handle repeated operations like "3+3+3+4" (already has operators)
-    // Handle repeated multiplication like "3*3*3*3"
 
     this.addThought(`✅ Normalized to: "${normalized}"`, thoughtStream)
     return normalized
@@ -822,6 +920,20 @@ class UniversalMathCalculator {
 // TYPE DEFINITIONS
 interface ThoughtNode {
   id: number
+  content: string
+  type: string
+  confidence: number
+  timestamp: number
+  emoji: string
+}
+
+interface InitialSpark {
+  type: string
+  confidence: number
+  analysis: any
+}
+
+interface IterativeThought {
   content: string
   type: string
   confidence: number
