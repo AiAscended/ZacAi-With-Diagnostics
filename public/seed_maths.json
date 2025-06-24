@@ -1,0 +1,1275 @@
+{
+  "calculation_methods": {
+    "basic_arithmetic": {
+      "addition": {
+        "algorithm": "Add digits column by column from right to left, carry over when sum > 9",
+        "steps": [
+          "1. Align numbers by place value (ones, tens, hundreds)",
+          "2. Start from rightmost column (ones place)",
+          "3. Add digits in column, if sum ≥ 10, write ones digit and carry tens digit",
+          "4. Move left to next column, add digits plus any carry",
+          "5. Repeat until all columns complete"
+        ],
+        "examples": {
+          "47_plus_38": {
+            "setup": "  47\n+ 38\n----",
+            "step1": "7 + 8 = 15, write 5 carry 1",
+            "step2": "4 + 3 + 1(carry) = 8",
+            "result": "85",
+            "verification": "47 + 38 = 85"
+          },
+          "10_plus_10": {
+            "setup": "  10\n+ 10\n----",
+            "step1": "0 + 0 = 0",
+            "step2": "1 + 1 = 2",
+            "result": "20",
+            "verification": "10 + 10 = 20"
+          }
+        }
+      },
+      "subtraction": {
+        "algorithm": "Subtract digits column by column, borrow when needed",
+        "steps": [
+          "1. Align numbers by place value",
+          "2. Start from rightmost column",
+          "3. If top digit < bottom digit, borrow from left column",
+          "4. Subtract bottom from top digit",
+          "5. Move left, repeat process"
+        ],
+        "examples": {
+          "85_minus_47": {
+            "setup": "  85\n- 47\n----",
+            "step1": "5 - 7: need to borrow, 15 - 7 = 8",
+            "step2": "7 - 4 = 3 (after borrowing)",
+            "result": "38"
+          }
+        }
+      },
+      "multiplication": {
+        "algorithm": "Multiply each digit by multiplier, add partial products",
+        "steps": [
+          "1. Write numbers with larger on top",
+          "2. Multiply top number by each digit of bottom number",
+          "3. Shift each partial product one place left",
+          "4. Add all partial products"
+        ],
+        "examples": {
+          "10_times_10": {
+            "setup": "  10\n× 10\n----",
+            "step1": "10 × 0 = 0",
+            "step2": "10 × 1 = 10 (shift left: 100)",
+            "step3": "0 + 100 = 100",
+            "result": "100",
+            "verification": "10 × 10 = 100"
+          },
+          "23_times_45": {
+            "setup": "   23\n×  45\n-----",
+            "step1": "23 × 5 = 115",
+            "step2": "23 × 4 = 92 (shift left: 920)",
+            "step3": "115 + 920 = 1035",
+            "result": "1035"
+          }
+        }
+      },
+      "division": {
+        "algorithm": "Long division: divide, multiply, subtract, bring down",
+        "steps": [
+          "1. How many times does divisor go into first digits of dividend?",
+          "2. Multiply divisor by that quotient digit",
+          "3. Subtract result from dividend section",
+          "4. Bring down next digit",
+          "5. Repeat until complete"
+        ],
+        "examples": {
+          "100_divided_by_10": {
+            "setup": "100 ÷ 10",
+            "step1": "10 goes into 10 once (1), 1×10=10",
+            "step2": "10-10=0, bring down 0 to make 00",
+            "step3": "10 goes into 0 zero times (0)",
+            "result": "10",
+            "verification": "100 ÷ 10 = 10"
+          },
+          "144_divided_by_12": {
+            "setup": "144 ÷ 12",
+            "step1": "12 goes into 14 once (1), 1×12=12",
+            "step2": "14-12=2, bring down 4 to make 24",
+            "step3": "12 goes into 24 twice (2), 2×12=24",
+            "step4": "24-24=0",
+            "result": "12"
+          }
+        }
+      }
+    },
+    "how_to_use_times_tables": {
+      "lookup_method": "Find first number in left column, second number in top row, intersection is answer",
+      "example": "For 7 × 8: find 7 in times_tables, look at position 8 (index 7), answer is 56",
+      "verification": "Always check: 7 × 8 should equal 8 × 7",
+      "mental_tricks": [
+        "9 times table: multiply by 10, subtract the number (9×7 = 70-7 = 63)",
+        "5 times table: multiply by 10, divide by 2 (5×8 = 80÷2 = 40)",
+        "11 times table: repeat the digit for single digits (11×7 = 77)"
+      ]
+    }
+  },
+  "arithmetic_tables": {
+    "addition": {
+      "1": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+      "2": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+      "3": [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      "4": [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+      "5": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+      "6": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+      "7": [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+      "8": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+      "9": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+      "10": [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+      "11": [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+      "12": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    },
+    "subtraction": {
+      "12": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+      "11": [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+      "10": [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+      "9": [8, 7, 6, 5, 4, 3, 2, 1, 0],
+      "8": [7, 6, 5, 4, 3, 2, 1, 0],
+      "7": [6, 5, 4, 3, 2, 1, 0],
+      "6": [5, 4, 3, 2, 1, 0],
+      "5": [4, 3, 2, 1, 0],
+      "4": [3, 2, 1, 0],
+      "3": [2, 1, 0],
+      "2": [1, 0],
+      "1": [0]
+    },
+    "multiplication": {
+      "1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      "2": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24],
+      "3": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+      "4": [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48],
+      "5": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
+      "6": [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72],
+      "7": [7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84],
+      "8": [8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96],
+      "9": [9, 18, 27, 36, 45, 54, 63, 72, 81, 90, 99, 108],
+      "10": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120],
+      "11": [11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121, 132],
+      "12": [12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144]
+    },
+    "division": {
+      "12": [12, 6, 4, 3, 2.4, 2, 1.71, 1.5, 1.33, 1.2, 1.09, 1],
+      "24": [24, 12, 8, 6, 4.8, 4, 3.43, 3, 2.67, 2.4, 2.18, 2],
+      "36": [36, 18, 12, 9, 7.2, 6, 5.14, 4.5, 4, 3.6, 3.27, 3],
+      "48": [48, 24, 16, 12, 9.6, 8, 6.86, 6, 5.33, 4.8, 4.36, 4],
+      "60": [60, 30, 20, 15, 12, 10, 8.57, 7.5, 6.67, 6, 5.45, 5],
+      "72": [72, 36, 24, 18, 14.4, 12, 10.29, 9, 8, 7.2, 6.55, 6],
+      "84": [84, 42, 28, 21, 16.8, 14, 12, 10.5, 9.33, 8.4, 7.64, 7],
+      "96": [96, 48, 32, 24, 19.2, 16, 13.71, 12, 10.67, 9.6, 8.73, 8],
+      "108": [108, 54, 36, 27, 21.6, 18, 15.43, 13.5, 12, 10.8, 9.82, 9],
+      "120": [120, 60, 40, 30, 24, 20, 17.14, 15, 13.33, 12, 10.91, 10],
+      "132": [132, 66, 44, 33, 26.4, 22, 18.86, 16.5, 14.67, 13.2, 12, 11],
+      "144": [144, 72, 48, 36, 28.8, 24, 20.57, 18, 16, 14.4, 13.09, 12]
+    }
+  },
+  "fractions": {
+    "1/2": 0.5,
+    "1/3": 0.333,
+    "2/3": 0.667,
+    "1/4": 0.25,
+    "3/4": 0.75,
+    "1/5": 0.2,
+    "2/5": 0.4,
+    "3/5": 0.6,
+    "4/5": 0.8,
+    "1/6": 0.167,
+    "5/6": 0.833,
+    "1/8": 0.125,
+    "3/8": 0.375,
+    "5/8": 0.625,
+    "7/8": 0.875,
+    "1/10": 0.1,
+    "1/12": 0.083,
+    "1/16": 0.0625
+  },
+  "tesla_map": {
+    "vortex_cycle": [1, 2, 4, 8, 7, 5, 1],
+    "tesla_pattern": [3, 6, 9],
+    "doubling_sequence": [1, 2, 4, 8, 16, 32, 64, 128, 256, 512],
+    "vortex_reduced": [1, 2, 4, 8, 7, 5, 1, 2, 4, 8, 7, 5],
+    "description": "Tesla's vortex math: doubling sequence reduces to 1-2-4-8-7-5 cycle, while 3-6-9 form the control pattern",
+    "usage": "Any number doubled and reduced (sum of digits until single digit) follows this pattern",
+    "examples": {
+      "16_reduced": "1+6=7",
+      "32_reduced": "3+2=5",
+      "64_reduced": "6+4=10, 1+0=1",
+      "128_reduced": "1+2+8=11, 1+1=2"
+    },
+    "tesla_369_properties": {
+      "3": "Creates all other numbers through doubling",
+      "6": "Represents physical manifestation",
+      "9": "Represents the universe and completion"
+    }
+  },
+  "mirror_times_tables": {
+    "1": {
+      "standard": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "mirror": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "reduced": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    },
+    "2": {
+      "standard": [2, 4, 6, 8, 10, 12, 14, 16, 18],
+      "mirror": [2, 4, 6, 8, 1, 3, 5, 7, 9],
+      "reduced": [2, 4, 6, 8, 1, 3, 5, 7, 9]
+    },
+    "3": {
+      "standard": [3, 6, 9, 12, 15, 18, 21, 24, 27],
+      "mirror": [3, 6, 9, 3, 6, 9, 3, 6, 9],
+      "reduced": [3, 6, 9, 3, 6, 9, 3, 6, 9]
+    },
+    "4": {
+      "standard": [4, 8, 12, 16, 20, 24, 28, 32, 36],
+      "mirror": [4, 8, 3, 7, 2, 6, 1, 5, 9],
+      "reduced": [4, 8, 3, 7, 2, 6, 1, 5, 9]
+    },
+    "5": {
+      "standard": [5, 10, 15, 20, 25, 30, 35, 40, 45],
+      "mirror": [5, 1, 6, 2, 7, 3, 8, 4, 9],
+      "reduced": [5, 1, 6, 2, 7, 3, 8, 4, 9]
+    },
+    "6": {
+      "standard": [6, 12, 18, 24, 30, 36, 42, 48, 54],
+      "mirror": [6, 3, 9, 6, 3, 9, 6, 3, 9],
+      "reduced": [6, 3, 9, 6, 3, 9, 6, 3, 9]
+    },
+    "7": {
+      "standard": [7, 14, 21, 28, 35, 42, 49, 56, 63],
+      "mirror": [7, 5, 3, 1, 8, 6, 4, 2, 9],
+      "reduced": [7, 5, 3, 1, 8, 6, 4, 2, 9]
+    },
+    "8": {
+      "standard": [8, 16, 24, 32, 40, 48, 56, 64, 72],
+      "mirror": [8, 7, 6, 5, 4, 3, 2, 1, 9],
+      "reduced": [8, 7, 6, 5, 4, 3, 2, 1, 9]
+    },
+    "9": {
+      "standard": [9, 18, 27, 36, 45, 54, 63, 72, 81],
+      "mirror": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+      "reduced": [9, 9, 9, 9, 9, 9, 9, 9, 9]
+    },
+    "description": "Mirror times tables show the digital root pattern when multiplying. Each number creates a unique mirror sequence.",
+    "usage": "Reduces complex multiplication to pattern recognition. 9 always equals 9, creating the universal constant."
+  },
+  "chinese_multiplication": {
+    "description": "Visual grid method using intersecting lines to represent digits",
+    "method": "Draw lines for each digit, count intersections in sections",
+    "step_by_step": [
+      "1. Draw vertical parallel lines for each digit of first number",
+      "2. Draw horizontal parallel lines for each digit of second number",
+      "3. Count intersections in diagonal sections (hundreds, tens, ones)",
+      "4. Add carries if any section totals more than 9",
+      "5. Read final answer from left to right"
+    ],
+    "examples": {
+      "10_times_10": {
+        "setup": "1 vertical line, 0 vertical lines crossed with 1 horizontal line, 0 horizontal lines",
+        "intersections": { "hundreds": 1, "tens": 0, "ones": 0 },
+        "result": 100,
+        "verification": "10 × 10 = 100"
+      },
+      "13_times_12": {
+        "setup": "1 line, 3 lines crossed with 1 line, 2 lines",
+        "intersections": { "hundreds": 1, "tens": 5, "ones": 6 },
+        "result": 156
+      },
+      "23_times_14": {
+        "setup": "2 lines, 3 lines crossed with 1 line, 4 lines",
+        "intersections": { "hundreds": 2, "tens": 11, "ones": 12 },
+        "carry": { "tens": 1, "ones": 2 },
+        "result": 322
+      }
+    },
+    "algorithm": "For each digit pair, multiply by position value and sum intersections",
+    "advantages": ["Visual representation", "Reduces errors", "Works for any size numbers"]
+  },
+  "abacus": {
+    "description": "Ancient calculating tool using beads on rods",
+    "structure": {
+      "heaven_beads": { "value": 5, "position": "top" },
+      "earth_beads": { "value": 1, "position": "bottom" }
+    },
+    "operations": {
+      "addition": "Move beads up to add value",
+      "subtraction": "Move beads down to subtract value",
+      "multiplication": "Repeated addition with place value shifts",
+      "division": "Repeated subtraction with quotient tracking"
+    },
+    "examples": {
+      "7": { "heaven": 1, "earth": 2, "total": "5+2=7" },
+      "10": { "tens": { "heaven": 0, "earth": 1 }, "ones": { "heaven": 0, "earth": 0 } },
+      "23": { "tens": { "heaven": 0, "earth": 2 }, "ones": { "heaven": 0, "earth": 3 } },
+      "58": { "tens": { "heaven": 1, "earth": 0 }, "ones": { "heaven": 1, "earth": 3 } }
+    },
+    "mental_techniques": {
+      "visualization": "See bead positions in mind",
+      "finger_calculation": "Use fingers to simulate bead movements",
+      "speed_methods": "Complement addition, simultaneous operations"
+    }
+  },
+  "krystal_geometry": {
+    "triangle": {
+      "sides": 3,
+      "angles": 3,
+      "angle_sum": 180,
+      "area": "0.5 * base * height",
+      "perimeter": "side1 + side2 + side3",
+      "types": ["equilateral", "isosceles", "scalene"]
+    },
+    "square": {
+      "sides": 4,
+      "angles": 4,
+      "angle_sum": 360,
+      "area": "side^2",
+      "perimeter": "4 * side",
+      "diagonal": "side * sqrt(2)"
+    },
+    "pentagon": {
+      "sides": 5,
+      "angles": 5,
+      "angle_sum": 540,
+      "interior_angle": 108,
+      "area": "0.25 * sqrt(25 + 10*sqrt(5)) * side^2",
+      "golden_ratio": 1.618
+    },
+    "hexagon": {
+      "sides": 6,
+      "angles": 6,
+      "angle_sum": 720,
+      "interior_angle": 120,
+      "area": "1.5 * sqrt(3) * side^2",
+      "tessellation": true
+    },
+    "circle": {
+      "radius": "r",
+      "diameter": "2r",
+      "circumference": "2 * pi * r",
+      "area": "pi * r^2",
+      "pi": 3.14159265359
+    },
+    "sacred_geometry": {
+      "flower_of_life": "19 overlapping circles in hexagonal pattern",
+      "golden_spiral": "Based on golden ratio 1.618",
+      "platonic_solids": ["tetrahedron", "cube", "octahedron", "dodecahedron", "icosahedron"]
+    }
+  },
+  "mental_math": {
+    "strategies": [
+      "Break numbers into friendly parts (25 + 17 = 20 + 20 + 2)",
+      "Use benchmark numbers (99 = 100 - 1)",
+      "Visualize problems using number lines or grids",
+      "Apply the distributive property (7 × 23 = 7 × 20 + 7 × 3)",
+      "Use finger multiplication for 6-10 times tables",
+      "Round and adjust (47 + 29 = 50 + 30 - 4 = 76)",
+      "Double and halve (16 × 25 = 8 × 50 = 400)"
+    ],
+    "finger_multiplication": {
+      "description": "Use fingers for 6-10 times tables",
+      "method": "Assign values 6-10 to fingers, touch multiplied fingers, count",
+      "example": "7 × 8: touch 7th and 8th fingers, count tens and multiply remaining"
+    },
+    "chinese_finger_method": {
+      "description": "Ancient finger calculation system",
+      "left_hand": "Units 1-5",
+      "right_hand": "Tens 10-50",
+      "both_hands": "Can represent numbers up to 99"
+    },
+    "vedic_math": {
+      "sutras": ["All from 9 and last from 10", "By one more than the one before"],
+      "techniques": ["Vertically and crosswise", "Base method", "Digit sum method"]
+    }
+  },
+  "calculus": {
+    "derivative": {
+      "definition": "Rate of change or slope of a function",
+      "notation": ["dy/dx", "f'(x)", "d/dx"],
+      "basic_rules": {
+        "power_rule": "d/dx x^n = n*x^(n-1)",
+        "constant_rule": "d/dx c = 0",
+        "sum_rule": "d/dx (f+g) = f' + g'"
+      },
+      "examples": {
+        "x^2": "2x",
+        "x^3": "3x^2",
+        "5x": "5",
+        "sin(x)": "cos(x)"
+      }
+    },
+    "integral": {
+      "definition": "Area under curve or antiderivative",
+      "notation": ["∫ f(x) dx", "F(x) + C"],
+      "basic_rules": {
+        "power_rule": "∫ x^n dx = x^(n+1)/(n+1) + C",
+        "constant_rule": "∫ c dx = cx + C",
+        "sum_rule": "∫ (f+g) dx = ∫f dx + ∫g dx"
+      },
+      "examples": {
+        "x": "x^2/2 + C",
+        "x^2": "x^3/3 + C",
+        "1": "x + C",
+        "cos(x)": "sin(x) + C"
+      }
+    },
+    "limits": {
+      "definition": "Value a function approaches as input approaches a point",
+      "notation": "lim(x→a) f(x) = L",
+      "types": ["finite limits", "infinite limits", "limits at infinity"]
+    }
+  },
+  "calculator": {
+    "operations": ["add", "subtract", "multiply", "divide", "power", "root", "factorial"],
+    "order_of_operations": ["Parentheses", "Exponents", "Multiplication/Division", "Addition/Subtraction"],
+    "algorithm": "Parse expression, apply PEMDAS, evaluate left to right within same precedence",
+    "advanced_functions": {
+      "trigonometric": ["sin", "cos", "tan", "asin", "acos", "atan"],
+      "logarithmic": ["log", "ln", "log10"],
+      "statistical": ["mean", "median", "mode", "standard_deviation"]
+    },
+    "memory_functions": ["store", "recall", "clear", "add_to_memory"],
+    "number_systems": {
+      "binary": "base 2",
+      "octal": "base 8",
+      "decimal": "base 10",
+      "hexadecimal": "base 16"
+    },
+    "basic_calculator_usage": {
+      "addition_example": "To calculate 10 + 10: press 1, 0, +, 1, 0, = to get 20",
+      "multiplication_example": "To calculate 10 × 10: press 1, 0, ×, 1, 0, = to get 100",
+      "common_calculations": {
+        "10_plus_10": "10 + 10 = 20",
+        "10_times_10": "10 × 10 = 100",
+        "100_divided_by_10": "100 ÷ 10 = 10",
+        "20_minus_10": "20 - 10 = 10"
+      }
+    }
+  },
+  "advanced_patterns": {
+    "fibonacci": {
+      "sequence": [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377],
+      "formula": "F(n) = F(n-1) + F(n-2)",
+      "golden_ratio": "F(n+1)/F(n) approaches 1.618",
+      "nature_examples": ["flower petals", "shell spirals", "tree branches"]
+    },
+    "prime_numbers": {
+      "definition": "Numbers divisible only by 1 and themselves",
+      "first_25": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97],
+      "sieve_of_eratosthenes": "Ancient algorithm to find primes",
+      "applications": ["cryptography", "computer science", "number theory"]
+    },
+    "pascal_triangle": {
+      "row_0": [1],
+      "row_1": [1, 1],
+      "row_2": [1, 2, 1],
+      "row_3": [1, 3, 3, 1],
+      "row_4": [1, 4, 6, 4, 1],
+      "row_5": [1, 5, 10, 10, 5, 1],
+      "properties": ["binomial coefficients", "sum of row = 2^n", "fibonacci in diagonals"]
+    }
+  },
+  "measurement_systems": {
+    "metric": {
+      "length": { "mm": 0.001, "cm": 0.01, "m": 1, "km": 1000 },
+      "mass": { "mg": 0.001, "g": 1, "kg": 1000 },
+      "volume": { "ml": 0.001, "l": 1 }
+    },
+    "imperial": {
+      "length": { "inch": 1, "foot": 12, "yard": 36, "mile": 63360 },
+      "mass": { "ounce": 1, "pound": 16, "ton": 32000 },
+      "volume": { "fluid_ounce": 1, "cup": 8, "pint": 16, "quart": 32, "gallon": 128 }
+    },
+    "conversions": {
+      "inch_to_cm": 2.54,
+      "foot_to_m": 0.3048,
+      "pound_to_kg": 0.453592,
+      "fahrenheit_to_celsius": "(F-32)*5/9"
+    }
+  },
+  "common_math_facts": {
+    "multiplication_facts": {
+      "10_times_10": "10 × 10 = 100",
+      "5_times_5": "5 × 5 = 25",
+      "12_times_12": "12 × 12 = 144",
+      "any_number_times_0": "Any number × 0 = 0",
+      "any_number_times_1": "Any number × 1 = that number",
+      "square_numbers": "1²=1, 2²=4, 3²=9, 4²=16, 5²=25, 6²=36, 7²=49, 8²=64, 9²=81, 10²=100, 11²=121, 12²=144"
+    },
+    "division_facts": {
+      "100_divided_by_10": "100 ÷ 10 = 10",
+      "144_divided_by_12": "144 ÷ 12 = 12",
+      "any_number_divided_by_1": "Any number ÷ 1 = that number",
+      "any_number_divided_by_itself": "Any number ÷ itself = 1"
+    },
+    "addition_facts": {
+      "10_plus_10": "10 + 10 = 20",
+      "doubles": "1+1=2, 2+2=4, 3+3=6, 4+4=8, 5+5=10, 6+6=12, 7+7=14, 8+8=16, 9+9=18, 10+10=20"
+    },
+    "subtraction_facts": {
+      "20_minus_10": "20 - 10 = 10",
+      "100_minus_10": "100 - 10 = 90",
+      "any_number_minus_0": "Any number - 0 = that number",
+      "any_number_minus_itself": "Any number - itself = 0"
+    }
+  },
+  "problem_solving_instructions": {
+    "step_by_step_process": [
+      "1. Read the problem carefully and identify what is being asked",
+      "2. Identify the numbers and operation needed (+, -, ×, ÷)",
+      "3. Choose the appropriate method from calculation_methods",
+      "4. Work through the calculation step by step",
+      "5. Check your answer using a different method or estimation",
+      "6. Verify the answer makes sense in context"
+    ],
+    "when_to_use_each_method": {
+      "times_tables": "For basic multiplication facts (1×1 through 12×12)",
+      "chinese_multiplication": "For visual learners or complex multiplication",
+      "long_multiplication": "For larger numbers that don't fit in times tables",
+      "mental_math": "For quick calculations and estimation",
+      "calculator": "For complex calculations or verification"
+    },
+    "error_checking": [
+      "Estimate the answer before calculating",
+      "Use inverse operations to check (if 10×10=100, then 100÷10=10)",
+      "Try a different method to verify",
+      "Check if the answer is reasonable"
+    ]
+  },
+  "number_system": {
+    "digits": {
+      "0": { "word": "zero", "value": 0, "meaning": "nothing, no amount" },
+      "1": { "word": "one", "value": 1, "meaning": "single unit" },
+      "2": { "word": "two", "value": 2, "meaning": "pair, couple" },
+      "3": { "word": "three", "value": 3, "meaning": "trio, triple" },
+      "4": { "word": "four", "value": 4, "meaning": "quartet" },
+      "5": { "word": "five", "value": 5, "meaning": "quintet" },
+      "6": { "word": "six", "value": 6, "meaning": "half dozen" },
+      "7": { "word": "seven", "value": 7, "meaning": "lucky number" },
+      "8": { "word": "eight", "value": 8, "meaning": "octet" },
+      "9": { "word": "nine", "value": 9, "meaning": "highest single digit" }
+    },
+    "word_to_number": {
+      "zero": 0,
+      "one": 1,
+      "two": 2,
+      "three": 3,
+      "four": 4,
+      "five": 5,
+      "six": 6,
+      "seven": 7,
+      "eight": 8,
+      "nine": 9,
+      "ten": 10,
+      "eleven": 11,
+      "twelve": 12,
+      "thirteen": 13,
+      "fourteen": 14,
+      "fifteen": 15,
+      "sixteen": 16,
+      "seventeen": 17,
+      "eighteen": 18,
+      "nineteen": 19,
+      "twenty": 20
+    },
+    "number_to_word": {
+      "0": "zero",
+      "1": "one",
+      "2": "two",
+      "3": "three",
+      "4": "four",
+      "5": "five",
+      "6": "six",
+      "7": "seven",
+      "8": "eight",
+      "9": "nine",
+      "10": "ten",
+      "11": "eleven",
+      "12": "twelve",
+      "13": "thirteen",
+      "14": "fourteen",
+      "15": "fifteen",
+      "16": "sixteen",
+      "17": "seventeen",
+      "18": "eighteen",
+      "19": "nineteen",
+      "20": "twenty"
+    }
+  },
+  "mathematical_symbols": {
+    "+": {
+      "name": "plus",
+      "operation": "addition",
+      "meaning": "add numbers together",
+      "synonyms": ["add", "plus", "sum", "total", "combine", "increase by", "more than"],
+      "examples": ["2 + 2 = 4", "3 plus 1 equals 4", "sum of 5 and 3 is 8"],
+      "phrases": ["add {a} to {b}", "sum of {a} and {b}", "{a} plus {b}", "{a} increased by {b}"]
+    },
+    "-": {
+      "name": "minus",
+      "operation": "subtraction",
+      "meaning": "take away, find difference",
+      "synonyms": ["subtract", "minus", "take away", "difference", "less", "decrease by", "remove"],
+      "examples": ["5 - 2 = 3", "7 minus 3 equals 4", "difference between 10 and 6 is 4"],
+      "phrases": [
+        "subtract {b} from {a}",
+        "{a} minus {b}",
+        "difference between {a} and {b}",
+        "how many left if {b} taken from {a}"
+      ]
+    },
+    "×": {
+      "name": "times",
+      "operation": "multiplication",
+      "meaning": "multiply, repeated addition",
+      "synonyms": ["multiply", "times", "product", "of", "multiplied by"],
+      "examples": ["3 × 4 = 12", "2 times 5 equals 10", "product of 6 and 7 is 42"],
+      "phrases": ["{a} times {b}", "{a} multiplied by {b}", "product of {a} and {b}", "{a} × {b}"]
+    },
+    "x": {
+      "name": "times",
+      "operation": "multiplication",
+      "meaning": "multiply, same as ×",
+      "synonyms": ["multiply", "times", "product", "of", "multiplied by"],
+      "examples": ["3 x 4 = 12", "2x5=10", "6x7=42"],
+      "phrases": ["{a}x{b}", "{a} x {b}", "{a} times {b}"]
+    },
+    "*": {
+      "name": "times",
+      "operation": "multiplication",
+      "meaning": "multiply, computer symbol",
+      "synonyms": ["multiply", "times", "product"],
+      "examples": ["3 * 4 = 12", "2*5=10"],
+      "phrases": ["{a}*{b}", "{a} * {b}"]
+    },
+    "÷": {
+      "name": "divided by",
+      "operation": "division",
+      "meaning": "split into equal parts",
+      "synonyms": ["divide", "divided by", "quotient", "split", "share equally"],
+      "examples": ["12 ÷ 3 = 4", "20 divided by 5 equals 4", "quotient of 15 and 3 is 5"],
+      "phrases": ["{a} divided by {b}", "{a} ÷ {b}", "quotient of {a} and {b}", "how many {b}s in {a}"]
+    },
+    "/": {
+      "name": "divided by",
+      "operation": "division",
+      "meaning": "split into equal parts, same as ÷",
+      "synonyms": ["divide", "divided by", "quotient", "over"],
+      "examples": ["12 / 3 = 4", "20/5=4", "15/3=5"],
+      "phrases": ["{a}/{b}", "{a} / {b}", "{a} over {b}"]
+    },
+    "=": {
+      "name": "equals",
+      "operation": "equality",
+      "meaning": "is the same as, results in",
+      "synonyms": ["equals", "is", "makes", "results in", "the same as", "gives", "answer is"],
+      "examples": ["2 + 2 = 4", "3 times 3 equals 9", "5 minus 1 is 4"],
+      "phrases": ["{a} equals {b}", "{a} is {b}", "{a} makes {b}", "answer is {b}"]
+    }
+  },
+  "mathematical_vocabulary": {
+    "sum": "The result of adding numbers together",
+    "total": "The final amount when numbers are combined",
+    "difference": "The result of subtracting one number from another",
+    "product": "The result of multiplying numbers together",
+    "quotient": "The result of dividing one number by another",
+    "answer": "The solution to a mathematical problem",
+    "result": "The outcome of a calculation",
+    "solution": "The answer to a problem",
+    "calculate": "To work out a mathematical problem",
+    "equation": "A mathematical statement showing two things are equal",
+    "expression": "A mathematical phrase with numbers and operations",
+    "operation": "A mathematical action like +, -, ×, ÷"
+  },
+  "expression_patterns": {
+    "addition_phrases": [
+      "What is {a} + {b}?",
+      "What is {a} plus {b}?",
+      "Add {a} and {b}",
+      "Sum of {a} and {b}",
+      "{a} plus {b} equals what?",
+      "What is the sum of {a} and {b}?",
+      "{a} + {b} =",
+      "{a}+{b}=",
+      "If you have {a} and add {b}, how many do you have?",
+      "{a} increased by {b}"
+    ],
+    "subtraction_phrases": [
+      "What is {a} - {b}?",
+      "What is {a} minus {b}?",
+      "Subtract {b} from {a}",
+      "Difference between {a} and {b}",
+      "{a} minus {b} equals what?",
+      "What is the difference between {a} and {b}?",
+      "{a} - {b} =",
+      "{a}-{b}=",
+      "If you have {a} and take away {b}, how many are left?",
+      "How many are left if {b} is taken from {a}?",
+      "{a} decreased by {b}"
+    ],
+    "multiplication_phrases": [
+      "What is {a} × {b}?",
+      "What is {a} times {b}?",
+      "What is {a} x {b}?",
+      "Multiply {a} by {b}",
+      "Product of {a} and {b}",
+      "{a} times {b} equals what?",
+      "What is the product of {a} and {b}?",
+      "{a} × {b} =",
+      "{a}×{b}=",
+      "{a} x {b} =",
+      "{a}x{b}=",
+      "{a} * {b} =",
+      "{a}*{b}=",
+      "{a} multiplied by {b}"
+    ],
+    "division_phrases": [
+      "What is {a} ÷ {b}?",
+      "What is {a} divided by {b}?",
+      "What is {a} / {b}?",
+      "Divide {a} by {b}",
+      "Quotient of {a} and {b}",
+      "{a} divided by {b} equals what?",
+      "What is the quotient of {a} and {b}?",
+      "{a} ÷ {b} =",
+      "{a}÷{b}=",
+      "{a} / {b} =",
+      "{a}/{b}=",
+      "How many times does {b} go into {a}?",
+      "How many {b}s are in {a}?"
+    ]
+  },
+  "basic_arithmetic_examples": {
+    "addition_examples": {
+      "1+1=2": "One plus one equals two",
+      "2+2=4": "Two plus two equals four",
+      "3+3=6": "Three plus three equals six",
+      "1+2=3": "One plus two equals three",
+      "2+3=5": "Two plus three equals five",
+      "4+5=9": "Four plus five equals nine",
+      "10+10=20": "Ten plus ten equals twenty"
+    },
+    "subtraction_examples": {
+      "2-1=1": "Two minus one equals one",
+      "4-2=2": "Four minus two equals two",
+      "5-3=2": "Five minus three equals two",
+      "10-5=5": "Ten minus five equals five",
+      "8-4=4": "Eight minus four equals four",
+      "20-10=10": "Twenty minus ten equals ten"
+    },
+    "multiplication_examples": {
+      "2×2=4": "Two times two equals four",
+      "3×3=9": "Three times three equals nine",
+      "2×3=6": "Two times three equals six",
+      "4×5=20": "Four times five equals twenty",
+      "10×10=100": "Ten times ten equals one hundred",
+      "1×5=5": "One times five equals five"
+    },
+    "division_examples": {
+      "4÷2=2": "Four divided by two equals two",
+      "6÷3=2": "Six divided by three equals two",
+      "10÷5=2": "Ten divided by five equals two",
+      "100÷10=10": "One hundred divided by ten equals ten",
+      "8÷4=2": "Eight divided by four equals two"
+    }
+  },
+  "arithmetic_algorithms": {
+    "addition_algorithm": {
+      "description": "To add any numbers together",
+      "steps": [
+        "1. Start with the first number",
+        "2. Add the second number to it",
+        "3. If there are more numbers, add each one to the running total",
+        "4. The final total is your answer"
+      ],
+      "example": "To calculate 5 + 3: Start with 5, add 3 to get 8. Answer: 8"
+    },
+    "subtraction_algorithm": {
+      "description": "To subtract one number from another",
+      "steps": [
+        "1. Start with the first (larger) number",
+        "2. Take away the second number",
+        "3. What remains is your answer"
+      ],
+      "example": "To calculate 8 - 3: Start with 8, take away 3 to get 5. Answer: 5"
+    },
+    "multiplication_algorithm": {
+      "description": "To multiply numbers (repeated addition)",
+      "steps": [
+        "1. Take the first number",
+        "2. Add it to itself the number of times shown by the second number",
+        "3. Or use times tables for quick lookup"
+      ],
+      "example": "To calculate 4 × 3: Add 4 three times: 4 + 4 + 4 = 12. Answer: 12"
+    },
+    "division_algorithm": {
+      "description": "To divide one number by another",
+      "steps": [
+        "1. Ask: How many times does the second number fit into the first?",
+        "2. Count how many complete groups you can make",
+        "3. That count is your answer"
+      ],
+      "example": "To calculate 12 ÷ 3: How many 3s fit in 12? 3+3+3+3=12, so 4 times. Answer: 4"
+    }
+  },
+  "problem_recognition": {
+    "math_indicators": [
+      "Contains numbers (1, 2, 3, etc.)",
+      "Contains math symbols (+, -, ×, ÷, =)",
+      "Contains math words (plus, minus, times, divided)",
+      "Contains calculation phrases (sum of, product of, difference between)",
+      "Asks 'what is' followed by numbers and operations",
+      "Contains equals sign or asks for an answer"
+    ],
+    "instruction_for_ai": [
+      "If you see numbers with math symbols or words, treat it as a math problem",
+      "Recognize that 'x' between numbers means multiplication",
+      "Understand that '=' means the user wants the answer",
+      "When you see math patterns, use the appropriate algorithm",
+      "Look up answers in times tables when possible",
+      "Show your working step by step"
+    ]
+  },
+  "math_expression_recognition": {
+    "multiplication_patterns": [
+      "{number}x{number}",
+      "{number} x {number}",
+      "{number}×{number}",
+      "{number} × {number}",
+      "{number}*{number}",
+      "{number} * {number}",
+      "{number} times {number}",
+      "{number} multiplied by {number}",
+      "multiply {number} by {number}",
+      "what is {number} times {number}",
+      "product of {number} and {number}"
+    ],
+    "addition_patterns": [
+      "{number}+{number}",
+      "{number} + {number}",
+      "{number} plus {number}",
+      "{number} add {number}",
+      "add {number} and {number}",
+      "sum of {number} and {number}",
+      "what is {number} plus {number}"
+    ],
+    "subtraction_patterns": [
+      "{number}-{number}",
+      "{number} - {number}",
+      "{number} minus {number}",
+      "subtract {number} from {number}",
+      "difference between {number} and {number}",
+      "what is {number} minus {number}"
+    ],
+    "division_patterns": [
+      "{number}÷{number}",
+      "{number} ÷ {number}",
+      "{number}/{number}",
+      "{number} / {number}",
+      "{number} divided by {number}",
+      "divide {number} by {number}",
+      "what is {number} divided by {number}"
+    ]
+  },
+  "calculation_instructions": {
+    "when_to_calculate": [
+      "If input contains numbers with math symbols (x, ×, *, +, -, ÷, /), perform calculation",
+      "If input asks 'what is' followed by numbers and operations, calculate the answer",
+      "If input contains 'times', 'plus', 'minus', 'divided by' between numbers, calculate",
+      "If input ends with '=' or '?', provide the mathematical result"
+    ],
+    "how_to_calculate": {
+      "multiplication": {
+        "method": "Use times tables for numbers 1-12, or break down larger numbers",
+        "examples": {
+          "2x2": "Look up 2 in multiplication table, position 2 = 4",
+          "13x44": "Break down: 13×44 = 13×40 + 13×4 = 520 + 52 = 572",
+          "4x5": "Look up 4 in multiplication table, position 5 = 20"
+        }
+      },
+      "addition": {
+        "method": "Add numbers together step by step",
+        "examples": {
+          "2+2": "Start with 2, add 2 = 4",
+          "5+7": "Start with 5, add 7 = 12"
+        }
+      },
+      "subtraction": {
+        "method": "Take away second number from first",
+        "examples": {
+          "8-3": "Start with 8, take away 3 = 5",
+          "15-10": "Start with 15, take away 10 = 5"
+        }
+      },
+      "division": {
+        "method": "How many times does second number fit into first",
+        "examples": {
+          "12÷3": "How many 3s in 12? 3+3+3+3=12, so 4 times",
+          "20÷5": "How many 5s in 20? 5+5+5+5=20, so 4 times"
+        }
+      }
+    }
+  },
+  "specific_calculations": {
+    "common_multiplications": {
+      "2x2": 4,
+      "3x3": 9,
+      "4x4": 16,
+      "5x5": 25,
+      "4x5": 20,
+      "5x4": 20,
+      "6x7": 42,
+      "7x6": 42,
+      "8x9": 72,
+      "9x8": 72,
+      "10x10": 100,
+      "11x11": 121,
+      "12x12": 144,
+      "13x44": 572
+    },
+    "common_additions": {
+      "2+2": 4,
+      "3+3": 6,
+      "4+4": 8,
+      "5+5": 10,
+      "1+1": 2,
+      "1+2": 3,
+      "2+3": 5,
+      "3+4": 7,
+      "4+5": 9,
+      "5+6": 11
+    },
+    "common_subtractions": {
+      "4-2": 2,
+      "5-3": 2,
+      "8-4": 4,
+      "10-5": 5,
+      "9-3": 6,
+      "7-2": 5
+    },
+    "common_divisions": {
+      "4÷2": 2,
+      "6÷3": 2,
+      "8÷4": 2,
+      "10÷5": 2,
+      "12÷3": 4,
+      "15÷5": 3,
+      "20÷4": 5
+    }
+  },
+  "response_templates": {
+    "multiplication_response": "To calculate {a} × {b}: The answer is {result}",
+    "addition_response": "To calculate {a} + {b}: The answer is {result}",
+    "subtraction_response": "To calculate {a} - {b}: The answer is {result}",
+    "division_response": "To calculate {a} ÷ {b}: The answer is {result}",
+    "step_by_step": "Step 1: Identify the operation. Step 2: Apply the calculation method. Step 3: Provide the answer."
+  },
+  "ai_instructions": {
+    "primary_directive": "When user input contains mathematical expressions, always attempt to solve them",
+    "recognition_rules": [
+      "Numbers followed by 'x', '×', '*' mean multiplication",
+      "Numbers followed by '+' mean addition",
+      "Numbers followed by '-' mean subtraction",
+      "Numbers followed by '÷', '/' mean division",
+      "Words like 'times', 'plus', 'minus', 'divided by' indicate operations",
+      "Questions starting with 'what is' followed by numbers are math problems"
+    ],
+    "calculation_priority": [
+      "1. Check if expression matches common_calculations for instant answer",
+      "2. Use times tables for multiplication up to 12x12",
+      "3. Break down larger problems using mental math techniques",
+      "4. Always provide the numerical answer",
+      "5. Show working if helpful"
+    ],
+    "response_format": "Always give the numerical answer clearly, e.g., 'The answer is 4' or '2x2 = 4'"
+  },
+  "expanded_vocabulary": {
+    "operation_synonyms": {
+      "addition": [
+        "add",
+        "plus",
+        "sum",
+        "total",
+        "combine",
+        "increased by",
+        "more than",
+        "altogether",
+        "in total",
+        "added to"
+      ],
+      "subtraction": [
+        "subtract",
+        "minus",
+        "take away",
+        "difference",
+        "decreased by",
+        "less than",
+        "remove",
+        "left",
+        "remaining",
+        "reduced by"
+      ],
+      "multiplication": [
+        "multiply",
+        "times",
+        "product",
+        "of",
+        "multiplied by",
+        "repeated addition",
+        "groups of",
+        "lots of",
+        "sets of"
+      ],
+      "division": [
+        "divide",
+        "divided by",
+        "quotient",
+        "split",
+        "share equally",
+        "how many groups",
+        "per",
+        "each",
+        "distributed among"
+      ],
+      "equals": [
+        "equals",
+        "is",
+        "makes",
+        "results in",
+        "the same as",
+        "gives",
+        "answer is",
+        "comes to",
+        "totals",
+        "amounts to"
+      ]
+    },
+    "number_synonyms": {
+      "dozen": 12,
+      "half_dozen": 6,
+      "score": 20,
+      "pair": 2,
+      "couple": 2,
+      "trio": 3,
+      "quartet": 4,
+      "quintet": 5,
+      "sextet": 6,
+      "septet": 7,
+      "octet": 8,
+      "nonet": 9,
+      "decade": 10,
+      "century": 100,
+      "millennium": 1000
+    },
+    "mathematical_terms": {
+      "squared": "multiplied by itself (e.g., 5 squared = 5 × 5 = 25)",
+      "cubed": "multiplied by itself twice (e.g., 3 cubed = 3 × 3 × 3 = 27)",
+      "to_the_power_of": "raised to an exponent (e.g., 2 to the power of 3 = 2³ = 8)",
+      "percent": "out of 100 (e.g., 25% = 25/100 = 0.25)",
+      "ratio": "comparison of two quantities (e.g., 3:2 ratio)",
+      "proportion": "equality of two ratios",
+      "average": "sum of values divided by count of values",
+      "median": "middle value when numbers are arranged in order",
+      "mode": "most frequently occurring value",
+      "remainder": "what's left after division"
+    }
+  },
+  "advanced_problem_solving": {
+    "strategies": [
+      "Identify the operation(s) needed by looking for key words",
+      "Translate word problems into mathematical equations",
+      "Use the correct order of operations (PEMDAS/BODMAS)",
+      "Break complex problems into smaller steps",
+      "Check your answer by working backwards or using estimation",
+      "Ensure units are consistent and included in the final answer"
+    ],
+    "word_problem_translation": {
+      "addition_indicators": ["total", "sum", "altogether", "combined", "increased by", "more than"],
+      "subtraction_indicators": ["difference", "less than", "decreased by", "take away", "how many left", "remaining"],
+      "multiplication_indicators": ["product", "times", "of", "groups of", "repeated", "each"],
+      "division_indicators": ["quotient", "divided by", "per", "each", "shared equally", "how many groups"]
+    },
+    "examples": {
+      "addition_word_problem": "What is the sum of 5 and 3? → 5 + 3 = 8",
+      "subtraction_word_problem": "Subtract 7 from 12 → 12 - 7 = 5",
+      "multiplication_word_problem": "Find the product of 4 and 6 → 4 × 6 = 24",
+      "division_word_problem": "What is 10 divided by 2? → 10 ÷ 2 = 5",
+      "percentage_problem": "Calculate 25% of 80 → (25/100) × 80 = 20",
+      "mixed_operations": "What is 2 + 3 × 4? → 2 + (3 × 4) = 2 + 12 = 14"
+    }
+  },
+  "fraction_operations": {
+    "basic_fractions": {
+      "definition": "A fraction represents part of a whole, written as numerator/denominator",
+      "examples": {
+        "1/2": "one half = 0.5",
+        "1/4": "one quarter = 0.25",
+        "3/4": "three quarters = 0.75"
+      }
+    },
+    "operations": {
+      "addition": {
+        "same_denominator": "Add numerators, keep denominator: 1/4 + 2/4 = 3/4",
+        "different_denominator": "Find common denominator first: 1/2 + 1/3 = 3/6 + 2/6 = 5/6"
+      },
+      "subtraction": {
+        "same_denominator": "Subtract numerators, keep denominator: 3/4 - 1/4 = 2/4 = 1/2",
+        "different_denominator": "Find common denominator first: 2/3 - 1/6 = 4/6 - 1/6 = 3/6 = 1/2"
+      },
+      "multiplication": "Multiply numerators and denominators: 1/2 × 2/3 = 2/6 = 1/3",
+      "division": "Multiply by reciprocal: 1/2 ÷ 1/4 = 1/2 × 4/1 = 4/2 = 2"
+    }
+  },
+  "percentage_operations": {
+    "definition": "Percentage means 'per hundred' or 'out of 100'",
+    "conversion": {
+      "percent_to_decimal": "Divide by 100: 25% = 25/100 = 0.25",
+      "decimal_to_percent": "Multiply by 100: 0.75 = 75%",
+      "fraction_to_percent": "Convert to decimal first: 1/4 = 0.25 = 25%"
+    },
+    "calculations": {
+      "find_percentage": "To find 20% of 50: (20/100) × 50 = 10",
+      "find_percentage_increase": "From 40 to 50: (50-40)/40 × 100 = 25% increase",
+      "find_percentage_decrease": "From 50 to 40: (50-40)/50 × 100 = 20% decrease"
+    },
+    "examples": {
+      "10_percent_of_100": "10% of 100 = (10/100) × 100 = 10",
+      "25_percent_of_80": "25% of 80 = (25/100) × 80 = 20",
+      "50_percent_of_60": "50% of 60 = (50/100) × 60 = 30"
+    },
+    "examples": {
+      "10_percent_of_100": "10% of 100 = (10/100) × 100 = 10",
+      "25_percent_of_80": "25% of 80 = (25/100) × 80 = 20",
+      "50_percent_of_60": "50% of 60 = (50/100) × 60 = 30"
+    }
+  },
+  "units_of_measurement": {
+    "length": {
+      "metric": {
+        "millimeter": { "abbreviation": "mm", "value": 0.001 },
+        "centimeter": { "abbreviation": "cm", "value": 0.01 },
+        "meter": { "abbreviation": "m", "value": 1 },
+        "kilometer": { "abbreviation": "km", "value": 1000 }
+      },
+      "imperial": {
+        "inch": { "abbreviation": "in", "value": 1 },
+        "foot": { "abbreviation": "ft", "value": 12 },
+        "yard": { "abbreviation": "yd", "value": 36 },
+        "mile": { "abbreviation": "mi", "value": 63360 }
+      }
+    },
+    "weight": {
+      "metric": {
+        "milligram": { "abbreviation": "mg", "value": 0.001 },
+        "gram": { "abbreviation": "g", "value": 1 },
+        "kilogram": { "abbreviation": "kg", "value": 1000 }
+      },
+      "imperial": {
+        "ounce": { "abbreviation": "oz", "value": 1 },
+        "pound": { "abbreviation": "lb", "value": 16 },
+        "ton": { "abbreviation": "t", "value": 32000 }
+      }
+    },
+    "volume": {
+      "metric": {
+        "milliliter": { "abbreviation": "ml", "value": 0.001 },
+        "liter": { "abbreviation": "l", "value": 1 }
+      },
+      "imperial": {
+        "fluid_ounce": { "abbreviation": "fl oz", "value": 1 },
+        "cup": { "abbreviation": "c", "value": 8 },
+        "pint": { "abbreviation": "pt", "value": 16 },
+        "quart": { "abbreviation": "qt", "value": 32 },
+        "gallon": { "abbreviation": "gal", "value": 128 }
+      }
+    },
+    "conversion_examples": [
+      "1 meter = 100 centimeters",
+      "1 kilometer = 1000 meters",
+      "1 kilogram = 1000 grams",
+      "1 liter = 1000 milliliters",
+      "1 foot = 12 inches",
+      "1 yard = 3 feet",
+      "1 pound = 16 ounces"
+    ]
+  },
+  "mixed_format_examples": {
+    "word_and_symbol_combinations": {
+      "addition": [
+        "What is 5 + 3?",
+        "Find the sum of 7 and 9",
+        "Add 12 to 8",
+        "What is 15 plus 25?",
+        "Calculate 100 + 50"
+      ],
+      "subtraction": [
+        "What is 10 - 4?",
+        "Subtract 6 from 15",
+        "Find the difference between 20 and 8",
+        "What is 50 minus 30?",
+        "Calculate 100 - 25"
+      ],
+      "multiplication": [
+        "What is 6 × 7?",
+        "Multiply 8 by 9",
+        "Find the product of 12 and 5",
+        "What is 4 times 15?",
+        "Calculate 25 × 4"
+      ],
+      "division": [
+        "What is 24 ÷ 6?",
+        "Divide 35 by 7",
+        "Find the quotient of 48 and 8",
+        "What is 100 divided by 10?",
+        "Calculate 72 ÷ 9"
+      ],
+      "percentages": [
+        "Calculate 10% of 50",
+        "What is 25% of 200?",
+        "Find 50% of 80",
+        "Calculate 75% of 120",
+        "What is 20% of 150?"
+      ]
+    },
+    "complex_problems": [
+      "If you have 12 apples and eat 3, how many are left? → 12 - 3 = 9",
+      "A box contains 6 rows of 8 cookies. How many cookies total? → 6 × 8 = 48",
+      "Share 24 candies equally among 4 children. How many each? → 24 ÷ 4 = 6",
+      "You buy 3 items costing $5 each. What's the total? → 3 × $5 = $15"
+    ]
+  },
+  "comprehensive_ai_instructions": {
+    "primary_directives": [
+      "When encountering a math problem, first identify the operation(s) required",
+      "If the problem is in words, translate it into a mathematical expression",
+      "Apply the correct order of operations (PEMDAS/BODMAS)",
+      "If the answer is not a whole number, express it as a decimal or fraction, as appropriate",
+      "If units of measurement are involved, include them in the answer",
+      "If unsure, ask for clarification or provide possible interpretations"
+    ],
+    "recognition_priorities": [
+      "1. Look for mathematical symbols (+, -, ×, ÷, =, %, etc.)",
+      "2. Identify mathematical vocabulary (sum, product, quotient, difference, etc.)",
+      "3. Recognize number patterns and sequences",
+      "4. Check for units of measurement",
+      "5. Identify question words that indicate mathematical operations"
+    ],
+    "calculation_approach": [
+      "1. Parse the expression to identify all numbers and operations",
+      "2. Check for pre-calculated answers in common_calculations",
+      "3. Use appropriate calculation method based on complexity",
+      "4. Apply order of operations if multiple operations present",
+      "5. Verify answer using estimation or inverse operations",
+      "6. Format response clearly with the numerical answer"
+    ],
+    "error_handling": [
+      "If expression is ambiguous, ask for clarification",
+      "If calculation seems unreasonable, double-check method",
+      "If units don't match, suggest conversion or clarification",
+      "If operation is unclear, provide possible interpretations"
+    ]
+  }
+}

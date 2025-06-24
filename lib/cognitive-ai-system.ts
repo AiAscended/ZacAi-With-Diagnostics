@@ -1,45 +1,15 @@
 import { BrowserStorageManager } from "./browser-storage-manager"
+import { EnhancedCognitiveSystem } from "./enhanced-cognitive-system"
 
-// Simple interface definitions to avoid circular imports
-interface ThinkingResult {
-  query: string
-  steps: any[]
-  finalAnswer: string
-  toolsUsed: string[]
-  confidence: number
-  processingTime: number
-}
-
-interface CognitiveResponse {
-  message: string
-  thinking: ThinkingResult
-  confidence: number
-  learningUpdate?: {
-    newWords: string[]
-    vocabularyProgress: any
-  }
-  timestamp: number
-}
-
-interface CognitiveStats {
-  vocabulary: any
-  thinking: any
-  webKnowledge: any
-  mathematics: any
-  overallProgress: {
-    totalInteractions: number
-    learningRate: number
-    confidenceLevel: number
-  }
-}
-
+// UPDATED COGNITIVE AI SYSTEM - FIXED STATS BUG
 export class CognitiveAISystem {
+  private enhancedCognitive = new EnhancedCognitiveSystem()
   private storageManager = new BrowserStorageManager()
-  private conversationHistory: any[] = []
+  private conversationHistory: ChatMessage[] = []
   private memory: Map<string, any> = new Map()
   private vocabulary: Map<string, string> = new Map()
-  private personalInfo: Map<string, any> = new Map()
-  private facts: Map<string, any> = new Map()
+  private personalInfo: Map<string, PersonalInfoEntry> = new Map()
+  private facts: Map<string, FactEntry> = new Map()
   private systemStatus = "idle"
   private isInitialized = false
 
@@ -50,10 +20,10 @@ export class CognitiveAISystem {
 
   public async sendMessage(userMessage: string): Promise<string> {
     const response = await this.processMessage(userMessage)
-    return response.message
+    return response.content
   }
 
-  public async processMessage(userMessage: string): Promise<CognitiveResponse> {
+  public async processMessage(userMessage: string): Promise<AIResponse> {
     if (!this.isInitialized) {
       await this.initialize()
     }
@@ -63,132 +33,31 @@ export class CognitiveAISystem {
     // Extract and store personal information FIRST
     this.extractAndStorePersonalInfo(userMessage)
 
-    // Simple response generation for now
-    const response: CognitiveResponse = {
-      message: this.generateSimpleResponse(userMessage),
-      thinking: {
-        query: userMessage,
-        steps: [
-          {
-            step: 1,
-            process: "Message Analysis",
-            reasoning: "Analyzing user input for keywords and intent",
-            toolsConsidered: ["vocabulary", "math", "web-knowledge"],
-            toolSelected: "vocabulary",
-            confidence: 0.8,
-          },
-        ],
-        finalAnswer: "Processing complete",
-        toolsUsed: ["vocabulary"],
-        confidence: 0.8,
-        processingTime: 100,
-      },
-      confidence: 0.8,
-      learningUpdate: {
-        newWords: this.extractNewWords(userMessage),
-        vocabularyProgress: this.getVocabularyProgress(),
-      },
-      timestamp: Date.now(),
+    // Use enhanced cognitive processing
+    const cognitiveResponse = await this.enhancedCognitive.processThought(
+      userMessage,
+      this.conversationHistory,
+      this.personalInfo,
+    )
+
+    const response: AIResponse = {
+      content: cognitiveResponse.content,
+      confidence: cognitiveResponse.confidence,
+      reasoning: cognitiveResponse.reasoning, // This now contains actual thoughts
     }
 
-    await this.saveConversation(userMessage, response.message)
+    await this.saveConversation(userMessage, response.content)
     return response
-  }
-
-  private generateSimpleResponse(userMessage: string): string {
-    const lowerMessage = userMessage.toLowerCase()
-
-    // Math detection
-    if (
-      lowerMessage.includes("calculate") ||
-      lowerMessage.includes("math") ||
-      /\d+\s*[+\-*/]\s*\d+/.test(lowerMessage)
-    ) {
-      const mathMatch = userMessage.match(/(\d+)\s*([+\-*/])\s*(\d+)/)
-      if (mathMatch) {
-        const [, a, op, b] = mathMatch
-        const num1 = Number.parseInt(a)
-        const num2 = Number.parseInt(b)
-        let result = 0
-        let operation = ""
-
-        switch (op) {
-          case "+":
-            result = num1 + num2
-            operation = "addition"
-            break
-          case "-":
-            result = num1 - num2
-            operation = "subtraction"
-            break
-          case "*":
-            result = num1 * num2
-            operation = "multiplication"
-            break
-          case "/":
-            result = num1 / num2
-            operation = "division"
-            break
-        }
-
-        return `I calculated ${num1} ${op} ${num2} = ${result}. I used my mathematical toolkit for this ${operation} problem.`
-      }
-    }
-
-    // Definition detection
-    if (lowerMessage.includes("what is") || lowerMessage.includes("define")) {
-      const word = lowerMessage.replace(/what is|define/g, "").trim()
-      return `I'm learning about "${word}". This would normally trigger my web knowledge engine to search for definitions and examples. I'm building my vocabulary one word at a time!`
-    }
-
-    // Personal info detection
-    if (lowerMessage.includes("my name is") || lowerMessage.includes("i am")) {
-      return `Thank you for sharing that information with me! I'll remember this in my personal memory system. I'm currently at the "${this.getVocabularyLevel()}" vocabulary level and learning new words from our conversation.`
-    }
-
-    // Default response
-    return `I understand you said: "${userMessage}". I'm an enhanced AI learning system starting with infant-level vocabulary (currently learning the alphabet and basic words). I have mathematical tools, web knowledge capabilities, and a thinking pipeline that helps me choose the right tools for each situation. What would you like to explore together?`
-  }
-
-  private extractNewWords(message: string): string[] {
-    const words = message.toLowerCase().split(/\s+/)
-    const newWords = []
-
-    for (const word of words) {
-      const cleanWord = word.replace(/[^\w]/g, "")
-      if (cleanWord.length > 3 && !this.vocabulary.has(cleanWord)) {
-        newWords.push(cleanWord)
-        this.vocabulary.set(cleanWord, "learned")
-      }
-    }
-
-    return newWords
-  }
-
-  private getVocabularyProgress() {
-    return {
-      currentLevel: this.getVocabularyLevel(),
-      masteredWords: this.vocabulary.size,
-      totalCoreWords: 432,
-      currentLevelProgress: Math.min((this.vocabulary.size / 432) * 100, 100),
-    }
-  }
-
-  private getVocabularyLevel(): string {
-    const wordCount = this.vocabulary.size
-    if (wordCount < 27) return "Infant (Learning Alphabet)"
-    if (wordCount < 77) return "Toddler (Basic Words)"
-    if (wordCount < 177) return "Child (Elementary)"
-    if (wordCount < 377) return "Teen (Intermediate)"
-    if (wordCount < 432) return "Adult (Advanced)"
-    return "Expert (Beyond Core)"
   }
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
 
     try {
-      console.log("🚀 Initializing Cognitive AI System...")
+      console.log("🚀 Initializing Cognitive AI System with Enhanced Engine...")
+
+      // Initialize enhanced cognitive system
+      await this.enhancedCognitive.initialize()
 
       await this.loadConversationHistory()
       await this.loadMemory()
@@ -197,7 +66,7 @@ export class CognitiveAISystem {
       this.systemStatus = "ready"
       this.isInitialized = true
 
-      console.log("✅ Cognitive AI System ready!")
+      console.log("✅ Enhanced Cognitive AI System ready!")
     } catch (error) {
       console.error("❌ Initialization failed:", error)
       this.systemStatus = "ready"
@@ -212,72 +81,36 @@ export class CognitiveAISystem {
         ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
         : 0
 
+    // FIXED: Only count personalInfo, not memory (which is empty anyway)
     const totalUserInfo = this.personalInfo.size
+
+    // Get enhanced cognitive data
+    const mathKnowledge = this.enhancedCognitive.getMathKnowledge()
+    const factDatabase = this.enhancedCognitive.getFactDatabase()
+
+    console.log("📊 FIXED Stats:", {
+      personalInfo: this.personalInfo.size,
+      memory: this.memory.size,
+      facts: factDatabase.size,
+      mathKnowledge: mathKnowledge.size,
+      totalUserInfo: totalUserInfo, // FIXED: No more double counting
+    })
 
     return {
       totalMessages: this.conversationHistory.length,
       vocabularySize: this.vocabulary.size,
-      memoryEntries: totalUserInfo,
+      memoryEntries: totalUserInfo, // FIXED: Only personalInfo count
       avgConfidence: Math.round(avgConfidence * 100) / 100,
       systemStatus: this.systemStatus,
-      mathFunctions: 144, // 12x12 times table
+      mathFunctions: mathKnowledge.size, // Now shows actual math knowledge
       seedProgress: 0,
       responseTime: 0,
+      // Enhanced data access
       vocabularyData: this.vocabulary,
       memoryData: this.memory,
       personalInfoData: this.personalInfo,
-      factsData: this.facts,
-      mathFunctionsData: new Map(),
-    }
-  }
-
-  public async getSystemStats(): Promise<CognitiveStats> {
-    const vocabularyStats = {
-      currentLevel: this.getVocabularyLevel(),
-      masteredWords: this.vocabulary.size,
-      totalCoreWords: 432,
-      currentLevelProgress: Math.min((this.vocabulary.size / 432) * 100, 100),
-      vocabularyAge: this.getVocabularyLevel(),
-      nextMilestone: this.vocabulary.size < 432 ? "Continue learning core vocabulary" : "All core vocabulary mastered!",
-      recentlyLearned: Array.from(this.vocabulary.keys()).slice(-5),
-    }
-
-    const thinkingStats = {
-      totalQueries: this.conversationHistory.length,
-      toolUsage: { vocabulary: this.conversationHistory.length },
-      averageProcessingTime: 100,
-      averageConfidence: 80,
-      personalMemorySize: this.personalInfo.size,
-      recentQueries: this.conversationHistory.slice(-5).map((m) => m.content || ""),
-    }
-
-    const webStats = {
-      cacheSize: 0,
-      searchHistory: 0,
-      recentSearches: [],
-    }
-
-    const mathStats = {
-      totalCalculations: 0,
-      operationBreakdown: {},
-      timesTableSize: 144,
-      constantsAvailable: 9,
-      recentCalculations: [],
-    }
-
-    const totalInteractions = this.conversationHistory.length
-    const learningRate = this.vocabulary.size / Math.max(totalInteractions, 1)
-
-    return {
-      vocabulary: vocabularyStats,
-      thinking: thinkingStats,
-      webKnowledge: webStats,
-      mathematics: mathStats,
-      overallProgress: {
-        totalInteractions,
-        learningRate: Math.round(learningRate * 100) / 100,
-        confidenceLevel: 80,
-      },
+      factsData: factDatabase, // Now shows actual facts from seed data
+      mathFunctionsData: mathKnowledge, // Now shows actual math knowledge
     }
   }
 
@@ -296,13 +129,49 @@ export class CognitiveAISystem {
         importance: 0.7,
         extract: (match: RegExpMatchArray) => `${match[1]} ${match[2]}`,
       },
+      {
+        pattern: /i (?:have a|am married to a|married a) (wife|husband|partner)/i,
+        key: "marital_status",
+        importance: 0.8,
+        extract: (match: RegExpMatchArray) => `married (${match[1]})`,
+      },
+      {
+        pattern: /(?:one is named|first one is|cat is named|dog is named) (\w+)/i,
+        key: "pet_name_1",
+        importance: 0.6,
+        extract: (match: RegExpMatchArray) => match[1],
+      },
+      {
+        pattern: /(?:the )?other (?:one )?is (?:named )?(\w+)/i,
+        key: "pet_name_2",
+        importance: 0.6,
+        extract: (match: RegExpMatchArray) => match[1],
+      },
+      {
+        pattern: /i work as (?:a |an )?(.+?)(?:\.|$|,)/i,
+        key: "job",
+        importance: 0.8,
+        extract: (match: RegExpMatchArray) => match[1].trim(),
+      },
+      {
+        pattern: /i live in (.+?)(?:\.|$|,)/i,
+        key: "location",
+        importance: 0.7,
+        extract: (match: RegExpMatchArray) => match[1].trim(),
+      },
+      {
+        pattern: /i am (\d+) years old/i,
+        key: "age",
+        importance: 0.7,
+        extract: (match: RegExpMatchArray) => match[1],
+      },
     ]
 
     personalPatterns.forEach(({ pattern, key, importance, extract }) => {
       const match = message.match(pattern)
       if (match) {
         const value = extract(match)
-        const entry = {
+        const entry: PersonalInfoEntry = {
           key,
           value,
           timestamp: Date.now(),
@@ -428,14 +297,14 @@ export class CognitiveAISystem {
   }
 
   private async saveConversation(userMessage: string, aiResponse: string): Promise<void> {
-    const userMsg = {
+    const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
       content: userMessage,
       timestamp: Date.now(),
     }
 
-    const aiMsg = {
+    const aiMsg: ChatMessage = {
       id: (Date.now() + 1).toString(),
       role: "assistant",
       content: aiResponse,
@@ -478,10 +347,10 @@ export class CognitiveAISystem {
   }
 
   public getMathFunctionCount(): number {
-    return 144 // 12x12 times table
+    return this.enhancedCognitive.getMathKnowledge().size
   }
 
-  public generateSuggestions(messages: any[]): any[] {
+  public generateSuggestions(messages: ChatMessage[]): any[] {
     return [
       { text: "Tell me about yourself", type: "question" },
       { text: "What can you remember about me?", type: "question" },
@@ -512,7 +381,7 @@ export class CognitiveAISystem {
     }
   }
 
-  public getConversationHistory(): any[] {
+  public getConversationHistory(): ChatMessage[] {
     return [...this.conversationHistory]
   }
 
@@ -582,30 +451,38 @@ export class CognitiveAISystem {
       throw error
     }
   }
-
-  public rememberUserInfo(key: string, value: string): void {
-    this.personalInfo.set(key, {
-      key,
-      value,
-      timestamp: Date.now(),
-      importance: 0.8,
-      type: "user_info",
-      source: "manual",
-    })
-  }
-
-  public forgetUserInfo(key: string): void {
-    this.personalInfo.delete(key)
-  }
-
-  public resetLearningProgress(): void {
-    this.vocabulary.clear()
-    this.memory.clear()
-    this.personalInfo.clear()
-    this.conversationHistory = []
-    this.initializeBasicVocabulary()
-    this.initializeSampleFacts()
-  }
 }
 
-export type { CognitiveResponse, CognitiveStats }
+// Type Definitions
+interface PersonalInfoEntry {
+  key: string
+  value: string
+  timestamp: number
+  importance: number
+  type: string
+  source: string
+}
+
+interface FactEntry {
+  key: string
+  value: string
+  timestamp: number
+  importance: number
+  type: string
+  source: string
+}
+
+interface AIResponse {
+  content: string
+  confidence: number
+  reasoning?: string[]
+  mathAnalysis?: any
+}
+
+interface ChatMessage {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: number
+  confidence?: number
+}
