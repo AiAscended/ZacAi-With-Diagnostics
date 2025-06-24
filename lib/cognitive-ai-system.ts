@@ -118,7 +118,7 @@ class CognitiveProcessor {
     }
   }
 
-  private synthesizeResponse(
+  private generateResponse(
     intent: IntentInference,
     context: ContextSynthesis,
     knowledge: KnowledgeActivation,
@@ -279,145 +279,39 @@ class CognitiveProcessor {
     knowledge: KnowledgeActivation,
     personalInfo: Map<string, any>,
   ): string {
+    const userName = this.getUserName(personalInfo)
+    const namePrefix = userName ? `${userName}, ` : ""
+
+    // Simple, logical responses based on intent
     switch (intent.primary) {
       case "personal_sharing":
-        return this.generatePersonalResponse(context, knowledge, personalInfo)
+        return `${namePrefix}thanks for sharing that! I'll remember it.`
       case "inquiry":
-        return this.generateInquiryResponse(context, knowledge, personalInfo)
+        if (knowledge.facts.length > 0) {
+          return `${namePrefix}based on what I know: ${knowledge.facts[0].content}`
+        }
+        return `${namePrefix}that's a great question! What specifically would you like to know?`
       case "mathematics":
-        return this.generateMathResponse(context, knowledge)
+        return "Let me calculate that for you."
       case "memory":
-        return this.generateMemoryResponse(context, knowledge, personalInfo)
+        if (personalInfo.size > 0) {
+          const facts = Array.from(personalInfo.entries())
+            .map(([key, entry]) => {
+              const value = typeof entry === "object" ? entry.value : entry
+              return `${key}: ${value}`
+            })
+            .slice(0, 3)
+            .join(", ")
+          return `${namePrefix}I remember: ${facts}`
+        }
+        return `${namePrefix}I don't have any stored memories yet. Tell me something about yourself!`
       case "greeting":
-        return this.generateGreetingResponse(context, personalInfo)
-      case "learning":
-        return this.generateLearningResponse(context, knowledge, personalInfo)
+        const timeOfDay = new Date().getHours()
+        const greeting = timeOfDay < 12 ? "Good morning" : timeOfDay < 18 ? "Good afternoon" : "Good evening"
+        return `${greeting}${namePrefix}! How can I help you today?`
       default:
-        return this.generateConversationalResponse(context, knowledge, personalInfo)
+        return `${namePrefix}I understand. What would you like to talk about?`
     }
-  }
-
-  private generatePersonalResponse(
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-    personalInfo: Map<string, any>,
-  ): string {
-    const userName = this.getUserName(personalInfo)
-    const namePrefix = userName ? `Thanks for sharing that, ${userName}! ` : "Thanks for sharing that! "
-
-    const responses = [
-      `${namePrefix}I'll remember that about you.`,
-      `${namePrefix}I've stored that information and will keep it in mind.`,
-      `${namePrefix}That's interesting to know - it helps me understand you better.`,
-      `${namePrefix}I appreciate you telling me that. I'll remember it for our future conversations.`,
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
-  }
-
-  private generateInquiryResponse(
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-    personalInfo: Map<string, any>,
-  ): string {
-    const userName = this.getUserName(personalInfo)
-    const namePrefix = userName ? `${userName}, ` : ""
-
-    if (knowledge.facts.length > 0) {
-      return `${namePrefix}based on what I know: ${knowledge.facts[0].content}`
-    }
-
-    // Check if asking about personal info
-    if (context.personal.facts.length > 0) {
-      const personalFacts = context.personal.facts.map((f) => `${f.type}: ${f.value}`).join(", ")
-      return `${namePrefix}here's what I remember about you: ${personalFacts}`
-    }
-
-    const responses = [
-      `${namePrefix}that's a great question! Let me think about that...`,
-      `${namePrefix}I'd be happy to help you with that. Can you provide more context?`,
-      `${namePrefix}that's interesting to consider. What specifically would you like to know?`,
-      `${namePrefix}good question! I'm processing that and would love to explore it further.`,
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
-  }
-
-  private generateMathResponse(context: ContextSynthesis, knowledge: KnowledgeActivation): string {
-    return "I can help you with that calculation. Let me process the mathematical expression."
-  }
-
-  private generateMemoryResponse(
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-    personalInfo: Map<string, any>,
-  ): string {
-    const userName = this.getUserName(personalInfo)
-    const namePrefix = userName ? `${userName}, ` : ""
-
-    if (personalInfo.size > 0) {
-      const facts = Array.from(personalInfo.entries())
-        .map(([key, entry]) => {
-          const value = typeof entry === "object" ? entry.value : entry
-          return `${key}: ${value}`
-        })
-        .slice(0, 3)
-        .join(", ")
-      return `${namePrefix}I remember: ${facts}`
-    }
-
-    if (knowledge.facts.length > 0) {
-      return `${namePrefix}I remember: ${knowledge.facts.map((f) => f.content).join(", ")}`
-    }
-
-    return `${namePrefix}I'm searching my memory for that information...`
-  }
-
-  private generateGreetingResponse(context: ContextSynthesis, personalInfo: Map<string, any>): string {
-    const timeOfDay = new Date().getHours()
-    const greeting = timeOfDay < 12 ? "Good morning" : timeOfDay < 18 ? "Good afternoon" : "Good evening"
-    const userName = this.getUserName(personalInfo)
-    const namePrefix = userName ? ` ${userName}` : ""
-
-    const responses = [
-      `${greeting}${namePrefix}! How can I help you today?`,
-      `Hello${namePrefix}! Great to see you again!`,
-      `Hi there${namePrefix}! What's on your mind?`,
-      `Hey${namePrefix}! I'm here and ready to chat.`,
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
-  }
-
-  private generateLearningResponse(
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-    personalInfo: Map<string, any>,
-  ): string {
-    const userName = this.getUserName(personalInfo)
-    const namePrefix = userName ? `${userName}, ` : ""
-
-    const responses = [
-      `${namePrefix}I'd be happy to help you learn about that! What would you like to know?`,
-      `${namePrefix}that's a great topic to explore. Let me share what I know...`,
-      `${namePrefix}I love helping with learning! What specific aspect interests you?`,
-      `${namePrefix}let's dive into that together. What would you like to understand better?`,
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
-  }
-
-  private generateConversationalResponse(
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-    personalInfo: Map<string, any>,
-  ): string {
-    const userName = this.getUserName(personalInfo)
-    const namePrefix = userName ? `${userName}, ` : ""
-
-    const responses = [
-      `${namePrefix}that's really interesting! Tell me more about that.`,
-      `${namePrefix}I see what you mean. What's your perspective on this?`,
-      `${namePrefix}that makes sense. How do you feel about it?`,
-      `${namePrefix}I understand. What would you like to explore about this topic?`,
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
   }
 
   private getUserName(personalInfo: Map<string, any>): string | null {

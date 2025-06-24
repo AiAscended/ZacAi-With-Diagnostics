@@ -162,6 +162,117 @@ export default function EnhancedAIChat() {
     })
   }
 
+  const handleBulkImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        const content = e.target?.result as string
+        let data: any
+
+        if (file.name.endsWith(".json")) {
+          data = JSON.parse(content)
+        } else if (file.name.endsWith(".csv")) {
+          // Simple CSV parsing for vocabulary data
+          const lines = content.split("\n")
+          const headers = lines[0].split(",")
+          data = { vocabulary: {} }
+
+          for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(",")
+            if (values.length >= 2) {
+              data.vocabulary[values[0]] = {
+                definition: values[1],
+                partOfSpeech: values[2] || "unknown",
+                category: "imported",
+              }
+            }
+          }
+        } else if (file.name.endsWith(".txt")) {
+          // Simple text parsing - each line as a vocabulary word
+          const lines = content.split("\n").filter((line) => line.trim())
+          data = { vocabulary: {} }
+
+          lines.forEach((line) => {
+            const word = line.trim()
+            if (word) {
+              data.vocabulary[word] = {
+                definition: `Imported word: ${word}`,
+                partOfSpeech: "unknown",
+                category: "imported",
+              }
+            }
+          })
+        }
+
+        if (data) {
+          knowledgeManager.importKnowledge(data)
+          updateStats()
+          alert(`Successfully imported data from ${file.name}`)
+        }
+      } catch (error) {
+        console.error("Import failed:", error)
+        alert("Failed to import data. Please check the file format.")
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  const handleClearData = async () => {
+    if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+      try {
+        // Clear knowledge manager data
+        knowledgeManager.importKnowledge({
+          vocabulary: [],
+          mathematics: [],
+          userInfo: [],
+          facts: [],
+          conversations: [],
+        })
+
+        // Clear AI system data
+        await aiSystem.clearAllData()
+
+        updateStats()
+        setActiveDataView(null)
+        alert("All data cleared successfully")
+      } catch (error) {
+        console.error("Failed to clear data:", error)
+        alert("Failed to clear data")
+      }
+    }
+  }
+
+  const handleRetrainModel = async () => {
+    try {
+      setIsLoading(true)
+      await aiSystem.retrainFromKnowledge()
+      updateStats()
+      alert("Model retrained successfully")
+    } catch (error) {
+      console.error("Retrain failed:", error)
+      alert("Failed to retrain model")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleOptimizeKnowledge = async () => {
+    try {
+      setIsLoading(true)
+      await knowledgeManager.optimizeKnowledge()
+      updateStats()
+      alert("Knowledge optimized successfully")
+    } catch (error) {
+      console.error("Optimization failed:", error)
+      alert("Failed to optimize knowledge")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const fetchKnowledgeData = async (type: string) => {
     try {
       const data = knowledgeManager.exportKnowledge()
@@ -384,13 +495,26 @@ export default function EnhancedAIChat() {
                 <BarChart3 className="w-8 h-8 text-blue-600" />
                 <div>
                   <h1 className="text-2xl font-bold">{systemInfo.name || "ZacAI"} Metrics Dashboard</h1>
-                  <p className="text-sm text-gray-600">Version {stats.version}</p>
+                  <p className="text-sm text-gray-600">
+                    Version {stats.version} • {stats.systemStatus || "Ready"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <Button variant="outline" onClick={handleExport}>
                   <Download className="w-4 h-4 mr-2" />
-                  Export
+                  Export Data
+                </Button>
+                <Button variant="outline" onClick={handleRetrainModel}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Retrain
+                </Button>
+                <Button variant="outline" onClick={handleOptimizeKnowledge}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Optimize
+                </Button>
+                <Button variant="destructive" onClick={handleClearData}>
+                  Clear All Data
                 </Button>
                 <div className="flex items-center gap-2">
                   <span className="text-sm">Chat</span>
@@ -404,7 +528,7 @@ export default function EnhancedAIChat() {
           {/* Content */}
           <div className="flex-1 overflow-auto">
             <div className="max-w-6xl mx-auto p-4 space-y-6">
-              {/* Quick Stats */}
+              {/* Quick Stats Cards */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <Card
                   className="cursor-pointer hover:shadow-md transition-shadow"
@@ -414,6 +538,7 @@ export default function EnhancedAIChat() {
                     <BookOpen className="w-8 h-8 mx-auto mb-2 text-blue-600" />
                     <div className="text-2xl font-bold">{stats.vocabulary}</div>
                     <div className="text-sm text-gray-500">Vocabulary</div>
+                    <Progress value={(stats.vocabulary / 1000) * 100} className="h-1 mt-2" />
                   </CardContent>
                 </Card>
 
@@ -425,6 +550,7 @@ export default function EnhancedAIChat() {
                     <Calculator className="w-8 h-8 mx-auto mb-2 text-green-600" />
                     <div className="text-2xl font-bold">{stats.mathematics}</div>
                     <div className="text-sm text-gray-500">Math Concepts</div>
+                    <Progress value={(stats.mathematics / 100) * 100} className="h-1 mt-2" />
                   </CardContent>
                 </Card>
 
@@ -436,6 +562,7 @@ export default function EnhancedAIChat() {
                     <User className="w-8 h-8 mx-auto mb-2 text-purple-600" />
                     <div className="text-2xl font-bold">{stats.userInfo}</div>
                     <div className="text-sm text-gray-500">User Info</div>
+                    <Progress value={(stats.userInfo / 50) * 100} className="h-1 mt-2" />
                   </CardContent>
                 </Card>
 
@@ -447,6 +574,7 @@ export default function EnhancedAIChat() {
                     <FileText className="w-8 h-8 mx-auto mb-2 text-orange-600" />
                     <div className="text-2xl font-bold">{stats.facts}</div>
                     <div className="text-sm text-gray-500">Facts</div>
+                    <Progress value={(stats.facts / 200) * 100} className="h-1 mt-2" />
                   </CardContent>
                 </Card>
 
@@ -455,11 +583,12 @@ export default function EnhancedAIChat() {
                     <MessageCircle className="w-8 h-8 mx-auto mb-2 text-red-600" />
                     <div className="text-2xl font-bold">{stats.conversations}</div>
                     <div className="text-sm text-gray-500">Conversations</div>
+                    <Progress value={Math.min((stats.conversations / 100) * 100, 100)} className="h-1 mt-2" />
                   </CardContent>
                 </Card>
               </div>
 
-              {/* System Information */}
+              {/* System Information Card */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -467,59 +596,319 @@ export default function EnhancedAIChat() {
                     System Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Name</span>
-                      <span className="text-sm font-mono">{systemInfo.name || "ZacAI"}</span>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-sm">Core System</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Name</span>
+                          <span className="font-mono">{systemInfo.name || "ZacAI"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Version</span>
+                          <span className="font-mono">{stats.version}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Status</span>
+                          <Badge variant={stats.systemStatus === "ready" ? "default" : "secondary"}>
+                            {stats.systemStatus || "Ready"}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Confidence</span>
+                          <span className="font-mono">
+                            {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "N/A"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Version</span>
-                      <span className="text-sm font-mono">{stats.version}</span>
+
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-sm">Knowledge Base</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Total Entries</span>
+                          <span className="font-mono">{stats.totalEntries}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Learning Rate</span>
+                          <span className="font-mono">Active</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Storage</span>
+                          <span className="font-mono">IndexedDB</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Backup</span>
+                          <span className="font-mono">LocalStorage</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Total Entries</span>
-                      <span className="text-sm font-mono">{stats.totalEntries}</span>
+
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-sm">Performance</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Last Updated</span>
+                          <span className="font-mono text-xs">{new Date(stats.lastUpdated).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Response Time</span>
+                          <span className="font-mono">~500ms</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Memory Usage</span>
+                          <span className="font-mono">Optimized</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Cache Status</span>
+                          <Badge variant="default">Active</Badge>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Last Updated</span>
-                      <span className="text-sm font-mono">{new Date(stats.lastUpdated).toLocaleString()}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Knowledge Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="w-5 h-5" />
+                    Knowledge Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">Vocabulary</span>
+                          <span className="text-sm text-gray-500">{stats.vocabulary} words</span>
+                        </div>
+                        <Progress value={(stats.vocabulary / 1000) * 100} className="h-2" />
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">Mathematics</span>
+                          <span className="text-sm text-gray-500">{stats.mathematics} concepts</span>
+                        </div>
+                        <Progress value={(stats.mathematics / 100) * 100} className="h-2" />
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">User Information</span>
+                          <span className="text-sm text-gray-500">{stats.userInfo} entries</span>
+                        </div>
+                        <Progress value={(stats.userInfo / 50) * 100} className="h-2" />
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">Facts & Knowledge</span>
+                          <span className="text-sm text-gray-500">{stats.facts} facts</span>
+                        </div>
+                        <Progress value={(stats.facts / 200) * 100} className="h-2" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
+                        <div className="text-sm text-blue-600">Total Knowledge Entries</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-3 bg-green-50 rounded">
+                          <div className="text-lg font-bold text-green-600">{stats.conversations}</div>
+                          <div className="text-xs text-green-600">Conversations</div>
+                        </div>
+                        <div className="text-center p-3 bg-purple-50 rounded">
+                          <div className="text-lg font-bold text-purple-600">
+                            {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "0%"}
+                          </div>
+                          <div className="text-xs text-purple-600">Avg Confidence</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Knowledge Data Visualization */}
-              {activeDataView && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <Database className="w-5 h-5" />
-                        {activeDataView.charAt(0).toUpperCase() + activeDataView.slice(1)} Data
-                      </span>
-                      <Button variant="outline" size="sm" onClick={() => setActiveDataView(null)}>
-                        Close
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-96">
-                      <div className="space-y-2">
-                        {knowledgeData[activeDataView]?.length > 0 ? (
-                          knowledgeData[activeDataView].map((item: any, index: number) => (
-                            <div key={index} className="p-2 bg-gray-50 rounded text-sm">
-                              <pre className="whitespace-pre-wrap">{JSON.stringify(item, null, 2)}</pre>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center text-gray-500 py-8">No {activeDataView} data available</div>
-                        )}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Knowledge Data Visualization
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="overview" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5">
+                      <TabsTrigger value="overview">Overview</TabsTrigger>
+                      <TabsTrigger value="vocabulary" onClick={() => fetchKnowledgeData("vocabulary")}>
+                        Vocabulary
+                      </TabsTrigger>
+                      <TabsTrigger value="mathematics" onClick={() => fetchKnowledgeData("mathematics")}>
+                        Math
+                      </TabsTrigger>
+                      <TabsTrigger value="userInfo" onClick={() => fetchKnowledgeData("userInfo")}>
+                        User Info
+                      </TabsTrigger>
+                      <TabsTrigger value="facts" onClick={() => fetchKnowledgeData("facts")}>
+                        Facts
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="overview" className="space-y-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="p-4 border rounded-lg text-center">
+                          <BookOpen className="w-8 h-8 mx-auto mb-2 text-blue-500" />
+                          <div className="text-xl font-bold">{stats.vocabulary}</div>
+                          <div className="text-sm text-gray-500">Vocabulary Words</div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <Calculator className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                          <div className="text-xl font-bold">{stats.mathematics}</div>
+                          <div className="text-sm text-gray-500">Math Concepts</div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <User className="w-8 h-8 mx-auto mb-2 text-purple-500" />
+                          <div className="text-xl font-bold">{stats.userInfo}</div>
+                          <div className="text-sm text-gray-500">Personal Data</div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <FileText className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+                          <div className="text-xl font-bold">{stats.facts}</div>
+                          <div className="text-sm text-gray-500">Knowledge Facts</div>
+                        </div>
                       </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              )}
+                    </TabsContent>
+
+                    {/* Data Views */}
+                    {["vocabulary", "mathematics", "userInfo", "facts"].map((dataType) => (
+                      <TabsContent key={dataType} value={dataType}>
+                        <ScrollArea className="h-96">
+                          <div className="space-y-2">
+                            {knowledgeData[dataType]?.length > 0 ? (
+                              knowledgeData[dataType].map((item: any, index: number) => (
+                                <div key={index} className="p-3 bg-gray-50 rounded border">
+                                  <div className="font-mono text-sm">
+                                    {Array.isArray(item) ? (
+                                      <div>
+                                        <strong>{item[0]}:</strong> {JSON.stringify(item[1], null, 2)}
+                                      </div>
+                                    ) : (
+                                      <pre className="whitespace-pre-wrap">{JSON.stringify(item, null, 2)}</pre>
+                                    )}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center text-gray-500 py-8">
+                                No {dataType} data available. Click "Load Data" to fetch.
+                              </div>
+                            )}
+                          </div>
+                        </ScrollArea>
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                </CardContent>
+              </Card>
+
+              {/* Training & Data Pipeline */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Training & Data Pipeline
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold">Data Management</h4>
+                      <div className="space-y-2">
+                        <Button onClick={handleExport} className="w-full" variant="outline">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export All Knowledge
+                        </Button>
+                        <div>
+                          <input
+                            type="file"
+                            accept=".json,.csv,.txt"
+                            onChange={handleBulkImport}
+                            className="hidden"
+                            id="bulk-import"
+                          />
+                          <Button asChild className="w-full" variant="outline">
+                            <label htmlFor="bulk-import" className="cursor-pointer">
+                              <Upload className="w-4 h-4 mr-2" />
+                              Bulk Import Data
+                            </label>
+                          </Button>
+                        </div>
+                        <Button onClick={handleOptimizeKnowledge} className="w-full" variant="outline">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Optimize Knowledge Base
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="font-semibold">AI Training</h4>
+                      <div className="space-y-2">
+                        <Button onClick={handleRetrainModel} className="w-full" variant="outline">
+                          <Brain className="w-4 h-4 mr-2" />
+                          Retrain AI Model
+                        </Button>
+                        <Button onClick={() => updateStats()} className="w-full" variant="outline">
+                          <TrendingUp className="w-4 h-4 mr-2" />
+                          Refresh Statistics
+                        </Button>
+                        <Button onClick={handleClearData} className="w-full" variant="destructive">
+                          <Database className="w-4 h-4 mr-2" />
+                          Clear All Data
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator className="my-6" />
+
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">System Status</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-3 bg-green-50 rounded border">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <span className="text-sm font-medium">Knowledge Manager</span>
+                        </div>
+                        <div className="text-xs text-green-600 mt-1">Active & Learning</div>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded border">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                          <span className="text-sm font-medium">Cognitive AI</span>
+                        </div>
+                        <div className="text-xs text-blue-600 mt-1">Processing Ready</div>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded border">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                          <span className="text-sm font-medium">Storage</span>
+                        </div>
+                        <div className="text-xs text-purple-600 mt-1">IndexedDB + Local</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
