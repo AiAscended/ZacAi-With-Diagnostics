@@ -34,7 +34,7 @@ class CognitiveProcessor {
     console.log("📚 Knowledge:", knowledge)
 
     // Stage 5: Response Synthesis
-    const response = this.synthesizeResponse(intent, context, knowledge, personalInfo)
+    const response = this.generateResponse(intent, context, knowledge, personalInfo)
     console.log("💬 Response:", response)
 
     // Stage 6: Confidence Calculation
@@ -131,9 +131,7 @@ class CognitiveProcessor {
 
     return {
       content,
-      tone,
       reasoning,
-      template: responseTemplate,
     }
   }
 
