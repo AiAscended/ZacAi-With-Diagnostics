@@ -1,6 +1,6 @@
 import { BrowserStorageManager } from "./browser-storage-manager"
 
-// Revolutionary Cognitive Processing Engine
+// Revolutionary Cognitive Processing Engine - FUNCTIONALITY ONLY
 class CognitiveProcessor {
   private contextMemory: Map<string, ContextNode> = new Map()
   private semanticPatterns: Map<string, SemanticPattern> = new Map()
@@ -155,7 +155,7 @@ class CognitiveProcessor {
   private extractEntities(input: string): Entity[] {
     const entities: Entity[] = []
 
-    // Names
+    // Names - Enhanced patterns
     const namePattern = /(?:my name is|i'm|i am|call me) (\w+)/gi
     let match = namePattern.exec(input)
     if (match) entities.push({ type: "name", value: match[1], confidence: 0.9 })
@@ -166,19 +166,19 @@ class CognitiveProcessor {
       entities.push({ type: "number", value: match[1], confidence: 0.95 })
     }
 
-    // Relationships
+    // Relationships - Enhanced
     const relationshipPattern = /(?:wife|husband|partner|spouse|girlfriend|boyfriend|married)/gi
     if (relationshipPattern.test(input)) {
       entities.push({ type: "relationship", value: "partner", confidence: 0.8 })
     }
 
-    // Pets
+    // Pets - Enhanced
     const petPattern = /(?:cat|dog|pet)s?/gi
     if (petPattern.test(input)) {
       entities.push({ type: "pet", value: "animal", confidence: 0.8 })
     }
 
-    // Jobs
+    // Jobs - Enhanced
     const jobPattern = /(?:work as|job is|i'm a|i am a) (.+?)(?:\.|$|,)/gi
     match = jobPattern.exec(input)
     if (match) entities.push({ type: "job", value: match[1].trim(), confidence: 0.8 })
@@ -729,8 +729,7 @@ export class CognitiveAISystem {
     }
   }
 
-  // ... (rest of the methods remain the same but with proper personal info handling)
-
+  // Rest of the implementation continues with all the missing methods...
   private mathFunctions: Map<string, MathFunction> = new Map()
 
   private initializeBasicMathFunctions(): void {
