@@ -162,117 +162,6 @@ export default function EnhancedAIChat() {
     })
   }
 
-  const handleBulkImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = async (e) => {
-      try {
-        const content = e.target?.result as string
-        let data: any
-
-        if (file.name.endsWith(".json")) {
-          data = JSON.parse(content)
-        } else if (file.name.endsWith(".csv")) {
-          // Simple CSV parsing for vocabulary data
-          const lines = content.split("\n")
-          const headers = lines[0].split(",")
-          data = { vocabulary: {} }
-
-          for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(",")
-            if (values.length >= 2) {
-              data.vocabulary[values[0]] = {
-                definition: values[1],
-                partOfSpeech: values[2] || "unknown",
-                category: "imported",
-              }
-            }
-          }
-        } else if (file.name.endsWith(".txt")) {
-          // Simple text parsing - each line as a vocabulary word
-          const lines = content.split("\n").filter((line) => line.trim())
-          data = { vocabulary: {} }
-
-          lines.forEach((line) => {
-            const word = line.trim()
-            if (word) {
-              data.vocabulary[word] = {
-                definition: `Imported word: ${word}`,
-                partOfSpeech: "unknown",
-                category: "imported",
-              }
-            }
-          })
-        }
-
-        if (data) {
-          knowledgeManager.importKnowledge(data)
-          updateStats()
-          alert(`Successfully imported data from ${file.name}`)
-        }
-      } catch (error) {
-        console.error("Import failed:", error)
-        alert("Failed to import data. Please check the file format.")
-      }
-    }
-    reader.readAsText(file)
-  }
-
-  const handleClearData = async () => {
-    if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
-      try {
-        // Clear knowledge manager data
-        knowledgeManager.importKnowledge({
-          vocabulary: [],
-          mathematics: [],
-          userInfo: [],
-          facts: [],
-          conversations: [],
-        })
-
-        // Clear AI system data
-        await aiSystem.clearAllData()
-
-        updateStats()
-        setActiveDataView(null)
-        alert("All data cleared successfully")
-      } catch (error) {
-        console.error("Failed to clear data:", error)
-        alert("Failed to clear data")
-      }
-    }
-  }
-
-  const handleRetrainModel = async () => {
-    try {
-      setIsLoading(true)
-      await aiSystem.retrainFromKnowledge()
-      updateStats()
-      alert("Model retrained successfully")
-    } catch (error) {
-      console.error("Retrain failed:", error)
-      alert("Failed to retrain model")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleOptimizeKnowledge = async () => {
-    try {
-      setIsLoading(true)
-      await knowledgeManager.optimizeKnowledge()
-      updateStats()
-      alert("Knowledge optimized successfully")
-    } catch (error) {
-      console.error("Optimization failed:", error)
-      alert("Failed to optimize knowledge")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const fetchKnowledgeData = async (type: string) => {
     try {
       const data = knowledgeManager.exportKnowledge()
@@ -288,15 +177,14 @@ export default function EnhancedAIChat() {
     }
   }
 
-  // UPDATED: Cognitive thinking simulation instead of just math
   const simulateThinking = async (userInput: string): Promise<string[]> => {
     const thinkingSteps = [
-      "🧠 Analyzing semantic components and extracting entities...",
-      "🔗 Synthesizing context from conversation history and personal info...",
-      "🎯 Inferring primary intent and classifying message type...",
-      "📚 Activating relevant knowledge and personal memories...",
-      "💭 Generating contextual response using cognitive processing...",
-      "✨ Calculating confidence and finalizing response...",
+      "🧠 Analyzing input and extracting key information...",
+      "🔗 Checking conversation context and personal memories...",
+      "🎯 Determining response intent and approach...",
+      "📚 Accessing relevant knowledge and facts...",
+      "💭 Generating appropriate response...",
+      "✨ Finalizing answer with confidence scoring...",
     ]
 
     const finalThinking: string[] = []
@@ -304,7 +192,7 @@ export default function EnhancedAIChat() {
     for (let i = 0; i < thinkingSteps.length; i++) {
       setCurrentThinking(thinkingSteps[i])
       finalThinking.push(thinkingSteps[i])
-      await new Promise((resolve) => setTimeout(resolve, 600))
+      await new Promise((resolve) => setTimeout(resolve, 300))
     }
 
     return finalThinking
@@ -346,10 +234,10 @@ export default function EnhancedAIChat() {
         console.warn("Knowledge search failed:", knowledgeError)
       }
 
-      // Show cognitive thinking process
+      // Show thinking process
       const thinkingSteps = await simulateThinking(userInput)
 
-      // Get AI response with error handling - NOW USING COGNITIVE SYSTEM
+      // Get AI response with error handling
       let response
       try {
         response = await aiSystem.processMessage(userInput)
@@ -414,7 +302,6 @@ export default function EnhancedAIChat() {
       suggestions.push("Can you explain more?", "Give me an example")
     }
 
-    // Add math-specific suggestions if it was a math problem
     if (/\d/.test(userInput)) {
       suggestions.push("Try a different math problem", "What's 2x2?", "Calculate 5+5")
     }
@@ -461,6 +348,113 @@ export default function EnhancedAIChat() {
     if (confidence > 0.7) return "text-green-600"
     if (confidence > 0.4) return "text-yellow-600"
     return "text-red-600"
+  }
+
+  const handleBulkImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        const content = e.target?.result as string
+        let data: any
+
+        if (file.name.endsWith(".json")) {
+          data = JSON.parse(content)
+        } else if (file.name.endsWith(".csv")) {
+          const lines = content.split("\n")
+          const headers = lines[0].split(",")
+          data = { vocabulary: {} }
+
+          for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(",")
+            if (values.length >= 2) {
+              data.vocabulary[values[0]] = {
+                definition: values[1],
+                partOfSpeech: values[2] || "unknown",
+                category: "imported",
+              }
+            }
+          }
+        } else if (file.name.endsWith(".txt")) {
+          const lines = content.split("\n").filter((line) => line.trim())
+          data = { vocabulary: {} }
+
+          lines.forEach((line) => {
+            const word = line.trim()
+            if (word) {
+              data.vocabulary[word] = {
+                definition: `Imported word: ${word}`,
+                partOfSpeech: "unknown",
+                category: "imported",
+              }
+            }
+          })
+        }
+
+        if (data) {
+          knowledgeManager.importKnowledge(data)
+          updateStats()
+          alert(`Successfully imported data from ${file.name}`)
+        }
+      } catch (error) {
+        console.error("Import failed:", error)
+        alert("Failed to import data. Please check the file format.")
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  const handleClearData = async () => {
+    if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+      try {
+        knowledgeManager.importKnowledge({
+          vocabulary: [],
+          mathematics: [],
+          userInfo: [],
+          facts: [],
+          conversations: [],
+        })
+
+        await aiSystem.clearAllData()
+
+        updateStats()
+        setActiveDataView(null)
+        alert("All data cleared successfully")
+      } catch (error) {
+        console.error("Failed to clear data:", error)
+        alert("Failed to clear data")
+      }
+    }
+  }
+
+  const handleRetrainModel = async () => {
+    try {
+      setIsLoading(true)
+      await aiSystem.retrainFromKnowledge()
+      updateStats()
+      alert("Model retrained successfully")
+    } catch (error) {
+      console.error("Retrain failed:", error)
+      alert("Failed to retrain model")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleOptimizeKnowledge = async () => {
+    try {
+      setIsLoading(true)
+      await knowledgeManager.optimizeKnowledge()
+      updateStats()
+      alert("Knowledge optimized successfully")
+    } catch (error) {
+      console.error("Optimization failed:", error)
+      alert("Failed to optimize knowledge")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (isInitializing) {
@@ -655,7 +649,7 @@ export default function EnhancedAIChat() {
                         </div>
                         <div className="flex justify-between">
                           <span>Response Time</span>
-                          <span className="font-mono">~500ms</span>
+                          <span className="font-mono">~300ms</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Memory Usage</span>
@@ -933,7 +927,6 @@ export default function EnhancedAIChat() {
               </CardTitle>
 
               <div className="flex items-center gap-4">
-                {/* Quick Stats */}
                 <div className="hidden md:flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4 text-blue-500" />
@@ -958,7 +951,6 @@ export default function EnhancedAIChat() {
           </CardHeader>
 
           <CardContent className="flex-1 flex flex-col min-h-0">
-            {/* Messages */}
             <ScrollArea className="flex-1 mb-4">
               <div className="space-y-4 pr-4">
                 {messages.length === 0 && (
@@ -969,10 +961,9 @@ export default function EnhancedAIChat() {
                     </div>
                     <p className="text-lg font-medium mb-2">Hello! I'm {systemInfo.name || "ZacAI"} 🧠</p>
                     <p className="mb-4">
-                      I have enhanced mathematical understanding! Try any math problem in any format.
+                      I can help with math, remember information about you, and have conversations!
                     </p>
 
-                    {/* Initial Suggestions */}
                     <div className="grid grid-cols-2 gap-2 text-sm max-w-md mx-auto">
                       <Button
                         variant="outline"
@@ -986,27 +977,29 @@ export default function EnhancedAIChat() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("2 times 2")}
+                        onClick={() => setInput("My name is John")}
                         className="text-left justify-start"
                       >
-                        <Calculator className="w-4 h-4 mr-2" />2 times 2
+                        <User className="w-4 h-4 mr-2" />
+                        My name is John
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("2 multiplied by 2")}
+                        onClick={() => setInput("What can you do?")}
                         className="text-left justify-start"
                       >
-                        <Lightbulb className="w-4 h-4 mr-2" />2 multiplied by 2
+                        <Lightbulb className="w-4 h-4 mr-2" />
+                        What can you do?
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("what is 2 * 2?")}
+                        onClick={() => setInput("Tell me a fact")}
                         className="text-left justify-start"
                       >
-                        <Settings className="w-4 h-4 mr-2" />
-                        what is 2 * 2?
+                        <FileText className="w-4 h-4 mr-2" />
+                        Tell me a fact
                       </Button>
                     </div>
                   </div>
@@ -1021,10 +1014,8 @@ export default function EnhancedAIChat() {
                     >
                       <div className="text-sm mb-2">{message.content}</div>
 
-                      {/* AI Response Features */}
                       {message.role === "assistant" && (
                         <div className="space-y-3 mt-3">
-                          {/* Thinking Process */}
                           {message.thinking && message.thinking.length > 0 && (
                             <div className="border-l-2 border-blue-300 pl-3">
                               <button
@@ -1054,7 +1045,6 @@ export default function EnhancedAIChat() {
                             </div>
                           )}
 
-                          {/* Math Analysis */}
                           {message.mathAnalysis && (
                             <div className="bg-green-50 border border-green-200 rounded p-2">
                               <div className="text-xs text-green-700 font-medium mb-1">Mathematical Analysis</div>
@@ -1065,7 +1055,6 @@ export default function EnhancedAIChat() {
                             </div>
                           )}
 
-                          {/* Knowledge Used */}
                           {message.knowledgeUsed && message.knowledgeUsed.length > 0 && (
                             <div className="space-y-2">
                               <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -1082,7 +1071,6 @@ export default function EnhancedAIChat() {
                             </div>
                           )}
 
-                          {/* Suggestions */}
                           {message.suggestions && message.suggestions.length > 0 && (
                             <div className="space-y-2">
                               <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -1105,7 +1093,6 @@ export default function EnhancedAIChat() {
                             </div>
                           )}
 
-                          {/* Feedback and Stats */}
                           <div className="flex items-center justify-between text-xs opacity-70">
                             <div className="flex items-center gap-2">
                               <span>{formatTimestamp(message.timestamp)}</span>
@@ -1128,7 +1115,6 @@ export default function EnhancedAIChat() {
                               )}
                             </div>
 
-                            {/* Feedback Buttons */}
                             <div className="flex items-center gap-1">
                               <Button
                                 variant="ghost"
@@ -1151,7 +1137,6 @@ export default function EnhancedAIChat() {
                         </div>
                       )}
 
-                      {/* User Message Timestamp */}
                       {message.role === "user" && (
                         <div className="text-xs opacity-70 mt-2">{formatTimestamp(message.timestamp)}</div>
                       )}
@@ -1159,7 +1144,6 @@ export default function EnhancedAIChat() {
                   </div>
                 ))}
 
-                {/* Real-time Thinking Display */}
                 {isThinking && currentThinking && (
                   <div className="flex justify-start">
                     <div className="bg-gray-100 border shadow-sm rounded-lg p-4 max-w-[80%]">
@@ -1188,12 +1172,11 @@ export default function EnhancedAIChat() {
               </div>
             </ScrollArea>
 
-            {/* Input Form */}
             <form onSubmit={handleSubmit} className="flex gap-2">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Try any math problem: 2x2, 2 times 2, multiply 2 by 2, what is 2*2?"
+                placeholder="Ask me anything - math, personal questions, or just chat!"
                 disabled={isLoading}
                 className="flex-1"
               />
@@ -1273,12 +1256,12 @@ export default function EnhancedAIChat() {
                   <Separator />
 
                   <div className="space-y-2">
-                    <div className="text-sm font-medium">Enhanced Math Engine</div>
+                    <div className="text-sm font-medium">System Status</div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-green-500" />
-                      <span className="text-sm">Advanced Pattern Recognition</span>
+                      <span className="text-sm">All Systems Operational</span>
                     </div>
-                    <div className="text-xs text-gray-500">Understands 50+ mathematical expression formats</div>
+                    <div className="text-xs text-gray-500">Ready for conversations and learning</div>
                   </div>
                 </CardContent>
               </Card>
@@ -1289,69 +1272,49 @@ export default function EnhancedAIChat() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Database className="w-4 h-4" />
-                    Enhanced Math Knowledge
+                    Knowledge Base
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-sm text-gray-600">
-                    <p className="mb-2">I now understand math in many formats:</p>
+                    <p className="mb-2">I can help with:</p>
                     <ul className="space-y-1 text-xs">
-                      <li>• "2x2", "2*2", "2×2"</li>
-                      <li>• "2 times 2", "2 multiplied by 2"</li>
-                      <li>• "multiply 2 by 2", "what is 2 times 2?"</li>
-                      <li>• Multi-step problems</li>
-                      <li>• Natural language expressions</li>
+                      <li>• Mathematical calculations</li>
+                      <li>• Remembering personal information</li>
+                      <li>• General knowledge and facts</li>
+                      <li>• Conversational interactions</li>
+                      <li>• Learning from our conversations</li>
                     </ul>
                   </div>
 
                   <Separator />
 
                   <div className="space-y-2">
-                    <div className="text-sm font-medium">Thinking Process</div>
-                    <div className="space-y-1 text-xs">
-                      <div className="flex items-center gap-2">
-                        <Brain className="w-3 h-3 text-blue-500" />
-                        <span>Real-time reasoning display</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calculator className="w-3 h-3 text-green-500" />
-                        <span>Pattern matching analysis</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Search className="w-3 h-3 text-purple-500" />
-                        <span>Mathematical confidence scoring</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Test These Formats</div>
+                    <div className="text-sm font-medium">Quick Actions</div>
                     <div className="space-y-2 text-xs">
                       <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-left justify-start"
-                        onClick={() => setInput("2x2=")}
+                        onClick={() => setInput("What do you remember about me?")}
                       >
-                        "2x2="
+                        Check Memory
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-left justify-start"
-                        onClick={() => setInput("2 times by 2")}
+                        onClick={() => setInput("Calculate 15 * 23")}
                       >
-                        "2 times by 2"
+                        Test Math
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-left justify-start"
-                        onClick={() => setInput("what is 5 multiplied by 3?")}
+                        onClick={() => setInput("Tell me a random fact")}
                       >
-                        "what is 5 multiplied by 3?"
+                        Random Fact
                       </Button>
                     </div>
                   </div>
@@ -1386,12 +1349,12 @@ export default function EnhancedAIChat() {
                   <Separator />
 
                   <div className="space-y-2">
-                    <div className="text-sm font-medium">Enhanced Features</div>
+                    <div className="text-sm font-medium">Features</div>
                     <div className="text-xs text-gray-500 space-y-1">
-                      <p>• Real-time thinking display</p>
-                      <p>• Advanced math pattern recognition</p>
-                      <p>• Multi-format expression parsing</p>
-                      <p>• Confidence-based responses</p>
+                      <p>• Real-time learning</p>
+                      <p>• Mathematical processing</p>
+                      <p>• Personal memory storage</p>
+                      <p>• Knowledge export/import</p>
                     </div>
                   </div>
 
@@ -1400,10 +1363,10 @@ export default function EnhancedAIChat() {
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Privacy</div>
                     <div className="text-xs text-gray-500 space-y-1">
-                      <p>• No data sent to servers</p>
-                      <p>• You control all information</p>
-                      <p>• Learning happens locally</p>
-                      <p>• Export/import as needed</p>
+                      <p>• All data stored locally</p>
+                      <p>• No external servers</p>
+                      <p>• You control your data</p>
+                      <p>• Export anytime</p>
                     </div>
                   </div>
                 </CardContent>
