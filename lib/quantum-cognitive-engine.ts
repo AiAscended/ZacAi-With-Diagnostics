@@ -113,6 +113,13 @@ export class QuantumCognitiveEngine {
       sparkType = "mathematical"
       confidence = 0.9
       this.addThought("⚡ Mathematical spark detected - preparing numerical reasoning", "mathematical", 0.9)
+    } else if (inputAnalysis.hasNumbers && !inputAnalysis.hasMathOperators) {
+      // Check for implicit multiplication like "2x2" or "3x3x3"
+      if (/\d+x\d+/.test(input.toLowerCase()) || /\d+\*\d+/.test(input)) {
+        sparkType = "mathematical"
+        confidence = 0.9
+        this.addThought("⚡ Implicit multiplication detected - preparing numerical reasoning", "mathematical", 0.9)
+      }
     } else if (inputAnalysis.hasPersonalInfo) {
       sparkType = "personal"
       confidence = 0.8
@@ -297,7 +304,7 @@ export class QuantumCognitiveEngine {
     this.addThought("🔄 Recalculating mathematical expression...", "iteration", 0.8)
 
     // Real mathematical calculation without hardcoded patterns
-    const calculator = new RealMathCalculator()
+    const calculator = new UniversalMathCalculator()
     return calculator.calculate(input, this.thoughtStream)
   }
 
@@ -483,7 +490,7 @@ class IterativeThinkingEngine {
     this.addIterativeThought("🧮 Processing mathematical iteration...", 0.8, thoughtStream)
 
     // Real mathematical processing
-    const calculator = new RealMathCalculator()
+    const calculator = new UniversalMathCalculator()
     const result = calculator.calculate(thought, thoughtStream)
 
     if (result) {
@@ -646,20 +653,24 @@ class CognitiveFlow {
   }
 }
 
-// REAL MATH CALCULATOR - NO HARDCODED PATTERNS
-class RealMathCalculator {
+// UNIVERSAL MATH CALCULATOR - HANDLES ALL MATHEMATICAL EXPRESSIONS
+class UniversalMathCalculator {
   public calculate(input: string, thoughtStream: ThoughtNode[]): { answer: number; steps: string[] } | null {
-    this.addThought("🧮 Starting real mathematical calculation...", thoughtStream)
+    this.addThought("🧮 Starting universal mathematical calculation...", thoughtStream)
 
-    const cleanInput = input.replace(/\s+/g, "").toLowerCase()
+    // Clean and normalize input
+    let cleanInput = input.replace(/\s+/g, "").toLowerCase()
     this.addThought(`🔍 Cleaned input: "${cleanInput}"`, thoughtStream)
+
+    // Handle different input formats
+    cleanInput = this.normalizeInput(cleanInput, thoughtStream)
 
     // Extract all numbers
     const numbers = (cleanInput.match(/\d+/g) || []).map(Number)
     this.addThought(`🔢 Numbers found: [${numbers.join(", ")}]`, thoughtStream)
 
     // Extract all operators
-    const operators = cleanInput.match(/[+\-×*x÷/]/g) || []
+    const operators = cleanInput.match(/[+\-×*÷/]/g) || []
     this.addThought(`🔣 Operators found: [${operators.join(", ")}]`, thoughtStream)
 
     if (numbers.length === 0) {
@@ -667,131 +678,133 @@ class RealMathCalculator {
       return null
     }
 
-    // Handle different cases
-    if (numbers.length === 1) {
+    // Handle single number
+    if (numbers.length === 1 && operators.length === 0) {
       this.addThought(`📊 Single number: ${numbers[0]}`, thoughtStream)
       return { answer: numbers[0], steps: [`The number is ${numbers[0]}`] }
     }
 
-    if (numbers.length === 2 && operators.length === 1) {
-      return this.calculateTwoNumbers(numbers[0], numbers[1], operators[0], thoughtStream)
-    }
-
-    if (numbers.length === 3) {
-      return this.calculateThreeNumbers(numbers, operators, thoughtStream)
-    }
-
-    this.addThought("❌ Complex expression not yet supported", thoughtStream)
-    return null
+    // Handle mathematical expressions
+    return this.evaluateExpression(numbers, operators, thoughtStream)
   }
 
-  private calculateTwoNumbers(
-    a: number,
-    b: number,
-    operator: string,
-    thoughtStream: ThoughtNode[],
-  ): { answer: number; steps: string[] } {
-    this.addThought(`🧮 Calculating: ${a} ${operator} ${b}`, thoughtStream)
+  private normalizeInput(input: string, thoughtStream: ThoughtNode[]): string {
+    this.addThought("🔧 Normalizing input format...", thoughtStream)
 
-    let result: number
-    let operatorSymbol: string
+    // Convert common formats
+    let normalized = input
+      .replace(/x/g, "*") // 2x2 -> 2*2
+      .replace(/×/g, "*") // 2×2 -> 2*2
+      .replace(/÷/g, "/") // 2÷2 -> 2/2
 
-    switch (operator) {
-      case "+":
-        result = a + b
-        operatorSymbol = "+"
-        break
-      case "-":
-        result = a - b
-        operatorSymbol = "-"
-        break
-      case "×":
-      case "*":
-      case "x":
-        result = a * b
-        operatorSymbol = "×"
-        break
-      case "÷":
-      case "/":
-        if (b === 0) {
-          this.addThought("❌ Cannot divide by zero", thoughtStream)
-          return { answer: Number.NaN, steps: ["Cannot divide by zero"] }
-        }
-        result = a / b
-        operatorSymbol = "÷"
-        break
-      default:
-        this.addThought(`❌ Unknown operator: ${operator}`, thoughtStream)
-        return { answer: Number.NaN, steps: [`Unknown operator: ${operator}`] }
+    // Handle implicit multiplication like "3x3x3" -> "3*3*3"
+    if (/\d+x\d+/.test(normalized)) {
+      normalized = normalized.replace(/(\d+)x(\d+)/g, "$1*$2")
+      this.addThought(`🔄 Converted implicit multiplication: "${normalized}"`, thoughtStream)
     }
 
-    this.addThought(`✅ Result: ${result}`, thoughtStream)
-    return {
-      answer: result,
-      steps: [`${a} ${operatorSymbol} ${b} = ${result}`],
-    }
+    // Handle repeated operations like "3+3+3+4" (already has operators)
+    // Handle repeated multiplication like "3*3*3*3"
+
+    this.addThought(`✅ Normalized to: "${normalized}"`, thoughtStream)
+    return normalized
   }
 
-  private calculateThreeNumbers(
+  private evaluateExpression(
     numbers: number[],
     operators: string[],
     thoughtStream: ThoughtNode[],
-  ): { answer: number; steps: string[] } {
+  ): { answer: number; steps: string[] } | null {
     this.addThought(
-      `🧮 Three number calculation: ${numbers.join(", ")} with operators ${operators.join(", ")}`,
+      `🧮 Evaluating expression with ${numbers.length} numbers and ${operators.length} operators`,
       thoughtStream,
     )
 
-    const [a, b, c] = numbers
+    if (numbers.length === 0) return null
+
+    // Handle single number
+    if (numbers.length === 1) {
+      return { answer: numbers[0], steps: [`Result: ${numbers[0]}`] }
+    }
+
+    // Handle mismatched numbers and operators
+    if (numbers.length !== operators.length + 1) {
+      this.addThought(`❌ Mismatched numbers (${numbers.length}) and operators (${operators.length})`, thoughtStream)
+      return null
+    }
+
     const steps: string[] = []
+    const workingNumbers = [...numbers]
+    const workingOperators = [...operators]
 
-    // Handle order of operations
-    if (operators.length === 2) {
-      // Check if we need to do multiplication/division first
-      const hasMultDiv = operators.some((op) => ["×", "*", "x", "÷", "/"].includes(op))
-      const hasAddSub = operators.some((op) => ["+", "-"].includes(op))
+    this.addThought(`🎯 Starting calculation with order of operations...`, thoughtStream)
 
-      if (hasMultDiv && hasAddSub) {
-        // Order of operations required
-        this.addThought("📚 Applying order of operations (PEMDAS)", thoughtStream)
+    // Step 1: Handle multiplication and division first (PEMDAS)
+    let i = 0
+    while (i < workingOperators.length) {
+      if (workingOperators[i] === "*" || workingOperators[i] === "/") {
+        const left = workingNumbers[i]
+        const right = workingNumbers[i + 1]
+        const operator = workingOperators[i]
 
-        // Find multiplication/division first
-        for (let i = 0; i < operators.length; i++) {
-          if (["×", "*", "x", "÷", "/"].includes(operators[i])) {
-            const tempResult = this.calculateTwoNumbers(numbers[i], numbers[i + 1], operators[i], [])
-            steps.push(`${numbers[i]} ${operators[i]} ${numbers[i + 1]} = ${tempResult.answer}`)
-
-            // Replace the two numbers with the result
-            const newNumbers = [...numbers]
-            newNumbers.splice(i, 2, tempResult.answer)
-            const newOperators = [...operators]
-            newOperators.splice(i, 1)
-
-            // Continue with remaining operation
-            if (newNumbers.length === 2 && newOperators.length === 1) {
-              const finalResult = this.calculateTwoNumbers(newNumbers[0], newNumbers[1], newOperators[0], [])
-              steps.push(`${newNumbers[0]} ${newOperators[0]} ${newNumbers[1]} = ${finalResult.answer}`)
-              return { answer: finalResult.answer, steps }
-            }
-            break
+        let result: number
+        if (operator === "*") {
+          result = left * right
+          steps.push(`${left} × ${right} = ${result}`)
+          this.addThought(`🔢 Multiplication: ${left} × ${right} = ${result}`, thoughtStream)
+        } else {
+          if (right === 0) {
+            this.addThought("❌ Cannot divide by zero", thoughtStream)
+            return { answer: Number.NaN, steps: ["Cannot divide by zero"] }
           }
+          result = left / right
+          steps.push(`${left} ÷ ${right} = ${result}`)
+          this.addThought(`🔢 Division: ${left} ÷ ${right} = ${result}`, thoughtStream)
         }
+
+        // Replace the two numbers and operator with the result
+        workingNumbers.splice(i, 2, result)
+        workingOperators.splice(i, 1)
+        // Don't increment i, check the same position again
       } else {
-        // All same precedence - calculate left to right
-        this.addThought("➡️ Calculating left to right", thoughtStream)
-        const firstResult = this.calculateTwoNumbers(a, b, operators[0], [])
-        steps.push(`${a} ${operators[0]} ${b} = ${firstResult.answer}`)
-
-        const finalResult = this.calculateTwoNumbers(firstResult.answer, c, operators[1], [])
-        steps.push(`${firstResult.answer} ${operators[1]} ${c} = ${finalResult.answer}`)
-
-        return { answer: finalResult.answer, steps }
+        i++
       }
     }
 
-    // Fallback
-    this.addThought("❌ Complex three-number calculation not handled", thoughtStream)
-    return { answer: Number.NaN, steps: ["Complex calculation not supported"] }
+    // Step 2: Handle addition and subtraction left to right
+    i = 0
+    while (i < workingOperators.length) {
+      const left = workingNumbers[i]
+      const right = workingNumbers[i + 1]
+      const operator = workingOperators[i]
+
+      let result: number
+      if (operator === "+") {
+        result = left + right
+        steps.push(`${left} + ${right} = ${result}`)
+        this.addThought(`🔢 Addition: ${left} + ${right} = ${result}`, thoughtStream)
+      } else if (operator === "-") {
+        result = left - right
+        steps.push(`${left} - ${right} = ${result}`)
+        this.addThought(`🔢 Subtraction: ${left} - ${right} = ${result}`, thoughtStream)
+      } else {
+        this.addThought(`❌ Unknown operator: ${operator}`, thoughtStream)
+        return null
+      }
+
+      // Replace the two numbers and operator with the result
+      workingNumbers.splice(i, 2, result)
+      workingOperators.splice(i, 1)
+      // Don't increment i, check the same position again
+    }
+
+    const finalAnswer = workingNumbers[0]
+    this.addThought(`✅ Final result: ${finalAnswer}`, thoughtStream)
+
+    return {
+      answer: finalAnswer,
+      steps: steps,
+    }
   }
 
   private addThought(content: string, thoughtStream: ThoughtNode[]): void {
