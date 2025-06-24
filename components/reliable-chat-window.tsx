@@ -273,25 +273,40 @@ export default function ReliableChatWindow() {
   const getDataForType = (dataType: string) => {
     switch (dataType) {
       case "vocabulary":
-        return Array.from(aiSystem.getStats().vocabulary || []).map(([word, category]) => ({
-          key: word,
-          value: category,
-          type: "vocabulary",
-        }))
+        const vocabStats = aiSystem.getStats()
+        if (vocabStats.vocabulary && vocabStats.vocabulary instanceof Map) {
+          return Array.from(vocabStats.vocabulary.entries()).map(([word, category]) => ({
+            key: word,
+            value: category,
+            type: "vocabulary",
+          }))
+        }
+        return []
+
       case "memory":
-        return Array.from(aiSystem.getStats().memory || []).map(([key, entry]) => ({
-          key: key,
-          value: typeof entry === "object" ? entry.value : entry,
-          timestamp: typeof entry === "object" ? entry.timestamp : Date.now(),
-          type: "memory",
-        }))
+        const memoryStats = aiSystem.getStats()
+        if (memoryStats.memory && memoryStats.memory instanceof Map) {
+          return Array.from(memoryStats.memory.entries()).map(([key, entry]) => ({
+            key: key,
+            value: typeof entry === "object" ? entry.value : entry,
+            timestamp: typeof entry === "object" ? entry.timestamp : Date.now(),
+            type: typeof entry === "object" && entry.type ? entry.type : "memory",
+          }))
+        }
+        return []
+
       case "math":
-        return Array.from(aiSystem.getStats().mathFunctions || []).map(([name, func]) => ({
-          key: name,
-          value: func.description || "Mathematical function",
-          examples: func.examples || [],
-          type: "math",
-        }))
+        const mathStats = aiSystem.getStats()
+        if (mathStats.mathFunctions && mathStats.mathFunctions instanceof Map) {
+          return Array.from(mathStats.mathFunctions.entries()).map(([name, func]) => ({
+            key: name,
+            value: func.description || "Mathematical function",
+            examples: func.examples || [],
+            type: "math",
+          }))
+        }
+        return []
+
       case "conversations":
         return aiSystem
           .getConversationHistory()
@@ -303,6 +318,7 @@ export default function ReliableChatWindow() {
             role: msg.role,
             type: "conversations",
           }))
+
       default:
         return []
     }
@@ -431,7 +447,9 @@ export default function ReliableChatWindow() {
             <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDataClick("math")}>
               <CardContent className="p-4 text-center">
                 <Calculator className="w-8 h-8 mx-auto mb-2 text-orange-600" />
-                <div className="text-2xl font-bold">{stats.mathFunctions}</div>
+                <div className="text-2xl font-bold">
+                  {typeof stats.mathFunctions === "number" ? stats.mathFunctions : 0}
+                </div>
                 <div className="text-sm text-gray-500">Math Functions</div>
                 <div className="text-xs text-orange-600 mt-1">Click to view</div>
               </CardContent>
@@ -707,11 +725,16 @@ export default function ReliableChatWindow() {
                             </div>
                           </div>
                         ) : (
-                          // View Mode
+                          // View Mode - enhance this section
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-3">
                                 <div className="font-medium text-sm">{entry.key}</div>
+                                {entry.type === "fact" && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Fact
+                                  </Badge>
+                                )}
                                 {entry.type === "memory" && entry.timestamp && (
                                   <div className="text-xs text-gray-500">
                                     {new Date(entry.timestamp).toLocaleDateString()}
@@ -1044,7 +1067,9 @@ export default function ReliableChatWindow() {
                   </div>
 
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">{stats.mathFunctions}</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {typeof stats.mathFunctions === "number" ? stats.mathFunctions : 0}
+                    </div>
                     <div className="text-xs text-gray-500">Math Funcs</div>
                   </div>
                 </div>
