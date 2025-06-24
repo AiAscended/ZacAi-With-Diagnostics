@@ -556,22 +556,6 @@ class CognitiveProcessor {
   }
 }
 
-// Intent Classification System
-class IntentClassifier {
-  classify(input: string): string {
-    // Advanced intent classification logic
-    return "conversation"
-  }
-}
-
-// Response Generation System
-class ResponseGenerator {
-  generate(intent: string, context: any): string {
-    // Advanced response generation logic
-    return "Generated response"
-  }
-}
-
 // Enhanced AI System with Cognitive Processing
 export class CognitiveAISystem {
   private cognitiveProcessor = new CognitiveProcessor()
@@ -589,6 +573,12 @@ export class CognitiveAISystem {
     this.initializeBasicVocabulary()
     this.initializeBasicMathFunctions()
     this.initializeSampleFacts()
+  }
+
+  // ADD MISSING sendMessage METHOD
+  public async sendMessage(userMessage: string): Promise<string> {
+    const response = await this.processMessage(userMessage)
+    return response.content
   }
 
   public async processMessage(userMessage: string): Promise<AIResponse> {
@@ -709,12 +699,19 @@ export class CognitiveAISystem {
         : 0
 
     // FIXED: Count all user information sources properly
-    const totalUserInfo = this.personalInfo.size + this.memory.size + this.facts.size
+    const totalUserInfo = this.personalInfo.size + this.memory.size
+
+    console.log("📊 Stats calculation:", {
+      personalInfo: this.personalInfo.size,
+      memory: this.memory.size,
+      facts: this.facts.size,
+      totalUserInfo: totalUserInfo,
+    })
 
     return {
       totalMessages: this.conversationHistory.length,
       vocabularySize: this.vocabulary.size,
-      memoryEntries: totalUserInfo, // Fixed: Now counts all user info sources
+      memoryEntries: totalUserInfo, // Fixed: Now counts personal info + memory correctly
       avgConfidence: Math.round(avgConfidence * 100) / 100,
       systemStatus: this.systemStatus,
       mathFunctions: this.mathFunctions.size,
