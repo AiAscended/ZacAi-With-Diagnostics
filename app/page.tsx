@@ -1,9 +1,9 @@
-import EnhancedAIChat from "@/components/enhanced-ai-chat"
+import CognitiveChatWindow from "@/components/cognitive-chat-window"
 
 export default function Home() {
   return (
-    <main className="h-screen">
-      <EnhancedAIChat />
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <CognitiveChatWindow />
     </main>
   )
 }
