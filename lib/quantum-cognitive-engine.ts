@@ -319,6 +319,41 @@ export class QuantumCognitiveEngine {
       confidence: 0.9,
     })
   }
+
+  // Add these methods at the end of the QuantumCognitiveEngine class
+
+  public async processMessage(userMessage: string): Promise<AIResponse> {
+    const personalInfoMap = new Map() // Will be populated from storage later
+    const response = await this.processThought(userMessage, [], personalInfoMap)
+
+    return {
+      content: response.content,
+      confidence: response.confidence,
+      reasoning: response.reasoning,
+    }
+  }
+
+  public getStats(): any {
+    return {
+      totalMessages: 0,
+      vocabularySize: this.knowledgeQuantum.size,
+      memoryEntries: 0,
+      avgConfidence: 0.8,
+      systemStatus: this.isInitialized ? "ready" : "initializing",
+      mathFunctions: this.knowledgeQuantum.size,
+      seedProgress: 0,
+      responseTime: 0,
+    }
+  }
+
+  public getConversationHistory(): any[] {
+    return []
+  }
+
+  public async sendMessage(userMessage: string): Promise<string> {
+    const response = await this.processMessage(userMessage)
+    return response.content
+  }
 }
 
 // ITERATIVE THINKING ENGINE - LIKE HOW GREAT MINDS WORK
@@ -836,4 +871,10 @@ interface CognitiveResponse {
   reasoning: string[]
   pathways: string[]
   synthesis: any
+}
+
+interface AIResponse {
+  content: string
+  confidence: number
+  reasoning: string[]
 }

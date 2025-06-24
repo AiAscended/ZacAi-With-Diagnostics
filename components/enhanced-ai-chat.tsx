@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { KnowledgeManagerV2 } from "@/lib/knowledge-manager-v2"
-import { CognitiveAISystem } from "@/lib/cognitive-ai-system"
+import { QuantumCognitiveEngine } from "@/lib/quantum-cognitive-engine"
 import {
   Brain,
   BookOpen,
@@ -66,7 +66,7 @@ interface AIStats {
 
 export default function EnhancedAIChat() {
   const [knowledgeManager] = useState(() => new KnowledgeManagerV2())
-  const [aiSystem] = useState(() => new CognitiveAISystem())
+  const [aiSystem] = useState(() => new QuantumCognitiveEngine())
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -304,7 +304,8 @@ export default function EnhancedAIChat() {
 
       let response
       try {
-        response = await aiSystem.processMessage(userInput)
+        const personalInfo = knowledgeManager.exportKnowledge().userInfo || new Map()
+        response = await aiSystem.processThought(userInput, [], new Map(Array.from(personalInfo.entries())))
       } catch (aiError) {
         console.error("AI processing failed:", aiError)
         response = {
