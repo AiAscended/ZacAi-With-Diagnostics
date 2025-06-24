@@ -1,456 +1,9 @@
 import { BrowserStorageManager } from "./browser-storage-manager"
+import { EnhancedCognitiveSystem } from "./enhanced-cognitive-system"
 
-// Revolutionary Cognitive Processing Engine - FUNCTIONALITY ONLY
-class CognitiveProcessor {
-  private contextMemory: Map<string, ContextNode> = new Map()
-  private semanticPatterns: Map<string, SemanticPattern> = new Map()
-
-  constructor() {
-    this.initializeSemanticPatterns()
-  }
-
-  // Core Cognitive Processing Pipeline
-  public async processThought(
-    input: string,
-    conversationContext: any[],
-    personalInfo: Map<string, any>,
-  ): Promise<CognitiveResponse> {
-    console.log("🧠 Starting cognitive processing for:", input)
-
-    // Stage 1: Semantic Decomposition
-    const semantics = this.decomposeSemantics(input)
-    console.log("📝 Semantics:", semantics)
-
-    // Stage 2: Context Synthesis
-    const context = this.synthesizeContext(semantics, conversationContext, personalInfo)
-    console.log("🔗 Context:", context)
-
-    // Stage 3: Intent Inference
-    const intent = this.inferIntent(semantics, context)
-    console.log("🎯 Intent:", intent)
-
-    // Stage 4: Knowledge Activation
-    const knowledge = this.activateRelevantKnowledge(intent, context, personalInfo)
-    console.log("📚 Knowledge:", knowledge)
-
-    // Stage 5: Response Synthesis
-    const response = this.generateResponse(intent, context, knowledge, personalInfo)
-    console.log("💬 Response:", response)
-
-    // Stage 6: Confidence Calculation
-    const confidence = this.calculateConfidence(semantics, intent, context, knowledge)
-
-    return {
-      content: response.content,
-      confidence: confidence,
-      reasoning: response.reasoning,
-      intent: intent,
-      context: context,
-      semantics: semantics,
-    }
-  }
-
-  private decomposeSemantics(input: string): SemanticComponents {
-    const words = input.toLowerCase().match(/\b\w+\b/g) || []
-    const entities = this.extractEntities(input)
-    const emotions = this.detectEmotions(input)
-    const concepts = this.identifyConcepts(words)
-    const relationships = this.findRelationships(words, entities)
-
-    return {
-      words,
-      entities,
-      emotions,
-      concepts,
-      relationships,
-      complexity: this.calculateComplexity(words, entities, concepts),
-    }
-  }
-
-  private synthesizeContext(
-    semantics: SemanticComponents,
-    history: any[],
-    personalInfo: Map<string, any>,
-  ): ContextSynthesis {
-    const recentContext = history.slice(-5) // Last 5 exchanges
-    const topicalContext = this.extractTopicalContext(recentContext)
-    const personalContext = this.extractPersonalContext(personalInfo)
-    const emotionalContext = this.extractEmotionalContext(recentContext)
-
-    return {
-      recent: recentContext,
-      topical: topicalContext,
-      personal: personalContext,
-      emotional: emotionalContext,
-      continuity: this.calculateContinuity(semantics, topicalContext),
-    }
-  }
-
-  private inferIntent(semantics: SemanticComponents, context: ContextSynthesis): IntentInference {
-    const primaryIntent = this.classifyPrimaryIntent(semantics)
-    const secondaryIntents = this.identifySecondaryIntents(semantics, context)
-    const urgency = this.assessUrgency(semantics)
-    const complexity = this.assessComplexity(semantics, context)
-
-    return {
-      primary: primaryIntent,
-      secondary: secondaryIntents,
-      urgency,
-      complexity,
-      confidence: this.calculateIntentConfidence(primaryIntent, secondaryIntents, context),
-    }
-  }
-
-  private activateRelevantKnowledge(
-    intent: IntentInference,
-    context: ContextSynthesis,
-    personalInfo: Map<string, any>,
-  ): KnowledgeActivation {
-    const relevantFacts = this.retrieveRelevantFacts(intent, context, personalInfo)
-    const patterns = this.matchPatterns(intent, context)
-    const analogies = this.findAnalogies(intent, context)
-
-    return {
-      facts: relevantFacts,
-      patterns,
-      analogies,
-      confidence: this.calculateKnowledgeConfidence(relevantFacts, patterns),
-    }
-  }
-
-  private generateResponse(
-    intent: IntentInference,
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-    personalInfo: Map<string, any>,
-  ): ResponseSynthesis {
-    const responseTemplate = this.selectResponseTemplate(intent, context)
-    const content = this.generateContent(responseTemplate, intent, context, knowledge, personalInfo)
-    const tone = this.determineTone(context, intent)
-    const reasoning = this.generateReasoning(intent, context, knowledge)
-
-    return {
-      content,
-      reasoning,
-    }
-  }
-
-  private calculateConfidence(
-    semantics: SemanticComponents,
-    intent: IntentInference,
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-  ): number {
-    const semanticConfidence = semantics.complexity > 0.3 ? 0.8 : 0.6
-    const intentConfidence = intent.confidence
-    const contextConfidence = context.continuity
-    const knowledgeConfidence = knowledge.confidence
-
-    return (semanticConfidence + intentConfidence + contextConfidence + knowledgeConfidence) / 4
-  }
-
-  // Enhanced Semantic Analysis Methods
-  private extractEntities(input: string): Entity[] {
-    const entities: Entity[] = []
-
-    // Names - Enhanced patterns
-    const namePattern = /(?:my name is|i'm|i am|call me) (\w+)/gi
-    let match = namePattern.exec(input)
-    if (match) entities.push({ type: "name", value: match[1], confidence: 0.9 })
-
-    // Numbers
-    const numberPattern = /\b(\d+(?:\.\d+)?)\b/g
-    while ((match = numberPattern.exec(input)) !== null) {
-      entities.push({ type: "number", value: match[1], confidence: 0.95 })
-    }
-
-    // Relationships - Enhanced
-    const relationshipPattern = /(?:wife|husband|partner|spouse|girlfriend|boyfriend|married)/gi
-    if (relationshipPattern.test(input)) {
-      entities.push({ type: "relationship", value: "partner", confidence: 0.8 })
-    }
-
-    // Pets - Enhanced
-    const petPattern = /(?:cat|dog|pet)s?/gi
-    if (petPattern.test(input)) {
-      entities.push({ type: "pet", value: "animal", confidence: 0.8 })
-    }
-
-    // Jobs - Enhanced
-    const jobPattern = /(?:work as|job is|i'm a|i am a) (.+?)(?:\.|$|,)/gi
-    match = jobPattern.exec(input)
-    if (match) entities.push({ type: "job", value: match[1].trim(), confidence: 0.8 })
-
-    return entities
-  }
-
-  private detectEmotions(input: string): EmotionalState {
-    const positiveWords = ["happy", "great", "good", "excellent", "wonderful", "love", "like", "amazing", "fantastic"]
-    const negativeWords = ["sad", "bad", "terrible", "hate", "dislike", "awful", "horrible", "angry"]
-    const questionWords = ["what", "how", "why", "when", "where", "who", "which"]
-
-    const words = input.toLowerCase().split(/\s+/)
-    const positive = words.filter((w) => positiveWords.includes(w)).length
-    const negative = words.filter((w) => negativeWords.includes(w)).length
-    const questions = words.filter((w) => questionWords.includes(w)).length
-
-    return {
-      valence: positive > negative ? "positive" : negative > positive ? "negative" : "neutral",
-      intensity: Math.max(positive, negative) / words.length,
-      curiosity: questions / words.length,
-      engagement: (positive + negative + questions) / words.length,
-    }
-  }
-
-  private identifyConcepts(words: string[]): Concept[] {
-    const conceptMap = new Map([
-      [
-        "mathematics",
-        ["math", "calculate", "number", "add", "subtract", "multiply", "divide", "times", "plus", "minus", "equals"],
-      ],
-      ["personal", ["name", "age", "work", "job", "live", "family", "married", "wife", "husband", "pet", "cat", "dog"]],
-      ["memory", ["remember", "recall", "forget", "know", "learned", "stored"]],
-      ["greeting", ["hello", "hi", "hey", "goodbye", "bye", "good morning", "good afternoon", "good evening"]],
-      ["question", ["what", "how", "why", "when", "where", "who", "which", "can", "could", "would"]],
-      ["emotion", ["feel", "happy", "sad", "angry", "excited", "love", "like", "hate"]],
-      ["learning", ["teach", "learn", "understand", "explain", "show", "tell"]],
-    ])
-
-    const concepts: Concept[] = []
-    for (const [concept, keywords] of conceptMap) {
-      const matches = words.filter((w) => keywords.includes(w)).length
-      if (matches > 0) {
-        concepts.push({
-          name: concept,
-          strength: matches / words.length,
-          keywords: keywords.filter((k) => words.includes(k)),
-        })
-      }
-    }
-
-    return concepts.sort((a, b) => b.strength - a.strength)
-  }
-
-  private classifyPrimaryIntent(semantics: SemanticComponents): string {
-    const concepts = semantics.concepts
-    if (concepts.length === 0) return "conversation"
-
-    const topConcept = concepts[0]
-
-    // Mathematical intent
-    if (topConcept.name === "mathematics" && topConcept.strength > 0.15) {
-      return "mathematics"
-    }
-
-    // Memory intent
-    if (topConcept.name === "memory" && topConcept.strength > 0.1) {
-      return "memory"
-    }
-
-    // Personal information sharing
-    if (topConcept.name === "personal" && topConcept.strength > 0.1) {
-      return "personal_sharing"
-    }
-
-    // Question asking
-    if (topConcept.name === "question" && topConcept.strength > 0.1) {
-      return "inquiry"
-    }
-
-    // Greeting
-    if (topConcept.name === "greeting" && topConcept.strength > 0.15) {
-      return "greeting"
-    }
-
-    // Learning
-    if (topConcept.name === "learning" && topConcept.strength > 0.1) {
-      return "learning"
-    }
-
-    return "conversation"
-  }
-
-  private generateContent(
-    template: string,
-    intent: IntentInference,
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-    personalInfo: Map<string, any>,
-  ): string {
-    const userName = this.getUserName(personalInfo)
-    const namePrefix = userName ? `${userName}, ` : ""
-
-    // Simple, logical responses based on intent
-    switch (intent.primary) {
-      case "personal_sharing":
-        return `${namePrefix}thanks for sharing that! I'll remember it.`
-      case "inquiry":
-        if (knowledge.facts.length > 0) {
-          return `${namePrefix}based on what I know: ${knowledge.facts[0].content}`
-        }
-        return `${namePrefix}that's a great question! What specifically would you like to know?`
-      case "mathematics":
-        return "Let me calculate that for you."
-      case "memory":
-        if (personalInfo.size > 0) {
-          const facts = Array.from(personalInfo.entries())
-            .map(([key, entry]) => {
-              const value = typeof entry === "object" ? entry.value : entry
-              return `${key}: ${value}`
-            })
-            .slice(0, 3)
-            .join(", ")
-          return `${namePrefix}I remember: ${facts}`
-        }
-        return `${namePrefix}I don't have any stored memories yet. Tell me something about yourself!`
-      case "greeting":
-        const timeOfDay = new Date().getHours()
-        const greeting = timeOfDay < 12 ? "Good morning" : timeOfDay < 18 ? "Good afternoon" : "Good evening"
-        return `${greeting}${namePrefix}! How can I help you today?`
-      default:
-        return `${namePrefix}I understand. What would you like to talk about?`
-    }
-  }
-
-  private getUserName(personalInfo: Map<string, any>): string | null {
-    const nameEntry = personalInfo.get("name")
-    if (nameEntry) {
-      return typeof nameEntry === "object" ? nameEntry.value : nameEntry
-    }
-    return null
-  }
-
-  // Helper methods for context and pattern matching
-  private extractTopicalContext(history: any[]): string[] {
-    return (
-      history
-        .map((h) => h.content)
-        .join(" ")
-        .match(/\b\w{4,}\b/g) || []
-    )
-  }
-
-  private extractPersonalContext(personalInfo: Map<string, any>): PersonalContext {
-    const personal: PersonalContext = { facts: [], preferences: [], relationships: [] }
-
-    for (const [key, entry] of personalInfo.entries()) {
-      const value = typeof entry === "object" ? entry.value : entry
-      personal.facts.push({ type: key, value: value })
-    }
-
-    return personal
-  }
-
-  private extractEmotionalContext(history: any[]): EmotionalContext {
-    return {
-      overall_tone: "neutral",
-      engagement_level: 0.7,
-      satisfaction: 0.8,
-    }
-  }
-
-  private calculateContinuity(semantics: SemanticComponents, topical: string[]): number {
-    const overlap = semantics.words.filter((w) => topical.includes(w)).length
-    return overlap / Math.max(semantics.words.length, 1)
-  }
-
-  private calculateComplexity(words: string[], entities: Entity[], concepts: Concept[]): number {
-    return (words.length * 0.1 + entities.length * 0.3 + concepts.length * 0.6) / 10
-  }
-
-  private initializeSemanticPatterns(): void {
-    // Initialize common semantic patterns for faster processing
-    this.semanticPatterns.set("greeting", {
-      patterns: [/^(hi|hello|hey)/i],
-      weight: 0.9,
-      response_type: "greeting",
-    })
-
-    this.semanticPatterns.set("math", {
-      patterns: [/\d+\s*[+\-*/]\s*\d+/, /calculate|compute/i],
-      weight: 0.95,
-      response_type: "mathematics",
-    })
-  }
-
-  // Additional helper methods
-  private findRelationships(words: string[], entities: Entity[]): Relationship[] {
-    return []
-  }
-
-  private identifySecondaryIntents(semantics: SemanticComponents, context: ContextSynthesis): string[] {
-    return []
-  }
-
-  private assessUrgency(semantics: SemanticComponents): number {
-    return 0.5
-  }
-
-  private assessComplexity(semantics: SemanticComponents, context: ContextSynthesis): number {
-    return semantics.complexity
-  }
-
-  private calculateIntentConfidence(primary: string, secondary: string[], context: ContextSynthesis): number {
-    return 0.8
-  }
-
-  private retrieveRelevantFacts(
-    intent: IntentInference,
-    context: ContextSynthesis,
-    personalInfo: Map<string, any>,
-  ): Fact[] {
-    const facts: Fact[] = []
-
-    // Add personal info as facts
-    for (const [key, entry] of personalInfo.entries()) {
-      const value = typeof entry === "object" ? entry.value : entry
-      facts.push({
-        content: `${key}: ${value}`,
-        confidence: 0.9,
-        source: "personal",
-      })
-    }
-
-    return facts
-  }
-
-  private matchPatterns(intent: IntentInference, context: ContextSynthesis): Pattern[] {
-    return []
-  }
-
-  private findAnalogies(intent: IntentInference, context: ContextSynthesis): Analogy[] {
-    return []
-  }
-
-  private calculateKnowledgeConfidence(facts: Fact[], patterns: Pattern[]): number {
-    return facts.length > 0 ? 0.8 : 0.5
-  }
-
-  private selectResponseTemplate(intent: IntentInference, context: ContextSynthesis): string {
-    return "default"
-  }
-
-  private determineTone(context: ContextSynthesis, intent: IntentInference): string {
-    return "friendly"
-  }
-
-  private generateReasoning(
-    intent: IntentInference,
-    context: ContextSynthesis,
-    knowledge: KnowledgeActivation,
-  ): string[] {
-    return [
-      `Identified intent: ${intent.primary}`,
-      `Context continuity: ${context.continuity.toFixed(2)}`,
-      `Knowledge confidence: ${knowledge.confidence.toFixed(2)}`,
-      `Personal context: ${context.personal.facts.length} facts available`,
-    ]
-  }
-}
-
-// Enhanced AI System with Cognitive Processing
+// UPDATED COGNITIVE AI SYSTEM - USES ENHANCED COGNITIVE ENGINE
 export class CognitiveAISystem {
-  private cognitiveProcessor = new CognitiveProcessor()
+  private enhancedCognitive = new EnhancedCognitiveSystem()
   private mathProcessor = new EnhancedMathProcessor()
   private storageManager = new BrowserStorageManager()
   private conversationHistory: ChatMessage[] = []
@@ -467,7 +20,6 @@ export class CognitiveAISystem {
     this.initializeSampleFacts()
   }
 
-  // ADD MISSING sendMessage METHOD
   public async sendMessage(userMessage: string): Promise<string> {
     const response = await this.processMessage(userMessage)
     return response.content
@@ -478,26 +30,13 @@ export class CognitiveAISystem {
       await this.initialize()
     }
 
-    console.log("🚀 Processing message:", userMessage)
+    console.log("🚀 Processing message with enhanced cognitive system:", userMessage)
 
     // Extract and store personal information FIRST
     this.extractAndStorePersonalInfo(userMessage)
 
-    // Check for math first
-    const mathAnalysis = this.mathProcessor.analyzeMathExpression(userMessage)
-    if (mathAnalysis.isMatch && mathAnalysis.result !== undefined) {
-      const response: AIResponse = {
-        content: `The result is: ${mathAnalysis.result}`,
-        confidence: mathAnalysis.confidence,
-        reasoning: mathAnalysis.reasoning,
-        mathAnalysis: mathAnalysis,
-      }
-      await this.saveConversation(userMessage, response.content)
-      return response
-    }
-
-    // Use cognitive processing for intelligent response
-    const cognitiveResponse = await this.cognitiveProcessor.processThought(
+    // Use enhanced cognitive processing
+    const cognitiveResponse = await this.enhancedCognitive.processThought(
       userMessage,
       this.conversationHistory,
       this.personalInfo,
@@ -513,6 +52,70 @@ export class CognitiveAISystem {
     return response
   }
 
+  public async initialize(): Promise<void> {
+    if (this.isInitialized) return
+
+    try {
+      console.log("🚀 Initializing Cognitive AI System with Enhanced Engine...")
+
+      // Initialize enhanced cognitive system
+      await this.enhancedCognitive.initialize()
+
+      await this.loadConversationHistory()
+      await this.loadMemory()
+      await this.loadVocabulary()
+
+      this.systemStatus = "ready"
+      this.isInitialized = true
+
+      console.log("✅ Enhanced Cognitive AI System ready!")
+    } catch (error) {
+      console.error("❌ Initialization failed:", error)
+      this.systemStatus = "ready"
+      this.isInitialized = true
+    }
+  }
+
+  public getStats(): any {
+    const assistantMessages = this.conversationHistory.filter((m) => m.role === "assistant" && m.confidence)
+    const avgConfidence =
+      assistantMessages.length > 0
+        ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
+        : 0
+
+    const totalUserInfo = this.personalInfo.size + this.memory.size
+
+    // Get enhanced cognitive data
+    const mathKnowledge = this.enhancedCognitive.getMathKnowledge()
+    const factDatabase = this.enhancedCognitive.getFactDatabase()
+
+    console.log("📊 Enhanced Stats:", {
+      personalInfo: this.personalInfo.size,
+      memory: this.memory.size,
+      facts: factDatabase.size,
+      mathKnowledge: mathKnowledge.size,
+      totalUserInfo: totalUserInfo,
+    })
+
+    return {
+      totalMessages: this.conversationHistory.length,
+      vocabularySize: this.vocabulary.size,
+      memoryEntries: totalUserInfo,
+      avgConfidence: Math.round(avgConfidence * 100) / 100,
+      systemStatus: this.systemStatus,
+      mathFunctions: mathKnowledge.size, // Now shows actual math knowledge
+      seedProgress: 0,
+      responseTime: 0,
+      // Enhanced data access
+      vocabularyData: this.vocabulary,
+      memoryData: this.memory,
+      personalInfoData: this.personalInfo,
+      factsData: factDatabase, // Now shows actual facts from seed data
+      mathFunctionsData: mathKnowledge, // Now shows actual math knowledge
+    }
+  }
+
+  // Keep all existing methods for compatibility
   private extractAndStorePersonalInfo(message: string): void {
     const personalPatterns = [
       {
@@ -583,42 +186,7 @@ export class CognitiveAISystem {
     })
   }
 
-  public getStats(): any {
-    const assistantMessages = this.conversationHistory.filter((m) => m.role === "assistant" && m.confidence)
-    const avgConfidence =
-      assistantMessages.length > 0
-        ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
-        : 0
-
-    // FIXED: Count all user information sources properly
-    const totalUserInfo = this.personalInfo.size + this.memory.size
-
-    console.log("📊 Stats calculation:", {
-      personalInfo: this.personalInfo.size,
-      memory: this.memory.size,
-      facts: this.facts.size,
-      totalUserInfo: totalUserInfo,
-    })
-
-    return {
-      totalMessages: this.conversationHistory.length,
-      vocabularySize: this.vocabulary.size,
-      memoryEntries: totalUserInfo, // Fixed: Now counts personal info + memory correctly
-      avgConfidence: Math.round(avgConfidence * 100) / 100,
-      systemStatus: this.systemStatus,
-      mathFunctions: this.mathFunctions.size,
-      seedProgress: 0,
-      responseTime: 0,
-      // Separate data access for detailed viewing
-      vocabularyData: this.vocabulary,
-      memoryData: this.memory,
-      personalInfoData: this.personalInfo,
-      factsData: this.facts,
-      mathFunctionsData: this.mathFunctions,
-    }
-  }
-
-  // Rest of the implementation continues with all the missing methods...
+  // Keep all existing methods for backward compatibility...
   private mathFunctions: Map<string, MathFunction> = new Map()
 
   private initializeBasicMathFunctions(): void {
@@ -732,27 +300,6 @@ export class CognitiveAISystem {
     })
   }
 
-  public async initialize(): Promise<void> {
-    if (this.isInitialized) return
-
-    try {
-      console.log("🚀 Initializing Cognitive AI System...")
-
-      await this.loadConversationHistory()
-      await this.loadMemory()
-      await this.loadVocabulary()
-
-      this.systemStatus = "ready"
-      this.isInitialized = true
-
-      console.log("✅ Cognitive AI System ready!")
-    } catch (error) {
-      console.error("❌ Initialization failed:", error)
-      this.systemStatus = "ready"
-      this.isInitialized = true
-    }
-  }
-
   private async loadConversationHistory(): Promise<void> {
     try {
       const conversations = await this.storageManager.loadConversations()
@@ -835,7 +382,7 @@ export class CognitiveAISystem {
   }
 
   public getMathFunctionCount(): number {
-    return this.mathFunctions.size
+    return this.enhancedCognitive.getMathKnowledge().size
   }
 
   public generateSuggestions(messages: ChatMessage[]): any[] {
@@ -1051,121 +598,6 @@ class EnhancedMathProcessor {
 }
 
 // Type Definitions
-interface CognitiveResponse {
-  content: string
-  confidence: number
-  reasoning: string[]
-  intent: IntentInference
-  context: ContextSynthesis
-  semantics: SemanticComponents
-}
-
-interface SemanticComponents {
-  words: string[]
-  entities: Entity[]
-  emotions: EmotionalState
-  concepts: Concept[]
-  relationships: Relationship[]
-  complexity: number
-}
-
-interface Entity {
-  type: string
-  value: string
-  confidence: number
-}
-
-interface EmotionalState {
-  valence: "positive" | "negative" | "neutral"
-  intensity: number
-  curiosity: number
-  engagement: number
-}
-
-interface Concept {
-  name: string
-  strength: number
-  keywords: string[]
-}
-
-interface Relationship {
-  from: string
-  to: string
-  type: string
-  strength: number
-}
-
-interface ContextSynthesis {
-  recent: any[]
-  topical: string[]
-  personal: PersonalContext
-  emotional: EmotionalContext
-  continuity: number
-}
-
-interface PersonalContext {
-  facts: Array<{ type: string; value: string }>
-  preferences: Array<{ type: string; value: string }>
-  relationships: Array<{ type: string; value: string }>
-}
-
-interface EmotionalContext {
-  overall_tone: string
-  engagement_level: number
-  satisfaction: number
-}
-
-interface IntentInference {
-  primary: string
-  secondary: string[]
-  urgency: number
-  complexity: number
-  confidence: number
-}
-
-interface KnowledgeActivation {
-  facts: Fact[]
-  patterns: Pattern[]
-  analogies: Analogy[]
-  confidence: number
-}
-
-interface Fact {
-  content: string
-  confidence: number
-  source: string
-}
-
-interface Pattern {
-  name: string
-  strength: number
-}
-
-interface Analogy {
-  source: string
-  target: string
-  similarity: number
-}
-
-interface ResponseSynthesis {
-  content: string
-  tone: string
-  reasoning: string[]
-  template: string
-}
-
-interface SemanticPattern {
-  patterns: RegExp[]
-  weight: number
-  response_type: string
-}
-
-interface ContextNode {
-  concept: string
-  connections: string[]
-  strength: number
-}
-
 interface PersonalInfoEntry {
   key: string
   value: string
