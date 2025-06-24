@@ -1,60 +1,288 @@
-interface ChatMessage {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: number
-  confidence?: number
+import { BrowserStorageManager } from "./browser-storage-manager"
+
+// Enhanced Math Processor - inline to avoid export issues
+class EnhancedMathProcessor {
+  private mathPatterns: MathPattern[] = []
+
+  constructor() {
+    this.initializeMathPatterns()
+  }
+
+  private initializeMathPatterns(): void {
+    this.mathPatterns = [
+      // Basic multiplication patterns
+      {
+        pattern: /(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
+        operation: "multiply",
+        confidence: 0.95,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+      {
+        pattern: /(\d+(?:\.\d+)?)\s*times\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
+        operation: "multiply",
+        confidence: 0.9,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+      {
+        pattern: /(\d+(?:\.\d+)?)\s*multiplied\s*by\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
+        operation: "multiply",
+        confidence: 0.9,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+      {
+        pattern: /multiply\s*(\d+(?:\.\d+)?)\s*by\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
+        operation: "multiply",
+        confidence: 0.9,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+      {
+        pattern: /what\s*(?:is|does)\s*(\d+(?:\.\d+)?)\s*(?:times|x|×|\*)\s*(\d+(?:\.\d+)?)\s*(?:equal|=)?\s*\??\s*$/i,
+        operation: "multiply",
+        confidence: 0.85,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+
+      // Addition patterns
+      {
+        pattern: /(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
+        operation: "add",
+        confidence: 0.95,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+      {
+        pattern: /(\d+(?:\.\d+)?)\s*plus\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
+        operation: "add",
+        confidence: 0.9,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+
+      // Subtraction patterns
+      {
+        pattern: /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
+        operation: "subtract",
+        confidence: 0.95,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+
+      // Division patterns
+      {
+        pattern: /(\d+(?:\.\d+)?)\s*[/÷]\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
+        operation: "divide",
+        confidence: 0.95,
+        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
+      },
+    ]
+  }
+
+  public analyzeMathExpression(input: string): MathAnalysis {
+    const cleanInput = input.trim().toLowerCase()
+    const reasoning: string[] = []
+
+    reasoning.push(`Analyzing input: "${input}"`)
+
+    // Check each pattern
+    for (const pattern of this.mathPatterns) {
+      const match = cleanInput.match(pattern.pattern)
+      if (match) {
+        reasoning.push(`Matched pattern for ${pattern.operation}`)
+
+        try {
+          const numbers = pattern.extract(match)
+          reasoning.push(`Extracted numbers: ${numbers.join(", ")}`)
+
+          const result = this.performOperation(pattern.operation, numbers)
+          reasoning.push(`Calculated result: ${result}`)
+
+          return {
+            isMatch: true,
+            operation: pattern.operation,
+            numbers: numbers,
+            result: result,
+            confidence: pattern.confidence,
+            reasoning: reasoning,
+          }
+        } catch (error) {
+          reasoning.push(`Error in calculation: ${error}`)
+          return {
+            isMatch: false,
+            operation: pattern.operation,
+            numbers: [],
+            result: undefined,
+            confidence: 0.3,
+            reasoning: reasoning,
+          }
+        }
+      }
+    }
+
+    // Check if it contains mathematical keywords but no match
+    const mathKeywords = ["calculate", "math", "multiply", "times", "plus", "minus", "divide", "add", "subtract"]
+    const containsMathKeywords = mathKeywords.some((keyword) => cleanInput.includes(keyword))
+
+    if (containsMathKeywords || /\d/.test(cleanInput)) {
+      reasoning.push("Contains mathematical keywords or numbers but no clear pattern match")
+      return {
+        isMatch: false,
+        operation: "unknown",
+        numbers: [],
+        result: undefined,
+        confidence: 0.4,
+        reasoning: reasoning,
+      }
+    }
+
+    reasoning.push("No mathematical content detected")
+    return {
+      isMatch: false,
+      operation: "none",
+      numbers: [],
+      result: undefined,
+      confidence: 0.0,
+      reasoning: reasoning,
+    }
+  }
+
+  private performOperation(operation: string, numbers: number[]): number {
+    switch (operation) {
+      case "add":
+        return numbers[0] + numbers[1]
+      case "subtract":
+        return numbers[0] - numbers[1]
+      case "multiply":
+        return numbers[0] * numbers[1]
+      case "divide":
+        if (numbers[1] === 0) throw new Error("Cannot divide by zero")
+        return numbers[0] / numbers[1]
+      case "power":
+        return Math.pow(numbers[0], numbers[1])
+      case "sqrt":
+        if (numbers[0] < 0) throw new Error("Cannot take square root of negative number")
+        return Math.sqrt(numbers[0])
+      case "percentage":
+        return (numbers[0] / 100) * numbers[1]
+      default:
+        throw new Error(`Unknown operation: ${operation}`)
+    }
+  }
 }
 
-interface AIResponse {
-  content: string
-  confidence: number
-}
-
-interface AIStats {
-  totalMessages: number
-  vocabularySize: number
-  memoryEntries: number
-  avgConfidence: number
-  systemStatus: "loading" | "ready" | "enhanced"
-  mathFunctions: number
-  seedProgress: number
-  responseTime: number
-}
-
-interface MemoryEntry {
-  key: string
-  value: string
-  timestamp: number
-  importance: number
-}
-
-interface MathFunction {
-  name: string
-  description: string
-  examples: string[]
-  func: (...args: number[]) => number | string
-}
-
-interface Suggestion {
-  text: string
-  type: "question" | "topic" | "action"
-}
-
+// Main AI System Class
 export class ReliableAISystem {
-  private conversationHistory: ChatMessage[] = []
-  private vocabulary: Map<string, string> = new Map()
-  private memory: Map<string, MemoryEntry> = new Map()
+  private mathProcessor = new EnhancedMathProcessor()
   private mathFunctions: Map<string, MathFunction> = new Map()
+  private storageManager = new BrowserStorageManager()
+  private conversationHistory: ChatMessage[] = []
+  private memory: Map<string, any> = new Map()
+  private vocabulary: Map<string, string> = new Map()
+  private systemStatus = "idle"
   private isInitialized = false
-  private systemStatus: "loading" | "ready" | "enhanced" = "loading"
-  private responseTimes: number[] = []
-  private feedbackData: Map<string, "positive" | "negative"> = new Map()
 
   constructor() {
     // Initialize with basic vocabulary immediately
     this.initializeBasicVocabulary()
     this.initializeBasicMathFunctions()
+  }
+
+  public async processMessage(userMessage: string): Promise<AIResponse> {
+    if (!this.isInitialized) {
+      await this.initialize()
+    }
+
+    // Learn from user input
+    this.learnFromMessage(userMessage)
+
+    // Use enhanced math processor first
+    const mathAnalysis = this.mathProcessor.analyzeMathExpression(userMessage)
+
+    if (mathAnalysis.isMatch && mathAnalysis.result !== undefined) {
+      const response: AIResponse = {
+        content: `The result is: ${mathAnalysis.result}`,
+        confidence: mathAnalysis.confidence,
+        reasoning: mathAnalysis.reasoning,
+        mathAnalysis: mathAnalysis,
+      }
+
+      await this.saveConversation(userMessage, response.content)
+      return response
+    }
+
+    // Check if it's a math question but couldn't solve it
+    if (mathAnalysis.confidence > 0.3) {
+      const response: AIResponse = {
+        content:
+          "I can see this is a math problem, but I'm having trouble understanding the exact calculation you want. Could you try rephrasing it? For example: '2 × 2', '2 times 2', or 'multiply 2 by 2'.",
+        confidence: 0.6,
+        reasoning: mathAnalysis.reasoning,
+        mathAnalysis: mathAnalysis,
+      }
+
+      await this.saveConversation(userMessage, response.content)
+      return response
+    }
+
+    // Generate response based on context and memory
+    const response = this.generateResponse(userMessage)
+
+    // Save conversation
+    await this.saveConversation(userMessage, response.content)
+
+    return response
+  }
+
+  private async saveConversationHistory(): Promise<void> {
+    try {
+      await this.storageManager.saveConversations(this.conversationHistory)
+    } catch (error) {
+      console.warn("Failed to save conversation:", error)
+    }
+  }
+
+  private async loadConversationHistory(): Promise<void> {
+    try {
+      const conversations = await this.storageManager.loadConversations()
+      this.conversationHistory = conversations.filter((msg) => msg && msg.id && msg.role && msg.content)
+    } catch (error) {
+      console.warn("Failed to load conversation history:", error)
+      this.conversationHistory = []
+    }
+  }
+
+  private async saveMemory(): Promise<void> {
+    try {
+      await this.storageManager.saveMemory(this.memory)
+    } catch (error) {
+      console.warn("Failed to save memory:", error)
+    }
+  }
+
+  private async loadMemory(): Promise<void> {
+    try {
+      const memory = await this.storageManager.loadMemory()
+      this.memory = memory
+    } catch (error) {
+      console.warn("Failed to load memory:", error)
+      this.memory = new Map()
+    }
+  }
+
+  private async saveVocabulary(): Promise<void> {
+    try {
+      await this.storageManager.saveVocabulary(this.vocabulary)
+    } catch (error) {
+      console.warn("Failed to save vocabulary:", error)
+    }
+  }
+
+  private async loadVocabulary(): Promise<void> {
+    try {
+      const vocabulary = await this.storageManager.loadVocabulary()
+      // Merge with existing vocabulary
+      vocabulary.forEach((category, word) => {
+        this.vocabulary.set(word, category)
+      })
+    } catch (error) {
+      console.warn("Failed to load vocabulary:", error)
+    }
   }
 
   public async initialize(): Promise<void> {
@@ -63,14 +291,14 @@ export class ReliableAISystem {
     try {
       console.log("🚀 Initializing Reliable AI System...")
 
-      // Load conversation history (safe operation)
-      this.loadConversationHistory()
+      // Load conversation history (now async)
+      await this.loadConversationHistory()
 
       // Load memory entries
-      this.loadMemory()
+      await this.loadMemory()
 
       // Load vocabulary
-      this.loadVocabulary()
+      await this.loadVocabulary()
 
       // Load math functions
       this.loadMathFunctions()
@@ -88,6 +316,85 @@ export class ReliableAISystem {
       // Even if something fails, we can still work with basic functionality
       this.systemStatus = "ready"
       this.isInitialized = true
+    }
+  }
+
+  private async saveConversation(userMessage: string, aiResponse: string): Promise<void> {
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: userMessage,
+      timestamp: Date.now(),
+    }
+
+    const aiMsg: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: aiResponse,
+      timestamp: Date.now(),
+    }
+
+    this.conversationHistory.push(userMsg, aiMsg)
+
+    // Keep only recent conversations to avoid memory issues
+    if (this.conversationHistory.length > 100) {
+      this.conversationHistory = this.conversationHistory.slice(-80)
+    }
+
+    // Save to IndexedDB safely
+    await this.saveConversationHistory()
+    await this.saveMemory()
+    await this.saveVocabulary()
+  }
+
+  private loadMathFunctions(): void {
+    // Add advanced math functions
+    const advancedMath: MathFunction[] = [
+      {
+        name: "sqrt",
+        description: "Square root",
+        examples: ["sqrt(16)", "square root of 25"],
+        func: (a: number) => Math.sqrt(a),
+      },
+      {
+        name: "power",
+        description: "Power/Exponent",
+        examples: ["2^3", "2 to the power of 3"],
+        func: (a: number, b: number) => Math.pow(a, b),
+      },
+      {
+        name: "sin",
+        description: "Sine",
+        examples: ["sin(30)", "sine of 45"],
+        func: (a: number) => Math.sin((a * Math.PI) / 180),
+      },
+      {
+        name: "cos",
+        description: "Cosine",
+        examples: ["cos(60)", "cosine of 90"],
+        func: (a: number) => Math.cos((a * Math.PI) / 180),
+      },
+      {
+        name: "tan",
+        description: "Tangent",
+        examples: ["tan(45)", "tangent of 30"],
+        func: (a: number) => Math.tan((a * Math.PI) / 180),
+      },
+    ]
+
+    advancedMath.forEach((func) => this.mathFunctions.set(func.name, func))
+  }
+
+  private async enhanceSystemInBackground(): Promise<void> {
+    try {
+      // Add more vocabulary gradually
+      await this.loadExtendedVocabulary()
+
+      // System is now enhanced
+      this.systemStatus = "enhanced"
+      console.log("🎯 System enhanced with extended vocabulary!")
+    } catch (error) {
+      console.warn("⚠️ Background enhancement failed, but system remains functional:", error)
     }
   }
 
@@ -142,6 +449,16 @@ export class ReliableAISystem {
       "subtract",
       "multiply",
       "divide",
+      "times",
+      "plus",
+      "minus",
+      "equals",
+      "result",
+      "answer",
+      "sum",
+      "difference",
+      "product",
+      "quotient",
     ]
 
     basicWords.forEach((word) => this.vocabulary.set(word.toLowerCase(), "basic"))
@@ -179,19 +496,6 @@ export class ReliableAISystem {
     basicMath.forEach((func) => this.mathFunctions.set(func.name, func))
   }
 
-  private async enhanceSystemInBackground(): Promise<void> {
-    try {
-      // Add more vocabulary gradually
-      await this.loadExtendedVocabulary()
-
-      // System is now enhanced
-      this.systemStatus = "enhanced"
-      console.log("🎯 System enhanced with extended vocabulary!")
-    } catch (error) {
-      console.warn("⚠️ Background enhancement failed, but system remains functional:", error)
-    }
-  }
-
   private async loadExtendedVocabulary(): Promise<void> {
     const extendedWords = [
       // Technology
@@ -207,7 +511,6 @@ export class ReliableAISystem {
       "machine",
       "learning",
       "algorithm",
-
       // Emotions
       "feel",
       "feeling",
@@ -221,7 +524,6 @@ export class ReliableAISystem {
       "curious",
       "interested",
       "bored",
-
       // Actions
       "create",
       "build",
@@ -237,7 +539,6 @@ export class ReliableAISystem {
       "try",
       "attempt",
       "succeed",
-
       // Math terms
       "equation",
       "formula",
@@ -266,182 +567,27 @@ export class ReliableAISystem {
     }
   }
 
-  public addVocabularyWord(word: string, category: string): void {
-    this.vocabulary.set(word.toLowerCase(), category)
+  public getStats(): any {
+    const assistantMessages = this.conversationHistory.filter((m) => m.role === "assistant" && m.confidence)
+    const avgConfidence =
+      assistantMessages.length > 0
+        ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
+        : 0
+
+    return {
+      totalMessages: this.conversationHistory.length,
+      vocabularySize: this.vocabulary.size,
+      memoryEntries: this.memory.size,
+      avgConfidence: Math.round(avgConfidence * 100) / 100,
+      systemStatus: this.systemStatus,
+      mathFunctions: this.mathFunctions.size,
+      seedProgress: 0,
+      responseTime: 0,
+    }
   }
 
-  public addMathFunction(mathFunc: MathFunction): void {
-    this.mathFunctions.set(mathFunc.name, mathFunc)
-  }
-
-  public getMathFunctionCount(): number {
-    return this.mathFunctions.size
-  }
-
-  public async processMessage(userMessage: string): Promise<AIResponse> {
-    // Learn from user input
-    this.learnFromMessage(userMessage)
-
-    // Check if it's a math question first
-    const mathResult = this.processMathQuery(userMessage)
-    if (mathResult) {
-      this.saveConversation(userMessage, mathResult.content)
-      return mathResult
-    }
-
-    // Generate response based on context and memory
-    const response = this.generateResponse(userMessage)
-
-    // Save conversation
-    this.saveConversation(userMessage, response.content)
-
-    return response
-  }
-
-  private processMathQuery(message: string): AIResponse | null {
-    const lowerMessage = message.toLowerCase()
-
-    // Check for mathematical expressions
-    const mathPatterns = [
-      // Basic arithmetic
-      { pattern: /(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)/, operation: "add" },
-      { pattern: /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/, operation: "subtract" },
-      { pattern: /(\d+(?:\.\d+)?)\s*\*\s*(\d+(?:\.\d+)?)/, operation: "multiply" },
-      { pattern: /(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/, operation: "divide" },
-      { pattern: /(\d+(?:\.\d+)?)\s*\^\s*(\d+(?:\.\d+)?)/, operation: "power" },
-
-      // Word-based math
-      { pattern: /add\s+(\d+(?:\.\d+)?)\s+(?:and|to)\s+(\d+(?:\.\d+)?)/, operation: "add" },
-      { pattern: /subtract\s+(\d+(?:\.\d+)?)\s+from\s+(\d+(?:\.\d+)?)/, operation: "subtract" },
-      { pattern: /multiply\s+(\d+(?:\.\d+)?)\s+(?:by|and)\s+(\d+(?:\.\d+)?)/, operation: "multiply" },
-      { pattern: /divide\s+(\d+(?:\.\d+)?)\s+by\s+(\d+(?:\.\d+)?)/, operation: "divide" },
-
-      // Functions
-      { pattern: /square\s+root\s+of\s+(\d+(?:\.\d+)?)/, operation: "sqrt" },
-      { pattern: /sqrt$$(\d+(?:\.\d+)?)$$/, operation: "sqrt" },
-      { pattern: /sin$$(\d+(?:\.\d+)?)$$/, operation: "sin" },
-      { pattern: /cos$$(\d+(?:\.\d+)?)$$/, operation: "cos" },
-      { pattern: /tan$$(\d+(?:\.\d+)?)$$/, operation: "tan" },
-    ]
-
-    for (const { pattern, operation } of mathPatterns) {
-      const match = message.match(pattern)
-      if (match) {
-        const mathFunc = this.mathFunctions.get(operation)
-        if (mathFunc) {
-          try {
-            const numbers = match.slice(1).map((n) => Number.parseFloat(n))
-            const result = mathFunc.func(...numbers)
-
-            return {
-              content: `The result is: ${result}`,
-              confidence: 0.95,
-            }
-          } catch (error) {
-            return {
-              content: "I encountered an error with that calculation. Please check your input.",
-              confidence: 0.3,
-            }
-          }
-        }
-      }
-    }
-
-    // Check for general math requests
-    if (
-      lowerMessage.includes("calculate") ||
-      lowerMessage.includes("math") ||
-      lowerMessage.includes("solve") ||
-      lowerMessage.includes("compute")
-    ) {
-      return {
-        content: "I can help with math! Try expressions like '2 + 3', 'sqrt(16)', 'sin(30)', or 'multiply 5 by 7'.",
-        confidence: 0.8,
-      }
-    }
-
-    return null
-  }
-
-  public generateSuggestions(messages: ChatMessage[]): Suggestion[] {
-    const suggestions: Suggestion[] = []
-
-    // Context-based suggestions
-    if (messages.length === 0) {
-      suggestions.push(
-        { text: "How do you work?", type: "question" },
-        { text: "Calculate 15 * 23", type: "action" },
-        { text: "Remember: I like programming", type: "action" },
-        { text: "What can you do?", type: "question" },
-      )
-    } else {
-      const lastMessage = messages[messages.length - 1]
-
-      if (lastMessage.role === "assistant") {
-        // Suggest follow-up questions
-        if (lastMessage.content.includes("math") || lastMessage.content.includes("calculate")) {
-          suggestions.push(
-            { text: "Try another calculation", type: "action" },
-            { text: "What math functions do you know?", type: "question" },
-          )
-        }
-
-        if (lastMessage.content.includes("remember") || lastMessage.content.includes("memory")) {
-          suggestions.push(
-            { text: "What else do you remember?", type: "question" },
-            { text: "Tell me about your memory system", type: "topic" },
-          )
-        }
-      }
-    }
-
-    // Always include some general suggestions
-    suggestions.push(
-      { text: "Tell me a joke", type: "topic" },
-      { text: "What's the weather like?", type: "question" },
-      { text: "Help me with something", type: "action" },
-    )
-
-    return suggestions.slice(0, 6) // Limit to 6 suggestions
-  }
-
-  public generateResponseSuggestions(userInput: string, aiResponse: string): string[] {
-    const suggestions: string[] = []
-
-    // Based on AI response content
-    if (aiResponse.includes("calculate") || aiResponse.includes("math")) {
-      suggestions.push("Try another calculation", "What's 2^10?", "Calculate pi * 5")
-    }
-
-    if (aiResponse.includes("remember") || aiResponse.includes("memory")) {
-      suggestions.push("What do you remember about me?", "Forget that information", "Remember something new")
-    }
-
-    if (aiResponse.includes("help")) {
-      suggestions.push("What else can you help with?", "Show me examples", "Explain that better")
-    }
-
-    // General follow-ups
-    suggestions.push("Tell me more", "That's interesting", "Can you explain?")
-
-    return suggestions.slice(0, 4) // Limit to 4 suggestions
-  }
-
-  public processFeedback(messageId: string, feedback: "positive" | "negative"): void {
-    this.feedbackData.set(messageId, feedback)
-
-    // Use feedback to improve future responses
-    // This is a simple implementation - could be more sophisticated
-    console.log(`Received ${feedback} feedback for message ${messageId}`)
-  }
-
-  public updateResponseTime(time: number): void {
-    this.responseTimes.push(time)
-
-    // Keep only recent response times
-    if (this.responseTimes.length > 50) {
-      this.responseTimes = this.responseTimes.slice(-30)
-    }
+  public getConversationHistory(): ChatMessage[] {
+    return [...this.conversationHistory]
   }
 
   private learnFromMessage(message: string): void {
@@ -471,7 +617,7 @@ export class ReliableAISystem {
       const match = message.match(pattern)
       if (match && match[1]) {
         const key = this.generateMemoryKey(match[1])
-        const entry: MemoryEntry = {
+        const entry = {
           key,
           value: match[1].trim(),
           timestamp: Date.now(),
@@ -497,7 +643,7 @@ export class ReliableAISystem {
     ) {
       const memoryResponse = this.searchMemory(userMessage)
       if (memoryResponse) {
-        return { content: memoryResponse, confidence: 0.8 }
+        return { content: memoryResponse, confidence: 0.8, reasoning: ["Found relevant memory"] }
       }
     }
 
@@ -554,14 +700,12 @@ export class ReliableAISystem {
     for (const pattern of patterns) {
       if (pattern.patterns.some((p) => lowerMessage.includes(p))) {
         const response = pattern.responses[Math.floor(Math.random() * pattern.responses.length)]
-        return { content: response, confidence: pattern.confidence }
+        return {
+          content: response,
+          confidence: pattern.confidence,
+          reasoning: [`Matched conversational pattern: ${pattern.patterns[0]}`],
+        }
       }
-    }
-
-    // Context-aware response based on conversation history
-    const contextResponse = this.generateContextualResponse(userMessage)
-    if (contextResponse) {
-      return contextResponse
     }
 
     // Default responses
@@ -578,6 +722,7 @@ export class ReliableAISystem {
     return {
       content: defaultResponses[Math.floor(Math.random() * defaultResponses.length)],
       confidence: 0.5,
+      reasoning: ["Used default conversational response"],
     }
   }
 
@@ -604,201 +749,89 @@ export class ReliableAISystem {
     return null
   }
 
-  private generateContextualResponse(userMessage: string): AIResponse | null {
-    // Use recent conversation history for context
-    const recentMessages = this.conversationHistory.slice(-6)
-
-    if (recentMessages.length > 0) {
-      const lastMessage = recentMessages[recentMessages.length - 1]
-
-      // If user is continuing a topic
-      if (lastMessage.role === "assistant" && lastMessage.content.includes("?")) {
-        return {
-          content: "I appreciate you sharing that with me. It helps me understand you better!",
-          confidence: 0.7,
-        }
-      }
-    }
-
-    return null
-  }
-
-  private saveConversation(userMessage: string, aiResponse: string): void {
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      role: "user",
-      content: userMessage,
-      timestamp: Date.now(),
-    }
-
-    const aiMsg: ChatMessage = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: aiResponse,
-      timestamp: Date.now(),
-    }
-
-    this.conversationHistory.push(userMsg, aiMsg)
-
-    // Keep only recent conversations to avoid memory issues
-    if (this.conversationHistory.length > 100) {
-      this.conversationHistory = this.conversationHistory.slice(-80)
-    }
-
-    // Save to localStorage safely
-    this.saveConversationHistory()
-    this.saveMemory()
-    this.saveVocabulary()
-    this.saveMathFunctions()
-  }
-
-  public getConversationHistory(): ChatMessage[] {
-    return [...this.conversationHistory]
-  }
-
-  public getStats(): AIStats {
-    const assistantMessages = this.conversationHistory.filter((m) => m.role === "assistant" && m.confidence)
-    const avgConfidence =
-      assistantMessages.length > 0
-        ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
-        : 0
-
-    const avgResponseTime =
-      this.responseTimes.length > 0
-        ? this.responseTimes.reduce((sum, time) => sum + time, 0) / this.responseTimes.length
-        : 0
-
-    return {
-      totalMessages: this.conversationHistory.length,
-      vocabularySize: this.vocabulary.size,
-      memoryEntries: this.memory.size,
-      avgConfidence: Math.round(avgConfidence * 100) / 100,
-      systemStatus: this.systemStatus,
-      mathFunctions: this.mathFunctions.size,
-      seedProgress: 0, // This will be updated by the seeder
-      responseTime: Math.round(avgResponseTime),
-    }
-  }
-
-  public exportData(): any {
-    return {
-      conversationHistory: this.conversationHistory,
-      vocabulary: Array.from(this.vocabulary.entries()),
-      memory: Array.from(this.memory.entries()),
-      mathFunctions: Array.from(this.mathFunctions.entries()).map(([name, func]) => ({
-        name,
-        description: func.description,
-        examples: func.examples,
-      })),
-      stats: this.getStats(),
-      exportDate: new Date().toISOString(),
-    }
-  }
-
-  private saveConversationHistory(): void {
+  public async clearAllData(): Promise<void> {
     try {
-      const data = JSON.stringify(this.conversationHistory)
-      localStorage.setItem("reliable-ai-conversation", data)
-    } catch (error) {
-      console.warn("Failed to save conversation:", error)
-    }
-  }
-
-  private loadConversationHistory(): void {
-    try {
-      const stored = localStorage.getItem("reliable-ai-conversation")
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed)) {
-          this.conversationHistory = parsed.filter((msg) => msg && msg.id && msg.role && msg.content)
-        }
-      }
-    } catch (error) {
-      console.warn("Failed to load conversation history:", error)
       this.conversationHistory = []
-    }
-  }
-
-  private saveMemory(): void {
-    try {
-      const memoryArray = Array.from(this.memory.entries())
-      localStorage.setItem("reliable-ai-memory", JSON.stringify(memoryArray))
-    } catch (error) {
-      console.warn("Failed to save memory:", error)
-    }
-  }
-
-  private loadMemory(): void {
-    try {
-      const stored = localStorage.getItem("reliable-ai-memory")
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed)) {
-          this.memory = new Map(parsed)
-        }
-      }
-    } catch (error) {
-      console.warn("Failed to load memory:", error)
+      this.vocabulary = new Map()
       this.memory = new Map()
-    }
-  }
+      this.mathFunctions = new Map()
 
-  private saveVocabulary(): void {
-    try {
-      const vocabArray = Array.from(this.vocabulary.entries())
-      localStorage.setItem("reliable-ai-vocabulary", JSON.stringify(vocabArray))
+      // Clear browser storage
+      await this.storageManager.clearAllData()
+
+      console.log("✅ All AI system data cleared")
     } catch (error) {
-      console.warn("Failed to save vocabulary:", error)
+      console.error("❌ Failed to clear AI system data:", error)
+      throw error
     }
   }
 
-  private loadVocabulary(): void {
+  public async retrainFromKnowledge(): Promise<void> {
     try {
-      const stored = localStorage.getItem("reliable-ai-vocabulary")
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed)) {
-          // Merge with existing vocabulary
-          const storedVocab = new Map(parsed)
-          storedVocab.forEach((category, word) => {
-            this.vocabulary.set(word, category)
-          })
+      console.log("🔄 Retraining AI system from knowledge base...")
+
+      // Rebuild vocabulary from stored knowledge
+      const storedData = await this.storageManager.exportAllData()
+      if (storedData) {
+        if (storedData.vocabulary) {
+          this.vocabulary = new Map(storedData.vocabulary)
+        }
+        if (storedData.memory) {
+          this.memory = new Map(storedData.memory)
         }
       }
-    } catch (error) {
-      console.warn("Failed to load vocabulary:", error)
-    }
-  }
 
-  private saveMathFunctions(): void {
-    try {
-      const mathArray = Array.from(this.mathFunctions.entries()).map(([name, func]) => [
-        name,
-        {
-          name: func.name,
-          description: func.description,
-          examples: func.examples,
-          // Note: We don't save the actual function, just metadata
-        },
-      ])
-      localStorage.setItem("reliable-ai-math", JSON.stringify(mathArray))
-    } catch (error) {
-      console.warn("Failed to save math functions:", error)
-    }
-  }
+      // Reinitialize math functions
+      this.initializeBasicMathFunctions()
 
-  private loadMathFunctions(): void {
-    try {
-      const stored = localStorage.getItem("reliable-ai-math")
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed)) {
-          // We only load metadata, actual functions are re-initialized
-          console.log(`Loaded ${parsed.length} math function definitions`)
-        }
-      }
+      // Save updated data
+      await this.saveConversationHistory()
+      await this.saveMemory()
+      await this.saveVocabulary()
+
+      console.log("✅ AI system retrained successfully")
     } catch (error) {
-      console.warn("Failed to load math functions:", error)
+      console.error("❌ AI system retraining failed:", error)
+      throw error
     }
   }
+}
+
+// Interfaces
+interface AIResponse {
+  content: string
+  confidence: number
+  reasoning?: string[]
+  mathAnalysis?: any
+}
+
+interface MathFunction {
+  name: string
+  description: string
+  examples: string[]
+  func: (...args: number[]) => number | string
+}
+
+interface ChatMessage {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: number
+  confidence?: number
+}
+
+interface MathPattern {
+  pattern: RegExp
+  operation: string
+  confidence: number
+  extract: (match: RegExpMatchArray) => number[]
+}
+
+interface MathAnalysis {
+  isMatch: boolean
+  operation: string
+  numbers: number[]
+  result: number | undefined
+  confidence: number
+  reasoning: string[]
 }
