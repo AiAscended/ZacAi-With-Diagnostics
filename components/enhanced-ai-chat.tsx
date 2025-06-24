@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { Switch } from "@/components/ui/switch"
+import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { KnowledgeManagerV2 } from "@/lib/knowledge-manager-v2"
 import { CognitiveAISystem } from "@/lib/cognitive-ai-system"
@@ -16,14 +19,19 @@ import {
   TrendingUp,
   MessageCircle,
   Database,
+  Cloud,
   Lightbulb,
   Calculator,
   BarChart3,
   Settings,
+  ThumbsUp,
+  ThumbsDown,
   RefreshCw,
   Download,
   Upload,
+  Search,
   Zap,
+  FileText,
   User,
   ChevronDown,
   ChevronUp,
@@ -344,117 +352,6 @@ export default function EnhancedAIChat() {
     return "text-red-600"
   }
 
-  const handleBulkImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = async (e) => {
-      try {
-        const content = e.target?.result as string
-        let data: any
-
-        if (file.name.endsWith(".json")) {
-          data = JSON.parse(content)
-        } else if (file.name.endsWith(".csv")) {
-          // Simple CSV parsing for vocabulary data
-          const lines = content.split("\n")
-          const headers = lines[0].split(",")
-          data = { vocabulary: {} }
-
-          for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(",")
-            if (values.length >= 2) {
-              data.vocabulary[values[0]] = {
-                definition: values[1],
-                partOfSpeech: values[2] || "unknown",
-                category: "imported",
-              }
-            }
-          }
-        } else if (file.name.endsWith(".txt")) {
-          // Simple text parsing - each line as a vocabulary word
-          const lines = content.split("\n").filter((line) => line.trim())
-          data = { vocabulary: {} }
-
-          lines.forEach((line) => {
-            const word = line.trim()
-            if (word) {
-              data.vocabulary[word] = {
-                definition: `Imported word: ${word}`,
-                partOfSpeech: "unknown",
-                category: "imported",
-              }
-            }
-          })
-        }
-
-        if (data) {
-          knowledgeManager.importKnowledge(data)
-          updateStats()
-          alert(`Successfully imported data from ${file.name}`)
-        }
-      } catch (error) {
-        console.error("Import failed:", error)
-        alert("Failed to import data. Please check the file format.")
-      }
-    }
-    reader.readAsText(file)
-  }
-
-  const handleClearData = async () => {
-    if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
-      try {
-        // Clear knowledge manager data
-        knowledgeManager.importKnowledge({
-          vocabulary: [],
-          mathematics: [],
-          userInfo: [],
-          facts: [],
-          conversations: [],
-        })
-
-        // Clear AI system data
-        await aiSystem.clearAllData()
-
-        updateStats()
-        setActiveDataView(null)
-        alert("All data cleared successfully")
-      } catch (error) {
-        console.error("Failed to clear data:", error)
-        alert("Failed to clear data")
-      }
-    }
-  }
-
-  const handleRetrainModel = async () => {
-    try {
-      setIsLoading(true)
-      await aiSystem.retrainFromKnowledge()
-      updateStats()
-      alert("Model retrained successfully")
-    } catch (error) {
-      console.error("Retrain failed:", error)
-      alert("Failed to retrain model")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleOptimizeKnowledge = async () => {
-    try {
-      setIsLoading(true)
-      await knowledgeManager.optimizeKnowledge()
-      updateStats()
-      alert("Knowledge optimized successfully")
-    } catch (error) {
-      console.error("Optimization failed:", error)
-      alert("Failed to optimize knowledge")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   if (isInitializing) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
@@ -484,126 +381,130 @@ export default function EnhancedAIChat() {
           <div className="flex-shrink-0 p-4 bg-white border-b">
             <div className="flex items-center justify-between max-w-6xl mx-auto">
               <div className="flex items-center gap-3">
-                <Brain className="w-8 h-8 text-blue-600" />
+                <BarChart3 className="w-8 h-8 text-blue-600" />
                 <div>
-                  <h1 className="text-2xl font-bold">ZacAI Metrics Dashboard</h1>
-                  <p className="text-gray-600">System performance and knowledge analytics</p>
+                  <h1 className="text-2xl font-bold">{systemInfo.name || "ZacAI"} Metrics Dashboard</h1>
+                  <p className="text-sm text-gray-600">Version {stats.version}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button onClick={() => setShowMetrics(false)} variant="outline">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Back to Chat
+              <div className="flex items-center gap-4">
+                <Button variant="outline" onClick={handleExport}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
                 </Button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Chat</span>
+                  <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
+                  <span className="text-sm">Metrics</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto p-4">
-            <div className="max-w-6xl mx-auto space-y-6">
+          <div className="flex-1 overflow-auto">
+            <div className="max-w-6xl mx-auto p-4 space-y-6">
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <Card
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => fetchKnowledgeData("vocabulary")}
+                >
+                  <CardContent className="p-4 text-center">
+                    <BookOpen className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                    <div className="text-2xl font-bold">{stats.vocabulary}</div>
+                    <div className="text-sm text-gray-500">Vocabulary</div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => fetchKnowledgeData("mathematics")}
+                >
+                  <CardContent className="p-4 text-center">
+                    <Calculator className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                    <div className="text-2xl font-bold">{stats.mathematics}</div>
+                    <div className="text-sm text-gray-500">Math Concepts</div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => fetchKnowledgeData("userInfo")}
+                >
+                  <CardContent className="p-4 text-center">
+                    <User className="w-8 h-8 mx-auto mb-2 text-purple-600" />
+                    <div className="text-2xl font-bold">{stats.userInfo}</div>
+                    <div className="text-sm text-gray-500">User Info</div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => fetchKnowledgeData("facts")}
+                >
+                  <CardContent className="p-4 text-center">
+                    <FileText className="w-8 h-8 mx-auto mb-2 text-orange-600" />
+                    <div className="text-2xl font-bold">{stats.facts}</div>
+                    <div className="text-sm text-gray-500">Facts</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <MessageCircle className="w-8 h-8 mx-auto mb-2 text-red-600" />
+                    <div className="text-2xl font-bold">{stats.conversations}</div>
+                    <div className="text-sm text-gray-500">Conversations</div>
+                  </CardContent>
+                </Card>
+              </div>
+
               {/* System Information */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
+                    <Brain className="w-5 h-5" />
                     System Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{stats.version}</div>
-                      <div className="text-sm text-gray-600">Version</div>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Name</span>
+                      <span className="text-sm font-mono">{systemInfo.name || "ZacAI"}</span>
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
-                        {stats.systemStatus === "ready" ? "Ready" : "Loading"}
-                      </div>
-                      <div className="text-sm text-gray-600">Status</div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Version</span>
+                      <span className="text-sm font-mono">{stats.version}</span>
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">
-                        {stats.avgConfidence?.toFixed(2) || "0.00"}
-                      </div>
-                      <div className="text-sm text-gray-600">Avg Confidence</div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Total Entries</span>
+                      <span className="text-sm font-mono">{stats.totalEntries}</span>
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-orange-600">
-                        {new Date(stats.lastUpdated).toLocaleTimeString()}
-                      </div>
-                      <div className="text-sm text-gray-600">Last Updated</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Knowledge Distribution */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5" />
-                    Knowledge Distribution
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Vocabulary</span>
-                        <span className="text-sm text-gray-600">{stats.vocabulary}</span>
-                      </div>
-                      <Progress value={(stats.vocabulary / Math.max(stats.totalEntries, 1)) * 100} className="h-2" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Mathematics</span>
-                        <span className="text-sm text-gray-600">{stats.mathematics}</span>
-                      </div>
-                      <Progress value={(stats.mathematics / Math.max(stats.totalEntries, 1)) * 100} className="h-2" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">User Info</span>
-                        <span className="text-sm text-gray-600">{stats.userInfo}</span>
-                      </div>
-                      <Progress value={(stats.userInfo / Math.max(stats.totalEntries, 1)) * 100} className="h-2" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Facts</span>
-                        <span className="text-sm text-gray-600">{stats.facts}</span>
-                      </div>
-                      <Progress value={(stats.facts / Math.max(stats.totalEntries, 1)) * 100} className="h-2" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Last Updated</span>
+                      <span className="text-sm font-mono">{new Date(stats.lastUpdated).toLocaleString()}</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Knowledge Data Visualization */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="w-5 h-5" />
-                    Knowledge Data Visualization
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    {["vocabulary", "mathematics", "userInfo", "facts"].map((type) => (
-                      <Button
-                        key={type}
-                        variant={activeDataView === type ? "default" : "outline"}
-                        onClick={() => fetchKnowledgeData(type)}
-                        className="capitalize"
-                      >
-                        {type}
+              {activeDataView && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <Database className="w-5 h-5" />
+                        {activeDataView.charAt(0).toUpperCase() + activeDataView.slice(1)} Data
+                      </span>
+                      <Button variant="outline" size="sm" onClick={() => setActiveDataView(null)}>
+                        Close
                       </Button>
-                    ))}
-                  </div>
-
-                  {activeDataView && (
-                    <ScrollArea className="h-64 border rounded-lg p-4">
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-96">
                       <div className="space-y-2">
                         {knowledgeData[activeDataView]?.length > 0 ? (
                           knowledgeData[activeDataView].map((item: any, index: number) => (
@@ -616,95 +517,9 @@ export default function EnhancedAIChat() {
                         )}
                       </div>
                     </ScrollArea>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Training & Data Pipeline */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Training & Data Pipeline
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-4">
-                      <h3 className="font-semibold">Data Management</h3>
-                      <div className="space-y-2">
-                        <Button onClick={handleExport} variant="outline" className="w-full justify-start">
-                          <Download className="w-4 h-4 mr-2" />
-                          Export Knowledge
-                        </Button>
-                        <div>
-                          <input
-                            type="file"
-                            accept=".json,.csv,.txt"
-                            onChange={handleBulkImport}
-                            className="hidden"
-                            id="bulk-import"
-                          />
-                          <Button asChild variant="outline" className="w-full justify-start">
-                            <label htmlFor="bulk-import" className="cursor-pointer">
-                              <Upload className="w-4 h-4 mr-2" />
-                              Import Data
-                            </label>
-                          </Button>
-                        </div>
-                        <Button onClick={handleClearData} variant="destructive" className="w-full justify-start">
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          Clear All Data
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="font-semibold">Model Training</h3>
-                      <div className="space-y-2">
-                        <Button
-                          onClick={handleRetrainModel}
-                          disabled={isLoading}
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Brain className="w-4 h-4 mr-2" />
-                          Retrain Model
-                        </Button>
-                        <Button
-                          onClick={handleOptimizeKnowledge}
-                          disabled={isLoading}
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <TrendingUp className="w-4 h-4 mr-2" />
-                          Optimize Knowledge
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="font-semibold">System Stats</h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Total Entries:</span>
-                          <span className="font-mono">{stats.totalEntries}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Conversations:</span>
-                          <span className="font-mono">{stats.conversations}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Memory Usage:</span>
-                          <span className="font-mono">
-                            {((JSON.stringify(knowledgeData).length / 1024 / 1024) * 100).toFixed(2)} MB
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
@@ -713,139 +528,136 @@ export default function EnhancedAIChat() {
   }
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="flex-shrink-0 p-4 bg-white border-b">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <div className="flex items-center gap-3">
-            <Brain className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-xl font-bold">ZacAI Enhanced Chat</h1>
-              <p className="text-sm text-gray-600">Cognitive AI with Advanced Learning</p>
+    <div className="flex h-screen bg-gray-50">
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <Card className="flex-1 m-4 flex flex-col">
+          <CardHeader className="flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="w-5 h-5" />
+                {systemInfo.name || "ZacAI"}
+                <Badge variant="outline" className="ml-2">
+                  Enhanced Math
+                </Badge>
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+              </CardTitle>
+
+              <div className="flex items-center gap-4">
+                {/* Quick Stats */}
+                <div className="hidden md:flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4 text-blue-500" />
+                    <span>{stats.vocabulary}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calculator className="w-4 h-4 text-green-500" />
+                    <span>{stats.mathematics}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MessageCircle className="w-4 h-4 text-purple-500" />
+                    <span>{stats.conversations}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Metrics</span>
+                  <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              v{stats.version}
-            </Badge>
-            <Button onClick={() => setShowMetrics(true)} variant="outline" size="sm">
-              <BarChart3 className="w-4 h-4 mr-1" />
-              Metrics
-            </Button>
-          </div>
-        </div>
-      </div>
+          </CardHeader>
 
-      {/* Chat Area */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full max-w-4xl mx-auto flex flex-col">
-          {/* Messages */}
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.length === 0 && (
-                <Card className="border-dashed">
-                  <CardContent className="p-8 text-center">
-                    <Brain className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-semibold mb-2">Welcome to ZacAI Enhanced Chat</h3>
-                    <p className="text-gray-600 mb-4">
-                      I'm an advanced AI with cognitive processing, mathematical abilities, and memory. Try asking me
-                      something!
-                    </p>
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      <Badge variant="secondary">Math: 25 × 4</Badge>
-                      <Badge variant="secondary">Memory: My name is John</Badge>
-                      <Badge variant="secondary">Questions: What can you do?</Badge>
+          <CardContent className="flex-1 flex flex-col min-h-0">
+            {/* Messages */}
+            <ScrollArea className="flex-1 mb-4">
+              <div className="space-y-4 pr-4">
+                {messages.length === 0 && (
+                  <div className="text-center text-gray-500 mt-8">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <Brain className="w-12 h-12 opacity-50" />
+                      <Calculator className="w-8 h-8 opacity-30" />
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                    <p className="text-lg font-medium mb-2">Hello! I'm {systemInfo.name || "ZacAI"} 🧠</p>
+                    <p className="mb-4">
+                      I have enhanced mathematical understanding! Try any math problem in any format.
+                    </p>
 
-              {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <Card className={`max-w-[80%] ${message.role === "user" ? "bg-blue-50" : "bg-white"}`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
-                          {message.role === "user" ? (
-                            <User className="w-6 h-6 text-blue-600" />
-                          ) : (
-                            <Brain className="w-6 h-6 text-purple-600" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold capitalize">{message.role}</span>
-                            <span className="text-xs text-gray-500">{formatTimestamp(message.timestamp)}</span>
-                            {message.confidence && (
-                              <Badge variant="outline" className={`text-xs ${getConfidenceColor(message.confidence)}`}>
-                                {Math.round(message.confidence * 100)}%
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="prose prose-sm max-w-none">
-                            <p className="whitespace-pre-wrap">{message.content}</p>
-                          </div>
+                    {/* Initial Suggestions */}
+                    <div className="grid grid-cols-2 gap-2 text-sm max-w-md mx-auto">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInput("2x2=")}
+                        className="text-left justify-start"
+                      >
+                        <Calculator className="w-4 h-4 mr-2" />
+                        2x2=
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInput("2 times 2")}
+                        className="text-left justify-start"
+                      >
+                        <Calculator className="w-4 h-4 mr-2" />2 times 2
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInput("2 multiplied by 2")}
+                        className="text-left justify-start"
+                      >
+                        <Lightbulb className="w-4 h-4 mr-2" />2 multiplied by 2
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInput("what is 2 * 2?")}
+                        className="text-left justify-start"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        what is 2 * 2?
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
-                          {/* Math Analysis */}
-                          {message.mathAnalysis && message.mathAnalysis.isMatch && (
-                            <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Calculator className="w-4 h-4 text-green-600" />
-                                <span className="text-sm font-semibold text-green-800">Mathematical Analysis</span>
-                              </div>
-                              <div className="text-sm space-y-1">
-                                <div>
-                                  <strong>Operation:</strong> {message.mathAnalysis.operation}
-                                </div>
-                                <div>
-                                  <strong>Numbers:</strong> {message.mathAnalysis.numbers.join(", ")}
-                                </div>
-                                <div>
-                                  <strong>Result:</strong> {message.mathAnalysis.result}
-                                </div>
-                              </div>
-                            </div>
-                          )}
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[80%] rounded-lg p-4 ${
+                        message.role === "user" ? "bg-blue-500 text-white" : "bg-white border shadow-sm"
+                      }`}
+                    >
+                      <div className="text-sm mb-2">{message.content}</div>
 
-                          {/* Knowledge Used */}
-                          {message.knowledgeUsed && message.knowledgeUsed.length > 0 && (
-                            <div className="mt-3 flex flex-wrap gap-1">
-                              {message.knowledgeUsed.map((knowledge, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  <BookOpen className="w-3 h-3 mr-1" />
-                                  {knowledge}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-
+                      {/* AI Response Features */}
+                      {message.role === "assistant" && (
+                        <div className="space-y-3 mt-3">
                           {/* Thinking Process */}
                           {message.thinking && message.thinking.length > 0 && (
-                            <div className="mt-3">
-                              <Button
-                                variant="ghost"
-                                size="sm"
+                            <div className="border-l-2 border-blue-300 pl-3">
+                              <button
                                 onClick={() =>
-                                  setShowThinking((prev) => ({
-                                    ...prev,
-                                    [message.id]: !prev[message.id],
-                                  }))
+                                  setShowThinking((prev) => ({ ...prev, [message.id]: !prev[message.id] }))
                                 }
-                                className="text-xs p-1 h-auto"
+                                className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
                               >
-                                <Lightbulb className="w-3 h-3 mr-1" />
-                                {showThinking[message.id] ? "Hide" : "Show"} Thinking Process
                                 {showThinking[message.id] ? (
-                                  <ChevronUp className="w-3 h-3 ml-1" />
+                                  <ChevronUp className="w-3 h-3" />
                                 ) : (
-                                  <ChevronDown className="w-3 h-3 ml-1" />
+                                  <ChevronDown className="w-3 h-3" />
                                 )}
-                              </Button>
+                                <Brain className="w-3 h-3" />
+                                <span>AI Thinking Process</span>
+                              </button>
                               {showThinking[message.id] && (
-                                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs space-y-1">
-                                  {message.thinking.map((step, index) => (
-                                    <div key={index} className="text-gray-700">
-                                      {step}
+                                <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded space-y-1">
+                                  {message.thinking.map((step, idx) => (
+                                    <div key={idx} className="flex items-start gap-2">
+                                      <div className="w-1 h-1 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                                      <span>{step}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -853,86 +665,363 @@ export default function EnhancedAIChat() {
                             </div>
                           )}
 
-                          {/* Suggestions */}
-                          {message.suggestions && message.suggestions.length > 0 && (
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {message.suggestions.map((suggestion, index) => (
-                                <Button
-                                  key={index}
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-xs h-7"
-                                  onClick={() => setInput(suggestion)}
-                                >
-                                  {suggestion}
-                                </Button>
-                              ))}
+                          {/* Math Analysis */}
+                          {message.mathAnalysis && (
+                            <div className="bg-green-50 border border-green-200 rounded p-2">
+                              <div className="text-xs text-green-700 font-medium mb-1">Mathematical Analysis</div>
+                              <div className="text-xs text-green-600">
+                                Operation: {message.mathAnalysis.operation} | Confidence:{" "}
+                                {Math.round(message.mathAnalysis.confidence * 100)}%
+                              </div>
                             </div>
                           )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
 
-              {/* Thinking Animation */}
-              {isThinking && currentThinking && (
-                <div className="flex justify-start">
-                  <Card className="max-w-[80%] bg-white">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <Brain className="w-6 h-6 text-purple-600 animate-pulse" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold">ZacAI</span>
-                            <Badge variant="outline" className="text-xs">
-                              Thinking...
-                            </Badge>
+                          {/* Knowledge Used */}
+                          {message.knowledgeUsed && message.knowledgeUsed.length > 0 && (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <Search className="w-3 h-3" />
+                                <span>Knowledge used:</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {message.knowledgeUsed.map((knowledge, idx) => (
+                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                    {knowledge}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Suggestions */}
+                          {message.suggestions && message.suggestions.length > 0 && (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <Lightbulb className="w-3 h-3" />
+                                <span>Try these:</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {message.suggestions.map((suggestion, idx) => (
+                                  <Button
+                                    key={idx}
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-xs h-6 px-2"
+                                    onClick={() => setInput(suggestion)}
+                                  >
+                                    {suggestion}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Feedback and Stats */}
+                          <div className="flex items-center justify-between text-xs opacity-70">
+                            <div className="flex items-center gap-2">
+                              <span>{formatTimestamp(message.timestamp)}</span>
+                              {message.confidence && (
+                                <div className="flex items-center gap-1">
+                                  <Cloud className="w-3 h-3" />
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${
+                                      message.confidence > 0.7
+                                        ? "bg-green-500"
+                                        : message.confidence > 0.4
+                                          ? "bg-yellow-500"
+                                          : "bg-red-500"
+                                    }`}
+                                  />
+                                  <span className={getConfidenceColor(message.confidence)}>
+                                    {Math.round(message.confidence * 100)}%
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Feedback Buttons */}
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={() => console.log("Positive feedback")}
+                              >
+                                <ThumbsUp className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={() => console.log("Negative feedback")}
+                              >
+                                <ThumbsDown className="w-3 h-3" />
+                              </Button>
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-600 italic">{currentThinking}</p>
                         </div>
+                      )}
+
+                      {/* User Message Timestamp */}
+                      {message.role === "user" && (
+                        <div className="text-xs opacity-70 mt-2">{formatTimestamp(message.timestamp)}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Real-time Thinking Display */}
+                {isThinking && currentThinking && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 border shadow-sm rounded-lg p-4 max-w-[80%]">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
+                        <Brain className="w-4 h-4 text-blue-500 animate-pulse" />
+                        <span className="text-sm text-gray-600 italic">{currentThinking}</span>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+                    </div>
+                  </div>
+                )}
 
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
+                {isLoading && !isThinking && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border shadow-sm rounded-lg p-4 max-w-[80%]">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
+                        <span className="text-sm text-gray-500">{systemInfo.name || "ZacAI"} is processing...</span>
+                        <Cloud className="w-4 h-4 text-gray-400 animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-          {/* Input Area */}
-          <div className="flex-shrink-0 p-4 bg-white border-t">
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
-            )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+
+            {/* Input Form */}
             <form onSubmit={handleSubmit} className="flex gap-2">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything... (math, questions, or tell me about yourself)"
+                placeholder="Try any math problem: 2x2, 2 times 2, multiply 2 by 2, what is 2*2?"
                 disabled={isLoading}
                 className="flex-1"
               />
               <Button type="submit" disabled={isLoading || !input.trim()}>
-                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Send"}
+                <Zap className="w-4 h-4 mr-2" />
+                Send
               </Button>
             </form>
-            <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-              <div className="flex items-center gap-4">
-                <span>📚 Vocabulary: {stats.vocabulary}</span>
-                <span>🧮 Math: {stats.mathematics}</span>
-                <span>👤 User Info: {stats.userInfo}</span>
-                <span>💬 Messages: {stats.conversations}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>Status: {stats.systemStatus || "Ready"}</span>
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              </div>
-            </div>
+
+            {error && (
+              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Sidebar */}
+      <div className="w-80 flex-shrink-0 p-4 overflow-hidden">
+        <Tabs defaultValue="stats" className="h-full flex flex-col">
+          <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
+            <TabsTrigger value="stats">Stats</TabsTrigger>
+            <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
+            <TabsTrigger value="tools">Tools</TabsTrigger>
+          </TabsList>
+
+          <div className="flex-1 mt-4 overflow-hidden">
+            <TabsContent value="stats" className="h-full">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    Live Stats
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{stats.vocabulary}</div>
+                      <div className="text-xs text-gray-500">Vocabulary</div>
+                    </div>
+
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">{stats.mathematics}</div>
+                      <div className="text-xs text-gray-500">Math</div>
+                    </div>
+
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">{stats.userInfo}</div>
+                      <div className="text-xs text-gray-500">User Info</div>
+                    </div>
+
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">{stats.facts}</div>
+                      <div className="text-xs text-gray-500">Facts</div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Total Knowledge</span>
+                      <span className="font-mono">{stats.totalEntries}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Conversations</span>
+                      <span className="font-mono">{stats.conversations}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Last Updated</span>
+                      <span className="font-mono text-xs">
+                        {stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : "Never"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Enhanced Math Engine</div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                      <span className="text-sm">Advanced Pattern Recognition</span>
+                    </div>
+                    <div className="text-xs text-gray-500">Understands 50+ mathematical expression formats</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="knowledge" className="h-full">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Database className="w-4 h-4" />
+                    Enhanced Math Knowledge
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-sm text-gray-600">
+                    <p className="mb-2">I now understand math in many formats:</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>• "2x2", "2*2", "2×2"</li>
+                      <li>• "2 times 2", "2 multiplied by 2"</li>
+                      <li>• "multiply 2 by 2", "what is 2 times 2?"</li>
+                      <li>• Multi-step problems</li>
+                      <li>• Natural language expressions</li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Thinking Process</div>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex items-center gap-2">
+                        <Brain className="w-3 h-3 text-blue-500" />
+                        <span>Real-time reasoning display</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calculator className="w-3 h-3 text-green-500" />
+                        <span>Pattern matching analysis</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Search className="w-3 h-3 text-purple-500" />
+                        <span>Mathematical confidence scoring</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Test These Formats</div>
+                    <div className="space-y-2 text-xs">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-left justify-start"
+                        onClick={() => setInput("2x2=")}
+                      >
+                        "2x2="
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-left justify-start"
+                        onClick={() => setInput("2 times by 2")}
+                      >
+                        "2 times by 2"
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-left justify-start"
+                        onClick={() => setInput("what is 5 multiplied by 3?")}
+                      >
+                        "what is 5 multiplied by 3?"
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="tools" className="h-full">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Settings className="w-4 h-4" />
+                    AI Tools
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button onClick={handleExport} className="w-full" variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Knowledge
+                  </Button>
+
+                  <div>
+                    <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
+                    <Button asChild className="w-full" variant="outline">
+                      <label htmlFor="import-file" className="cursor-pointer">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Import Knowledge
+                      </label>
+                    </Button>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Enhanced Features</div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p>• Real-time thinking display</p>
+                      <p>• Advanced math pattern recognition</p>
+                      <p>• Multi-format expression parsing</p>
+                      <p>• Confidence-based responses</p>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Privacy</div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p>• No data sent to servers</p>
+                      <p>• You control all information</p>
+                      <p>• Learning happens locally</p>
+                      <p>• Export/import as needed</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </div>
-        </div>
+        </Tabs>
       </div>
     </div>
   )
