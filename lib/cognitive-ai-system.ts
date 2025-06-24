@@ -1,10 +1,9 @@
 import { BrowserStorageManager } from "./browser-storage-manager"
 import { EnhancedCognitiveSystem } from "./enhanced-cognitive-system"
 
-// UPDATED COGNITIVE AI SYSTEM - USES ENHANCED COGNITIVE ENGINE
+// UPDATED COGNITIVE AI SYSTEM - FIXED STATS BUG
 export class CognitiveAISystem {
   private enhancedCognitive = new EnhancedCognitiveSystem()
-  private mathProcessor = new EnhancedMathProcessor()
   private storageManager = new BrowserStorageManager()
   private conversationHistory: ChatMessage[] = []
   private memory: Map<string, any> = new Map()
@@ -16,7 +15,6 @@ export class CognitiveAISystem {
 
   constructor() {
     this.initializeBasicVocabulary()
-    this.initializeBasicMathFunctions()
     this.initializeSampleFacts()
   }
 
@@ -45,7 +43,7 @@ export class CognitiveAISystem {
     const response: AIResponse = {
       content: cognitiveResponse.content,
       confidence: cognitiveResponse.confidence,
-      reasoning: cognitiveResponse.reasoning,
+      reasoning: cognitiveResponse.reasoning, // This now contains actual thoughts
     }
 
     await this.saveConversation(userMessage, response.content)
@@ -83,24 +81,25 @@ export class CognitiveAISystem {
         ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
         : 0
 
-    const totalUserInfo = this.personalInfo.size + this.memory.size
+    // FIXED: Only count personalInfo, not memory (which is empty anyway)
+    const totalUserInfo = this.personalInfo.size
 
     // Get enhanced cognitive data
     const mathKnowledge = this.enhancedCognitive.getMathKnowledge()
     const factDatabase = this.enhancedCognitive.getFactDatabase()
 
-    console.log("📊 Enhanced Stats:", {
+    console.log("📊 FIXED Stats:", {
       personalInfo: this.personalInfo.size,
       memory: this.memory.size,
       facts: factDatabase.size,
       mathKnowledge: mathKnowledge.size,
-      totalUserInfo: totalUserInfo,
+      totalUserInfo: totalUserInfo, // FIXED: No more double counting
     })
 
     return {
       totalMessages: this.conversationHistory.length,
       vocabularySize: this.vocabulary.size,
-      memoryEntries: totalUserInfo,
+      memoryEntries: totalUserInfo, // FIXED: Only personalInfo count
       avgConfidence: Math.round(avgConfidence * 100) / 100,
       systemStatus: this.systemStatus,
       mathFunctions: mathKnowledge.size, // Now shows actual math knowledge
@@ -184,40 +183,6 @@ export class CognitiveAISystem {
         console.log(`📝 Stored personal info: ${key} = ${value}`)
       }
     })
-  }
-
-  // Keep all existing methods for backward compatibility...
-  private mathFunctions: Map<string, MathFunction> = new Map()
-
-  private initializeBasicMathFunctions(): void {
-    const basicMath: MathFunction[] = [
-      {
-        name: "add",
-        description: "Addition",
-        examples: ["2 + 3", "add 5 and 7"],
-        func: (a: number, b: number) => a + b,
-      },
-      {
-        name: "subtract",
-        description: "Subtraction",
-        examples: ["10 - 3", "subtract 4 from 9"],
-        func: (a: number, b: number) => a - b,
-      },
-      {
-        name: "multiply",
-        description: "Multiplication",
-        examples: ["4 * 5", "multiply 3 by 6"],
-        func: (a: number, b: number) => a * b,
-      },
-      {
-        name: "divide",
-        description: "Division",
-        examples: ["15 / 3", "divide 20 by 4"],
-        func: (a: number, b: number) => (b !== 0 ? a / b : "Cannot divide by zero"),
-      },
-    ]
-
-    basicMath.forEach((func) => this.mathFunctions.set(func.name, func))
   }
 
   private initializeBasicVocabulary(): void {
@@ -412,7 +377,6 @@ export class CognitiveAISystem {
       memory: Array.from(this.memory.entries()),
       personalInfo: Array.from(this.personalInfo.entries()),
       facts: Array.from(this.facts.entries()),
-      mathFunctions: Array.from(this.mathFunctions.entries()),
       timestamp: Date.now(),
     }
   }
@@ -454,7 +418,6 @@ export class CognitiveAISystem {
       this.memory = new Map()
       this.personalInfo = new Map()
       this.facts = new Map()
-      this.mathFunctions = new Map()
 
       await this.storageManager.clearAllData()
       console.log("✅ All AI system data cleared")
@@ -478,8 +441,6 @@ export class CognitiveAISystem {
         }
       }
 
-      this.initializeBasicMathFunctions()
-
       await this.saveConversationHistory()
       await this.saveMemory()
       await this.saveVocabulary()
@@ -488,111 +449,6 @@ export class CognitiveAISystem {
     } catch (error) {
       console.error("❌ AI system retraining failed:", error)
       throw error
-    }
-  }
-}
-
-// Enhanced Math Processor (keeping existing functionality)
-class EnhancedMathProcessor {
-  private mathPatterns: MathPattern[] = []
-
-  constructor() {
-    this.initializeMathPatterns()
-  }
-
-  private initializeMathPatterns(): void {
-    this.mathPatterns = [
-      {
-        pattern: /(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
-        operation: "multiply",
-        confidence: 0.95,
-        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
-      },
-      {
-        pattern: /(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
-        operation: "add",
-        confidence: 0.95,
-        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
-      },
-      {
-        pattern: /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
-        operation: "subtract",
-        confidence: 0.95,
-        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
-      },
-      {
-        pattern: /(\d+(?:\.\d+)?)\s*[/÷]\s*(\d+(?:\.\d+)?)\s*=?\s*$/i,
-        operation: "divide",
-        confidence: 0.95,
-        extract: (match) => [Number.parseFloat(match[1]), Number.parseFloat(match[2])],
-      },
-    ]
-  }
-
-  public analyzeMathExpression(input: string): MathAnalysis {
-    const cleanInput = input.trim().toLowerCase()
-    const reasoning: string[] = []
-
-    reasoning.push(`Analyzing input: "${input}"`)
-
-    for (const pattern of this.mathPatterns) {
-      const match = cleanInput.match(pattern.pattern)
-      if (match) {
-        reasoning.push(`Matched pattern for ${pattern.operation}`)
-
-        try {
-          const numbers = pattern.extract(match)
-          reasoning.push(`Extracted numbers: ${numbers.join(", ")}`)
-
-          const result = this.performOperation(pattern.operation, numbers)
-          reasoning.push(`Calculated result: ${result}`)
-
-          return {
-            isMatch: true,
-            operation: pattern.operation,
-            numbers: numbers,
-            result: result,
-            confidence: pattern.confidence,
-            reasoning: reasoning,
-          }
-        } catch (error) {
-          reasoning.push(`Error in calculation: ${error}`)
-          return {
-            isMatch: false,
-            operation: pattern.operation,
-            numbers: [],
-            result: undefined,
-            confidence: 0.3,
-            reasoning: reasoning,
-          }
-        }
-      }
-    }
-
-    reasoning.push("No mathematical content detected")
-    return {
-      isMatch: false,
-      operation: "none",
-      numbers: [],
-      result: undefined,
-      confidence: 0.0,
-      reasoning: reasoning,
-    }
-  }
-
-  private performOperation(operation: string, numbers: number[]): number {
-    switch (operation) {
-      case "add":
-        return numbers[0] + numbers[1]
-      case "subtract":
-        return numbers[0] - numbers[1]
-      case "multiply":
-        return numbers[0] * numbers[1]
-      case "divide":
-        if (numbers[1] === 0) throw new Error("Cannot divide by zero")
-        return numbers[0] / numbers[1]
-      default:
-        throw new Error(`Unknown operation: ${operation}`)
     }
   }
 }
@@ -623,33 +479,10 @@ interface AIResponse {
   mathAnalysis?: any
 }
 
-interface MathFunction {
-  name: string
-  description: string
-  examples: string[]
-  func: (...args: number[]) => number | string
-}
-
 interface ChatMessage {
   id: string
   role: "user" | "assistant"
   content: string
   timestamp: number
   confidence?: number
-}
-
-interface MathPattern {
-  pattern: RegExp
-  operation: string
-  confidence: number
-  extract: (match: RegExpMatchArray) => number[]
-}
-
-interface MathAnalysis {
-  isMatch: boolean
-  operation: string
-  numbers: number[]
-  result: number | undefined
-  confidence: number
-  reasoning: string[]
 }

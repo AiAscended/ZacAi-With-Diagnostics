@@ -1,561 +1,310 @@
-import { BrowserStorageManager } from "./browser-storage-manager"
-
-// ADVANCED COGNITIVE PROCESSING ENGINE - BACKEND ONLY
+// ENHANCED COGNITIVE SYSTEM - BACKEND ONLY, NO UI CHANGES
 export class EnhancedCognitiveSystem {
-  private knowledgeGraph: Map<string, KnowledgeNode> = new Map()
-  private mathKnowledge: Map<string, MathKnowledge> = new Map()
-  private factDatabase: Map<string, FactKnowledge> = new Map()
-  private patternLibrary: Map<string, PatternTemplate> = new Map()
-  private contextMemory: ContextMemory[] = []
-  private storageManager = new BrowserStorageManager()
+  private mathKnowledge: Map<string, any> = new Map()
+  private factDatabase: Map<string, any> = new Map()
+  private cognitiveRouter = new CognitiveRouter()
+  private thinkingProcess: string[] = []
   private isInitialized = false
 
   constructor() {
-    this.initializePatternLibrary()
+    console.log("🧠 Initializing Enhanced Cognitive System...")
   }
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
 
-    console.log("🧠 Initializing Enhanced Cognitive System...")
-
     try {
-      await this.loadMathematicalKnowledge()
-      await this.loadFactualKnowledge()
-      await this.buildKnowledgeGraph()
+      console.log("🔄 Loading mathematical knowledge...")
+      await this.loadMathKnowledge()
+
+      console.log("📚 Loading factual database...")
+      await this.loadFactDatabase()
+
+      console.log("🧠 Initializing cognitive router...")
+      this.cognitiveRouter.initialize()
 
       this.isInitialized = true
       console.log("✅ Enhanced Cognitive System ready!")
     } catch (error) {
-      console.error("❌ Cognitive system initialization failed:", error)
+      console.error("❌ Enhanced Cognitive System initialization failed:", error)
       this.isInitialized = true // Continue anyway
     }
   }
 
-  // ENHANCED COGNITIVE PROCESSING
   public async processThought(
     input: string,
     conversationHistory: any[],
     personalInfo: Map<string, any>,
-  ): Promise<EnhancedCognitiveResponse> {
-    if (!this.isInitialized) await this.initialize()
+  ): Promise<CognitiveResponse> {
+    this.thinkingProcess = []
 
     console.log("🧠 Enhanced cognitive processing:", input)
 
-    // Stage 1: Deep Semantic Analysis
-    const semantics = await this.deepSemanticAnalysis(input)
+    // Stage 1: Input Analysis
+    this.addThought("🔍 Analyzing input complexity and type...")
+    const inputAnalysis = this.analyzeInput(input)
+    this.addThought(`📝 Input type: ${inputAnalysis.type}, complexity: ${inputAnalysis.complexity}`)
 
-    // Stage 2: Mathematical Pattern Recognition
-    const mathAnalysis = await this.analyzeMathematicalContent(input)
+    // Stage 2: Cognitive Routing
+    this.addThought("🛤️ Selecting cognitive pathways...")
+    const pathways = this.cognitiveRouter.selectPathways(inputAnalysis)
+    this.addThought(`🔀 Activated pathways: ${pathways.map((p) => p.name).join(", ")}`)
 
-    // Stage 3: Knowledge Graph Activation
-    const knowledgeActivation = await this.activateKnowledgeGraph(semantics, mathAnalysis)
+    // Stage 3: Parallel Processing
+    this.addThought("⚡ Processing through multiple cognitive pathways...")
+    const pathwayResults = await this.processPathways(pathways, input, personalInfo)
 
-    // Stage 4: Context Integration
-    const contextIntegration = await this.integrateContext(semantics, conversationHistory, personalInfo)
+    // Stage 4: Knowledge Synthesis
+    this.addThought("🔗 Synthesizing knowledge from all pathways...")
+    const synthesis = this.synthesizeKnowledge(pathwayResults, personalInfo)
+    this.addThought(`💡 Synthesis confidence: ${Math.round(synthesis.confidence * 100)}%`)
 
-    // Stage 5: Intelligent Response Generation
-    const response = await this.generateIntelligentResponse(
-      semantics,
-      mathAnalysis,
-      knowledgeActivation,
-      contextIntegration,
-      personalInfo,
-    )
-
-    return response
-  }
-
-  // DEEP SEMANTIC ANALYSIS
-  private async deepSemanticAnalysis(input: string): Promise<DeepSemantics> {
-    const words = input.toLowerCase().match(/\b\w+\b/g) || []
-
-    // Enhanced entity extraction
-    const entities = this.extractAdvancedEntities(input)
-
-    // Concept mapping with knowledge graph
-    const concepts = await this.mapConcepts(words)
-
-    // Intent classification with confidence scoring
-    const intents = this.classifyIntents(words, entities, concepts)
-
-    // Emotional and contextual analysis
-    const emotional = this.analyzeEmotionalContext(input)
+    // Stage 5: Response Generation
+    this.addThought("💬 Generating intelligent response...")
+    const response = this.generateIntelligentResponse(synthesis, personalInfo)
+    this.addThought(`✅ Response generated with ${Math.round(response.confidence * 100)}% confidence`)
 
     return {
-      words,
-      entities,
-      concepts,
-      intents,
-      emotional,
-      complexity: this.calculateSemanticComplexity(words, entities, concepts),
+      content: response.content,
+      confidence: response.confidence,
+      reasoning: [...this.thinkingProcess],
+      pathways: pathways.map((p) => p.name),
+      synthesis: synthesis,
     }
   }
 
-  // MATHEMATICAL KNOWLEDGE SYSTEM
-  private async analyzeMathematicalContent(input: string): Promise<MathematicalAnalysis> {
-    const mathPatterns = this.detectMathematicalPatterns(input)
+  private addThought(thought: string): void {
+    this.thinkingProcess.push(thought)
+    console.log(thought)
+  }
 
-    if (mathPatterns.length === 0) {
-      return { hasMath: false, patterns: [], solutions: [], confidence: 0 }
+  private analyzeInput(input: string): InputAnalysis {
+    const words = input.toLowerCase().split(/\s+/)
+    const hasNumbers = /\d/.test(input)
+    const hasMathOperators = /[+\-×*÷/=]/.test(input)
+    const hasQuestionWords = /\b(what|how|why|when|where|who|which)\b/i.test(input)
+
+    let type = "conversation"
+    let complexity = 0.3
+
+    // Detect mathematical expressions
+    if (hasNumbers && hasMathOperators) {
+      type = "mathematics"
+      complexity = this.calculateMathComplexity(input)
     }
-
-    const solutions: MathSolution[] = []
-
-    for (const pattern of mathPatterns) {
-      const solution = await this.solveMathematicalProblem(pattern)
-      if (solution) solutions.push(solution)
+    // Detect questions
+    else if (hasQuestionWords) {
+      type = "inquiry"
+      complexity = 0.6
+    }
+    // Detect personal information
+    else if (/\b(my|i|me|am|have)\b/i.test(input)) {
+      type = "personal"
+      complexity = 0.4
     }
 
     return {
-      hasMath: true,
-      patterns: mathPatterns,
-      solutions,
-      confidence: solutions.length > 0 ? 0.9 : 0.3,
+      type,
+      complexity,
+      hasNumbers,
+      hasMathOperators,
+      hasQuestionWords,
+      wordCount: words.length,
     }
   }
 
-  private async solveMathematicalProblem(pattern: MathPattern): Promise<MathSolution | null> {
-    // Basic arithmetic
-    if (pattern.type === "arithmetic") {
-      return this.solveArithmetic(pattern)
-    }
+  private calculateMathComplexity(input: string): number {
+    const operators = (input.match(/[+\-×*÷/]/g) || []).length
+    const numbers = (input.match(/\d+/g) || []).length
 
-    // Advanced mathematical concepts from seed data
-    if (pattern.type === "advanced") {
-      return this.solveAdvancedMath(pattern)
-    }
-
-    // Word problems
-    if (pattern.type === "word_problem") {
-      return this.solveWordProblem(pattern)
-    }
-
-    return null
+    // More operators and numbers = higher complexity
+    return Math.min(0.9, 0.3 + operators * 0.2 + numbers * 0.1)
   }
 
-  private solveArithmetic(pattern: MathPattern): MathSolution {
-    const { operation, numbers } = pattern
-    let result: number
-    let explanation: string
-
-    switch (operation) {
-      case "add":
-        result = numbers.reduce((a, b) => a + b, 0)
-        explanation = `Adding ${numbers.join(" + ")} = ${result}`
-        break
-      case "subtract":
-        result = numbers[0] - numbers[1]
-        explanation = `${numbers[0]} - ${numbers[1]} = ${result}`
-        break
-      case "multiply":
-        result = numbers.reduce((a, b) => a * b, 1)
-        explanation = `Multiplying ${numbers.join(" × ")} = ${result}`
-        break
-      case "divide":
-        if (numbers[1] === 0) {
-          return { result: "undefined", explanation: "Cannot divide by zero", method: "error", confidence: 1.0 }
-        }
-        result = numbers[0] / numbers[1]
-        explanation = `${numbers[0]} ÷ ${numbers[1]} = ${result}`
-        break
-      default:
-        return { result: "unknown", explanation: "Unknown operation", method: "error", confidence: 0 }
-    }
-
-    return {
-      result: result.toString(),
-      explanation,
-      method: "basic_arithmetic",
-      confidence: 0.95,
-    }
-  }
-
-  private async solveAdvancedMath(pattern: MathPattern): Promise<MathSolution | null> {
-    // Use mathematical knowledge from seed data
-    const relevantMath = this.findRelevantMathKnowledge(pattern.expression)
-
-    if (relevantMath.length === 0) return null
-
-    // Apply mathematical formulas and methods
-    for (const mathTool of relevantMath) {
-      const solution = this.applyMathematicalMethod(pattern, mathTool)
-      if (solution) return solution
-    }
-
-    return null
-  }
-
-  private findRelevantMathKnowledge(expression: string): MathKnowledge[] {
-    const relevant: MathKnowledge[] = []
-
-    for (const [key, knowledge] of this.mathKnowledge) {
-      if (this.isRelevantToExpression(expression, knowledge)) {
-        relevant.push(knowledge)
-      }
-    }
-
-    return relevant.sort((a, b) => b.relevance - a.relevance)
-  }
-
-  private applyMathematicalMethod(pattern: MathPattern, mathTool: MathKnowledge): MathSolution | null {
-    try {
-      // Apply the mathematical method based on the tool
-      if (mathTool.type === "formula" && mathTool.formula) {
-        return this.applyFormula(pattern, mathTool)
-      }
-
-      if (mathTool.type === "algorithm" && mathTool.algorithm) {
-        return this.applyAlgorithm(pattern, mathTool)
-      }
-
-      if (mathTool.type === "lookup_table" && mathTool.table) {
-        return this.applyLookupTable(pattern, mathTool)
-      }
-
-      return null
-    } catch (error) {
-      console.warn("Math application error:", error)
-      return null
-    }
-  }
-
-  // KNOWLEDGE GRAPH SYSTEM
-  private async buildKnowledgeGraph(): Promise<void> {
-    console.log("🕸️ Building knowledge graph...")
-
-    // Connect mathematical concepts
-    this.connectMathematicalConcepts()
-
-    // Connect factual knowledge
-    this.connectFactualKnowledge()
-
-    // Build semantic relationships
-    this.buildSemanticRelationships()
-
-    console.log(`✅ Knowledge graph built with ${this.knowledgeGraph.size} nodes`)
-  }
-
-  private connectMathematicalConcepts(): void {
-    for (const [key, math] of this.mathKnowledge) {
-      const node: KnowledgeNode = {
-        id: key,
-        type: "mathematical",
-        content: math,
-        connections: [],
-        strength: math.importance || 0.5,
-        lastAccessed: Date.now(),
-      }
-
-      // Find related mathematical concepts
-      node.connections = this.findMathematicalConnections(math)
-
-      this.knowledgeGraph.set(key, node)
-    }
-  }
-
-  private findMathematicalConnections(math: MathKnowledge): string[] {
-    const connections: string[] = []
-
-    // Connect by category
-    for (const [key, otherMath] of this.mathKnowledge) {
-      if (otherMath.category === math.category && key !== math.concept) {
-        connections.push(key)
-      }
-    }
-
-    // Connect by keywords
-    if (math.keywords) {
-      for (const [key, otherMath] of this.mathKnowledge) {
-        if (otherMath.keywords && this.hasCommonKeywords(math.keywords, otherMath.keywords)) {
-          connections.push(key)
-        }
-      }
-    }
-
-    return connections
-  }
-
-  // INTELLIGENT RESPONSE GENERATION
-  private async generateIntelligentResponse(
-    semantics: DeepSemantics,
-    mathAnalysis: MathematicalAnalysis,
-    knowledgeActivation: KnowledgeActivation,
-    contextIntegration: ContextIntegration,
+  private async processPathways(
+    pathways: CognitivePathway[],
+    input: string,
     personalInfo: Map<string, any>,
-  ): Promise<EnhancedCognitiveResponse> {
-    // Mathematical response
-    if (mathAnalysis.hasMath && mathAnalysis.solutions.length > 0) {
-      const solution = mathAnalysis.solutions[0]
-      return {
-        content: `${solution.explanation}`,
-        confidence: solution.confidence,
-        reasoning: [`Used ${solution.method}`, `Mathematical confidence: ${solution.confidence}`],
-        type: "mathematical",
-        knowledgeUsed: mathAnalysis.solutions.map((s) => s.method),
+  ): Promise<PathwayResult[]> {
+    const results: PathwayResult[] = []
+
+    for (const pathway of pathways) {
+      this.addThought(`🔄 Processing through ${pathway.name} pathway...`)
+
+      try {
+        let result: PathwayResult
+
+        switch (pathway.type) {
+          case "mathematical":
+            result = await this.processMathematicalPathway(input)
+            break
+          case "factual":
+            result = await this.processFactualPathway(input)
+            break
+          case "personal":
+            result = await this.processPersonalPathway(input, personalInfo)
+            break
+          case "conversational":
+            result = await this.processConversationalPathway(input)
+            break
+          default:
+            result = { pathway: pathway.name, confidence: 0.3, data: "Generic response" }
+        }
+
+        this.addThought(`✅ ${pathway.name} pathway result: confidence ${Math.round(result.confidence * 100)}%`)
+        results.push(result)
+      } catch (error) {
+        this.addThought(`❌ ${pathway.name} pathway failed: ${error}`)
+        results.push({ pathway: pathway.name, confidence: 0.1, data: null })
       }
     }
 
-    // Factual knowledge response
-    if (knowledgeActivation.facts.length > 0) {
-      const fact = knowledgeActivation.facts[0]
+    return results
+  }
+
+  private async processMathematicalPathway(input: string): Promise<PathwayResult> {
+    this.addThought("🔢 Analyzing mathematical expression...")
+
+    // Enhanced math processing for multi-step operations
+    const mathProcessor = new AdvancedMathProcessor()
+    const result = mathProcessor.processComplexExpression(input)
+
+    if (result.success) {
+      this.addThought(`🧮 Mathematical solution found: ${result.answer}`)
       return {
-        content: `Based on what I know: ${fact.content}`,
-        confidence: fact.confidence,
-        reasoning: [`Retrieved from ${fact.source}`, `Relevance: ${fact.relevance}`],
-        type: "factual",
-        knowledgeUsed: [fact.category],
+        pathway: "mathematical",
+        confidence: result.confidence,
+        data: {
+          answer: result.answer,
+          steps: result.steps,
+          method: result.method,
+        },
       }
     }
 
-    // Personal context response
-    const userName = this.extractUserName(personalInfo)
-    const personalContext = contextIntegration.personal
+    this.addThought("❌ No mathematical pattern recognized")
+    return { pathway: "mathematical", confidence: 0.1, data: null }
+  }
 
-    if (personalContext.relevantFacts.length > 0) {
-      const fact = personalContext.relevantFacts[0]
+  private async processFactualPathway(input: string): Promise<PathwayResult> {
+    this.addThought("📚 Searching factual knowledge...")
+
+    const relevantFacts = this.searchFactDatabase(input)
+
+    if (relevantFacts.length > 0) {
+      this.addThought(`📖 Found ${relevantFacts.length} relevant facts`)
       return {
-        content: `${userName ? userName + ", " : ""}I remember you mentioned ${fact.value}. ${this.generateContextualResponse(semantics, fact)}`,
+        pathway: "factual",
         confidence: 0.8,
-        reasoning: [`Used personal context: ${fact.key}`, `Intent: ${semantics.intents[0]?.type}`],
-        type: "personal",
-        knowledgeUsed: ["personal_memory"],
+        data: relevantFacts[0], // Use most relevant fact
       }
     }
 
-    // Default intelligent response
-    return this.generateDefaultIntelligentResponse(semantics, personalInfo)
+    this.addThought("❌ No relevant facts found")
+    return { pathway: "factual", confidence: 0.2, data: null }
   }
 
-  // LOAD MATHEMATICAL KNOWLEDGE FROM SEED DATA
-  private async loadMathematicalKnowledge(): Promise<void> {
-    try {
-      console.log("📊 Loading mathematical knowledge...")
+  private async processPersonalPathway(input: string, personalInfo: Map<string, any>): Promise<PathwayResult> {
+    this.addThought("👤 Analyzing personal context...")
 
-      const response = await fetch("/seed_maths.json")
-      if (!response.ok) throw new Error("Failed to load math seed data")
+    const personalFacts = Array.from(personalInfo.entries())
 
-      const mathData = await response.json()
-
-      // Process times tables
-      if (mathData.arithmetic_tables?.multiplication) {
-        this.processTimesTables(mathData.arithmetic_tables.multiplication)
+    if (personalFacts.length > 0) {
+      this.addThought(`💭 Found ${personalFacts.length} personal memories`)
+      return {
+        pathway: "personal",
+        confidence: 0.7,
+        data: personalFacts,
       }
-
-      // Process advanced mathematical concepts
-      if (mathData.tesla_map) {
-        this.processTeslaMap(mathData.tesla_map)
-      }
-
-      // Process calculation methods
-      if (mathData.calculation_methods) {
-        this.processCalculationMethods(mathData.calculation_methods)
-      }
-
-      // Process mathematical formulas
-      if (mathData.calculus) {
-        this.processCalculus(mathData.calculus)
-      }
-
-      console.log(`✅ Loaded ${this.mathKnowledge.size} mathematical concepts`)
-    } catch (error) {
-      console.warn("Failed to load mathematical knowledge:", error)
     }
-  }
-  \
-  private processTimes
-  Tables(multiplicationTable: any): void {
-    for (const [number, results] of Object.entries(multiplicationTable)) {
-      const mathKnowledge: MathKnowledge = {
-        concept: `times_table_${number}`,
-        type: "lookup_table",
-        category: "arithmetic",
-        table: results as number[],
-        description: `Times table for ${number}`,
-        examples: [`${number} × 1 = ${(results as number[])[0]}`, `${number} × 12 = ${(results as number[])[11]}`],
-        keywords: ["multiplication", "times", number],
-        importance: 0.9,
-        relevance: 0,
-      }
 
-      this.mathKnowledge.set(`times_table_${number}`, mathKnowledge)
+    this.addThought("❌ No personal information available")
+    return { pathway: "personal", confidence: 0.3, data: null }
+  }
+
+  private async processConversationalPathway(input: string): Promise<PathwayResult> {
+    this.addThought("💬 Processing conversational context...")
+
+    return {
+      pathway: "conversational",
+      confidence: 0.6,
+      data: "I understand what you're saying.",
     }
   }
 
-  private processTeslaMap(teslaData: any): void {
-    const mathKnowledge: MathKnowledge = {
-      concept: "tesla_vortex_mathematics",
-      type: "algorithm",
-      category: "advanced",
-      algorithm: teslaData.vortex_cycle,
-      formula: "Digital root reduction following 1-2-4-8-7-5 pattern",
-      description: teslaData.description,
-      examples: Object.values(teslaData.examples || {}),
-      keywords: ["tesla", "vortex", "digital", "root", "369"],
-      importance: 0.7,
-      relevance: 0,
-    }
+  private synthesizeKnowledge(results: PathwayResult[], personalInfo: Map<string, any>): KnowledgeSynthesis {
+    this.addThought("🔗 Synthesizing knowledge from all pathways...")
 
-    this.mathKnowledge.set("tesla_vortex_mathematics", mathKnowledge)
-  }
-
-  private processCalculationMethods(methods: any): void {
-    for (const [category, categoryMethods] of Object.entries(methods)) {
-      if (typeof categoryMethods === "object") {
-        for (const [method, methodData] of Object.entries(categoryMethods as any)) {
-          const mathKnowledge: MathKnowledge = {
-            concept: `${category}_${method}`,
-            type: "algorithm",
-            category: category,
-            algorithm: (methodData as any).steps || (methodData as any).algorithm,
-            description: (methodData as any).description,
-            examples: Object.values((methodData as any).examples || {}),
-            keywords: [category, method],
-            importance: 0.8,
-            relevance: 0,
-          }
-
-          this.mathKnowledge.set(`${category}_${method}`, mathKnowledge)
-        }
-      }
-    }
-  }
-
-  // LOAD FACTUAL KNOWLEDGE FROM SEED DATA
-  private async loadFactualKnowledge(): Promise<void> {
-    try {
-      console.log("📚 Loading factual knowledge...")
-
-      const response = await fetch("/seed_knowledge.json")
-      if (!response.ok) throw new Error("Failed to load knowledge seed data")
-
-      const knowledgeData = await response.json()
-
-      // Process facts
-      if (knowledgeData.facts) {
-        this.processFactualData(knowledgeData.facts)
-      }
-
-      // Process encyclopedia
-      if (knowledgeData.encyclopedia) {
-        this.processEncyclopedicData(knowledgeData.encyclopedia)
-      }
-
-      console.log(`✅ Loaded ${this.factDatabase.size} facts`)
-    } catch (error) {
-      console.warn("Failed to load factual knowledge:", error)
-      // Add some basic facts as fallback
-      this.addBasicFacts()
-    }
-  }
-
-  private processFactualData(facts: any): void {
-    for (const [category, categoryFacts] of Object.entries(facts)) {
-      if (typeof categoryFacts === "object") {
-        for (const [topic, data] of Object.entries(categoryFacts as any)) {
-          const fact: FactKnowledge = {
-            id: `${category}_${topic}`,
-            category: category,
-            topic: topic,
-            content: typeof data === "string" ? data : JSON.stringify(data),
-            source: "seed_knowledge",
-            confidence: 0.9,
-            relevance: 0,
-            keywords: [category, topic],
-            lastAccessed: Date.now(),
-          }
-
-          this.factDatabase.set(fact.id, fact)
-        }
-      }
-    }
-  }
-
-  private addBasicFacts(): void {
-    const basicFacts = [
-      { category: "science", topic: "water_boiling", content: "Water boils at 100°C (212°F) at sea level" },
-      {
-        category: "mathematics",
-        topic: "pi",
-        content: "Pi (π) is approximately 3.14159, the ratio of circumference to diameter",
-      },
-      {
-        category: "history",
-        topic: "first_computer",
-        content: "ENIAC was one of the first general-purpose computers, built in 1946",
-      },
-      { category: "geography", topic: "mount_everest", content: "Mount Everest is 8,848 meters (29,029 feet) tall" },
-      {
-        category: "physics",
-        topic: "speed_of_light",
-        content: "Light travels at 299,792,458 meters per second in a vacuum",
-      },
-    ]
-
-    basicFacts.forEach((fact) => {
-      const factKnowledge: FactKnowledge = {
-        id: `${fact.category}_${fact.topic}`,
-        category: fact.category,
-        topic: fact.topic,
-        content: fact.content,
-        source: "basic_facts",
-        confidence: 0.95,
-        relevance: 0,
-        keywords: [fact.category, fact.topic],
-        lastAccessed: Date.now(),
-      }
-
-      this.factDatabase.set(factKnowledge.id, factKnowledge)
+    const validResults = results.filter((r) => r.confidence > 0.3)
+    const bestResult = validResults.reduce((best, current) => (current.confidence > best.confidence ? current : best), {
+      confidence: 0,
+      pathway: "none",
+      data: null,
     })
+
+    const userName = this.getUserName(personalInfo)
+
+    return {
+      primaryPathway: bestResult.pathway,
+      confidence: bestResult.confidence,
+      data: bestResult.data,
+      userName: userName,
+      allResults: validResults,
+    }
   }
 
-  // HELPER METHODS
-  private detectMathematicalPatterns(input: string): MathPattern[] {
-    const patterns: MathPattern[] = []
+  private generateIntelligentResponse(
+    synthesis: KnowledgeSynthesis,
+    personalInfo: Map<string, any>,
+  ): ResponseGeneration {
+    const namePrefix = synthesis.userName ? `${synthesis.userName}, ` : ""
 
-    // Basic arithmetic patterns
-    const arithmeticRegex = /(\d+(?:\.\d+)?)\s*([+\-*/×÷])\s*(\d+(?:\.\d+)?)/g
-    let match
+    let content = ""
+    const confidence = synthesis.confidence
 
-    while ((match = arithmeticRegex.exec(input)) !== null) {
-      const operation = this.mapOperationSymbol(match[2])
-      patterns.push({
-        type: "arithmetic",
-        expression: match[0],
-        operation: operation,
-        numbers: [Number.parseFloat(match[1]), Number.parseFloat(match[3])],
-        confidence: 0.95,
-      })
+    switch (synthesis.primaryPathway) {
+      case "mathematical":
+        if (synthesis.data && synthesis.data.answer !== undefined) {
+          content = `${namePrefix}the answer is ${synthesis.data.answer}`
+          if (synthesis.data.steps) {
+            content += `. Here's how I solved it: ${synthesis.data.steps.join(" → ")}`
+          }
+        } else {
+          content = `${namePrefix}I can help with math problems. Try something like "3×3+3" or "15÷3"`
+        }
+        break
+
+      case "factual":
+        if (synthesis.data) {
+          content = `${namePrefix}${synthesis.data.content || synthesis.data}`
+        } else {
+          content = `${namePrefix}I don't have specific information about that, but I'd be happy to help with what I know!`
+        }
+        break
+
+      case "personal":
+        if (synthesis.data && synthesis.data.length > 0) {
+          const facts = synthesis.data
+            .slice(0, 3)
+            .map(([key, entry]: [string, any]) => {
+              const value = typeof entry === "object" ? entry.value : entry
+              return `${key}: ${value}`
+            })
+            .join(", ")
+          content = `${namePrefix}I remember: ${facts}`
+        } else {
+          content = `${namePrefix}I don't have any stored memories yet. Tell me something about yourself!`
+        }
+        break
+
+      default:
+        content = `${namePrefix}I understand. What would you like to talk about?`
     }
 
-    // Times table patterns
-    const timesRegex = /(\d+)\s*(?:times|x|×|\*)\s*(\d+)/gi
-    while ((match = timesRegex.exec(input)) !== null) {
-      patterns.push({
-        type: "arithmetic",
-        expression: match[0],
-        operation: "multiply",
-        numbers: [Number.parseInt(match[1]), Number.parseInt(match[2])],
-        confidence: 0.9,
-      })
-    }
-
-    return patterns
+    return { content, confidence }
   }
 
-  private mapOperationSymbol(symbol: string): string {
-    const mapping: { [key: string]: string } = {
-      "+": "add",
-      "-": "subtract",
-      "*": "multiply",
-      "×": "multiply",
-      "/": "divide",
-      "÷": "divide",
-    }
-    return mapping[symbol] || "unknown"
-  }
-
-  private extractUserName(personalInfo: Map<string, any>): string | null {
+  private getUserName(personalInfo: Map<string, any>): string | null {
     const nameEntry = personalInfo.get("name")
     if (nameEntry) {
       return typeof nameEntry === "object" ? nameEntry.value : nameEntry
@@ -563,291 +312,286 @@ export class EnhancedCognitiveSystem {
     return null
   }
 
-  // Initialize pattern library and other helper methods...
-  private initializePatternLibrary(): void {
-    // Initialize common patterns for faster processing
-  }
+  private async loadMathKnowledge(): Promise<void> {
+    try {
+      // Load from seed_maths.json
+      const response = await fetch("/seed_maths.json")
+      const mathData = await response.json()
 
-  private extractAdvancedEntities(input: string): Entity[] {
-    return [] // Implement advanced entity extraction
-  }
+      Object.entries(mathData).forEach(([key, value]) => {
+        this.mathKnowledge.set(key, value)
+      })
 
-  private async mapConcepts(words: string[]): Promise<Concept[]> {
-    return [] // Implement concept mapping
-  }
-
-  private classifyIntents(words: string[], entities: Entity[], concepts: Concept[]): Intent[] {
-    return [] // Implement intent classification
-  }
-
-  private analyzeEmotionalContext(input: string): EmotionalContext {
-    return { valence: "neutral", intensity: 0.5 } // Implement emotional analysis
-  }
-
-  private calculateSemanticComplexity(words: string[], entities: Entity[], concepts: Concept[]): number {
-    return (words.length * 0.1 + entities.length * 0.3 + concepts.length * 0.6) / 10
-  }
-
-  private async activateKnowledgeGraph(
-    semantics: DeepSemantics,
-    mathAnalysis: MathematicalAnalysis,
-  ): Promise<KnowledgeActivation> {
-    return { facts: [], concepts: [], confidence: 0.5 } // Implement knowledge activation
-  }
-
-  private async integrateContext(
-    semantics: DeepSemantics,
-    history: any[],
-    personalInfo: Map<string, any>,
-  ): Promise<ContextIntegration> {
-    return { personal: { relevantFacts: [] }, conversational: { continuity: 0.5 } } // Implement context integration
-  }
-
-  private generateContextualResponse(semantics: DeepSemantics, fact: any): string {
-    return "What would you like to know more about?"
-  }
-
-  private generateDefaultIntelligentResponse(
-    semantics: DeepSemantics,
-    personalInfo: Map<string, any>,
-  ): EnhancedCognitiveResponse {
-    return {
-      content: "I understand. How can I help you?",
-      confidence: 0.7,
-      reasoning: ["Default response generated"],
-      type: "conversational",
-      knowledgeUsed: [],
+      console.log(`📊 Loaded ${this.mathKnowledge.size} mathematical concepts`)
+    } catch (error) {
+      console.warn("Failed to load math knowledge:", error)
     }
   }
 
-  private isRelevantToExpression(expression: string, knowledge: MathKnowledge): boolean {
-    if (!knowledge.keywords) return false
-    return knowledge.keywords.some((keyword) => expression.toLowerCase().includes(keyword.toLowerCase()))
+  private async loadFactDatabase(): Promise<void> {
+    try {
+      // Load from seed_knowledge.json
+      const response = await fetch("/seed_knowledge.json")
+      const factData = await response.json()
+
+      Object.entries(factData).forEach(([key, value]) => {
+        this.factDatabase.set(key, value)
+      })
+
+      console.log(`📚 Loaded ${this.factDatabase.size} facts`)
+    } catch (error) {
+      console.warn("Failed to load fact database:", error)
+    }
   }
 
-  private applyFormula(pattern: MathPattern, mathTool: MathKnowledge): MathSolution | null {
-    // Implement formula application
-    return null
-  }
+  private searchFactDatabase(query: string): any[] {
+    const results: any[] = []
+    const queryWords = query.toLowerCase().split(/\s+/)
 
-  private applyAlgorithm(pattern: MathPattern, mathTool: MathKnowledge): MathSolution | null {
-    // Implement algorithm application
-    return null
-  }
+    for (const [key, fact] of this.factDatabase.entries()) {
+      const factText = typeof fact === "object" ? JSON.stringify(fact) : String(fact)
+      const matches = queryWords.filter((word) => factText.toLowerCase().includes(word)).length
 
-  private applyLookupTable(pattern: MathPattern, mathTool: MathKnowledge): MathSolution | null {
-    // Implement lookup table application
-    if (mathTool.table && pattern.operation === "multiply") {
-      const [a, b] = pattern.numbers
-      if (a >= 1 && a <= 12 && b >= 1 && b <= 12) {
-        const result = mathTool.table[b - 1]
-        return {
-          result: result.toString(),
-          explanation: `Using times table: ${a} × ${b} = ${result}`,
-          method: "times_table_lookup",
-          confidence: 0.95,
-        }
+      if (matches > 0) {
+        results.push({
+          key,
+          content: fact,
+          relevance: matches / queryWords.length,
+        })
       }
     }
-    return null
+
+    return results.sort((a, b) => b.relevance - a.relevance)
   }
 
-  private connectFactualKnowledge(): void {
-    // Implement factual knowledge connections
-  }
-
-  private buildSemanticRelationships(): void {
-    // Implement semantic relationship building
-  }
-
-  private hasCommonKeywords(keywords1: string[], keywords2: string[]): boolean {
-    return keywords1.some((k1) => keywords2.some((k2) => k1.toLowerCase() === k2.toLowerCase()))
-  }
-
-  private solveWordProblem(pattern: MathPattern): MathSolution | null {
-    // Implement word problem solving
-    return null
-  }
-
-  private processCalculus(calculusData: any): void {
-    // Process calculus concepts from seed data
-    for (const [concept, data] of Object.entries(calculusData)) {
-      if (typeof data === "object") {
-        const mathKnowledge: MathKnowledge = {
-          concept: `calculus_${concept}`,
-          type: "formula",
-          category: "calculus",
-          formula: (data as any).definition,
-          description: (data as any).definition,
-          examples: Object.values((data as any).examples || {}),
-          keywords: ["calculus", concept],
-          importance: 0.6,
-          relevance: 0,
-        }
-
-        this.mathKnowledge.set(`calculus_${concept}`, mathKnowledge)
-      }
-    }
-  }
-
-  private processEncyclopedicData(encyclopedia: any): void {
-    for (const [category, categoryData] of Object.entries(encyclopedia)) {
-      if (typeof categoryData === "object") {
-        for (const [topic, data] of Object.entries(categoryData as any)) {
-          const fact: FactKnowledge = {
-            id: `encyclopedia_${category}_${topic}`,
-            category: category,
-            topic: topic,
-            content: typeof data === "string" ? data : JSON.stringify(data),
-            source: "encyclopedia",
-            confidence: 0.85,
-            relevance: 0,
-            keywords: [category, topic],
-            lastAccessed: Date.now(),
-          }
-
-          this.factDatabase.set(fact.id, fact)
-        }
-      }
-    }
-  }
-
-  // PUBLIC METHODS FOR EXTERNAL ACCESS
-  public getMathKnowledge(): Map<string, MathKnowledge> {
+  // Public methods for stats (FIXED - no double counting)
+  public getMathKnowledge(): Map<string, any> {
     return this.mathKnowledge
   }
 
-  public getFactDatabase(): Map<string, FactKnowledge> {
+  public getFactDatabase(): Map<string, any> {
     return this.factDatabase
   }
+}
 
-  public getKnowledgeGraph(): Map<string, KnowledgeNode> {
-    return this.knowledgeGraph
+// COGNITIVE ROUTER - SELECTS APPROPRIATE THINKING PATHWAYS
+class CognitiveRouter {
+  private pathways: CognitivePathway[] = []
+
+  public initialize(): void {
+    this.pathways = [
+      {
+        name: "Mathematical Reasoning",
+        type: "mathematical",
+        triggers: ["numbers", "operators", "calculation"],
+        confidence: 0.9,
+      },
+      {
+        name: "Factual Knowledge",
+        type: "factual",
+        triggers: ["what", "who", "when", "where", "fact"],
+        confidence: 0.8,
+      },
+      {
+        name: "Personal Memory",
+        type: "personal",
+        triggers: ["remember", "my", "i", "me", "personal"],
+        confidence: 0.7,
+      },
+      {
+        name: "Conversational",
+        type: "conversational",
+        triggers: ["hello", "hi", "how", "thanks"],
+        confidence: 0.6,
+      },
+    ]
+  }
+
+  public selectPathways(analysis: InputAnalysis): CognitivePathway[] {
+    const selectedPathways: CognitivePathway[] = []
+
+    // Always include conversational as fallback
+    selectedPathways.push(this.pathways.find((p) => p.type === "conversational")!)
+
+    // Select specific pathways based on input analysis
+    if (analysis.type === "mathematics") {
+      selectedPathways.unshift(this.pathways.find((p) => p.type === "mathematical")!)
+    }
+
+    if (analysis.hasQuestionWords) {
+      selectedPathways.unshift(this.pathways.find((p) => p.type === "factual")!)
+    }
+
+    if (analysis.type === "personal") {
+      selectedPathways.unshift(this.pathways.find((p) => p.type === "personal")!)
+    }
+
+    return selectedPathways
+  }
+}
+
+// ADVANCED MATH PROCESSOR - HANDLES COMPLEX EXPRESSIONS
+class AdvancedMathProcessor {
+  public processComplexExpression(input: string): MathResult {
+    const cleanInput = input.trim().replace(/\s+/g, "")
+
+    // Handle multi-step expressions like 3×3+3, 3×3×3, etc.
+    const complexPatterns = [
+      {
+        pattern: /(\d+)[×*](\d+)[+](\d+)/,
+        solver: (match: RegExpMatchArray) => {
+          const a = Number.parseInt(match[1])
+          const b = Number.parseInt(match[2])
+          const c = Number.parseInt(match[3])
+          const step1 = a * b
+          const result = step1 + c
+          return {
+            answer: result,
+            steps: [`${a} × ${b} = ${step1}`, `${step1} + ${c} = ${result}`],
+            method: "Order of operations (multiplication first, then addition)",
+          }
+        },
+      },
+      {
+        pattern: /(\d+)[×*](\d+)[×*](\d+)/,
+        solver: (match: RegExpMatchArray) => {
+          const a = Number.parseInt(match[1])
+          const b = Number.parseInt(match[2])
+          const c = Number.parseInt(match[3])
+          const step1 = a * b
+          const result = step1 * c
+          return {
+            answer: result,
+            steps: [`${a} × ${b} = ${step1}`, `${step1} × ${c} = ${result}`],
+            method: "Sequential multiplication",
+          }
+        },
+      },
+      {
+        pattern: /(\d+)[+](\d+)[×*](\d+)/,
+        solver: (match: RegExpMatchArray) => {
+          const a = Number.parseInt(match[1])
+          const b = Number.parseInt(match[2])
+          const c = Number.parseInt(match[3])
+          const step1 = b * c
+          const result = a + step1
+          return {
+            answer: result,
+            steps: [`${b} × ${c} = ${step1}`, `${a} + ${step1} = ${result}`],
+            method: "Order of operations (multiplication first, then addition)",
+          }
+        },
+      },
+    ]
+
+    // Try complex patterns first
+    for (const pattern of complexPatterns) {
+      const match = cleanInput.match(pattern.pattern)
+      if (match) {
+        const solution = pattern.solver(match)
+        return {
+          success: true,
+          confidence: 0.95,
+          ...solution,
+        }
+      }
+    }
+
+    // Fall back to simple operations
+    const simplePatterns = [
+      {
+        pattern: /(\d+)[×*](\d+)/,
+        solver: (a: number, b: number) => ({ answer: a * b, method: "Multiplication" }),
+      },
+      {
+        pattern: /(\d+)[+](\d+)/,
+        solver: (a: number, b: number) => ({ answer: a + b, method: "Addition" }),
+      },
+      {
+        pattern: /(\d+)[-](\d+)/,
+        solver: (a: number, b: number) => ({ answer: a - b, method: "Subtraction" }),
+      },
+      {
+        pattern: /(\d+)[÷/](\d+)/,
+        solver: (a: number, b: number) => ({ answer: b !== 0 ? a / b : "Cannot divide by zero", method: "Division" }),
+      },
+    ]
+
+    for (const pattern of simplePatterns) {
+      const match = cleanInput.match(pattern.pattern)
+      if (match) {
+        const a = Number.parseInt(match[1])
+        const b = Number.parseInt(match[2])
+        const solution = pattern.solver(a, b)
+        return {
+          success: true,
+          confidence: 0.9,
+          steps: [
+            `${a} ${pattern.pattern.source.includes("×") ? "×" : pattern.pattern.source.includes("+") ? "+" : pattern.pattern.source.includes("-") ? "-" : "÷"} ${b} = ${solution.answer}`,
+          ],
+          ...solution,
+        }
+      }
+    }
+
+    return {
+      success: false,
+      confidence: 0.1,
+      answer: undefined,
+      steps: [],
+      method: "No mathematical pattern recognized",
+    }
   }
 }
 
 // TYPE DEFINITIONS
-interface EnhancedCognitiveResponse {
+interface InputAnalysis {
+  type: string
+  complexity: number
+  hasNumbers: boolean
+  hasMathOperators: boolean
+  hasQuestionWords: boolean
+  wordCount: number
+}
+
+interface CognitivePathway {
+  name: string
+  type: string
+  triggers: string[]
+  confidence: number
+}
+
+interface PathwayResult {
+  pathway: string
+  confidence: number
+  data: any
+}
+
+interface KnowledgeSynthesis {
+  primaryPathway: string
+  confidence: number
+  data: any
+  userName: string | null
+  allResults: PathwayResult[]
+}
+
+interface ResponseGeneration {
+  content: string
+  confidence: number
+}
+
+interface CognitiveResponse {
   content: string
   confidence: number
   reasoning: string[]
-  type: "mathematical" | "factual" | "personal" | "conversational"
-  knowledgeUsed: string[]
+  pathways: string[]
+  synthesis: KnowledgeSynthesis
 }
 
-interface DeepSemantics {
-  words: string[]
-  entities: Entity[]
-  concepts: Concept[]
-  intents: Intent[]
-  emotional: EmotionalContext
-  complexity: number
-}
-
-interface Entity {
-  type: string
-  value: string
+interface MathResult {
+  success: boolean
   confidence: number
-}
-
-interface Concept {
-  name: string
-  strength: number
-  keywords: string[]
-}
-
-interface Intent {
-  type: string
-  confidence: number
-}
-
-interface EmotionalContext {
-  valence: "positive" | "negative" | "neutral"
-  intensity: number
-}
-
-interface MathematicalAnalysis {
-  hasMath: boolean
-  patterns: MathPattern[]
-  solutions: MathSolution[]
-  confidence: number
-}
-
-interface MathPattern {
-  type: "arithmetic" | "advanced" | "word_problem"
-  expression: string
-  operation: string
-  numbers: number[]
-  confidence: number
-}
-
-interface MathSolution {
-  result: string
-  explanation: string
-  method: string
-  confidence: number
-}
-
-interface MathKnowledge {
-  concept: string
-  type: "formula" | "algorithm" | "lookup_table"
-  category: string
-  formula?: string
-  algorithm?: any
-  table?: number[]
-  description: string
-  examples: any[]
-  keywords: string[]
-  importance: number
-  relevance: number
-}
-
-interface FactKnowledge {
-  id: string
-  category: string
-  topic: string
-  content: string
-  source: string
-  confidence: number
-  relevance: number
-  keywords: string[]
-  lastAccessed: number
-}
-
-interface KnowledgeNode {
-  id: string
-  type: "mathematical" | "factual" | "personal"
-  content: any
-  connections: string[]
-  strength: number
-  lastAccessed: number
-}
-
-interface KnowledgeActivation {
-  facts: FactKnowledge[]
-  concepts: MathKnowledge[]
-  confidence: number
-}
-
-interface ContextIntegration {
-  personal: {
-    relevantFacts: any[]
-  }
-  conversational: {
-    continuity: number
-  }
-}
-
-interface ContextMemory {
-  id: string
-  content: string
-  timestamp: number
-  importance: number
-}
-
-interface PatternTemplate {
-  name: string
-  pattern: RegExp
-  handler: string
-  confidence: number
+  answer?: number | string
+  steps?: string[]
+  method?: string
 }
