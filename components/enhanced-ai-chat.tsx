@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { KnowledgeManager } from "@/lib/knowledge-manager"
+import { KnowledgeManagerV2 } from "@/lib/knowledge-manager-v2"
 import { CognitiveAISystem } from "@/lib/cognitive-ai-system"
 import {
   Brain,
@@ -63,7 +63,7 @@ interface AIStats {
 }
 
 export default function EnhancedAIChat() {
-  const [knowledgeManager] = useState(() => new KnowledgeManager())
+  const [knowledgeManager] = useState(() => new KnowledgeManagerV2())
   const [aiSystem] = useState(() => new CognitiveAISystem())
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
@@ -350,6 +350,117 @@ export default function EnhancedAIChat() {
     return "text-red-600"
   }
 
+  const handleBulkImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        const content = e.target?.result as string
+        let data: any
+
+        if (file.name.endsWith(".json")) {
+          data = JSON.parse(content)
+        } else if (file.name.endsWith(".csv")) {
+          // Simple CSV parsing for vocabulary data
+          const lines = content.split("\n")
+          const headers = lines[0].split(",")
+          data = { vocabulary: {} }
+
+          for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(",")
+            if (values.length >= 2) {
+              data.vocabulary[values[0]] = {
+                definition: values[1],
+                partOfSpeech: values[2] || "unknown",
+                category: "imported",
+              }
+            }
+          }
+        } else if (file.name.endsWith(".txt")) {
+          // Simple text parsing - each line as a vocabulary word
+          const lines = content.split("\n").filter((line) => line.trim())
+          data = { vocabulary: {} }
+
+          lines.forEach((line) => {
+            const word = line.trim()
+            if (word) {
+              data.vocabulary[word] = {
+                definition: `Imported word: ${word}`,
+                partOfSpeech: "unknown",
+                category: "imported",
+              }
+            }
+          })
+        }
+
+        if (data) {
+          knowledgeManager.importKnowledge(data)
+          updateStats()
+          alert(`Successfully imported data from ${file.name}`)
+        }
+      } catch (error) {
+        console.error("Import failed:", error)
+        alert("Failed to import data. Please check the file format.")
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  const handleClearData = async () => {
+    if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+      try {
+        // Clear knowledge manager data
+        knowledgeManager.importKnowledge({
+          vocabulary: [],
+          mathematics: [],
+          userInfo: [],
+          facts: [],
+          conversations: [],
+        })
+
+        // Clear AI system data
+        await aiSystem.clearAllData()
+
+        updateStats()
+        setActiveDataView(null)
+        alert("All data cleared successfully")
+      } catch (error) {
+        console.error("Failed to clear data:", error)
+        alert("Failed to clear data")
+      }
+    }
+  }
+
+  const handleRetrainModel = async () => {
+    try {
+      setIsLoading(true)
+      await aiSystem.retrainFromKnowledge()
+      updateStats()
+      alert("Model retrained successfully")
+    } catch (error) {
+      console.error("Retrain failed:", error)
+      alert("Failed to retrain model")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleOptimizeKnowledge = async () => {
+    try {
+      setIsLoading(true)
+      await knowledgeManager.optimizeKnowledge()
+      updateStats()
+      alert("Knowledge optimized successfully")
+    } catch (error) {
+      console.error("Optimization failed:", error)
+      alert("Failed to optimize knowledge")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   if (isInitializing) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
@@ -456,6 +567,296 @@ export default function EnhancedAIChat() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Detailed Metrics */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* System Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="w-5 h-5" />
+                      System Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Name</span>
+                        <span className="text-sm font-mono">{systemInfo.name || "ZacAI"}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Version</span>
+                        <span className="text-sm font-mono">{stats.version}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Total Entries</span>
+                        <span className="text-sm font-mono">{stats.totalEntries}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Last Updated</span>
+                        <span className="text-sm font-mono">{new Date(stats.lastUpdated).toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Mission</h4>
+                      <p className="text-xs text-gray-600">
+                        {systemInfo.mission || "Continuously learn and improve through interactions"}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Capabilities</h4>
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        {(
+                          systemInfo.capabilities || [
+                            "Math Processing",
+                            "Memory Storage",
+                            "Learning",
+                            "Pattern Recognition",
+                            "Context Understanding",
+                            "Personal Info",
+                          ]
+                        )
+                          .slice(0, 6)
+                          .map((cap: string, idx: number) => (
+                            <div key={idx} className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full" />
+                              <span>{cap}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Knowledge Distribution */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="w-5 h-5" />
+                      Knowledge Distribution
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Vocabulary</span>
+                          <span>{stats.vocabulary}</span>
+                        </div>
+                        <Progress value={(stats.vocabulary / Math.max(stats.totalEntries, 1)) * 100} className="h-2" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Mathematics</span>
+                          <span>{stats.mathematics}</span>
+                        </div>
+                        <Progress value={(stats.mathematics / Math.max(stats.totalEntries, 1)) * 100} className="h-2" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Facts</span>
+                          <span>{stats.facts}</span>
+                        </div>
+                        <Progress value={(stats.facts / Math.max(stats.totalEntries, 1)) * 100} className="h-2" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>User Information</span>
+                          <span>{stats.userInfo}</span>
+                        </div>
+                        <Progress value={(stats.userInfo / Math.max(stats.totalEntries, 1)) * 100} className="h-2" />
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Learning Sources</h4>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <p>• Seed vocabulary and mathematics</p>
+                        <p>• User conversations and interactions</p>
+                        <p>• Online dictionary and encyclopedia APIs</p>
+                        <p>• Real-time knowledge extraction</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Knowledge Data Visualization */}
+              {activeDataView && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <Database className="w-5 h-5" />
+                        {activeDataView.charAt(0).toUpperCase() + activeDataView.slice(1)} Data
+                      </span>
+                      <Button variant="outline" size="sm" onClick={() => setActiveDataView(null)}>
+                        Close
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-96">
+                      {activeDataView === "vocabulary" && (
+                        <div className="space-y-2">
+                          {knowledgeData.vocabulary.map(([word, data]: [string, any], idx: number) => (
+                            <div key={idx} className="border rounded p-3">
+                              <div className="font-medium">{word}</div>
+                              <div className="text-sm text-gray-600">{data.definition}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Part of Speech: {data.partOfSpeech} | Category: {data.category}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {activeDataView === "mathematics" && (
+                        <div className="space-y-2">
+                          {knowledgeData.mathematics.map(([concept, data]: [string, any], idx: number) => (
+                            <div key={idx} className="border rounded p-3">
+                              <div className="font-medium">{concept}</div>
+                              <div className="text-sm text-gray-600">{data.formula || "No formula"}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Category: {data.category} | Difficulty: {data.difficulty}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {activeDataView === "userInfo" && (
+                        <div className="space-y-2">
+                          {knowledgeData.userInfo.map(([key, data]: [string, any], idx: number) => (
+                            <div key={idx} className="border rounded p-3">
+                              <div className="font-medium">{key}</div>
+                              <div className="text-sm text-gray-600">{data.value}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Importance: {data.importance} | Category: {data.category}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {activeDataView === "facts" && (
+                        <div className="space-y-2">
+                          {knowledgeData.facts.map(([topic, data]: [string, any], idx: number) => (
+                            <div key={idx} className="border rounded p-3">
+                              <div className="font-medium">{topic}</div>
+                              <div className="text-sm text-gray-600">{data.fact}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Source: {data.source} | Confidence: {Math.round(data.confidence * 100)}%
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Training & Pipeline Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Training & Data Pipeline
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Quick Data Links */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Quick Data Access</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <Button variant="outline" size="sm" onClick={() => fetchKnowledgeData("vocabulary")}>
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        View Vocabulary
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => fetchKnowledgeData("mathematics")}>
+                        <Calculator className="w-4 h-4 mr-2" />
+                        View Mathematics
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => fetchKnowledgeData("userInfo")}>
+                        <User className="w-4 h-4 mr-2" />
+                        View User Info
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => fetchKnowledgeData("facts")}>
+                        <FileText className="w-4 h-4 mr-2" />
+                        View Facts
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Data Import/Export */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Data Management</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <input
+                          type="file"
+                          accept=".json,.csv,.txt"
+                          onChange={handleBulkImport}
+                          className="hidden"
+                          id="bulk-import"
+                        />
+                        <Button asChild variant="outline" className="w-full">
+                          <label htmlFor="bulk-import" className="cursor-pointer">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Import Data
+                          </label>
+                        </Button>
+                      </div>
+                      <Button onClick={handleExport} variant="outline" className="w-full">
+                        <Download className="w-4 h-4 mr-2" />
+                        Export All Data
+                      </Button>
+                      <Button onClick={handleClearData} variant="outline" className="w-full text-red-600">
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Clear All Data
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Training Pipeline */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Training Pipeline</h4>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Button onClick={handleRetrainModel} variant="outline" className="w-full">
+                          <Brain className="w-4 h-4 mr-2" />
+                          Retrain Model
+                        </Button>
+                        <Button onClick={handleOptimizeKnowledge} variant="outline" className="w-full">
+                          <Zap className="w-4 h-4 mr-2" />
+                          Optimize Knowledge
+                        </Button>
+                      </div>
+
+                      <div className="text-xs text-gray-500 space-y-1">
+                        <p>• Retrain Model: Rebuilds AI understanding from current knowledge base</p>
+                        <p>• Optimize Knowledge: Removes duplicates and improves data quality</p>
+                        <p>• Import Data: Supports JSON, CSV, and TXT formats</p>
+                        <p>• Export Data: Full knowledge base backup in JSON format</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
