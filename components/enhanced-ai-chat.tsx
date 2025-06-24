@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { Send } from "lucide-react"
 import { CognitiveAISystem } from "@/lib/cognitive-ai-system"
+import { KnowledgeManager } from "@/lib/knowledge-manager"
 
 interface ChatMessage {
   id: string
@@ -20,7 +21,69 @@ const EnhancedAIChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [aiSystem] = useState(() => new CognitiveAISystem())
+  const [knowledgeManager] = useState(() => new KnowledgeManager())
+  const [systemInfo, setSystemInfo] = useState<{
+    seedCount: number
+    vectorCount: number
+    sessionCount: number
+  }>({ seedCount: 0, vectorCount: 0, sessionCount: 0 })
+
+  useEffect(() => {
+    initializeSystem()
+  }, [])
+
+  const initializeSystem = async () => {
+    try {
+      setError(null)
+      console.log("🚀 Initializing Enhanced AI System...")
+
+      // Add error handling to prevent hanging
+      try {
+        knowledgeManager.loadSessionFromLocalStorage()
+      } catch (e) {
+        console.warn("Session load failed:", e)
+      }
+
+      try {
+        await knowledgeManager.loadFromIndexedDB()
+      } catch (e) {
+        console.warn("IndexedDB load failed:", e)
+      }
+
+      try {
+        await knowledgeManager.loadSeedData()
+      } catch (e) {
+        console.warn("Seed data load failed:", e)
+      }
+
+      try {
+        await aiSystem.initialize()
+      } catch (e) {
+        console.warn("AI system init failed:", e)
+      }
+
+      const sysInfo = knowledgeManager.getSystemInfo()
+      setSystemInfo(sysInfo)
+
+      const updateStats = () => {
+        const sysInfo = knowledgeManager.getSystemInfo()
+        setSystemInfo(sysInfo)
+      }
+
+      const history = aiSystem.getConversationHistory()
+      setMessages(history)
+
+      setIsInitializing(false)
+      console.log("✅ Enhanced AI System initialized successfully!")
+    } catch (error) {
+      console.error("❌ Failed to initialize:", error)
+      setError("Failed to initialize AI system")
+      setIsInitializing(false)
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value)
@@ -68,9 +131,16 @@ const EnhancedAIChat = () => {
     }
   }
 
+  const updateStats = () => {
+    const sysInfo = knowledgeManager.getSystemInfo()
+    setSystemInfo(sysInfo)
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <div className="flex-grow p-4 overflow-y-auto">
+        {isInitializing && <div className="text-center">Initializing...</div>}
+        {error && <div className="text-center text-red-500">{error}</div>}
         {messages.map((message) => (
           <div key={message.id} className={`mb-2 flex ${message.isUser ? "justify-end" : "justify-start"}`}>
             <div
