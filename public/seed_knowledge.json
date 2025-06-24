@@ -1,0 +1,137 @@
+{
+  "facts": {
+    "mathematics": {
+      "10x10": {
+        "result": 100,
+        "type": "multiplication",
+        "category": "basic_arithmetic",
+        "explanation": "Ten times ten equals one hundred",
+        "related_facts": ["10^2 = 100", "100 is a perfect square", "100 = 4 * 25"]
+      },
+      "multiplication_tables": {
+        "description": "Systematic arrangement of multiplication facts",
+        "importance": "Foundation for mathematical computation",
+        "patterns": ["Even numbers multiply to even", "Odd times odd equals odd"]
+      },
+      "perfect_squares": [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144],
+      "prime_numbers": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
+      "mathematical_constants": {
+        "pi": 3.14159265359,
+        "e": 2.71828182846,
+        "golden_ratio": 1.61803398875
+      }
+    },
+    "science": {
+      "physics": {
+        "speed_of_light": "299,792,458 meters per second",
+        "gravity_earth": "9.8 m/s²",
+        "absolute_zero": "-273.15°C or 0 Kelvin"
+      },
+      "chemistry": {
+        "water_formula": "H2O",
+        "periodic_table_elements": 118,
+        "states_of_matter": ["solid", "liquid", "gas", "plasma"]
+      },
+      "biology": {
+        "human_chromosomes": 46,
+        "dna_bases": ["A", "T", "G", "C"],
+        "kingdoms_of_life": ["Animalia", "Plantae", "Fungi", "Protista", "Monera"]
+      }
+    },
+    "geography": {
+      "continents": ["Asia", "Africa", "North America", "South America", "Antarctica", "Europe", "Australia"],
+      "oceans": ["Pacific", "Atlantic", "Indian", "Southern", "Arctic"],
+      "highest_mountain": "Mount Everest - 8,848 meters",
+      "longest_river": "Nile River - 6,650 kilometers"
+    },
+    "history": {
+      "world_wars": {
+        "ww1": "1914-1918",
+        "ww2": "1939-1945"
+      },
+      "ancient_civilizations": ["Egyptian", "Greek", "Roman", "Mesopotamian", "Chinese"],
+      "industrial_revolution": "1760-1840"
+    }
+  },
+  "encyclopedia": {
+    "animals": {
+      "mammals": {
+        "characteristics": ["warm-blooded", "hair or fur", "milk production", "live birth"],
+        "examples": ["elephant", "whale", "human", "dog", "cat"]
+      },
+      "birds": {
+        "characteristics": ["feathers", "wings", "beak", "lay eggs", "hollow bones"],
+        "examples": ["eagle", "penguin", "ostrich", "hummingbird", "owl"]
+      },
+      "reptiles": {
+        "characteristics": ["cold-blooded", "scales", "lay eggs", "breathe air"],
+        "examples": ["snake", "lizard", "turtle", "crocodile", "iguana"]
+      }
+    },
+    "plants": {
+      "trees": {
+        "deciduous": "lose leaves seasonally",
+        "evergreen": "keep leaves year-round",
+        "parts": ["roots", "trunk", "branches", "leaves"]
+      },
+      "flowers": {
+        "parts": ["petals", "stem", "leaves", "roots"],
+        "reproduction": "pollination and seed formation"
+      }
+    },
+    "technology": {
+      "computers": {
+        "components": ["CPU", "RAM", "storage", "motherboard"],
+        "types": ["desktop", "laptop", "tablet", "smartphone"]
+      },
+      "internet": {
+        "invention": "1960s-1990s",
+        "protocols": ["HTTP", "HTTPS", "FTP", "TCP/IP"],
+        "services": ["email", "web browsing", "social media", "streaming"]
+      }
+    },
+    "human_body": {
+      "systems": {
+        "circulatory": "heart, blood vessels, blood",
+        "respiratory": "lungs, airways, breathing",
+        "digestive": "stomach, intestines, food processing",
+        "nervous": "brain, spinal cord, nerves"
+      },
+      "senses": ["sight", "hearing", "smell", "taste", "touch"],
+      "organs": ["heart", "lungs", "liver", "kidneys", "brain"]
+    }
+  },
+  "reference_sources": {
+    "dictionaries": {
+      "merriam_webster": "https://www.merriam-webster.com/",
+      "oxford": "https://www.oxfordlearnersdictionaries.com/",
+      "cambridge": "https://dictionary.cambridge.org/"
+    },
+    "encyclopedias": {
+      "britannica": "https://www.britannica.com/",
+      "wikipedia": "https://en.wikipedia.org/",
+      "world_book": "https://www.worldbook.com/"
+    },
+    "thesaurus": {
+      "merriam_webster": "https://www.merriam-webster.com/thesaurus",
+      "thesaurus_com": "https://www.thesaurus.com/"
+    }
+  },
+  "learning_strategies": {
+    "memory_techniques": [
+      "repetition and practice",
+      "visual associations",
+      "mnemonics and acronyms",
+      "chunking information",
+      "spaced repetition"
+    ],
+    "study_methods": ["active reading", "note-taking", "summarization", "practice testing", "teaching others"],
+    "comprehension_skills": [
+      "identifying main ideas",
+      "making connections",
+      "asking questions",
+      "predicting outcomes",
+      "drawing conclusions"
+    ]
+  }
+}

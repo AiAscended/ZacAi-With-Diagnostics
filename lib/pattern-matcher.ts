@@ -16,7 +16,56 @@ export class PatternMatcher {
     this.knowledgeBase = knowledgeBase
   }
 
+  private enhancedMathRecognition(input: string): MatchResult | null {
+    const mathKeywords = [
+      "multiply",
+      "times",
+      "plus",
+      "add",
+      "minus",
+      "subtract",
+      "divide",
+      "equals",
+      "calculate",
+      "what is",
+      "how much",
+      "result",
+      "answer",
+    ]
+
+    const hasNumbers = /\d+/.test(input)
+    const hasMathKeywords = mathKeywords.some((keyword) => input.toLowerCase().includes(keyword))
+    const hasMathSymbols = /[+\-×÷*/=]/.test(input)
+
+    if (hasNumbers && (hasMathKeywords || hasMathSymbols)) {
+      return {
+        intent: "mathematics",
+        confidence: 0.9,
+        pattern: {
+          intent: "mathematics",
+          patterns: ["mathematical expression detected"],
+          responses: ["Let me calculate that for you."],
+          followUp: ["Would you like to try another calculation?"],
+        },
+        extractedEntities: this.extractNumbers(input),
+      }
+    }
+
+    return null
+  }
+
+  private extractNumbers(input: string): string[] {
+    const numbers = input.match(/\d+/g) || []
+    return numbers
+  }
+
   public matchIntent(input: string): MatchResult | null {
+    // First try enhanced math recognition
+    const mathMatch = this.enhancedMathRecognition(input)
+    if (mathMatch) {
+      return mathMatch
+    }
+
     const inputLower = input.toLowerCase().trim()
     let bestMatch: MatchResult | null = null
     let highestConfidence = 0
