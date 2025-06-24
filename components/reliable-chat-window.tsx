@@ -80,7 +80,7 @@ export default function ReliableChatWindow() {
   })
   const [error, setError] = useState<string | null>(null)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-  const [isSeeding, setIsSeeding] = useState(false)
+  const [isSeeding, setIsSeeding] = useState(isSeeding)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const [selectedDataType, setSelectedDataType] = useState<string | null>(null)
@@ -133,13 +133,17 @@ export default function ReliableChatWindow() {
   const updateStats = () => {
     const newStats = aiSystem.getStats()
     const seedProgress = vocabularySeeder.getProgress()
+
+    // Debug log to check what we're getting
+    console.log("Math functions from getStats:", newStats.mathFunctions, typeof newStats.mathFunctions)
+
     setStats({
       totalMessages: newStats.totalMessages,
       vocabularySize: newStats.vocabularySize,
       memoryEntries: newStats.memoryEntries,
       avgConfidence: newStats.avgConfidence,
       systemStatus: newStats.systemStatus,
-      mathFunctions: newStats.mathFunctions, // This should now be a number
+      mathFunctions: typeof newStats.mathFunctions === "number" ? newStats.mathFunctions : 0,
       seedProgress: seedProgress,
       responseTime: newStats.responseTime,
     })
@@ -280,8 +284,8 @@ export default function ReliableChatWindow() {
 
     switch (dataType) {
       case "vocabulary":
-        if (currentStats.vocabulary && currentStats.vocabulary instanceof Map) {
-          return Array.from(currentStats.vocabulary.entries()).map(([word, category]) => ({
+        if (currentStats.vocabularyData && currentStats.vocabularyData instanceof Map) {
+          return Array.from(currentStats.vocabularyData.entries()).map(([word, category]) => ({
             key: word,
             value: category,
             type: "vocabulary",
@@ -290,8 +294,8 @@ export default function ReliableChatWindow() {
         return []
 
       case "memory":
-        if (currentStats.memory && currentStats.memory instanceof Map) {
-          return Array.from(currentStats.memory.entries()).map(([key, entry]) => ({
+        if (currentStats.memoryData && currentStats.memoryData instanceof Map) {
+          return Array.from(currentStats.memoryData.entries()).map(([key, entry]) => ({
             key: key,
             value: typeof entry === "object" ? entry.value : entry,
             timestamp: typeof entry === "object" ? entry.timestamp : Date.now(),
@@ -301,8 +305,8 @@ export default function ReliableChatWindow() {
         return []
 
       case "math":
-        if (currentStats.mathFunctions && currentStats.mathFunctions instanceof Map) {
-          return Array.from(currentStats.mathFunctions.entries()).map(([name, func]) => ({
+        if (currentStats.mathFunctionsData && currentStats.mathFunctionsData instanceof Map) {
+          return Array.from(currentStats.mathFunctionsData.entries()).map(([name, func]) => ({
             key: name,
             value: func.description || "Mathematical function",
             examples: func.examples || [],

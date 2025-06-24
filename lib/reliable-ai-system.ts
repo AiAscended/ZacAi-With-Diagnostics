@@ -182,6 +182,9 @@ export class ReliableAISystem {
     this.initializeBasicVocabulary()
     this.initializeBasicMathFunctions()
     this.initializeSampleFacts()
+
+    // Ensure math functions are loaded
+    this.loadMathFunctions()
   }
 
   public async processMessage(userMessage: string): Promise<AIResponse> {
@@ -593,13 +596,13 @@ export class ReliableAISystem {
       memoryEntries: this.memory.size,
       avgConfidence: Math.round(avgConfidence * 100) / 100,
       systemStatus: this.systemStatus,
-      mathFunctions: this.mathFunctions.size, // Fixed: return size, not the Map
+      mathFunctions: this.mathFunctions.size, // Ensure this returns a number
       seedProgress: 0,
       responseTime: 0,
-      // Add access to the actual data for detailed viewing
-      vocabulary: this.vocabulary,
-      memory: this.memory,
-      mathFunctions: this.mathFunctions,
+      // Add access to the actual data for detailed viewing - but don't interfere with the numeric stats
+      vocabularyData: this.vocabulary,
+      memoryData: this.memory,
+      mathFunctionsData: this.mathFunctions,
     }
   }
 
