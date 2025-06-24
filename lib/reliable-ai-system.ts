@@ -567,6 +567,32 @@ export class ReliableAISystem {
     }
   }
 
+  public async addVocabularyWord(word: string, category: string): Promise<void> {
+    this.vocabulary.set(word.toLowerCase(), category)
+    await this.saveVocabulary()
+  }
+
+  public async removeVocabularyWord(word: string): Promise<void> {
+    this.vocabulary.delete(word.toLowerCase())
+    await this.saveVocabulary()
+  }
+
+  public async addMemoryEntry(key: string, value: string): Promise<void> {
+    const entry = {
+      key: key.toLowerCase().replace(/\s+/g, "_"),
+      value: value,
+      timestamp: Date.now(),
+      importance: 0.7,
+    }
+    this.memory.set(entry.key, entry)
+    await this.saveMemory()
+  }
+
+  public async removeMemoryEntry(key: string): Promise<void> {
+    this.memory.delete(key)
+    await this.saveMemory()
+  }
+
   public getStats(): any {
     const assistantMessages = this.conversationHistory.filter((m) => m.role === "assistant" && m.confidence)
     const avgConfidence =
@@ -583,6 +609,10 @@ export class ReliableAISystem {
       mathFunctions: this.mathFunctions.size,
       seedProgress: 0,
       responseTime: 0,
+      // Add access to the actual data
+      vocabulary: this.vocabulary,
+      memory: this.memory,
+      mathFunctions: this.mathFunctions,
     }
   }
 
