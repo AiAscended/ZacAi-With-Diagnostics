@@ -186,20 +186,28 @@ export class CognitiveAISystem {
       }
     }
 
-    // Look it up online
-    const wordData = await this.enhancedKnowledge.lookupWord(word)
-    if (wordData) {
-      return {
-        content: this.formatWordDefinition(wordData, false),
-        confidence: 0.9,
-        reasoning: ["Successfully looked up word definition online", "Stored in learned vocabulary for future use"],
+    // Look it up online with timeout
+    try {
+      const wordData = await Promise.race([
+        this.enhancedKnowledge.lookupWord(word),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Lookup timeout")), 3000)),
+      ])
+
+      if (wordData) {
+        return {
+          content: this.formatWordDefinition(wordData, false),
+          confidence: 0.9,
+          reasoning: ["Successfully looked up word definition online", "Stored in learned vocabulary for future use"],
+        }
       }
+    } catch (error) {
+      console.warn("Word lookup timed out or failed:", error)
     }
 
     return {
-      content: `I couldn't find a definition for "${word}". Could you check the spelling or try a different word?`,
+      content: `I couldn't find a definition for "${word}" right now. This might be due to network issues. Try again later or ask about something else!`,
       confidence: 0.4,
-      reasoning: ["Online dictionary lookup failed"],
+      reasoning: ["Online dictionary lookup failed or timed out"],
     }
   }
 
@@ -289,19 +297,41 @@ export class CognitiveAISystem {
     try {
       console.log("🚀 Initializing Enhanced Cognitive AI System...")
 
-      // Load learned knowledge
-      await this.enhancedKnowledge.loadLearnedKnowledge()
+      // Load learned knowledge with timeout
+      try {
+        await Promise.race([
+          this.enhancedKnowledge.loadLearnedKnowledge(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000)),
+        ])
+      } catch (error) {
+        console.warn("Learned knowledge loading timed out (non-critical):", error)
+      }
 
-      await this.loadConversationHistory()
-      await this.loadMemory()
-      await this.loadVocabulary()
+      // Load other data with error handling
+      try {
+        await this.loadConversationHistory()
+      } catch (error) {
+        console.warn("Conversation history loading failed (non-critical):", error)
+      }
+
+      try {
+        await this.loadMemory()
+      } catch (error) {
+        console.warn("Memory loading failed (non-critical):", error)
+      }
+
+      try {
+        await this.loadVocabulary()
+      } catch (error) {
+        console.warn("Vocabulary loading failed (non-critical):", error)
+      }
 
       this.systemStatus = "ready"
       this.isInitialized = true
 
-      console.log("✅ Enhanced Cognitive AI System ready with online capabilities!")
+      console.log("✅ Enhanced Cognitive AI System ready (with fallbacks)!")
     } catch (error) {
-      console.error("❌ Initialization failed:", error)
+      console.error("❌ Initialization failed, using fallbacks:", error)
       this.systemStatus = "ready"
       this.isInitialized = true
     }

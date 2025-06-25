@@ -110,10 +110,18 @@ export default function EnhancedAIChat() {
       setError(null)
       console.log("🚀 Initializing Enhanced AI System...")
 
-      knowledgeManager.loadSessionFromLocalStorage()
-      await knowledgeManager.loadFromIndexedDB()
-      await knowledgeManager.loadSeedData()
-      await aiSystem.initialize()
+      // Add timeout to prevent infinite loading
+      const initPromise = Promise.all([
+        knowledgeManager.loadSessionFromLocalStorage(),
+        knowledgeManager.loadFromIndexedDB(),
+        knowledgeManager.loadSeedData(),
+        aiSystem.initialize(),
+      ])
+
+      await Promise.race([
+        initPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Initialization timeout")), 10000)),
+      ])
 
       const sysInfo = knowledgeManager.getSystemInfo()
       setSystemInfo(sysInfo)
@@ -128,8 +136,9 @@ export default function EnhancedAIChat() {
       console.log("✅ Enhanced AI System initialized successfully!")
     } catch (error) {
       console.error("❌ Failed to initialize:", error)
-      setError("Failed to initialize AI system")
+      setError("Initialization timed out - using fallback mode")
       setIsInitializing(false)
+      // Continue with basic functionality even if initialization fails
     }
   }
 
@@ -286,6 +295,27 @@ export default function EnhancedAIChat() {
 
       setMessages((prev) => [...prev, userMessage])
 
+      // Add timeout to prevent hanging
+      let response
+      try {
+        const personalInfo = knowledgeManager.exportKnowledge().userInfo || new Map()
+
+        const responsePromise = aiSystem.processThought(userInput, [], new Map(Array.from(personalInfo.entries())))
+
+        response = await Promise.race([
+          responsePromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Response timeout")), 8000)),
+        ])
+      } catch (aiError) {
+        console.error("AI processing failed or timed out:", aiError)
+        response = {
+          content:
+            "I'm having trouble processing that message right now. This might be due to network issues. Could you try rephrasing it?",
+          confidence: 0.5,
+          reasoning: ["Error occurred during processing or timeout"],
+        }
+      }
+
       let knowledgeResults: any[] = []
       let knowledgeUsed: string[] = []
 
@@ -300,19 +330,6 @@ export default function EnhancedAIChat() {
       }
 
       const thinkingSteps = await simulateThinking(userInput)
-
-      let response
-      try {
-        const personalInfo = knowledgeManager.exportKnowledge().userInfo || new Map()
-        response = await aiSystem.processThought(userInput, [], new Map(Array.from(personalInfo.entries())))
-      } catch (aiError) {
-        console.error("AI processing failed:", aiError)
-        response = {
-          content: "I'm having trouble processing that message. Could you try rephrasing it?",
-          confidence: 0.5,
-          reasoning: ["Error occurred during processing"],
-        }
-      }
 
       try {
         await knowledgeManager.learnFromMessage(userInput, response.content)

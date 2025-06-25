@@ -29,20 +29,25 @@ export class EnhancedKnowledgeSystem {
   // Enhanced Dictionary Lookup with Thesaurus and Phonetics
   public async lookupWord(word: string): Promise<any> {
     try {
-      const response = await fetch(`${this.onlineSources.get("dictionary")}${word}`)
+      // Add timeout to prevent hanging
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+      const response = await fetch(`${this.onlineSources.get("dictionary")}${word}`, {
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+
       if (response.ok) {
         const data = await response.json()
         const wordData = data[0]
 
-        // Get synonyms from thesaurus
-        const synonymsResponse = await fetch(`${this.onlineSources.get("thesaurus")}${word}`)
-        const synonymsData = synonymsResponse.ok ? await synonymsResponse.json() : []
-
+        // Skip synonyms lookup if it might cause issues
         const enhancedWordData = {
           word: wordData.word,
           phonetics: wordData.phonetics || [],
           meanings: wordData.meanings || [],
-          synonyms: synonymsData.slice(0, 10).map((item: any) => item.word) || [],
+          synonyms: [], // Simplified to prevent hanging
           sourceUrl: wordData.sourceUrls?.[0] || "",
           learned: true,
           timestamp: Date.now(),
@@ -55,7 +60,7 @@ export class EnhancedKnowledgeSystem {
         return enhancedWordData
       }
     } catch (error) {
-      console.error("Dictionary lookup failed:", error)
+      console.warn("Dictionary lookup failed (non-critical):", error)
     }
     return null
   }
@@ -71,37 +76,13 @@ export class EnhancedKnowledgeSystem {
         return this.applyLearnedFormula(expression, learnedFormula)
       }
 
-      // Try to solve using MathJS API
-      const response = await fetch(`${this.onlineSources.get("math_formulas")}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ expr: expression }),
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-
-        // Learn this math pattern for future use
-        const mathPattern = {
-          type: mathType,
-          expression: expression,
-          result: result.result,
-          method: "online_calculation",
-          formula: this.extractFormula(expression),
-          timestamp: Date.now(),
-        }
-
-        this.learnedMathematics.set(mathType, mathPattern)
-        await this.saveLearnedKnowledge("mathematics")
-
-        return mathPattern
-      }
+      // Skip online math API for now to prevent hanging
+      // Just use local processing
+      return this.processLocalMath(expression)
     } catch (error) {
-      console.error("Math processing failed:", error)
+      console.warn("Math processing failed (non-critical):", error)
+      return this.processLocalMath(expression)
     }
-
-    // Fallback to local processing
-    return this.processLocalMath(expression)
   }
 
   private identifyMathType(expression: string): string {
@@ -187,7 +168,15 @@ export class EnhancedKnowledgeSystem {
   // Science Knowledge Lookup
   public async lookupScientificConcept(concept: string): Promise<any> {
     try {
-      const response = await fetch(`${this.onlineSources.get("wikipedia")}${encodeURIComponent(concept)}`)
+      // Add timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+
+      const response = await fetch(`${this.onlineSources.get("wikipedia")}${encodeURIComponent(concept)}`, {
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+
       if (response.ok) {
         const data = await response.json()
 
@@ -206,7 +195,7 @@ export class EnhancedKnowledgeSystem {
         return scientificData
       }
     } catch (error) {
-      console.error("Science lookup failed:", error)
+      console.warn("Science lookup failed (non-critical):", error)
     }
     return null
   }
@@ -282,25 +271,31 @@ export class EnhancedKnowledgeSystem {
       const types = ["vocabulary", "mathematics", "science"]
 
       for (const type of types) {
-        const stored = localStorage.getItem(`learned_${type}`)
-        if (stored) {
-          const data = JSON.parse(stored)
-          const map =
-            type === "vocabulary"
-              ? this.learnedVocabulary
-              : type === "mathematics"
-                ? this.learnedMathematics
-                : this.learnedScience
+        try {
+          const stored = localStorage.getItem(`learned_${type}`)
+          if (stored) {
+            const data = JSON.parse(stored)
+            const map =
+              type === "vocabulary"
+                ? this.learnedVocabulary
+                : type === "mathematics"
+                  ? this.learnedMathematics
+                  : this.learnedScience
 
-          data.forEach(([key, value]: [string, any]) => {
-            map.set(key, value)
-          })
+            if (Array.isArray(data)) {
+              data.forEach(([key, value]: [string, any]) => {
+                map.set(key, value)
+              })
+            }
+          }
+        } catch (typeError) {
+          console.warn(`Failed to load learned ${type} (non-critical):`, typeError)
         }
       }
 
-      console.log("✅ Loaded all learned knowledge")
+      console.log("✅ Loaded learned knowledge (with fallbacks)")
     } catch (error) {
-      console.error("Failed to load learned knowledge:", error)
+      console.warn("Failed to load learned knowledge (non-critical):", error)
     }
   }
 
