@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { KnowledgeManagerV2 } from "@/lib/knowledge-manager-v2"
-import { QuantumCognitiveEngine } from "@/lib/quantum-cognitive-engine"
+import { CognitiveAISystem } from "@/lib/cognitive-ai-system"
 import {
   Brain,
   BookOpen,
@@ -65,7 +65,7 @@ interface AIStats {
 
 export default function EnhancedAIChat() {
   const [knowledgeManager] = useState(() => new KnowledgeManagerV2())
-  const [aiSystem] = useState(() => new QuantumCognitiveEngine())
+  const [aiSystem] = useState(() => new CognitiveAISystem()) // FIXED: Using the correct AI system
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -113,37 +113,41 @@ export default function EnhancedAIChat() {
       // Initialize AI system first with proper error handling
       try {
         await aiSystem.initialize()
+        console.log("✅ AI System initialized successfully")
 
-        // Check if the system has the debug info method
-        if (typeof aiSystem.getSystemDebugInfo === "function") {
-          const systemIdentity = aiSystem.getSystemDebugInfo()
-          if (systemIdentity.systemIdentity?.name) {
-            console.log(
-              `✅ System Identity: ${systemIdentity.systemIdentity.name} v${systemIdentity.systemIdentity.version}`,
-            )
-          }
+        // Get system debug info to verify identity loading
+        const debugInfo = aiSystem.getSystemDebugInfo()
+        console.log("🔍 System Debug Info:", debugInfo)
+
+        if (debugInfo.systemIdentity?.name) {
+          console.log(`✅ System Identity: ${debugInfo.systemIdentity.name} v${debugInfo.systemIdentity.version}`)
+          setSystemInfo(debugInfo.systemIdentity)
         } else {
-          console.log("✅ AI System initialized (debug info not available)")
+          console.warn("⚠️ System identity not loaded properly")
+          setSystemInfo({ name: "ZacAI", version: "2.0.0" })
         }
       } catch (aiError) {
         console.warn("AI system initialization had issues:", aiError)
-        // Continue with limited functionality
+        setSystemInfo({ name: "ZacAI", version: "2.0.0" })
       }
 
       // Load knowledge manager with timeout protection
-      const knowledgePromise = Promise.all([
-        knowledgeManager.loadSessionFromLocalStorage(),
-        knowledgeManager.loadFromIndexedDB(),
-        knowledgeManager.loadSeedData(),
-      ])
+      try {
+        const knowledgePromise = Promise.all([
+          knowledgeManager.loadSessionFromLocalStorage(),
+          knowledgeManager.loadFromIndexedDB(),
+          knowledgeManager.loadSeedData(),
+        ])
 
-      await Promise.race([
-        knowledgePromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Knowledge loading timeout")), 8000)),
-      ])
+        await Promise.race([
+          knowledgePromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Knowledge loading timeout")), 8000)),
+        ])
 
-      const sysInfo = knowledgeManager.getSystemInfo()
-      setSystemInfo(sysInfo)
+        console.log("✅ Knowledge Manager initialized")
+      } catch (knowledgeError) {
+        console.warn("Knowledge manager initialization had issues:", knowledgeError)
+      }
 
       updateStats()
       loadKnowledgeData()
@@ -152,18 +156,18 @@ export default function EnhancedAIChat() {
       try {
         const history = aiSystem.getConversationHistory()
         setMessages(history)
+        console.log(`✅ Loaded ${history.length} conversation messages`)
       } catch (historyError) {
         console.warn("Could not load conversation history:", historyError)
         setMessages([])
       }
 
       setIsInitializing(false)
-      console.log("✅ Enhanced AI System initialized successfully!")
+      console.log("✅ Enhanced AI System fully initialized!")
     } catch (error) {
       console.error("❌ Failed to initialize:", error)
       setError("System initialized with limited functionality")
       setIsInitializing(false)
-      // Continue with basic functionality
     }
   }
 
@@ -172,27 +176,38 @@ export default function EnhancedAIChat() {
   }
 
   const updateStats = () => {
-    const aiStats = aiSystem.getStats()
-    const knowledgeStats = knowledgeManager.getStats()
+    try {
+      const aiStats = aiSystem.getStats()
+      const knowledgeStats = knowledgeManager.getStats()
 
-    setStats({
-      vocabulary: aiStats.vocabularySize + (knowledgeStats.vocabulary || 0),
-      mathematics: aiStats.mathFunctions + (knowledgeStats.mathematics || 0),
-      userInfo: aiStats.memoryEntries + (knowledgeStats.userInfo || 0),
-      facts: knowledgeStats.facts || 0,
-      conversations: aiStats.totalMessages,
-      totalEntries: aiStats.totalLearned + (knowledgeStats.totalEntries || 0),
-      lastUpdated: Date.now(),
-      version: "2.0.0",
-      systemStatus: aiStats.systemStatus,
-      avgConfidence: aiStats.avgConfidence,
-    })
+      console.log("📊 AI Stats:", aiStats)
+      console.log("📊 Knowledge Stats:", knowledgeStats)
+
+      setStats({
+        vocabulary: aiStats.vocabularySize + (knowledgeStats.vocabulary || 0),
+        mathematics: aiStats.mathFunctions + (knowledgeStats.mathematics || 0),
+        userInfo: aiStats.memoryEntries + (knowledgeStats.userInfo || 0),
+        facts: (aiStats.factsData?.size || 0) + (knowledgeStats.facts || 0),
+        conversations: aiStats.totalMessages,
+        totalEntries: (aiStats.totalLearned || 0) + (knowledgeStats.totalEntries || 0),
+        lastUpdated: Date.now(),
+        version: "2.0.0",
+        systemStatus: aiStats.systemStatus,
+        avgConfidence: aiStats.avgConfidence,
+      })
+    } catch (error) {
+      console.error("Failed to update stats:", error)
+    }
   }
 
   const loadKnowledgeData = () => {
     try {
       const data = knowledgeManager.exportKnowledge()
       const aiStats = aiSystem.getStats()
+
+      console.log("📚 Loading knowledge data...")
+      console.log("Knowledge Manager Data:", data)
+      console.log("AI System Data:", aiStats)
 
       // Get learned knowledge from AI system
       const learnedVocab = aiStats.vocabularyData || new Map()
@@ -290,6 +305,7 @@ export default function EnhancedAIChat() {
       }
 
       setKnowledgeData(processedData)
+      console.log("✅ Knowledge data loaded:", processedData)
     } catch (error) {
       console.error("Failed to load knowledge data:", error)
     }
@@ -377,11 +393,13 @@ export default function EnhancedAIChat() {
       // Use the cognitive AI system for processing
       let response
       try {
+        console.log("🤖 Processing message with AI system:", userInput)
         const responsePromise = aiSystem.processMessage(userInput)
         response = await Promise.race([
           responsePromise,
           new Promise((_, reject) => setTimeout(() => reject(new Error("Response timeout")), 10000)),
         ])
+        console.log("✅ AI Response:", response)
       } catch (aiError) {
         console.error("AI processing failed or timed out:", aiError)
         // Fallback response
@@ -425,8 +443,12 @@ export default function EnhancedAIChat() {
       }
 
       setMessages((prev) => [...prev, aiMessage])
-      updateStats()
-      loadKnowledgeData()
+
+      // Update stats and reload knowledge data after processing
+      setTimeout(() => {
+        updateStats()
+        loadKnowledgeData()
+      }, 500)
     } catch (error) {
       console.error("Error processing message:", error)
       setError("Failed to process message. Please try again.")
@@ -463,14 +485,30 @@ export default function EnhancedAIChat() {
   }
 
   const handleExport = () => {
-    const data = knowledgeManager.exportKnowledge()
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `zacai-knowledge-${new Date().toISOString().split("T")[0]}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    try {
+      const aiData = aiSystem.exportData()
+      const knowledgeData = knowledgeManager.exportKnowledge()
+
+      const combinedData = {
+        aiSystem: aiData,
+        knowledgeManager: knowledgeData,
+        exportDate: new Date().toISOString(),
+        version: "2.0.0",
+      }
+
+      const blob = new Blob([JSON.stringify(combinedData, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `zacai-complete-export-${new Date().toISOString().split("T")[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      console.log("✅ Data exported successfully")
+    } catch (error) {
+      console.error("Export failed:", error)
+      alert("Failed to export data")
+    }
   }
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -480,11 +518,21 @@ export default function EnhancedAIChat() {
       reader.onload = (e) => {
         try {
           const data = JSON.parse(e.target?.result as string)
-          knowledgeManager.importKnowledge(data)
+
+          // Import to both systems
+          if (data.knowledgeManager) {
+            knowledgeManager.importKnowledge(data.knowledgeManager)
+          }
+          if (data.aiSystem) {
+            // Import AI system data if available
+            console.log("AI system data available for import")
+          }
+
           updateStats()
           loadKnowledgeData()
           alert("Knowledge imported successfully!")
         } catch (error) {
+          console.error("Import failed:", error)
           alert("Failed to import knowledge. Please check the file format.")
         }
       }
@@ -587,20 +635,24 @@ export default function EnhancedAIChat() {
   }
 
   const monitorSystemHealth = () => {
-    const debugInfo = aiSystem.getSystemDebugInfo()
+    try {
+      const debugInfo = aiSystem.getSystemDebugInfo()
 
-    if (!debugInfo.isInitialized) {
-      console.warn("⚠️ AI System not properly initialized, attempting recovery...")
-      initializeSystem()
-    }
+      if (!debugInfo.isInitialized) {
+        console.warn("⚠️ AI System not properly initialized, attempting recovery...")
+        initializeSystem()
+      }
 
-    if (debugInfo.systemStatus === "error") {
-      console.warn("⚠️ AI System in error state, attempting recovery...")
-      setError("System recovering from error state...")
-      setTimeout(() => {
-        setError(null)
-        updateStats()
-      }, 2000)
+      if (debugInfo.systemStatus === "error") {
+        console.warn("⚠️ AI System in error state, attempting recovery...")
+        setError("System recovering from error state...")
+        setTimeout(() => {
+          setError(null)
+          updateStats()
+        }, 2000)
+      }
+    } catch (error) {
+      console.warn("Health check failed:", error)
     }
   }
 
