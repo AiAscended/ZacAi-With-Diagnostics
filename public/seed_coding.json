@@ -1,0 +1,288 @@
+{
+  "react_fundamentals": {
+    "components": {
+      "definition": "Reusable pieces of UI that can accept props and return JSX",
+      "syntax": "function ComponentName(props) { return <div>{props.children}</div>; }",
+      "examples": [
+        "function Button({ onClick, children }) { return <button onClick={onClick}>{children}</button>; }",
+        "const Card = ({ title, content }) => <div><h2>{title}</h2><p>{content}</p></div>;"
+      ],
+      "best_practices": [
+        "Use PascalCase for component names",
+        "Keep components small and focused",
+        "Use props for data passing",
+        "Avoid deep nesting"
+      ]
+    },
+    "jsx": {
+      "definition": "JavaScript XML - syntax extension that allows writing HTML-like code in JavaScript",
+      "rules": [
+        "Must return single parent element or Fragment",
+        "Use className instead of class",
+        "Use camelCase for attributes",
+        "Self-closing tags must end with />"
+      ],
+      "examples": [
+        "<div className='container'>Hello World</div>",
+        "<img src='/image.jpg' alt='Description' />",
+        "<Fragment><h1>Title</h1><p>Content</p></Fragment>"
+      ]
+    },
+    "hooks": {
+      "useState": {
+        "purpose": "Manage component state",
+        "syntax": "const [state, setState] = useState(initialValue)",
+        "examples": [
+          "const [count, setCount] = useState(0)",
+          "const [user, setUser] = useState({ name: '', email: '' })",
+          "const [isVisible, setIsVisible] = useState(false)"
+        ]
+      },
+      "useEffect": {
+        "purpose": "Handle side effects and lifecycle events",
+        "syntax": "useEffect(() => { /* effect */ }, [dependencies])",
+        "examples": [
+          "useEffect(() => { document.title = 'New Title'; }, [])",
+          "useEffect(() => { fetchData(); }, [userId])",
+          "useEffect(() => { const timer = setInterval(tick, 1000); return () => clearInterval(timer); }, [])"
+        ]
+      },
+      "useContext": {
+        "purpose": "Access context values without prop drilling",
+        "syntax": "const value = useContext(MyContext)",
+        "examples": ["const theme = useContext(ThemeContext)", "const user = useContext(UserContext)"]
+      }
+    },
+    "props": {
+      "definition": "Properties passed to components for customization",
+      "types": ["strings", "numbers", "booleans", "objects", "arrays", "functions"],
+      "examples": [
+        "function Greeting({ name, age }) { return <h1>Hello {name}, you are {age}</h1>; }",
+        "function Button({ onClick, disabled, children }) { return <button onClick={onClick} disabled={disabled}>{children}</button>; }"
+      ],
+      "destructuring": "const { name, age, email } = props"
+    }
+  },
+  "nextjs_fundamentals": {
+    "app_router": {
+      "definition": "Next.js 13+ routing system using app directory",
+      "structure": {
+        "app/": "Root directory for App Router",
+        "app/page.tsx": "Home page component",
+        "app/layout.tsx": "Root layout component",
+        "app/loading.tsx": "Loading UI component",
+        "app/error.tsx": "Error UI component",
+        "app/not-found.tsx": "404 page component"
+      },
+      "routing": {
+        "dynamic_routes": "app/blog/[slug]/page.tsx",
+        "nested_routes": "app/dashboard/settings/page.tsx",
+        "route_groups": "app/(auth)/login/page.tsx"
+      }
+    },
+    "server_components": {
+      "definition": "Components that render on the server by default",
+      "benefits": ["Better performance", "Smaller bundle size", "Direct database access", "Better SEO"],
+      "examples": [
+        "async function BlogPost({ params }) { const post = await fetchPost(params.id); return <article>{post.content}</article>; }"
+      ],
+      "restrictions": ["No useState", "No useEffect", "No browser APIs", "No event handlers"]
+    },
+    "client_components": {
+      "definition": "Components that render on the client, marked with 'use client'",
+      "usage": "Add 'use client' directive at top of file",
+      "examples": [
+        "'use client'\nimport { useState } from 'react'\nexport default function Counter() { const [count, setCount] = useState(0); return <button onClick={() => setCount(count + 1)}>{count}</button>; }"
+      ],
+      "when_to_use": ["Interactive elements", "State management", "Browser APIs", "Event handlers"]
+    },
+    "data_fetching": {
+      "server_side": {
+        "fetch": "const data = await fetch('https://api.example.com/data')",
+        "database": "const users = await db.user.findMany()",
+        "caching": "fetch(url, { cache: 'force-cache' })"
+      },
+      "client_side": {
+        "useEffect": "useEffect(() => { fetchData().then(setData); }, [])",
+        "swr": "const { data, error } = useSWR('/api/data', fetcher)",
+        "react_query": "const { data, isLoading } = useQuery('users', fetchUsers)"
+      }
+    },
+    "api_routes": {
+      "definition": "Server-side API endpoints in Next.js",
+      "location": "app/api/route.ts or pages/api/",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      "examples": [
+        "export async function GET() { return Response.json({ message: 'Hello' }); }",
+        "export async function POST(request) { const body = await request.json(); return Response.json(body); }"
+      ]
+    }
+  },
+  "javascript_essentials": {
+    "variables": {
+      "const": "Block-scoped, cannot be reassigned",
+      "let": "Block-scoped, can be reassigned",
+      "var": "Function-scoped, avoid in modern code"
+    },
+    "functions": {
+      "arrow_functions": "const add = (a, b) => a + b",
+      "regular_functions": "function add(a, b) { return a + b; }",
+      "async_functions": "async function fetchData() { const response = await fetch(url); return response.json(); }"
+    },
+    "destructuring": {
+      "arrays": "const [first, second] = array",
+      "objects": "const { name, age } = person",
+      "nested": "const { user: { name, email } } = data"
+    },
+    "spread_operator": {
+      "arrays": "const newArray = [...oldArray, newItem]",
+      "objects": "const newObject = { ...oldObject, newProperty: value }",
+      "function_args": "function sum(...numbers) { return numbers.reduce((a, b) => a + b, 0); }"
+    },
+    "promises": {
+      "creation": "const promise = new Promise((resolve, reject) => { /* async work */ })",
+      "consumption": "promise.then(result => console.log(result)).catch(error => console.error(error))",
+      "async_await": "try { const result = await promise; } catch (error) { console.error(error); }"
+    }
+  },
+  "typescript_basics": {
+    "types": {
+      "primitive": ["string", "number", "boolean", "null", "undefined"],
+      "arrays": "string[] or Array<string>",
+      "objects": "{ name: string; age: number }",
+      "unions": "string | number",
+      "optional": "{ name?: string }"
+    },
+    "interfaces": {
+      "definition": "interface User { id: number; name: string; email: string; }",
+      "extending": "interface Admin extends User { permissions: string[]; }",
+      "optional_properties": "interface Config { apiUrl: string; timeout?: number; }"
+    },
+    "generics": {
+      "functions": "function identity<T>(arg: T): T { return arg; }",
+      "interfaces": "interface ApiResponse<T> { data: T; status: number; }",
+      "components": "interface Props<T> { items: T[]; onSelect: (item: T) => void; }"
+    }
+  },
+  "css_styling": {
+    "tailwind_css": {
+      "utility_classes": "bg-blue-500 text-white p-4 rounded-lg shadow-md",
+      "responsive": "sm:text-lg md:text-xl lg:text-2xl",
+      "hover_states": "hover:bg-blue-600 hover:scale-105",
+      "dark_mode": "dark:bg-gray-800 dark:text-white"
+    },
+    "css_modules": {
+      "usage": "import styles from './Component.module.css'",
+      "class_names": "className={styles.container}",
+      "composition": "className={`${styles.base} ${styles.variant}`}"
+    },
+    "styled_components": {
+      "basic": "const Button = styled.button`background: blue; color: white;`",
+      "props": "const Button = styled.button<{primary?: boolean}>`background: ${props => props.primary ? 'blue' : 'gray'};`"
+    }
+  },
+  "state_management": {
+    "local_state": {
+      "useState": "const [count, setCount] = useState(0)",
+      "useReducer": "const [state, dispatch] = useReducer(reducer, initialState)"
+    },
+    "global_state": {
+      "context": "const ThemeContext = createContext(); const theme = useContext(ThemeContext);",
+      "zustand": "const useStore = create((set) => ({ count: 0, increment: () => set((state) => ({ count: state.count + 1 })) }))",
+      "redux": "const store = configureStore({ reducer: { counter: counterReducer } })"
+    }
+  },
+  "performance": {
+    "optimization": {
+      "memo": "const MemoizedComponent = React.memo(Component)",
+      "useMemo": "const expensiveValue = useMemo(() => computeExpensiveValue(a, b), [a, b])",
+      "useCallback": "const memoizedCallback = useCallback(() => { doSomething(a, b); }, [a, b])",
+      "lazy_loading": "const LazyComponent = lazy(() => import('./Component'))"
+    },
+    "code_splitting": {
+      "dynamic_imports": "const Component = dynamic(() => import('./Component'), { loading: () => <p>Loading...</p> })",
+      "route_splitting": "Each page in app/ directory is automatically code-split"
+    }
+  },
+  "testing": {
+    "jest": {
+      "setup": "npm install --save-dev jest @testing-library/react @testing-library/jest-dom",
+      "basic_test": "test('renders learn react link', () => { render(<App />); const linkElement = screen.getByText(/learn react/i); expect(linkElement).toBeInTheDocument(); })"
+    },
+    "testing_library": {
+      "queries": ["getByText", "getByRole", "getByTestId", "queryByText", "findByText"],
+      "user_events": "await user.click(button); await user.type(input, 'Hello World');"
+    }
+  },
+  "deployment": {
+    "vercel": {
+      "setup": "npm install -g vercel",
+      "deploy": "vercel --prod",
+      "environment": "Add environment variables in Vercel dashboard"
+    },
+    "build_process": {
+      "development": "npm run dev",
+      "build": "npm run build",
+      "start": "npm run start",
+      "lint": "npm run lint"
+    }
+  },
+  "best_practices": {
+    "file_structure": {
+      "components": "Keep components in components/ directory",
+      "pages": "Use app/ directory for pages in App Router",
+      "utilities": "Create lib/ or utils/ for helper functions",
+      "types": "Define TypeScript types in types/ directory"
+    },
+    "naming_conventions": {
+      "components": "PascalCase (UserProfile.tsx)",
+      "files": "kebab-case (user-profile.tsx) or camelCase (userProfile.tsx)",
+      "variables": "camelCase (userName, isLoading)",
+      "constants": "UPPER_SNAKE_CASE (API_BASE_URL)"
+    },
+    "code_organization": {
+      "single_responsibility": "Each component should have one clear purpose",
+      "composition": "Prefer composition over inheritance",
+      "prop_drilling": "Avoid deep prop drilling, use context or state management",
+      "error_boundaries": "Implement error boundaries for better error handling"
+    }
+  },
+  "common_patterns": {
+    "conditional_rendering": {
+      "ternary": "condition ? <ComponentA /> : <ComponentB />",
+      "logical_and": "condition && <Component />",
+      "early_return": "if (!data) return <Loading />; return <Content data={data} />;"
+    },
+    "list_rendering": {
+      "map": "items.map(item => <Item key={item.id} data={item} />)",
+      "filter_map": "items.filter(item => item.active).map(item => <Item key={item.id} data={item} />)"
+    },
+    "form_handling": {
+      "controlled": "const [value, setValue] = useState(''); <input value={value} onChange={e => setValue(e.target.value)} />",
+      "uncontrolled": "const inputRef = useRef(); <input ref={inputRef} />; const value = inputRef.current.value;"
+    }
+  },
+  "debugging": {
+    "react_devtools": "Browser extension for inspecting React component tree",
+    "console_methods": ["console.log", "console.error", "console.warn", "console.table"],
+    "error_boundaries": "Catch JavaScript errors anywhere in component tree",
+    "strict_mode": "<React.StrictMode> helps identify problems in development"
+  },
+  "resources": {
+    "official_docs": {
+      "react": "https://react.dev/",
+      "nextjs": "https://nextjs.org/docs",
+      "typescript": "https://www.typescriptlang.org/docs/"
+    },
+    "learning_platforms": {
+      "w3schools": "https://www.w3schools.com/react/",
+      "mdn": "https://developer.mozilla.org/en-US/docs/Learn",
+      "freecodecamp": "https://www.freecodecamp.org/"
+    },
+    "tools": {
+      "vscode": "Recommended IDE with React/TypeScript extensions",
+      "chrome_devtools": "Built-in browser debugging tools",
+      "npm": "Package manager for JavaScript dependencies"
+    }
+  }
+}

@@ -15,9 +15,19 @@ export class CognitiveAISystem {
   private systemStatus = "idle"
   private isInitialized = false
 
+  // Add these new properties
+  private systemIdentity: any = null
+  private systemCapabilities: string[] = []
+  private knowledgeSources: any = null
+  private learnedVocabulary: Map<string, any> = new Map()
+  private learnedMathematics: Map<string, any> = new Map()
+  private learnedScience: Map<string, any> = new Map()
+  private learnedCoding: Map<string, any> = new Map()
+
   constructor() {
     this.initializeBasicVocabulary()
     this.initializeSampleFacts()
+    this.loadSystemIdentity() // Add this line
   }
 
   public async sendMessage(userMessage: string): Promise<string> {
@@ -277,6 +287,19 @@ export class CognitiveAISystem {
   private generateConversationalResponse(userMessage: string): string {
     const lowerMessage = userMessage.toLowerCase()
 
+    // Identity questions
+    if (lowerMessage.includes("what is your name") || lowerMessage.includes("who are you")) {
+      const name = this.systemIdentity?.name || "ZacAI"
+      const purpose = this.systemIdentity?.purpose || "an AI assistant"
+      return `Hello! I'm ${name}, ${purpose}. I can help with math calculations (including Tesla/Vortex math), look up word definitions, explore scientific concepts, assist with React/Next.js coding, and remember personal information about you. What would you like to explore?`
+    }
+
+    // Capability questions
+    if (lowerMessage.includes("what can you do") || lowerMessage.includes("your capabilities")) {
+      const capabilities = this.systemCapabilities.slice(0, 5).join(", ")
+      return `I have many capabilities including: ${capabilities}. I'm constantly learning and expanding my knowledge through our conversations and online research. What would you like help with?`
+    }
+
     // Personal info detection
     if (lowerMessage.includes("my name is") || lowerMessage.includes("i am")) {
       return `Thank you for sharing that information with me! I'll remember this in my personal memory system. I'm constantly learning and can now help with math problems, look up word definitions online, and even explore scientific concepts together!`
@@ -284,11 +307,13 @@ export class CognitiveAISystem {
 
     // Greeting responses
     if (lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
-      return `Hello! I'm excited to chat with you. I can help with math calculations (including Tesla/Vortex math), look up word definitions, explore scientific concepts, and remember personal information about you. What would you like to explore?`
+      const name = this.systemIdentity?.name || "ZacAI"
+      return `Hello! I'm ${name} and I'm excited to chat with you. I can help with math calculations (including Tesla/Vortex math), look up word definitions, explore scientific concepts, assist with coding, and remember personal information about you. What would you like to explore?`
     }
 
     // Default response
-    return `I understand you said: "${userMessage}". I'm an enhanced AI with access to online dictionaries, mathematical tools including Tesla/Vortex math, and scientific knowledge. I can learn new words and concepts from our conversations. What would you like to explore together?`
+    const name = this.systemIdentity?.name || "ZacAI"
+    return `I understand you said: "${userMessage}". I'm ${name}, an enhanced AI with access to online dictionaries, mathematical tools including Tesla/Vortex math, scientific knowledge, and coding assistance. I can learn new words and concepts from our conversations. What would you like to explore together?`
   }
 
   public async initialize(): Promise<void> {
@@ -297,14 +322,27 @@ export class CognitiveAISystem {
     try {
       console.log("🚀 Initializing Enhanced Cognitive AI System...")
 
+      // Load system identity first
+      await this.loadSystemIdentity()
+
       // Load learned knowledge with timeout
+      try {
+        await Promise.race([
+          this.loadLearnedKnowledge(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000)),
+        ])
+      } catch (error) {
+        console.warn("Learned knowledge loading timed out (non-critical):", error)
+      }
+
+      // Load enhanced knowledge system
       try {
         await Promise.race([
           this.enhancedKnowledge.loadLearnedKnowledge(),
           new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000)),
         ])
       } catch (error) {
-        console.warn("Learned knowledge loading timed out (non-critical):", error)
+        console.warn("Enhanced knowledge loading timed out (non-critical):", error)
       }
 
       // Load other data with error handling
@@ -329,7 +367,8 @@ export class CognitiveAISystem {
       this.systemStatus = "ready"
       this.isInitialized = true
 
-      console.log("✅ Enhanced Cognitive AI System ready (with fallbacks)!")
+      const name = this.systemIdentity?.name || "ZacAI"
+      console.log(`✅ ${name} Enhanced Cognitive AI System ready!`)
     } catch (error) {
       console.error("❌ Initialization failed, using fallbacks:", error)
       this.systemStatus = "ready"
@@ -684,6 +723,99 @@ export class CognitiveAISystem {
     } catch (error) {
       console.error("❌ AI system retraining failed:", error)
       throw error
+    }
+  }
+
+  private async loadSystemIdentity(): Promise<void> {
+    try {
+      const response = await fetch("/seed_system.json")
+      if (response.ok) {
+        const systemData = await response.json()
+        this.systemIdentity = systemData.identity
+        this.systemCapabilities = systemData.core_capabilities
+        this.knowledgeSources = systemData.knowledge_system
+        console.log(`✅ Loaded system identity: ${this.systemIdentity?.name}`)
+      }
+    } catch (error) {
+      console.warn("Could not load system identity:", error)
+    }
+  }
+
+  private async saveLearnedVocabulary(): Promise<void> {
+    try {
+      const learnedData = Object.fromEntries(this.learnedVocabulary)
+      localStorage.setItem("learnt_vocab", JSON.stringify(learnedData))
+      console.log(`💾 Saved ${this.learnedVocabulary.size} learned vocabulary entries`)
+    } catch (error) {
+      console.warn("Failed to save learned vocabulary:", error)
+    }
+  }
+
+  private async saveLearnedMathematics(): Promise<void> {
+    try {
+      const learnedData = Object.fromEntries(this.learnedMathematics)
+      localStorage.setItem("learnt_maths", JSON.stringify(learnedData))
+      console.log(`💾 Saved ${this.learnedMathematics.size} learned mathematics entries`)
+    } catch (error) {
+      console.warn("Failed to save learned mathematics:", error)
+    }
+  }
+
+  private async saveLearnedScience(): Promise<void> {
+    try {
+      const learnedData = Object.fromEntries(this.learnedScience)
+      localStorage.setItem("learnt_science", JSON.stringify(learnedData))
+      console.log(`💾 Saved ${this.learnedScience.size} learned science entries`)
+    } catch (error) {
+      console.warn("Failed to save learned science:", error)
+    }
+  }
+
+  private async saveLearnedCoding(): Promise<void> {
+    try {
+      const learnedData = Object.fromEntries(this.learnedCoding)
+      localStorage.setItem("learnt_coding", JSON.stringify(learnedData))
+      console.log(`💾 Saved ${this.learnedCoding.size} learned coding entries`)
+    } catch (error) {
+      console.warn("Failed to save learned coding:", error)
+    }
+  }
+
+  private async loadLearnedKnowledge(): Promise<void> {
+    try {
+      // Load learned vocabulary
+      const vocabData = localStorage.getItem("learnt_vocab")
+      if (vocabData) {
+        const parsed = JSON.parse(vocabData)
+        this.learnedVocabulary = new Map(Object.entries(parsed))
+        console.log(`📚 Loaded ${this.learnedVocabulary.size} learned vocabulary entries`)
+      }
+
+      // Load learned mathematics
+      const mathData = localStorage.getItem("learnt_maths")
+      if (mathData) {
+        const parsed = JSON.parse(mathData)
+        this.learnedMathematics = new Map(Object.entries(parsed))
+        console.log(`🧮 Loaded ${this.learnedMathematics.size} learned mathematics entries`)
+      }
+
+      // Load learned science
+      const scienceData = localStorage.getItem("learnt_science")
+      if (scienceData) {
+        const parsed = JSON.parse(scienceData)
+        this.learnedScience = new Map(Object.entries(parsed))
+        console.log(`🔬 Loaded ${this.learnedScience.size} learned science entries`)
+      }
+
+      // Load learned coding
+      const codingData = localStorage.getItem("learnt_coding")
+      if (codingData) {
+        const parsed = JSON.parse(codingData)
+        this.learnedCoding = new Map(Object.entries(parsed))
+        console.log(`💻 Loaded ${this.learnedCoding.size} learned coding entries`)
+      }
+    } catch (error) {
+      console.warn("Failed to load learned knowledge:", error)
     }
   }
 }
