@@ -18,24 +18,21 @@ import {
   BookOpen,
   TrendingUp,
   MessageCircle,
-  Database,
   Cloud,
   Lightbulb,
   Calculator,
-  BarChart3,
   Settings,
   ThumbsUp,
   ThumbsDown,
   RefreshCw,
-  Download,
-  Upload,
   Search,
   Zap,
-  FileText,
-  User,
   ChevronDown,
   ChevronUp,
 } from "lucide-react"
+import KnowledgeManagementTab from "./knowledge-management-tab"
+import SystemSettingsTab from "./system-settings-tab"
+import MemorySystemTab from "./memory-system-tab"
 
 interface ChatMessage {
   id: string
@@ -688,187 +685,6 @@ export default function EnhancedAIChat() {
     )
   }
 
-  // Rest of the component remains exactly the same - no UI changes
-  if (showMetrics) {
-    return (
-      <div className="h-screen bg-gray-50 overflow-hidden">
-        <div className="h-full flex flex-col">
-          {/* Header */}
-          <div className="flex-shrink-0 p-4 bg-white border-b">
-            <div className="flex items-center justify-between max-w-7xl mx-auto">
-              <div className="flex items-center gap-3">
-                <BarChart3 className="w-8 h-8 text-blue-600" />
-                <div>
-                  <h1 className="text-2xl font-bold">{systemInfo.name || "ZacAI"} Admin Dashboard</h1>
-                  <p className="text-sm text-gray-600">Unified AI System - Knowledge Management & Training Pipeline</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Button variant="outline" onClick={handleExport}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Export
-                </Button>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">Chat</span>
-                  <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
-                  <span className="text-sm">Admin</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Stats Bar */}
-          <div className="flex-shrink-0 p-4 bg-white border-b">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-5 gap-4">
-                <Card
-                  className="cursor-pointer hover:bg-blue-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("vocabulary")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <BookOpen className="w-6 h-6 mx-auto mb-1 text-blue-600" />
-                    <div className="text-xl font-bold">{stats.vocabulary}</div>
-                    <div className="text-xs text-gray-500">Vocabulary</div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:bg-green-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("mathematics")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <Calculator className="w-6 h-6 mx-auto mb-1 text-green-600" />
-                    <div className="text-xl font-bold">{stats.mathematics}</div>
-                    <div className="text-xs text-gray-500">Math</div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:bg-purple-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("userInfo")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <User className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-xl font-bold">{stats.userInfo}</div>
-                    <div className="text-xs text-gray-500">User Info</div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:bg-orange-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("facts")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <FileText className="w-6 h-6 mx-auto mb-1 text-orange-600" />
-                    <div className="text-xl font-bold">{stats.facts}</div>
-                    <div className="text-xs text-gray-500">Facts</div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:bg-red-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("overview")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <MessageCircle className="w-6 h-6 mx-auto mb-1 text-red-600" />
-                    <div className="text-xl font-bold">{stats.conversations}</div>
-                    <div className="text-xs text-gray-500">Conversations</div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content - keeping all existing admin UI exactly the same */}
-          <div className="flex-1 overflow-auto">
-            <div className="max-w-7xl mx-auto p-4">
-              {/* All existing admin content remains unchanged */}
-              {activeDataView === "overview" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Brain className="w-5 h-5" />
-                        Unified System Overview
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center p-3 bg-blue-50 rounded">
-                          <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
-                          <div className="text-sm text-blue-600">Total Knowledge</div>
-                        </div>
-                        <div className="text-center p-3 bg-green-50 rounded">
-                          <div className="text-2xl font-bold text-green-600">
-                            {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "0%"}
-                          </div>
-                          <div className="text-sm text-green-600">Avg Confidence</div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Status</span>
-                          <Badge variant="default">{stats.systemStatus || "Ready"}</Badge>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Version</span>
-                          <span className="font-mono">{stats.version}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Last Updated</span>
-                          <span className="text-xs">{new Date(stats.lastUpdated).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Settings className="w-5 h-5" />
-                        Quick Actions
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <Button onClick={handleExport} className="w-full" variant="outline">
-                        <Download className="w-4 h-4 mr-2" />
-                        Export All Data
-                      </Button>
-
-                      <div>
-                        <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
-                        <Button asChild className="w-full" variant="outline">
-                          <label htmlFor="import-file" className="cursor-pointer">
-                            <Upload className="w-4 h-4 mr-2" />
-                            Import Data
-                          </label>
-                        </Button>
-                      </div>
-
-                      <Button
-                        onClick={() => {
-                          updateStats()
-                          loadKnowledgeData()
-                        }}
-                        className="w-full"
-                        variant="outline"
-                      >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Refresh Data
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-              {/* All other admin views remain exactly the same */}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // CHAT UI REMAINS EXACTLY THE SAME - no changes to chat interface
   return (
     <div className="flex h-screen bg-gray-50">
@@ -1156,7 +972,7 @@ export default function EnhancedAIChat() {
         </Card>
       </div>
 
-      {/* Sidebar - keeping all existing sidebar content exactly the same */}
+      {/* Sidebar - UNCHANGED */}
       <div className="w-80 flex-shrink-0 p-4 overflow-hidden">
         <Tabs defaultValue="stats" className="h-full flex flex-col">
           <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
@@ -1231,246 +1047,12 @@ export default function EnhancedAIChat() {
             </TabsContent>
 
             <TabsContent value="knowledge" className="h-full">
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Database className="w-4 h-4" />
-                    Knowledge Base
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-sm text-gray-600">
-                    <p className="mb-2">I can help with:</p>
-                    <ul className="space-y-1 text-xs">
-                      <li>• Mathematical calculations</li>
-                      <li>• Remembering personal information</li>
-                      <li>• General knowledge and facts</li>
-                      <li>• Conversational interactions</li>
-                      <li>• Learning from our conversations</li>
-                    </ul>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-3">
-                    <div className="text-sm font-medium">Available Cognitive Tools</div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 p-2 bg-blue-50 rounded-lg">
-                        <Calculator className="w-4 h-4 text-blue-600" />
-                        <div>
-                          <div className="font-medium text-xs">Mathematical Toolkit</div>
-                          <div className="text-xs text-gray-600">Times tables, calculations, expressions</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
-                        <BookOpen className="w-4 h-4 text-green-600" />
-                        <div>
-                          <div className="font-medium text-xs">Vocabulary System</div>
-                          <div className="text-xs text-gray-600">432 core English words</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 p-2 bg-purple-50 rounded-lg">
-                        <Cloud className="w-4 h-4 text-purple-600" />
-                        <div>
-                          <div className="font-medium text-xs">Web Knowledge Engine</div>
-                          <div className="text-xs text-gray-600">Definitions and facts</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 p-2 bg-orange-50 rounded-lg">
-                        <Brain className="w-4 h-4 text-orange-600" />
-                        <div>
-                          <div className="font-medium text-xs">Thinking Pipeline</div>
-                          <div className="text-xs text-gray-600">Smart tool selection</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 p-2 bg-red-50 rounded-lg">
-                        <Database className="w-4 h-4 text-red-600" />
-                        <div>
-                          <div className="font-medium text-xs">Personal Memory</div>
-                          <div className="text-xs text-gray-600">User information storage</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 p-2 bg-yellow-50 rounded-lg">
-                        <Zap className="w-4 h-4 text-yellow-600" />
-                        <div>
-                          <div className="font-medium text-xs">Cognitive Router</div>
-                          <div className="text-xs text-gray-600">Task routing optimization</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Quick Actions</div>
-                    <div className="space-y-2 text-xs">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-left justify-start"
-                        onClick={() => setInput("What do you remember about me?")}
-                      >
-                        Check Memory
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-left justify-start"
-                        onClick={() => setInput("Calculate 15 * 23")}
-                      >
-                        Test Math
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-left justify-start"
-                        onClick={() => setInput("Tell me a random fact")}
-                      >
-                        Random Fact
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <KnowledgeManagementTab />
             </TabsContent>
 
             <TabsContent value="tools" className="h-full">
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Settings className="w-4 h-4" />
-                    AI Tools & Training
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button onClick={handleExport} className="w-full" variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Knowledge
-                  </Button>
-
-                  <div>
-                    <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
-                    <Button asChild className="w-full" variant="outline">
-                      <label htmlFor="import-file" className="cursor-pointer">
-                        <Upload className="w-4 h-4 mr-2" />
-                        Import Data
-                      </label>
-                    </Button>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-3">
-                    <div className="text-sm font-medium">Training Configuration</div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs font-medium mb-1 block">Learning Rate</label>
-                        <Input type="range" min="0.1" max="1.0" step="0.1" defaultValue="0.5" className="text-sm" />
-                        <div className="text-xs text-gray-500 mt-1">
-                          Controls how quickly the AI learns from conversations
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-medium mb-1 block">Confidence Threshold</label>
-                        <Input type="range" min="0.5" max="1.0" step="0.05" defaultValue="0.8" className="text-sm" />
-                        <div className="text-xs text-gray-500 mt-1">Minimum confidence level for responses</div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium">Enable Thinking Display</label>
-                        <Switch defaultChecked />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium">Auto-save Learning</label>
-                        <Switch defaultChecked />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium">Mathematical Processing</label>
-                        <Switch defaultChecked />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium">Personal Memory Storage</label>
-                        <Switch defaultChecked />
-                      </div>
-
-                      <Button size="sm" className="w-full">
-                        <Settings className="w-3 h-3 mr-1" />
-                        Apply Configuration
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">System Management</div>
-                    <div className="space-y-2 text-xs">
-                      <Button onClick={handleRetrainModel} className="w-full" variant="outline" size="sm">
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Retrain Model
-                      </Button>
-                      <Button onClick={handleOptimizeKnowledge} className="w-full" variant="outline" size="sm">
-                        <Zap className="w-4 h-4 mr-2" />
-                        Optimize Knowledge
-                      </Button>
-                      <div>
-                        <input
-                          type="file"
-                          accept=".json,.csv,.txt"
-                          onChange={handleBulkImport}
-                          className="hidden"
-                          id="bulk-import"
-                        />
-                        <Button asChild className="w-full" variant="outline" size="sm">
-                          <label htmlFor="bulk-import" className="cursor-pointer">
-                            <Upload className="w-4 h-4 mr-2" />
-                            Bulk Import
-                          </label>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Features</div>
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <p>• Real-time learning</p>
-                      <p>• Mathematical processing</p>
-                      <p>• Personal memory storage</p>
-                      <p>• Knowledge export/import</p>
-                      <p>• Training configuration</p>
-                      <p>• System optimization</p>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Privacy & Security</div>
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <p>• All data stored locally</p>
-                      <p>• No external servers</p>
-                      <p>• You control your data</p>
-                      <p>• Export anytime</p>
-                      <p>• Secure processing</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <SystemSettingsTab />
+              <MemorySystemTab />
             </TabsContent>
           </div>
         </Tabs>
