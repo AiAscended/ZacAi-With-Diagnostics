@@ -30,7 +30,7 @@ export class CognitiveAISystem {
   constructor() {
     this.initializeBasicVocabulary()
     this.initializeSampleFacts()
-    this.loadSystemIdentity() // Add this line
+    // Remove this line: this.loadSystemIdentity()
   }
 
   public async sendMessage(userMessage: string): Promise<string> {
@@ -432,6 +432,12 @@ export class CognitiveAISystem {
   }
 
   private async handleIdentityQuestion(message: string): Promise<AIResponse> {
+    // Ensure system identity is loaded
+    if (!this.systemIdentity?.name) {
+      console.log("🔄 System identity not loaded, attempting to load now...")
+      await this.loadSystemIdentity()
+    }
+
     const currentTime = this.temporalSystem.getCurrentDateTime()
     const stats = this.getStats()
 
@@ -441,13 +447,33 @@ export class CognitiveAISystem {
       const name = this.systemIdentity?.name || "ZacAI"
       const version = this.systemIdentity?.version || "2.0.0"
       response = `👋 **Hello! I'm ${name} v${version}**\n\n`
-      response += `${
-        this.systemIdentity?.purpose || "I'm an AI assistant designed to help you learn and solve problems."
-      }\n\n`
+      response += `${this.systemIdentity?.purpose || "I'm an AI assistant designed to help you learn and solve problems."}\n\n`
       response += `**🕐 Current Time**: ${currentTime.formatted.full}\n`
       response += `**📚 Knowledge Stats**: ${stats.totalLearned || 0} concepts learned\n`
       response += `**🧮 Math Functions**: ${stats.mathFunctions} available\n\n`
       response += `I can help with math (including Tesla/Vortex patterns), definitions, science concepts, coding, and I remember our conversations!`
+    } else if (message.toLowerCase().includes("capabilities") || message.toLowerCase().includes("what can you do")) {
+      const name = this.systemIdentity?.name || "ZacAI"
+      response = `🚀 **${name} Capabilities**\n\n`
+
+      if (this.systemCapabilities.length > 0) {
+        response += `**Core Capabilities:**\n`
+        this.systemCapabilities.slice(0, 6).forEach((capability, index) => {
+          response += `${index + 1}. ${capability}\n`
+        })
+      } else {
+        response += `**Core Capabilities:**\n`
+        response += `1. Mathematical calculations including Tesla/Vortex math\n`
+        response += `2. Word definitions and vocabulary learning\n`
+        response += `3. Scientific concept research and explanation\n`
+        response += `4. Coding assistance with React/Next.js/JavaScript\n`
+        response += `5. Personal memory and conversation history\n`
+      }
+
+      response += `\n**📊 Current Stats:**\n`
+      response += `• Total learned concepts: ${stats.totalLearned}\n`
+      response += `• Conversation messages: ${stats.totalMessages}\n`
+      response += `• System status: ${stats.systemStatus}\n`
     } else {
       response = this.generateConversationalResponse(message)
     }
@@ -462,22 +488,29 @@ export class CognitiveAISystem {
   private generateConversationalResponse(userMessage: string): string {
     const lowerMessage = userMessage.toLowerCase()
 
-    // Identity questions
+    // Identity questions - ensure we have system identity
     if (lowerMessage.includes("what is your name") || lowerMessage.includes("who are you")) {
       const name = this.systemIdentity?.name || "ZacAI"
-      const purpose = this.systemIdentity?.purpose || "an AI assistant"
-      return `Hello! I'm ${name}, ${purpose}. I can help with math calculations (including Tesla/Vortex math), look up word definitions, explore scientific concepts, assist with React/Next.js coding, and remember personal information about you. What would you like to explore?`
+      const version = this.systemIdentity?.version || "2.0.0"
+      const purpose = this.systemIdentity?.purpose || "an AI assistant designed to help you learn and solve problems"
+
+      return `Hello! I'm ${name} v${version}, ${purpose}. I can help with math calculations (including Tesla/Vortex math), look up word definitions, explore scientific concepts, assist with React/Next.js coding, and remember personal information about you. What would you like to explore?`
     }
 
     // Capability questions
     if (lowerMessage.includes("what can you do") || lowerMessage.includes("your capabilities")) {
-      const capabilities = this.systemCapabilities.slice(0, 5).join(", ")
-      return `I have many capabilities including: ${capabilities}. I'm constantly learning and expanding my knowledge through our conversations and online research. What would you like help with?`
+      const name = this.systemIdentity?.name || "ZacAI"
+      const capabilities =
+        this.systemCapabilities.length > 0
+          ? this.systemCapabilities.slice(0, 3).join(", ")
+          : "mathematical calculations, word definitions, scientific research, coding assistance"
+
+      return `I'm ${name} with many capabilities including: ${capabilities}. I'm constantly learning and expanding my knowledge through our conversations and online research. What would you like help with?`
     }
 
     // Personal info detection
     if (lowerMessage.includes("my name is") || lowerMessage.includes("i am")) {
-      return `Thank you for sharing that information with me! I'll remember this in my personal memory system. I'm constantly learning and can now help with math problems, look up word definitions online, and even explore scientific concepts together!`
+      return `Thank you for sharing that information with me! I'll remember this in my personal memory system. I'm constantly learning and can help with math problems, look up word definitions online, and explore scientific concepts together!`
     }
 
     // Greeting responses
@@ -497,8 +530,17 @@ export class CognitiveAISystem {
     try {
       console.log("🚀 Initializing Enhanced Cognitive AI System...")
 
-      // Load system identity first
+      // Load system identity FIRST and wait for it
+      console.log("📋 Loading system identity...")
       await this.loadSystemIdentity()
+
+      // Verify system identity loaded
+      if (this.systemIdentity?.name) {
+        console.log(`✅ System identity loaded: ${this.systemIdentity.name} v${this.systemIdentity.version}`)
+      } else {
+        console.warn("⚠️ System identity not loaded, using defaults")
+        this.setDefaultSystemIdentity()
+      }
 
       // Load learned knowledge with timeout
       try {
@@ -546,6 +588,7 @@ export class CognitiveAISystem {
       console.log(`✅ ${name} Enhanced Cognitive AI System ready!`)
     } catch (error) {
       console.error("❌ Initialization failed, using fallbacks:", error)
+      this.setDefaultSystemIdentity()
       this.systemStatus = "ready"
       this.isInitialized = true
     }
@@ -911,17 +954,42 @@ export class CognitiveAISystem {
 
   private async loadSystemIdentity(): Promise<void> {
     try {
-      const response = await fetch("/seed_system.json")
+      console.log("📋 Attempting to load system identity from seed_system.json...")
+
+      const response = await fetch("/seed_system.json", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Cache-Control": "no-cache",
+        },
+      })
+
       if (response.ok) {
         const systemData = await response.json()
-        this.systemIdentity = systemData.identity
-        this.systemCapabilities = systemData.core_capabilities
-        this.knowledgeSources = systemData.knowledge_system
-        console.log(`✅ Loaded system identity: ${this.systemIdentity?.name}`)
+
+        if (systemData.identity) {
+          this.systemIdentity = systemData.identity
+          this.systemCapabilities = systemData.core_capabilities || []
+          this.knowledgeSources = systemData.knowledge_system
+
+          console.log(`✅ System identity loaded successfully:`)
+          console.log(`   Name: ${this.systemIdentity.name}`)
+          console.log(`   Version: ${this.systemIdentity.version}`)
+          console.log(`   Capabilities: ${this.systemCapabilities.length} items`)
+          return
+        } else {
+          console.warn("⚠️ seed_system.json found but missing identity section")
+        }
+      } else {
+        console.warn(`⚠️ Failed to fetch seed_system.json: ${response.status} ${response.statusText}`)
       }
     } catch (error) {
-      console.warn("Could not load system identity:", error)
+      console.warn("⚠️ Could not load system identity from file:", error)
     }
+
+    // If we get here, loading failed - set defaults
+    console.log("📋 Setting default system identity...")
+    this.setDefaultSystemIdentity()
   }
 
   private async saveLearnedVocabulary(): Promise<void> {
@@ -999,6 +1067,36 @@ export class CognitiveAISystem {
       }
     } catch (error) {
       console.warn("Failed to load learned knowledge:", error)
+    }
+  }
+
+  private setDefaultSystemIdentity(): void {
+    this.systemIdentity = {
+      name: "ZacAI",
+      version: "2.0.0",
+      purpose:
+        "To be an intelligent, learning browser-based AI assistant that helps users with knowledge, conversation, and problem-solving",
+    }
+    this.systemCapabilities = [
+      "Natural language conversation and understanding",
+      "Mathematical calculations including Tesla/Vortex math patterns",
+      "Word definitions and vocabulary expansion",
+      "Scientific concept explanation and research",
+      "Coding assistance with React/Next.js/JavaScript/TypeScript",
+    ]
+    console.log("✅ Default system identity set")
+  }
+
+  public getSystemDebugInfo(): any {
+    return {
+      isInitialized: this.isInitialized,
+      systemStatus: this.systemStatus,
+      systemIdentity: this.systemIdentity,
+      systemCapabilities: this.systemCapabilities,
+      hasKnowledgeSources: !!this.knowledgeSources,
+      temporalSystemWorking: !!this.temporalSystem,
+      enhancedKnowledgeWorking: !!this.enhancedKnowledge,
+      initializationTime: Date.now(),
     }
   }
 }
