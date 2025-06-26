@@ -37,7 +37,113 @@ export class UnifiedAISystem {
   private learningQueue: any[] = []
 
   constructor() {
-    this.initializeCognitiveSystem()
+    // Initialize basic vocabulary and facts
+    this.initializeBasicVocabulary()
+    this.initializeSampleFacts()
+  }
+
+  private initializeBasicVocabulary(): void {
+    const basicWords = [
+      "hello",
+      "hi",
+      "hey",
+      "goodbye",
+      "bye",
+      "thanks",
+      "thank",
+      "please",
+      "yes",
+      "no",
+      "maybe",
+      "sure",
+      "okay",
+      "ok",
+      "good",
+      "bad",
+      "great",
+      "what",
+      "who",
+      "where",
+      "when",
+      "why",
+      "how",
+      "can",
+      "could",
+      "would",
+      "like",
+      "love",
+      "want",
+      "need",
+      "know",
+      "think",
+      "remember",
+      "forget",
+      "help",
+      "sorry",
+      "excuse",
+      "understand",
+      "explain",
+      "tell",
+      "say",
+      "calculate",
+      "math",
+      "number",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "times",
+      "plus",
+      "minus",
+      "equals",
+      "result",
+      "answer",
+      "define",
+      "meaning",
+      "word",
+      "learn",
+      "learned",
+      "new",
+      "recent",
+      "vortex",
+      "tesla",
+    ]
+
+    basicWords.forEach((word) => {
+      const entry: VocabularyEntry = {
+        word: word.toLowerCase(),
+        definition: `Basic word: ${word}`,
+        partOfSpeech: "basic",
+        examples: [],
+        phonetic: "",
+        frequency: 1,
+        source: "basic",
+        learned: Date.now(),
+        confidence: 0.7,
+      }
+      this.vocabulary.set(word.toLowerCase(), entry)
+    })
+  }
+
+  private initializeSampleFacts(): void {
+    const sampleFacts = [
+      { category: "science", fact: "Water boils at 100°C at sea level" },
+      { category: "history", fact: "The first computer was ENIAC, built in 1946" },
+      { category: "geography", fact: "Mount Everest is 8,848 meters tall" },
+      { category: "mathematics", fact: "Tesla's 3-6-9 pattern reveals the fundamental structure of the universe" },
+    ]
+
+    sampleFacts.forEach((item) => {
+      const entry: FactEntry = {
+        key: `fact_${item.category}`,
+        value: item.fact,
+        category: item.category,
+        source: "basic",
+        confidence: 0.8,
+        timestamp: Date.now(),
+      }
+      this.facts.set(`fact_${item.category}`, entry)
+    })
   }
 
   public async initialize(): Promise<void> {
