@@ -30,7 +30,6 @@ export class CognitiveAISystem {
   constructor() {
     this.initializeBasicVocabulary()
     this.initializeSampleFacts()
-    // Remove this line: this.loadSystemIdentity()
   }
 
   public async sendMessage(userMessage: string): Promise<string> {
@@ -52,16 +51,25 @@ export class CognitiveAISystem {
     let response: AIResponse
 
     try {
-      // NEW: Check if it's a date/time query FIRST
-      if (this.enhancedKnowledge.isDateTimeQuery(userMessage)) {
+      // FIXED: Check message types in the correct priority order
+
+      // 1. FIRST: Check if it's an identity question (highest priority)
+      if (this.isIdentityQuestion(userMessage)) {
+        console.log("🎯 Detected identity question")
+        response = await this.handleIdentityQuestion(userMessage)
+      }
+      // 2. Check if it's a date/time query
+      else if (this.enhancedKnowledge.isDateTimeQuery(userMessage)) {
+        console.log("🎯 Detected date/time query")
         response = {
           content: this.enhancedKnowledge.handleDateTimeQuery(userMessage),
           confidence: 0.95,
           reasoning: ["Processed date/time query using temporal knowledge system"],
         }
       }
-      // Check if it's a math problem
+      // 3. Check if it's a math problem
       else if (this.enhancedMath.analyzeMathExpression(userMessage).isMatch) {
+        console.log("🎯 Detected math problem")
         const mathAnalysis = this.enhancedMath.analyzeMathExpression(userMessage)
 
         try {
@@ -86,28 +94,29 @@ export class CognitiveAISystem {
           }
         }
       }
-      // Check for learned content queries
+      // 4. Check for learned content queries
       else if (this.isAskingAboutLearnedContent(userMessage)) {
+        console.log("🎯 Detected learned content query")
         response = await this.handleLearnedContentQuery(userMessage)
       }
-      // Check for definition requests
+      // 5. Check for definition requests (AFTER identity check)
       else if (this.isDefinitionRequest(userMessage)) {
+        console.log("🎯 Detected definition request")
         response = await this.handleDefinitionRequest(userMessage)
       }
-      // Check for knowledge requests
+      // 6. Check for knowledge requests
       else if (this.isKnowledgeRequest(userMessage)) {
+        console.log("🎯 Detected knowledge request")
         response = await this.handleKnowledgeRequest(userMessage)
       }
-      // Check for coding requests
+      // 7. Check for coding requests
       else if (this.isCodingRequest(userMessage)) {
+        console.log("🎯 Detected coding request")
         response = await this.handleCodingRequest(userMessage)
       }
-      // Identity questions
-      else if (this.isIdentityQuestion(userMessage)) {
-        response = await this.handleIdentityQuestion(userMessage)
-      }
-      // Default conversational response
+      // 8. Default conversational response
       else {
+        console.log("🎯 Using conversational response")
         response = {
           content: this.generateConversationalResponse(userMessage),
           confidence: 0.8,
@@ -151,7 +160,8 @@ export class CognitiveAISystem {
             : localAnalysis.vortexData.isVortexNumber
               ? "Vortex Cycle"
               : "Standard"
-        }\n\n`
+        }\n`
+        response += `• Analysis: ${localAnalysis.vortexData.analysis}\n\n`
       }
 
       response += `**🧠 My Enhanced Reasoning Process:**\n`
@@ -209,6 +219,98 @@ export class CognitiveAISystem {
       percentage: "% of",
     }
     return symbols[operation as keyof typeof symbols] || operation
+  }
+
+  private isIdentityQuestion(message: string): boolean {
+    const patterns = [
+      /(?:what.*your.*name|who.*you|what.*you)/i,
+      /(?:tell.*about.*yourself|introduce.*yourself)/i,
+      /(?:what.*can.*you.*do|your.*capabilities)/i,
+      /(?:hello.*tell.*about|hi.*tell.*about)/i,
+      /(?:what.*are.*you|who.*are.*you)/i,
+    ]
+
+    // IMPORTANT: Don't treat definition requests as identity questions
+    const definitionPatterns = [
+      /(?:what\s+(?:is|does|means?)\s+(?!you|your))/i,
+      /(?:define\s+(?!you|your))/i,
+      /(?:meaning\s+of\s+(?!you|your))/i,
+    ]
+
+    const isDefinition = definitionPatterns.some((pattern) => pattern.test(message))
+    if (isDefinition) {
+      console.log("🔍 Detected definition pattern, not identity")
+      return false
+    }
+
+    const isIdentity = patterns.some((pattern) => pattern.test(message))
+    console.log("🔍 Identity check result:", isIdentity, "for message:", message)
+    return isIdentity
+  }
+
+  private async handleIdentityQuestion(message: string): Promise<AIResponse> {
+    // Ensure system identity is loaded
+    if (!this.systemIdentity?.name) {
+      console.log("🔄 System identity not loaded, attempting to load now...")
+      await this.loadSystemIdentity()
+    }
+
+    const currentTime = this.temporalSystem.getCurrentDateTime()
+    const stats = this.getStats()
+
+    let response = ""
+
+    if (message.toLowerCase().includes("name") || message.toLowerCase().includes("who")) {
+      const name = this.systemIdentity?.name || "ZacAI"
+      const version = this.systemIdentity?.version || "2.0.0"
+      response = `👋 **Hello! I'm ${name} v${version}**\n\n`
+      response += `${this.systemIdentity?.purpose || "I'm an AI assistant designed to help you learn and solve problems."}\n\n`
+      response += `**🕐 Current Time**: ${currentTime.formatted.full}\n`
+      response += `**📚 Knowledge Stats**: ${stats.totalLearned || 0} concepts learned\n`
+      response += `**🧮 Math Functions**: ${stats.mathFunctions} available\n\n`
+      response += `I can help with math (including Tesla/Vortex patterns), definitions, science concepts, coding, and I remember our conversations!`
+    } else if (message.toLowerCase().includes("capabilities") || message.toLowerCase().includes("what can you do")) {
+      const name = this.systemIdentity?.name || "ZacAI"
+      response = `🚀 **${name} Capabilities**\n\n`
+
+      if (this.systemCapabilities.length > 0) {
+        response += `**Core Capabilities:**\n`
+        this.systemCapabilities.slice(0, 6).forEach((capability, index) => {
+          response += `${index + 1}. ${capability}\n`
+        })
+      } else {
+        response += `**Core Capabilities:**\n`
+        response += `1. Mathematical calculations including Tesla/Vortex math\n`
+        response += `2. Word definitions and vocabulary learning\n`
+        response += `3. Scientific concept research and explanation\n`
+        response += `4. Coding assistance with React/Next.js/JavaScript\n`
+        response += `5. Personal memory and conversation history\n`
+      }
+
+      response += `\n**📊 Current Stats:**\n`
+      response += `• Total learned concepts: ${stats.totalLearned}\n`
+      response += `• Conversation messages: ${stats.totalMessages}\n`
+      response += `• System status: ${stats.systemStatus}\n`
+    } else {
+      // General introduction
+      const name = this.systemIdentity?.name || "ZacAI"
+      const version = this.systemIdentity?.version || "2.0.0"
+      response = `👋 **Hello! I'm ${name} v${version}**\n\n`
+      response += `I'm an enhanced AI assistant with these key abilities:\n\n`
+      response += `🧮 **Mathematics**: Advanced calculations including Tesla/Vortex math patterns\n`
+      response += `📚 **Learning**: I can look up word definitions and learn from our conversations\n`
+      response += `🔬 **Knowledge**: Scientific concepts and general information\n`
+      response += `💻 **Coding**: Help with React, Next.js, JavaScript, and TypeScript\n`
+      response += `🧠 **Memory**: I remember personal information and conversation context\n\n`
+      response += `**Current Status**: ${stats.systemStatus} | **Knowledge**: ${stats.totalLearned} concepts learned\n\n`
+      response += `What would you like to explore together?`
+    }
+
+    return {
+      content: response,
+      confidence: 0.95,
+      reasoning: ["Generated identity response with current system information"],
+    }
   }
 
   private isAskingAboutLearnedContent(message: string): boolean {
@@ -299,7 +401,12 @@ export class CognitiveAISystem {
   }
 
   private isDefinitionRequest(message: string): boolean {
-    const patterns = [/what\s+(?:is|does|means?)\s+(.+)/i, /define\s+(.+)/i, /meaning\s+of\s+(.+)/i, /explain\s+(.+)/i]
+    const patterns = [
+      /what\s+(?:is|does|means?)\s+(?!you|your)(.+)/i,
+      /define\s+(?!you|your)(.+)/i,
+      /meaning\s+of\s+(?!you|your)(.+)/i,
+      /explain\s+(?!you|your)(.+)/i,
+    ]
     return patterns.some((pattern) => pattern.test(message))
   }
 
@@ -466,69 +573,6 @@ export class CognitiveAISystem {
       content: `I'd love to help you with ${language} and "${concept}" but I couldn't find detailed information right now. Try asking about specific React components, JavaScript functions, or Next.js features!`,
       confidence: 0.5,
       reasoning: ["Could not find information about requested coding concept"],
-    }
-  }
-
-  private isIdentityQuestion(message: string): boolean {
-    const patterns = [
-      /(?:what.*your.*name|who.*you|what.*you)/i,
-      /(?:tell.*about.*yourself|introduce.*yourself)/i,
-      /(?:what.*can.*you.*do|your.*capabilities)/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleIdentityQuestion(message: string): Promise<AIResponse> {
-    // Ensure system identity is loaded
-    if (!this.systemIdentity?.name) {
-      console.log("🔄 System identity not loaded, attempting to load now...")
-      await this.loadSystemIdentity()
-    }
-
-    const currentTime = this.temporalSystem.getCurrentDateTime()
-    const stats = this.getStats()
-
-    let response = ""
-
-    if (message.toLowerCase().includes("name") || message.toLowerCase().includes("who")) {
-      const name = this.systemIdentity?.name || "ZacAI"
-      const version = this.systemIdentity?.version || "2.0.0"
-      response = `👋 **Hello! I'm ${name} v${version}**\n\n`
-      response += `${this.systemIdentity?.purpose || "I'm an AI assistant designed to help you learn and solve problems."}\n\n`
-      response += `**🕐 Current Time**: ${currentTime.formatted.full}\n`
-      response += `**📚 Knowledge Stats**: ${stats.totalLearned || 0} concepts learned\n`
-      response += `**🧮 Math Functions**: ${stats.mathFunctions} available\n\n`
-      response += `I can help with math (including Tesla/Vortex patterns), definitions, science concepts, coding, and I remember our conversations!`
-    } else if (message.toLowerCase().includes("capabilities") || message.toLowerCase().includes("what can you do")) {
-      const name = this.systemIdentity?.name || "ZacAI"
-      response = `🚀 **${name} Capabilities**\n\n`
-
-      if (this.systemCapabilities.length > 0) {
-        response += `**Core Capabilities:**\n`
-        this.systemCapabilities.slice(0, 6).forEach((capability, index) => {
-          response += `${index + 1}. ${capability}\n`
-        })
-      } else {
-        response += `**Core Capabilities:**\n`
-        response += `1. Mathematical calculations including Tesla/Vortex math\n`
-        response += `2. Word definitions and vocabulary learning\n`
-        response += `3. Scientific concept research and explanation\n`
-        response += `4. Coding assistance with React/Next.js/JavaScript\n`
-        response += `5. Personal memory and conversation history\n`
-      }
-
-      response += `\n**📊 Current Stats:**\n`
-      response += `• Total learned concepts: ${stats.totalLearned}\n`
-      response += `• Conversation messages: ${stats.totalMessages}\n`
-      response += `• System status: ${stats.systemStatus}\n`
-    } else {
-      response = this.generateConversationalResponse(message)
-    }
-
-    return {
-      content: response,
-      confidence: 0.95,
-      reasoning: ["Generated identity response with current system information"],
     }
   }
 
