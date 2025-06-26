@@ -21,12 +21,17 @@ import {
   Cloud,
   Lightbulb,
   Calculator,
+  BarChart3,
   Settings,
   ThumbsUp,
   ThumbsDown,
   RefreshCw,
+  Download,
+  Upload,
   Search,
   Zap,
+  FileText,
+  User,
   ChevronDown,
   ChevronUp,
 } from "lucide-react"
@@ -681,6 +686,292 @@ export default function EnhancedAIChat() {
             </div>
           </CardContent>
         </Card>
+      </div>
+    )
+  }
+
+  // Rest of the component remains exactly the same - no UI changes
+  if (showMetrics) {
+    return (
+      <div className="h-screen bg-gray-50 overflow-hidden">
+        <div className="h-full flex flex-col">
+          {/* Header */}
+          <div className="flex-shrink-0 p-4 bg-white border-b">
+            <div className="flex items-center justify-between max-w-7xl mx-auto">
+              <div className="flex items-center gap-3">
+                <BarChart3 className="w-8 h-8 text-blue-600" />
+                <div>
+                  <h1 className="text-2xl font-bold">{systemInfo.name || "ZacAI"} Admin Dashboard</h1>
+                  <p className="text-sm text-gray-600">Unified AI System - Knowledge Management & Training Pipeline</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <Button variant="outline" onClick={handleExport}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Chat</span>
+                  <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
+                  <span className="text-sm">Admin</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats Bar */}
+          <div className="flex-shrink-0 p-4 bg-white border-b">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-5 gap-4">
+                <Card
+                  className="cursor-pointer hover:bg-blue-50 transition-colors"
+                  onClick={() => handleQuickLinkClick("vocabulary")}
+                >
+                  <CardContent className="p-3 text-center">
+                    <BookOpen className="w-6 h-6 mx-auto mb-1 text-blue-600" />
+                    <div className="text-xl font-bold">{stats.vocabulary}</div>
+                    <div className="text-xs text-gray-500">Vocabulary</div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="cursor-pointer hover:bg-green-50 transition-colors"
+                  onClick={() => handleQuickLinkClick("mathematics")}
+                >
+                  <CardContent className="p-3 text-center">
+                    <Calculator className="w-6 h-6 mx-auto mb-1 text-green-600" />
+                    <div className="text-xl font-bold">{stats.mathematics}</div>
+                    <div className="text-xs text-gray-500">Math</div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="cursor-pointer hover:bg-purple-50 transition-colors"
+                  onClick={() => handleQuickLinkClick("userInfo")}
+                >
+                  <CardContent className="p-3 text-center">
+                    <User className="w-6 h-6 mx-auto mb-1 text-purple-600" />
+                    <div className="text-xl font-bold">{stats.userInfo}</div>
+                    <div className="text-xs text-gray-500">User Info</div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="cursor-pointer hover:bg-orange-50 transition-colors"
+                  onClick={() => handleQuickLinkClick("facts")}
+                >
+                  <CardContent className="p-3 text-center">
+                    <FileText className="w-6 h-6 mx-auto mb-1 text-orange-600" />
+                    <div className="text-xl font-bold">{stats.facts}</div>
+                    <div className="text-xs text-gray-500">Facts</div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="cursor-pointer hover:bg-red-50 transition-colors"
+                  onClick={() => handleQuickLinkClick("overview")}
+                >
+                  <CardContent className="p-3 text-center">
+                    <MessageCircle className="w-6 h-6 mx-auto mb-1 text-red-600" />
+                    <div className="text-xl font-bold">{stats.conversations}</div>
+                    <div className="text-xs text-gray-500">Conversations</div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 overflow-auto">
+            <div className="max-w-7xl mx-auto p-4">
+              {activeDataView === "overview" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Brain className="w-5 h-5" />
+                        Unified System Overview
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-3 bg-blue-50 rounded">
+                          <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
+                          <div className="text-sm text-blue-600">Total Knowledge</div>
+                        </div>
+                        <div className="text-center p-3 bg-green-50 rounded">
+                          <div className="text-2xl font-bold text-green-600">
+                            {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "0%"}
+                          </div>
+                          <div className="text-sm text-green-600">Avg Confidence</div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Status</span>
+                          <Badge variant="default">{stats.systemStatus || "Ready"}</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Version</span>
+                          <span className="font-mono">{stats.version}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Last Updated</span>
+                          <span className="text-xs">{new Date(stats.lastUpdated).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5" />
+                        Quick Actions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Button onClick={handleExport} className="w-full" variant="outline">
+                        <Download className="w-4 h-4 mr-2" />
+                        Export All Data
+                      </Button>
+
+                      <div>
+                        <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
+                        <Button asChild className="w-full" variant="outline">
+                          <label htmlFor="import-file" className="cursor-pointer">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Import Data
+                          </label>
+                        </Button>
+                      </div>
+
+                      <Button
+                        onClick={() => {
+                          updateStats()
+                          loadKnowledgeData()
+                        }}
+                        className="w-full"
+                        variant="outline"
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Refresh Data
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {activeDataView === "vocabulary" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>📖 Vocabulary Knowledge Base</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {knowledgeData.vocabulary.slice(0, 20).map((item: any, index: number) => (
+                        <div key={index} className="border rounded p-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-semibold">{item.word}</h4>
+                              <p className="text-sm text-gray-600">{item.definition}</p>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="outline">{item.partOfSpeech}</Badge>
+                                <Badge variant="secondary">{item.category}</Badge>
+                                <Badge variant="outline">{item.source}</Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {activeDataView === "mathematics" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>🧮 Mathematical Knowledge Base</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {knowledgeData.mathematics.slice(0, 20).map((item: any, index: number) => (
+                        <div key={index} className="border rounded p-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-semibold">{item.concept}</h4>
+                              <p className="text-sm text-gray-600">{item.formula}</p>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="outline">Difficulty: {item.difficulty}</Badge>
+                                <Badge variant="secondary">{item.category}</Badge>
+                                <Badge variant="outline">{item.source}</Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {activeDataView === "userInfo" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>👤 User Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {knowledgeData.userInfo.slice(0, 20).map((item: any, index: number) => (
+                        <div key={index} className="border rounded p-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-semibold">{item.key}</h4>
+                              <p className="text-sm text-gray-600">{item.value}</p>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="outline">Importance: {item.importance}</Badge>
+                                <Badge variant="secondary">{item.timestamp}</Badge>
+                                <Badge variant="outline">{item.source}</Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {activeDataView === "facts" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>📚 Facts Knowledge Base</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {knowledgeData.facts.slice(0, 20).map((item: any, index: number) => (
+                        <div key={index} className="border rounded p-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-semibold">{item.topic}</h4>
+                              <p className="text-sm text-gray-600">{item.content}</p>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="outline">{item.category}</Badge>
+                                <Badge variant="secondary">{item.source}</Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     )
   }

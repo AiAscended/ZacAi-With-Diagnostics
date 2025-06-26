@@ -425,10 +425,24 @@ export class UnifiedAISystem {
       }
     }
 
-    const word = wordMatch[1].trim().replace(/[?!.]/g, "")
+    const word = wordMatch[1].trim().replace(/[?!.]/g, "").toLowerCase()
+
+    // Handle "maths" specifically
+    if (word === "maths" || word === "mathematics") {
+      return {
+        content: this.formatSeedDefinition("mathematics", {
+          definition:
+            "The abstract science of number, quantity, and space, either as abstract concepts (pure mathematics) or as applied to other disciplines such as physics and engineering (applied mathematics). Also called 'maths' in British English.",
+          partOfSpeech: "noun",
+          examples: ["I love studying mathematics", "Mathematics is the language of science", "She excels at maths"],
+        }),
+        confidence: 0.95,
+        reasoning: ["Retrieved definition for mathematics/maths from built-in knowledge"],
+      }
+    }
 
     // Check if already learned
-    const learnedWord = this.enhancedKnowledge.getLearnedVocabulary().get(word.toLowerCase())
+    const learnedWord = this.enhancedKnowledge.getLearnedVocabulary().get(word)
     if (learnedWord) {
       return {
         content: this.formatWordDefinition(learnedWord, true),
@@ -438,8 +452,8 @@ export class UnifiedAISystem {
     }
 
     // Check seed vocabulary data first
-    if (this.seedVocabData && this.seedVocabData[word.toLowerCase()]) {
-      const seedDef = this.seedVocabData[word.toLowerCase()]
+    if (this.seedVocabData && this.seedVocabData[word]) {
+      const seedDef = this.seedVocabData[word]
       return {
         content: this.formatSeedDefinition(word, seedDef),
         confidence: 0.9,
