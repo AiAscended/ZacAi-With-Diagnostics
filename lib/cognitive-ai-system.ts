@@ -5,7 +5,7 @@ import { EnhancedKnowledgeSystem } from "./enhanced-knowledge-system"
 import { EnhancedMathProcessor } from "./enhanced-math-processor"
 import { TemporalKnowledgeSystem } from "./temporal-knowledge-system"
 
-// FIXED COGNITIVE AI SYSTEM - Enhanced with Online Sources and Learned Knowledge
+// FIXED COGNITIVE AI SYSTEM - Restored Full Functionality
 export class CognitiveAISystem {
   private enhancedKnowledge = new EnhancedKnowledgeSystem()
   private enhancedMath = new EnhancedMathProcessor()
@@ -18,7 +18,7 @@ export class CognitiveAISystem {
   private systemStatus = "idle"
   private isInitialized = false
 
-  // Add these new properties
+  // Enhanced properties
   private systemIdentity: any = null
   private systemCapabilities: string[] = []
   private knowledgeSources: any = null
@@ -27,11 +27,17 @@ export class CognitiveAISystem {
   private learnedScience: Map<string, any> = new Map()
   private learnedCoding: Map<string, any> = new Map()
 
+  // RESTORED: Seed data integration
+  private seedMathData: any = null
+  private seedVocabData: any = null
+  private seedKnowledgeData: any = null
+
   private temporalSystem = new TemporalKnowledgeSystem()
 
   constructor() {
     this.initializeBasicVocabulary()
     this.initializeSampleFacts()
+    this.loadSeedData() // RESTORED: Load seed data on construction
   }
 
   public async sendMessage(userMessage: string): Promise<string> {
@@ -51,14 +57,19 @@ export class CognitiveAISystem {
     let response: AIResponse
 
     try {
-      // IMPROVED: More specific pattern matching with better priority
+      // IMPROVED: Better pattern matching with specific number extraction
 
-      // 1. Check for Tesla/Vortex math queries FIRST (before other math)
-      if (this.isTeslaMathQuery(userMessage)) {
+      // 1. Check for specific Tesla number calculations FIRST
+      if (this.isSpecificTeslaNumberQuery(userMessage)) {
+        console.log("🎯 Detected specific Tesla number query")
+        response = await this.handleSpecificTeslaNumber(userMessage)
+      }
+      // 2. Check for Tesla/Vortex math queries (general)
+      else if (this.isTeslaMathQuery(userMessage)) {
         console.log("🎯 Detected Tesla/Vortex math query")
         response = await this.handleTeslaMathQuery(userMessage)
       }
-      // 2. Check if it's a date/time query
+      // 3. Check if it's a date/time query
       else if (this.enhancedKnowledge.isDateTimeQuery(userMessage)) {
         console.log("🎯 Detected date/time query")
         response = {
@@ -67,59 +78,37 @@ export class CognitiveAISystem {
           reasoning: ["Processed date/time query using temporal knowledge system"],
         }
       }
-      // 3. Check if it's a math problem (after Tesla math check)
+      // 4. Check if it's a math problem (FIXED: Now returns actual results)
       else if (this.enhancedMath.analyzeMathExpression(userMessage).isMatch) {
         console.log("🎯 Detected math problem")
-        const mathAnalysis = this.enhancedMath.analyzeMathExpression(userMessage)
-
-        try {
-          const enhancedMathResult = await Promise.race([
-            this.enhancedKnowledge.processMathProblem(userMessage),
-            new Promise((_, reject) => setTimeout(() => reject(new Error("Math timeout")), 3000)),
-          ])
-
-          response = {
-            content: this.generateEnhancedMathResponse(mathAnalysis, enhancedMathResult),
-            confidence: enhancedMathResult.confidence || mathAnalysis.confidence,
-            reasoning: [...(mathAnalysis.reasoning || []), "Enhanced with online math APIs"],
-            mathAnalysis: { ...mathAnalysis, enhancedResult: enhancedMathResult },
-          }
-        } catch (error) {
-          console.warn("Enhanced math processing failed, using local:", error)
-          response = {
-            content: this.generateMathResponse(mathAnalysis),
-            confidence: mathAnalysis.confidence,
-            reasoning: mathAnalysis.reasoning,
-            mathAnalysis: mathAnalysis,
-          }
-        }
+        response = await this.handleMathProblem(userMessage)
       }
-      // 4. Check for coding requests (BEFORE knowledge requests)
+      // 5. Check for coding requests
       else if (this.isCodingRequest(userMessage)) {
         console.log("🎯 Detected coding request")
         response = await this.handleCodingRequest(userMessage)
       }
-      // 5. Check for learned content queries
+      // 6. Check for learned content queries
       else if (this.isAskingAboutLearnedContent(userMessage)) {
         console.log("🎯 Detected learned content query")
         response = await this.handleLearnedContentQuery(userMessage)
       }
-      // 6. Check for definition requests (more specific patterns)
+      // 7. Check for definition requests (FIXED: More specific patterns)
       else if (this.isDefinitionRequest(userMessage)) {
         console.log("🎯 Detected definition request")
         response = await this.handleDefinitionRequest(userMessage)
       }
-      // 7. Check for knowledge requests (AFTER coding check)
+      // 8. Check for knowledge requests
       else if (this.isKnowledgeRequest(userMessage)) {
         console.log("🎯 Detected knowledge request")
         response = await this.handleKnowledgeRequest(userMessage)
       }
-      // 8. Check if it's an identity question (more specific)
+      // 9. Check if it's an identity question
       else if (this.isIdentityQuestion(userMessage)) {
         console.log("🎯 Detected identity question")
         response = await this.handleIdentityQuestion(userMessage)
       }
-      // 9. Default conversational response
+      // 10. Default conversational response
       else {
         console.log("🎯 Using conversational response")
         response = {
@@ -139,6 +128,339 @@ export class CognitiveAISystem {
         reasoning: ["Error occurred during message processing"],
       }
     }
+  }
+
+  // RESTORED: Load seed data functionality
+  private async loadSeedData(): Promise<void> {
+    try {
+      console.log("📚 Loading seed data...")
+
+      // Load math seed data
+      const mathResponse = await fetch("/seed_maths.json")
+      if (mathResponse.ok) {
+        this.seedMathData = await mathResponse.json()
+        console.log("✅ Loaded seed math data")
+      }
+
+      // Load vocabulary seed data
+      const vocabResponse = await fetch("/seed_vocab.json")
+      if (vocabResponse.ok) {
+        this.seedVocabData = await vocabResponse.json()
+        console.log("✅ Loaded seed vocabulary data")
+      }
+
+      // Load knowledge seed data
+      const knowledgeResponse = await fetch("/seed_knowledge.json")
+      if (knowledgeResponse.ok) {
+        this.seedKnowledgeData = await knowledgeResponse.json()
+        console.log("✅ Loaded seed knowledge data")
+      }
+    } catch (error) {
+      console.warn("Failed to load seed data:", error)
+    }
+  }
+
+  // FIXED: Specific Tesla number calculation
+  private isSpecificTeslaNumberQuery(message: string): boolean {
+    const patterns = [
+      /tesla.*pattern.*(?:for|of).*(\d+)/i,
+      /vortex.*pattern.*(?:for|of).*(\d+)/i,
+      /(?:number|pattern).*(\d+).*tesla/i,
+      /tesla.*(\d+)/i,
+      /vortex.*(\d+)/i,
+    ]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private async handleSpecificTeslaNumber(message: string): Promise<AIResponse> {
+    // Extract the number from the message
+    const numberMatch = message.match(/(\d+)/)
+    if (!numberMatch) {
+      return this.handleTeslaMathQuery(message) // Fallback to general explanation
+    }
+
+    const number = Number.parseInt(numberMatch[1])
+    const digitalRoot = this.calculateDigitalRoot(number)
+    const vortexData = this.getVortexAnalysis(number)
+
+    let response = `🌀 **Tesla Pattern Analysis for ${number}**\n\n`
+
+    response += `**🔢 Number Analysis:**\n`
+    response += `• Original Number: ${number}\n`
+    response += `• Digital Root: ${digitalRoot}\n`
+    response += `• Pattern Type: ${vortexData.type}\n`
+    response += `• Cycle Position: ${vortexData.position}\n\n`
+
+    response += `**🧮 Calculation Process:**\n`
+    if (number >= 10) {
+      const digits = number.toString().split("").map(Number)
+      response += `• ${number} → ${digits.join(" + ")} = ${digits.reduce((a, b) => a + b, 0)}\n`
+      let current = digits.reduce((a, b) => a + b, 0)
+      while (current >= 10) {
+        const nextDigits = current.toString().split("").map(Number)
+        const sum = nextDigits.reduce((a, b) => a + b, 0)
+        response += `• ${current} → ${nextDigits.join(" + ")} = ${sum}\n`
+        current = sum
+      }
+      response += `• Final Digital Root: ${current}\n\n`
+    } else {
+      response += `• Single digit number: ${number}\n`
+      response += `• Digital Root: ${number}\n\n`
+    }
+
+    response += `**🌀 Vortex Analysis:**\n`
+    response += `• ${vortexData.analysis}\n`
+    response += `• Significance: ${vortexData.significance}\n\n`
+
+    if (vortexData.isTeslaNumber) {
+      response += `**⚡ Tesla Number Properties:**\n`
+      response += `• This is one of Tesla's sacred numbers (3, 6, 9)\n`
+      response += `• Represents: ${vortexData.meaning}\n`
+      response += `• Universal Role: ${vortexData.role}\n\n`
+    } else {
+      response += `**🔄 Vortex Cycle Properties:**\n`
+      response += `• Part of the infinite vortex cycle: 1→2→4→8→7→5→1\n`
+      response += `• Position in cycle: ${vortexData.position}\n`
+      response += `• Next in sequence: ${vortexData.next}\n\n`
+    }
+
+    response += `**💡 Tesla's Insight:** "${vortexData.quote}"`
+
+    return {
+      content: response,
+      confidence: 0.95,
+      reasoning: [
+        "Calculated specific Tesla pattern for requested number",
+        "Used digital root analysis and vortex mathematics",
+        "Provided detailed step-by-step calculation",
+      ],
+    }
+  }
+
+  // FIXED: Math problem handling with actual results
+  private async handleMathProblem(message: string): Promise<AIResponse> {
+    const mathAnalysis = this.enhancedMath.analyzeMathExpression(message)
+
+    // Calculate the actual result
+    let actualResult: number | string = "Error"
+    try {
+      if (mathAnalysis.numbers && mathAnalysis.numbers.length >= 2) {
+        const [a, b] = mathAnalysis.numbers
+        switch (mathAnalysis.operation) {
+          case "add":
+            actualResult = a + b
+            break
+          case "subtract":
+            actualResult = a - b
+            break
+          case "multiply":
+            actualResult = a * b
+            break
+          case "divide":
+            actualResult = b !== 0 ? a / b : "Cannot divide by zero"
+            break
+          default:
+            actualResult = "Unknown operation"
+        }
+      }
+    } catch (error) {
+      console.error("Math calculation error:", error)
+      actualResult = "Calculation error"
+    }
+
+    // Generate enhanced response with actual result
+    let response = `🧮 **Enhanced Mathematical Calculation**\n\n`
+
+    response += `**Problem:** ${mathAnalysis.numbers?.join(` ${this.getOperationSymbol(mathAnalysis.operation)} `) || "Mathematical expression"} = **${actualResult}**\n\n`
+
+    // Add Tesla/Vortex analysis if result is a number
+    if (typeof actualResult === "number") {
+      const vortexData = this.getVortexAnalysis(actualResult)
+      response += `**🌀 Vortex Math Analysis:**\n`
+      response += `• Result Digital Root: ${this.calculateDigitalRoot(actualResult)}\n`
+      response += `• Pattern: ${vortexData.type}\n`
+      response += `• Analysis: ${vortexData.analysis}\n\n`
+    }
+
+    response += `**🧠 My Reasoning Process:**\n`
+    if (mathAnalysis.reasoning) {
+      mathAnalysis.reasoning.forEach((step: string, index: number) => {
+        response += `${index + 1}. ${step}\n`
+      })
+    }
+    response += `• Calculated using enhanced mathematical processor\n`
+    response += `• Applied Tesla/Vortex analysis to result\n`
+
+    return {
+      content: response,
+      confidence: mathAnalysis.confidence,
+      reasoning: mathAnalysis.reasoning,
+      mathAnalysis: { ...mathAnalysis, actualResult },
+    }
+  }
+
+  // FIXED: Definition request handling
+  private isDefinitionRequest(message: string): boolean {
+    const patterns = [
+      /^what\s+(?:is|does|means?)\s+(?!you|your)(.+)/i,
+      /^define\s+(?!you|your)(.+)/i,
+      /^meaning\s+of\s+(?!you|your)(.+)/i,
+      /^explain\s+(?!you|your)(.+)/i,
+      /what's\s+(?!you|your)(.+)/i,
+    ]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private async handleDefinitionRequest(message: string): Promise<AIResponse> {
+    const wordMatch = message.match(/(?:what\s+(?:is|does|means?)|define|meaning\s+of|explain|what's)\s+(.+)/i)
+    if (!wordMatch) {
+      return {
+        content:
+          "I couldn't identify what you want me to define. Could you ask like 'What is [word]?' or 'Define [word]'?",
+        confidence: 0.3,
+        reasoning: ["Could not extract word to define from message"],
+      }
+    }
+
+    const word = wordMatch[1].trim().replace(/[?!.]/g, "")
+
+    // First check if we already learned this word
+    const learnedWord = this.enhancedKnowledge.getLearnedVocabulary().get(word.toLowerCase())
+    if (learnedWord) {
+      return {
+        content: this.formatWordDefinition(learnedWord, true),
+        confidence: 0.95,
+        reasoning: ["Retrieved definition from learned vocabulary"],
+      }
+    }
+
+    // Look it up online with timeout
+    try {
+      const wordData = await Promise.race([
+        this.enhancedKnowledge.lookupWord(word),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Lookup timeout")), 3000)),
+      ])
+
+      if (wordData) {
+        return {
+          content: this.formatWordDefinition(wordData, false),
+          confidence: 0.9,
+          reasoning: ["Successfully looked up word definition online", "Stored in learned vocabulary for future use"],
+        }
+      }
+    } catch (error) {
+      console.warn("Word lookup timed out or failed:", error)
+    }
+
+    return {
+      content: `I couldn't find a definition for "${word}" right now. This might be due to network issues. Try again later or ask about something else!`,
+      confidence: 0.4,
+      reasoning: ["Online dictionary lookup failed or timed out"],
+    }
+  }
+
+  // Helper methods for Tesla/Vortex calculations
+  private calculateDigitalRoot(num: number): number {
+    while (num >= 10) {
+      num = num
+        .toString()
+        .split("")
+        .reduce((sum, digit) => sum + Number.parseInt(digit), 0)
+    }
+    return num
+  }
+
+  private getVortexAnalysis(number: number): any {
+    const digitalRoot = this.calculateDigitalRoot(number)
+    const vortexCycle = [1, 2, 4, 8, 7, 5]
+    const teslaNumbers = [3, 6, 9]
+
+    const isTeslaNumber = teslaNumbers.includes(digitalRoot)
+    const isVortexNumber = vortexCycle.includes(digitalRoot)
+
+    const analysis = {
+      type: isTeslaNumber ? "Tesla Number" : isVortexNumber ? "Vortex Cycle" : "Standard",
+      position: isTeslaNumber ? teslaNumbers.indexOf(digitalRoot) + 1 : vortexCycle.indexOf(digitalRoot) + 1,
+      isTeslaNumber,
+      isVortexNumber,
+      analysis: "",
+      significance: "",
+      meaning: "",
+      role: "",
+      quote: "",
+      next: "",
+    }
+
+    if (isTeslaNumber) {
+      switch (digitalRoot) {
+        case 3:
+          analysis.analysis = "Tesla Number representing creation and manifestation"
+          analysis.significance = "The creative force that brings ideas into reality"
+          analysis.meaning = "Creation"
+          analysis.role = "The generator of new possibilities"
+          analysis.quote = "3 represents the creative force of the universe"
+          break
+        case 6:
+          analysis.analysis = "Tesla Number representing harmony and balance"
+          analysis.significance = "The stabilizing force that maintains equilibrium"
+          analysis.meaning = "Harmony"
+          analysis.role = "The balancer of opposing forces"
+          analysis.quote = "6 represents perfect harmony and love"
+          break
+        case 9:
+          analysis.analysis = "Tesla Number representing completion and universal wisdom"
+          analysis.significance = "The culmination of all cycles and ultimate understanding"
+          analysis.meaning = "Completion"
+          analysis.role = "The universal constant that encompasses all"
+          analysis.quote = "9 represents the completion of the universal cycle"
+          break
+      }
+    } else if (isVortexNumber) {
+      const currentIndex = vortexCycle.indexOf(digitalRoot)
+      const nextIndex = (currentIndex + 1) % vortexCycle.length
+      analysis.next = vortexCycle[nextIndex].toString()
+
+      switch (digitalRoot) {
+        case 1:
+          analysis.analysis = "Vortex Cycle beginning - unity and new starts"
+          analysis.significance = "The starting point of all manifestation"
+          break
+        case 2:
+          analysis.analysis = "Vortex Cycle - duality and choice"
+          analysis.significance = "The first division creating possibilities"
+          break
+        case 4:
+          analysis.analysis = "Vortex Cycle - foundation and stability"
+          analysis.significance = "The solid base upon which growth occurs"
+          break
+        case 8:
+          analysis.analysis = "Vortex Cycle - infinite potential and material mastery"
+          analysis.significance = "The symbol of infinite loops and material success"
+          break
+        case 7:
+          analysis.analysis = "Vortex Cycle - spiritual bridge and mystical knowledge"
+          analysis.significance = "The connection between material and spiritual realms"
+          break
+        case 5:
+          analysis.analysis = "Vortex Cycle - change and transformation"
+          analysis.significance = "The dynamic force that creates movement and evolution"
+          break
+      }
+    }
+
+    return analysis
+  }
+
+  private getOperationSymbol(operation: string): string {
+    const symbols = {
+      add: "+",
+      subtract: "-",
+      multiply: "×",
+      divide: "÷",
+      power: "^",
+      percentage: "% of",
+    }
+    return symbols[operation as keyof typeof symbols] || operation
   }
 
   private generateEnhancedMathResponse(localAnalysis: any, enhancedResult: any): string {
@@ -210,18 +532,6 @@ export class CognitiveAISystem {
     }
 
     return response
-  }
-
-  private getOperationSymbol(operation: string): string {
-    const symbols = {
-      add: "+",
-      subtract: "-",
-      multiply: "×",
-      divide: "÷",
-      power: "^",
-      percentage: "% of",
-    }
-    return symbols[operation as keyof typeof symbols] || operation
   }
 
   private isIdentityQuestion(message: string): boolean {
@@ -396,64 +706,6 @@ export class CognitiveAISystem {
       content: response,
       confidence: 0.95,
       reasoning: ["Retrieved and formatted all recently learned knowledge across categories"],
-    }
-  }
-
-  private isDefinitionRequest(message: string): boolean {
-    const patterns = [
-      /what\s+(?:is|does|means?)\s+(?!you|your)(.+)/i,
-      /define\s+(?!you|your)(.+)/i,
-      /meaning\s+of\s+(?!you|your)(.+)/i,
-      /explain\s+(?!you|your)(.+)/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleDefinitionRequest(message: string): Promise<AIResponse> {
-    const wordMatch = message.match(/(?:what\s+(?:is|does|means?)|define|meaning\s+of|explain)\s+(.+)/i)
-    if (!wordMatch) {
-      return {
-        content:
-          "I couldn't identify what you want me to define. Could you ask like 'What is [word]?' or 'Define [word]'?",
-        confidence: 0.3,
-        reasoning: ["Could not extract word to define from message"],
-      }
-    }
-
-    const word = wordMatch[1].trim().replace(/[?!.]/g, "")
-
-    // First check if we already learned this word
-    const learnedWord = this.enhancedKnowledge.getLearnedVocabulary().get(word.toLowerCase())
-    if (learnedWord) {
-      return {
-        content: this.formatWordDefinition(learnedWord, true),
-        confidence: 0.95,
-        reasoning: ["Retrieved definition from learned vocabulary"],
-      }
-    }
-
-    // Look it up online with timeout
-    try {
-      const wordData = await Promise.race([
-        this.enhancedKnowledge.lookupWord(word),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Lookup timeout")), 3000)),
-      ])
-
-      if (wordData) {
-        return {
-          content: this.formatWordDefinition(wordData, false),
-          confidence: 0.9,
-          reasoning: ["Successfully looked up word definition online", "Stored in learned vocabulary for future use"],
-        }
-      }
-    } catch (error) {
-      console.warn("Word lookup timed out or failed:", error)
-    }
-
-    return {
-      content: `I couldn't find a definition for "${word}" right now. This might be due to network issues. Try again later or ask about something else!`,
-      confidence: 0.4,
-      reasoning: ["Online dictionary lookup failed or timed out"],
     }
   }
 
