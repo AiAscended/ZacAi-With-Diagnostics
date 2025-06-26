@@ -1,6 +1,7 @@
 import { BrowserStorageManager } from "./browser-storage-manager"
 import { EnhancedKnowledgeSystem } from "./enhanced-knowledge-system"
 import { EnhancedMathProcessor } from "./enhanced-math-processor"
+import { TemporalKnowledgeSystem } from "./temporal-knowledge-system"
 
 // FIXED COGNITIVE AI SYSTEM - Enhanced with Online Sources and Learned Knowledge
 export class CognitiveAISystem {
@@ -24,6 +25,8 @@ export class CognitiveAISystem {
   private learnedScience: Map<string, any> = new Map()
   private learnedCoding: Map<string, any> = new Map()
 
+  private temporalSystem = new TemporalKnowledgeSystem()
+
   constructor() {
     this.initializeBasicVocabulary()
     this.initializeSampleFacts()
@@ -45,22 +48,42 @@ export class CognitiveAISystem {
     // Extract and store personal information FIRST
     this.extractAndStorePersonalInfo(userMessage)
 
-    // Enhanced processing with online sources and learned knowledge
     let response: AIResponse
 
-    // Check if it's a math problem
-    const mathAnalysis = this.enhancedMath.analyzeMathExpression(userMessage)
-    if (mathAnalysis.isMatch) {
+    // NEW: Check if it's a date/time query FIRST
+    if (this.enhancedKnowledge.isDateTimeQuery(userMessage)) {
       response = {
-        content: this.generateMathResponse(mathAnalysis),
-        confidence: mathAnalysis.confidence,
-        reasoning: mathAnalysis.reasoning,
-        mathAnalysis: mathAnalysis,
+        content: this.enhancedKnowledge.handleDateTimeQuery(userMessage),
+        confidence: 0.95,
+        reasoning: ["Processed date/time query using temporal knowledge system"],
       }
     }
-    // Check if it's asking about recently learned words
-    else if (this.isAskingAboutLearnedWords(userMessage)) {
-      response = await this.handleLearnedWordsQuery(userMessage)
+    // Check if it's a math problem
+    else if (this.enhancedMath.analyzeMathExpression(userMessage).isMatch) {
+      const mathAnalysis = this.enhancedMath.analyzeMathExpression(userMessage)
+
+      // Try enhanced math processing with online APIs
+      try {
+        const enhancedMathResult = await this.enhancedKnowledge.processMathProblem(userMessage)
+        response = {
+          content: this.generateEnhancedMathResponse(mathAnalysis, enhancedMathResult),
+          confidence: enhancedMathResult.confidence || mathAnalysis.confidence,
+          reasoning: [...(mathAnalysis.reasoning || []), "Enhanced with online math APIs"],
+          mathAnalysis: { ...mathAnalysis, enhancedResult: enhancedMathResult },
+        }
+      } catch (error) {
+        // Fallback to local math processing
+        response = {
+          content: this.generateMathResponse(mathAnalysis),
+          confidence: mathAnalysis.confidence,
+          reasoning: mathAnalysis.reasoning,
+          mathAnalysis: mathAnalysis,
+        }
+      }
+    }
+    // Check if it's asking about recently learned content
+    else if (this.isAskingAboutLearnedContent(userMessage)) {
+      response = await this.handleLearnedContentQuery(userMessage)
     }
     // Check if it's a word definition request
     else if (this.isDefinitionRequest(userMessage)) {
@@ -69,6 +92,14 @@ export class CognitiveAISystem {
     // Check if it's a science/general knowledge request
     else if (this.isKnowledgeRequest(userMessage)) {
       response = await this.handleKnowledgeRequest(userMessage)
+    }
+    // NEW: Check if it's a coding question
+    else if (this.isCodingRequest(userMessage)) {
+      response = await this.handleCodingRequest(userMessage)
+    }
+    // Identity questions with enhanced system info
+    else if (this.isIdentityQuestion(userMessage)) {
+      response = await this.handleIdentityQuestion(userMessage)
     }
     // Default conversational response
     else {
@@ -83,26 +114,42 @@ export class CognitiveAISystem {
     return response
   }
 
-  private generateMathResponse(analysis: any): string {
-    if (analysis.result !== undefined) {
-      let response = `🧮 **Mathematical Calculation**\n\n`
-      response += `**Problem:** ${analysis.numbers.join(` ${this.getOperationSymbol(analysis.operation)} `)} = **${analysis.result}**\n\n`
+  private generateEnhancedMathResponse(localAnalysis: any, enhancedResult: any): string {
+    let response = `🧮 **Enhanced Mathematical Calculation**\n\n`
 
-      if (analysis.vortexData) {
-        response += `**🌀 Vortex Math Analysis:**\n`
-        response += `• Digital Root: ${analysis.vortexData.digitalRoot}\n`
-        response += `• Pattern: ${analysis.vortexData.isTeslaNumber ? "Tesla Number (3-6-9)" : analysis.vortexData.isVortexNumber ? "Vortex Cycle" : "Standard"}\n\n`
+    if (enhancedResult.result !== undefined) {
+      response += `**Problem:** ${
+        localAnalysis.numbers?.join(` ${this.getOperationSymbol(localAnalysis.operation)} `) ||
+        "Mathematical expression"
+      } = **${enhancedResult.result}**\n\n`
+
+      if (enhancedResult.method) {
+        response += `**Method Used:** ${enhancedResult.method} (${enhancedResult.source})\n\n`
       }
 
-      response += `**🧠 My Reasoning Process:**\n`
-      analysis.reasoning.forEach((step: string, index: number) => {
-        response += `${index + 1}. ${step}\n`
-      })
+      if (localAnalysis.vortexData) {
+        response += `**🌀 Vortex Math Analysis:**\n`
+        response += `• Digital Root: ${localAnalysis.vortexData.digitalRoot}\n`
+        response += `• Pattern: ${
+          localAnalysis.vortexData.isTeslaNumber
+            ? "Tesla Number (3-6-9)"
+            : localAnalysis.vortexData.isVortexNumber
+              ? "Vortex Cycle"
+              : "Standard"
+        }\n\n`
+      }
 
-      return response
-    } else {
-      return `I tried to solve that math problem but encountered an issue. Could you rephrase it? I can handle addition (+), subtraction (-), multiplication (×), division (÷), and even Tesla/Vortex math patterns!`
+      response += `**🧠 My Enhanced Reasoning Process:**\n`
+      if (localAnalysis.reasoning) {
+        localAnalysis.reasoning.forEach((step: string, index: number) => {
+          response += `${index + 1}. ${step}\n`
+        })
+      }
+      response += `• Used online mathematical APIs for verification\n`
+      response += `• Stored this mathematical pattern for future use\n`
     }
+
+    return response
   }
 
   private getOperationSymbol(operation: string): string {
@@ -117,54 +164,90 @@ export class CognitiveAISystem {
     return symbols[operation as keyof typeof symbols] || operation
   }
 
-  private isAskingAboutLearnedWords(message: string): boolean {
+  private isAskingAboutLearnedContent(message: string): boolean {
     const patterns = [
       /what.*(?:did you|have you).*learn/i,
-      /do you remember.*(?:word|learn)/i,
-      /what.*new.*word/i,
+      /do you remember.*(?:word|concept|learn)/i,
+      /what.*new.*(?:word|concept|knowledge)/i,
       /recently.*learn/i,
+      /show.*(?:learned|knowledge)/i,
+      /what.*(?:know|remember).*about/i,
     ]
     return patterns.some((pattern) => pattern.test(message))
   }
 
-  private async handleLearnedWordsQuery(message: string): Promise<AIResponse> {
-    const learnedVocab = this.enhancedKnowledge.getLearnedVocabulary()
-    const learnedMath = this.enhancedKnowledge.getLearnedMathematics()
+  private async handleLearnedContentQuery(message: string): Promise<AIResponse> {
+    const stats = this.enhancedKnowledge.getKnowledgeStats()
 
-    if (learnedVocab.size === 0 && learnedMath.size === 0) {
+    if (stats.totalLearned === 0) {
       return {
         content:
-          "I haven't learned any new words or math concepts in our recent conversations yet. Try asking me to define a word or solve a math problem, and I'll learn from it!",
+          "I haven't learned any new concepts in our recent conversations yet. Try asking me to define a word, solve a math problem, explain a science concept, or help with coding, and I'll learn from it!",
         confidence: 0.9,
-        reasoning: ["Checked learned knowledge stores, found no recent learning"],
+        reasoning: ["Checked all learned knowledge stores, found no recent learning"],
       }
     }
 
-    let response = "📚 **Here's what I've recently learned:**\n\n"
+    let response = `📚 **Here's what I've recently learned:**\n\n`
 
-    if (learnedVocab.size > 0) {
-      response += "**New Vocabulary:**\n"
-      Array.from(learnedVocab.entries())
-        .slice(-5)
+    const vocab = this.enhancedKnowledge.getLearnedVocabulary()
+    const math = this.enhancedKnowledge.getLearnedMathematics()
+    const science = this.enhancedKnowledge.getLearnedScience()
+    const coding = this.enhancedKnowledge.getLearnedCoding()
+
+    if (vocab.size > 0) {
+      response += `**📖 New Vocabulary (${vocab.size} words):**\n`
+      Array.from(vocab.entries())
+        .slice(-3)
         .forEach(([word, data]) => {
-          response += `• **${word}**: ${data.meanings?.[0]?.definitions?.[0]?.definition || "Definition learned"}\n`
+          response += `• **${word}**: ${
+            data.meanings?.[0]?.definitions?.[0]?.definition || data.extract || "Definition learned"
+          }\n`
         })
       response += "\n"
     }
 
-    if (learnedMath.size > 0) {
-      response += "**New Math Concepts:**\n"
-      Array.from(learnedMath.entries())
+    if (math.size > 0) {
+      response += `**🧮 New Math Concepts (${math.size} patterns):**\n`
+      Array.from(math.entries())
         .slice(-3)
         .forEach(([concept, data]) => {
-          response += `• **${concept}**: ${data.method || "Mathematical pattern"}\n`
+          response += `• **${concept}**: ${data.method || data.type || "Mathematical pattern"}\n`
         })
+      response += "\n"
     }
+
+    if (science.size > 0) {
+      response += `**🔬 New Science Knowledge (${science.size} concepts):**\n`
+      Array.from(science.entries())
+        .slice(-3)
+        .forEach(([concept, data]) => {
+          response += `• **${data.title || concept}**: ${(data.extract || "").substring(0, 100)}...\n`
+        })
+      response += "\n"
+    }
+
+    if (coding.size > 0) {
+      response += `**💻 New Coding Knowledge (${coding.size} concepts):**\n`
+      Array.from(coding.entries())
+        .slice(-3)
+        .forEach(([concept, data]) => {
+          response += `• **${data.concept || concept}** (${data.language}): ${
+            data.description || "Coding concept learned"
+          }\n`
+        })
+      response += "\n"
+    }
+
+    response += `**📊 Total Learning Stats:**\n`
+    response += `• Total items learned: ${stats.totalLearned}\n`
+    response += `• API sources available: ${stats.apiStatus.totalAPIs}\n`
+    response += `• Last updated: ${this.temporalSystem.getRelativeTime(stats.lastUpdate)}\n`
 
     return {
       content: response,
       confidence: 0.95,
-      reasoning: ["Retrieved and formatted recently learned knowledge"],
+      reasoning: ["Retrieved and formatted all recently learned knowledge across categories"],
     }
   }
 
@@ -284,6 +367,98 @@ export class CognitiveAISystem {
     }
   }
 
+  private isCodingRequest(message: string): boolean {
+    const patterns = [
+      /(?:how.*(?:code|program|develop))/i,
+      /(?:javascript|typescript|react|nextjs|css|html)/i,
+      /(?:function|component|api|hook)/i,
+      /(?:explain.*(?:code|programming))/i,
+      /(?:help.*(?:coding|programming))/i,
+    ]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private async handleCodingRequest(message: string): Promise<AIResponse> {
+    // Extract coding concept and language
+    const conceptMatch = message.match(/(?:explain|help.*with|how.*(?:code|create|build))\s+(.+)/i)
+    const concept = conceptMatch ? conceptMatch[1].trim().replace(/[?!.]/g, "") : message
+
+    // Detect language
+    let language = "javascript" // default
+    if (message.toLowerCase().includes("react")) language = "react"
+    else if (message.toLowerCase().includes("nextjs") || message.toLowerCase().includes("next.js")) language = "nextjs"
+    else if (message.toLowerCase().includes("typescript")) language = "typescript"
+    else if (message.toLowerCase().includes("css")) language = "css"
+    else if (message.toLowerCase().includes("html")) language = "html"
+
+    try {
+      const codingData = await this.enhancedKnowledge.lookupCodingConcept(concept, language)
+
+      if (codingData) {
+        let response = `💻 **${language.toUpperCase()} - ${codingData.concept || concept}**\n\n`
+        response += `${codingData.description || "Coding information found"}\n\n`
+
+        if (codingData.url) {
+          response += `🔗 **Resource**: [Learn more](${codingData.url})\n\n`
+        }
+
+        response += `📚 *Source: ${codingData.source}*\n`
+        response += `✨ I've learned about this coding concept and will remember it!`
+
+        return {
+          content: response,
+          confidence: 0.85,
+          reasoning: ["Successfully looked up coding concept", "Stored in learned coding knowledge base"],
+        }
+      }
+    } catch (error) {
+      console.warn("Coding lookup failed:", error)
+    }
+
+    return {
+      content: `I'd love to help you with ${language} and "${concept}" but I couldn't find detailed information right now. Try asking about specific React components, JavaScript functions, or Next.js features!`,
+      confidence: 0.5,
+      reasoning: ["Could not find information about requested coding concept"],
+    }
+  }
+
+  private isIdentityQuestion(message: string): boolean {
+    const patterns = [
+      /(?:what.*your.*name|who.*you|what.*you)/i,
+      /(?:tell.*about.*yourself|introduce.*yourself)/i,
+      /(?:what.*can.*you.*do|your.*capabilities)/i,
+    ]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private async handleIdentityQuestion(message: string): Promise<AIResponse> {
+    const currentTime = this.temporalSystem.getCurrentDateTime()
+    const stats = this.getStats()
+
+    let response = ""
+
+    if (message.toLowerCase().includes("name") || message.toLowerCase().includes("who")) {
+      const name = this.systemIdentity?.name || "ZacAI"
+      const version = this.systemIdentity?.version || "2.0.0"
+      response = `👋 **Hello! I'm ${name} v${version}**\n\n`
+      response += `${
+        this.systemIdentity?.purpose || "I'm an AI assistant designed to help you learn and solve problems."
+      }\n\n`
+      response += `**🕐 Current Time**: ${currentTime.formatted.full}\n`
+      response += `**📚 Knowledge Stats**: ${stats.totalLearned || 0} concepts learned\n`
+      response += `**🧮 Math Functions**: ${stats.mathFunctions} available\n\n`
+      response += `I can help with math (including Tesla/Vortex patterns), definitions, science concepts, coding, and I remember our conversations!`
+    } else {
+      response = this.generateConversationalResponse(message)
+    }
+
+    return {
+      content: response,
+      confidence: 0.95,
+      reasoning: ["Generated identity response with current system information"],
+    }
+  }
+
   private generateConversationalResponse(userMessage: string): string {
     const lowerMessage = userMessage.toLowerCase()
 
@@ -385,6 +560,7 @@ export class CognitiveAISystem {
 
     const totalUserInfo = this.personalInfo.size
     const knowledgeStats = this.enhancedKnowledge.getKnowledgeStats()
+    const currentTime = this.temporalSystem.getCurrentDateTime()
 
     return {
       totalMessages: this.conversationHistory.length,
@@ -392,7 +568,7 @@ export class CognitiveAISystem {
       memoryEntries: totalUserInfo,
       avgConfidence: Math.round(avgConfidence * 100) / 100,
       systemStatus: this.systemStatus,
-      mathFunctions: 144 + knowledgeStats.learnedMathematics, // Base + learned
+      mathFunctions: 144 + knowledgeStats.learnedMathematics,
       seedProgress: 0,
       responseTime: 0,
       // Enhanced data access
@@ -401,11 +577,18 @@ export class CognitiveAISystem {
       personalInfoData: this.personalInfo,
       factsData: this.facts,
       mathFunctionsData: new Map(),
-      // New learned knowledge stats
+      // New comprehensive learning stats
+      totalLearned: knowledgeStats.totalLearned,
       learnedVocabulary: knowledgeStats.learnedVocabulary,
       learnedMathematics: knowledgeStats.learnedMathematics,
       learnedScience: knowledgeStats.learnedScience,
-      onlineSourcesAvailable: knowledgeStats.onlineSourcesAvailable,
+      learnedCoding: knowledgeStats.learnedCoding,
+      apiStatus: knowledgeStats.apiStatus,
+      currentDateTime: currentTime,
+      batchQueueSize: knowledgeStats.batchQueueSize,
+      // System identity
+      systemName: this.systemIdentity?.name || "ZacAI",
+      systemVersion: this.systemIdentity?.version || "2.0.0",
     }
   }
 
