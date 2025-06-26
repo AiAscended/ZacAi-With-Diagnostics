@@ -1,3 +1,5 @@
+"use client"
+
 import { BrowserStorageManager } from "./browser-storage-manager"
 import { EnhancedKnowledgeSystem } from "./enhanced-knowledge-system"
 import { EnhancedMathProcessor } from "./enhanced-math-processor"
@@ -44,19 +46,17 @@ export class CognitiveAISystem {
     }
 
     console.log("🚀 Processing message with enhanced cognitive system:", userMessage)
-
-    // Store the message for learning
     this.extractAndStorePersonalInfo(userMessage)
 
     let response: AIResponse
 
     try {
-      // FIXED: Check message types in the correct priority order
+      // IMPROVED: More specific pattern matching with better priority
 
-      // 1. FIRST: Check if it's an identity question (highest priority)
-      if (this.isIdentityQuestion(userMessage)) {
-        console.log("🎯 Detected identity question")
-        response = await this.handleIdentityQuestion(userMessage)
+      // 1. Check for Tesla/Vortex math queries FIRST (before other math)
+      if (this.isTeslaMathQuery(userMessage)) {
+        console.log("🎯 Detected Tesla/Vortex math query")
+        response = await this.handleTeslaMathQuery(userMessage)
       }
       // 2. Check if it's a date/time query
       else if (this.enhancedKnowledge.isDateTimeQuery(userMessage)) {
@@ -67,7 +67,7 @@ export class CognitiveAISystem {
           reasoning: ["Processed date/time query using temporal knowledge system"],
         }
       }
-      // 3. Check if it's a math problem
+      // 3. Check if it's a math problem (after Tesla math check)
       else if (this.enhancedMath.analyzeMathExpression(userMessage).isMatch) {
         console.log("🎯 Detected math problem")
         const mathAnalysis = this.enhancedMath.analyzeMathExpression(userMessage)
@@ -94,27 +94,32 @@ export class CognitiveAISystem {
           }
         }
       }
-      // 4. Check for learned content queries
-      else if (this.isAskingAboutLearnedContent(userMessage)) {
-        console.log("🎯 Detected learned content query")
-        response = await this.handleLearnedContentQuery(userMessage)
-      }
-      // 5. Check for definition requests (AFTER identity check)
-      else if (this.isDefinitionRequest(userMessage)) {
-        console.log("🎯 Detected definition request")
-        response = await this.handleDefinitionRequest(userMessage)
-      }
-      // 6. Check for knowledge requests
-      else if (this.isKnowledgeRequest(userMessage)) {
-        console.log("🎯 Detected knowledge request")
-        response = await this.handleKnowledgeRequest(userMessage)
-      }
-      // 7. Check for coding requests
+      // 4. Check for coding requests (BEFORE knowledge requests)
       else if (this.isCodingRequest(userMessage)) {
         console.log("🎯 Detected coding request")
         response = await this.handleCodingRequest(userMessage)
       }
-      // 8. Default conversational response
+      // 5. Check for learned content queries
+      else if (this.isAskingAboutLearnedContent(userMessage)) {
+        console.log("🎯 Detected learned content query")
+        response = await this.handleLearnedContentQuery(userMessage)
+      }
+      // 6. Check for definition requests (more specific patterns)
+      else if (this.isDefinitionRequest(userMessage)) {
+        console.log("🎯 Detected definition request")
+        response = await this.handleDefinitionRequest(userMessage)
+      }
+      // 7. Check for knowledge requests (AFTER coding check)
+      else if (this.isKnowledgeRequest(userMessage)) {
+        console.log("🎯 Detected knowledge request")
+        response = await this.handleKnowledgeRequest(userMessage)
+      }
+      // 8. Check if it's an identity question (more specific)
+      else if (this.isIdentityQuestion(userMessage)) {
+        console.log("🎯 Detected identity question")
+        response = await this.handleIdentityQuestion(userMessage)
+      }
+      // 9. Default conversational response
       else {
         console.log("🎯 Using conversational response")
         response = {
@@ -124,9 +129,7 @@ export class CognitiveAISystem {
         }
       }
 
-      // Save the conversation
       await this.saveConversation(userMessage, response.content)
-
       return response
     } catch (error) {
       console.error("Error in message processing:", error)
@@ -223,29 +226,25 @@ export class CognitiveAISystem {
 
   private isIdentityQuestion(message: string): boolean {
     const patterns = [
-      /(?:what.*your.*name|who.*you|what.*you)/i,
-      /(?:tell.*about.*yourself|introduce.*yourself)/i,
-      /(?:what.*can.*you.*do|your.*capabilities)/i,
-      /(?:hello.*tell.*about|hi.*tell.*about)/i,
-      /(?:what.*are.*you|who.*are.*you)/i,
+      /^(?:what.*your.*name|who.*you)$/i,
+      /^(?:tell.*about.*yourself|introduce.*yourself)$/i,
+      /^(?:what.*can.*you.*do|your.*capabilities)$/i,
+      /^(?:hello.*tell.*about.*you|hi.*tell.*about.*you)$/i,
+      /^(?:what.*are.*you|who.*are.*you)$/i,
     ]
 
-    // IMPORTANT: Don't treat definition requests as identity questions
-    const definitionPatterns = [
-      /(?:what\s+(?:is|does|means?)\s+(?!you|your))/i,
-      /(?:define\s+(?!you|your))/i,
-      /(?:meaning\s+of\s+(?!you|your))/i,
+    // Don't treat other requests as identity questions
+    const excludePatterns = [
+      /(?:tell.*about.*(?:science|coding|math|tesla))/i,
+      /(?:what.*(?:is|does|means?).*(?!you|your))/i,
+      /(?:show.*me)/i,
+      /(?:example)/i,
     ]
 
-    const isDefinition = definitionPatterns.some((pattern) => pattern.test(message))
-    if (isDefinition) {
-      console.log("🔍 Detected definition pattern, not identity")
-      return false
-    }
+    const isExcluded = excludePatterns.some((pattern) => pattern.test(message))
+    if (isExcluded) return false
 
-    const isIdentity = patterns.some((pattern) => pattern.test(message))
-    console.log("🔍 Identity check result:", isIdentity, "for message:", message)
-    return isIdentity
+    return patterns.some((pattern) => pattern.test(message))
   }
 
   private async handleIdentityQuestion(message: string): Promise<AIResponse> {
@@ -490,7 +489,13 @@ export class CognitiveAISystem {
   }
 
   private isKnowledgeRequest(message: string): boolean {
-    const patterns = [/tell me about/i, /what.*know.*about/i, /explain.*science/i, /how.*work/i]
+    const patterns = [
+      /tell me about (?!you|your|yourself)/i,
+      /what.*know.*about (?!you|your)/i,
+      /explain.*(?:science|physics|chemistry|biology)/i,
+      /how.*(?:work|function).*(?!code|programming)/i,
+      /what.*(?:science|scientific)/i,
+    ]
     return patterns.some((pattern) => pattern.test(message))
   }
 
@@ -523,27 +528,43 @@ export class CognitiveAISystem {
 
   private isCodingRequest(message: string): boolean {
     const patterns = [
-      /(?:how.*(?:code|program|develop))/i,
-      /(?:javascript|typescript|react|nextjs|css|html)/i,
-      /(?:function|component|api|hook)/i,
+      /(?:show.*(?:code|example))/i,
+      /(?:what.*(?:code|programming).*look.*like)/i,
+      /(?:how.*(?:code|program|develop|build))/i,
+      /(?:javascript|typescript|react|nextjs|next\.js|css|html)/i,
+      /(?:function|component|api|hook|jsx|tsx)/i,
       /(?:explain.*(?:code|programming))/i,
       /(?:help.*(?:coding|programming))/i,
+      /(?:tell.*about.*(?:coding|programming|react|nextjs))/i,
+      /(?:example.*(?:react|nextjs|javascript))/i,
     ]
     return patterns.some((pattern) => pattern.test(message))
   }
 
   private async handleCodingRequest(message: string): Promise<AIResponse> {
-    // Extract coding concept and language
-    const conceptMatch = message.match(/(?:explain|help.*with|how.*(?:code|create|build))\s+(.+)/i)
+    const conceptMatch = message.match(
+      /(?:explain|help.*with|how.*(?:code|create|build)|show.*(?:code|example)|tell.*about)\s*(.+)/i,
+    )
     const concept = conceptMatch ? conceptMatch[1].trim().replace(/[?!.]/g, "") : message
 
-    // Detect language
-    let language = "javascript" // default
-    if (message.toLowerCase().includes("react")) language = "react"
-    else if (message.toLowerCase().includes("nextjs") || message.toLowerCase().includes("next.js")) language = "nextjs"
-    else if (message.toLowerCase().includes("typescript")) language = "typescript"
-    else if (message.toLowerCase().includes("css")) language = "css"
-    else if (message.toLowerCase().includes("html")) language = "html"
+    // Detect language and specific concepts
+    let language = "javascript"
+    let specificConcept = ""
+
+    if (message.toLowerCase().includes("react")) {
+      language = "react"
+      specificConcept = "react component"
+    } else if (message.toLowerCase().includes("nextjs") || message.toLowerCase().includes("next.js")) {
+      language = "nextjs"
+      specificConcept = "next.js application"
+    } else if (message.toLowerCase().includes("typescript")) {
+      language = "typescript"
+    }
+
+    // Check if asking for code examples
+    if (message.toLowerCase().includes("show") || message.toLowerCase().includes("example")) {
+      return this.generateCodeExample(language, concept)
+    }
 
     try {
       const codingData = await this.enhancedKnowledge.lookupCodingConcept(concept, language)
@@ -551,6 +572,34 @@ export class CognitiveAISystem {
       if (codingData) {
         let response = `💻 **${language.toUpperCase()} - ${codingData.concept || concept}**\n\n`
         response += `${codingData.description || "Coding information found"}\n\n`
+
+        // Add specific examples based on language
+        if (language === "react") {
+          response += `**🔧 React Example:**\n`
+          response += `\`\`\`jsx\n`
+          response += `function MyComponent({ title, children }) {\n`
+          response += `  return (\n`
+          response += `    <div className="container">\n`
+          response += `      <h1>{title}</h1>\n`
+          response += `      {children}\n`
+          response += `    </div>\n`
+          response += `  )\n`
+          response += `}\n`
+          response += `\`\`\`\n\n`
+        } else if (language === "nextjs") {
+          response += `**🚀 Next.js Example:**\n`
+          response += `\`\`\`tsx\n`
+          response += `// app/page.tsx\n`
+          response += `export default function HomePage() {\n`
+          response += `  return (\n`
+          response += `    <main>\n`
+          response += `      <h1>Welcome to Next.js!</h1>\n`
+          response += `      <p>This is a server component.</p>\n`
+          response += `    </main>\n`
+          response += `  )\n`
+          response += `}\n`
+          response += `\`\`\`\n\n`
+        }
 
         if (codingData.url) {
           response += `🔗 **Resource**: [Learn more](${codingData.url})\n\n`
@@ -561,8 +610,11 @@ export class CognitiveAISystem {
 
         return {
           content: response,
-          confidence: 0.85,
-          reasoning: ["Successfully looked up coding concept", "Stored in learned coding knowledge base"],
+          confidence: 0.9,
+          reasoning: [
+            "Successfully provided coding information with examples",
+            "Stored in learned coding knowledge base",
+          ],
         }
       }
     } catch (error) {
@@ -1186,6 +1238,144 @@ export class CognitiveAISystem {
       vocabularySize: this.vocabulary.size,
       personalInfoCount: this.personalInfo.size,
       factsCount: this.facts.size,
+    }
+  }
+
+  private isTeslaMathQuery(message: string): boolean {
+    const patterns = [
+      /tesla.*math/i,
+      /vortex.*math/i,
+      /tesla.*pattern/i,
+      /vortex.*pattern/i,
+      /digital.*root/i,
+      /3.*6.*9/i,
+      /tesla.*number/i,
+      /vortex.*number/i,
+      /what.*tesla.*math/i,
+      /explain.*tesla/i,
+      /tell.*about.*tesla.*math/i,
+    ]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private async handleTeslaMathQuery(message: string): Promise<AIResponse> {
+    let response = `🌀 **Tesla/Vortex Mathematics**\n\n`
+
+    response += `Tesla's 3-6-9 pattern reveals the fundamental structure of the universe through digital root analysis.\n\n`
+
+    response += `**🔢 The Tesla Pattern:**\n`
+    response += `• **3, 6, 9**: The sacred numbers that control the universe\n`
+    response += `• **1, 2, 4, 8, 7, 5**: The vortex cycle that repeats infinitely\n`
+    response += `• **Digital Root**: Reducing numbers to single digits reveals hidden patterns\n\n`
+
+    response += `**🌀 How Vortex Math Works:**\n`
+    response += `1. Take any number and add its digits together\n`
+    response += `2. Keep reducing until you get a single digit (1-9)\n`
+    response += `3. This reveals the number's position in the universal pattern\n`
+    response += `4. Numbers 3, 6, 9 are special - they form the "Tesla Triangle"\n\n`
+
+    response += `**🧮 Example Analysis:**\n`
+    response += `• 12 → 1+2 = 3 (Tesla Number - Creation)\n`
+    response += `• 15 → 1+5 = 6 (Tesla Number - Harmony)\n`
+    response += `• 18 → 1+8 = 9 (Tesla Number - Completion)\n`
+    response += `• 14 → 1+4 = 5 (Vortex Cycle - Transformation)\n\n`
+
+    response += `**💡 Tesla's Quote:** "If you only knew the magnificence of the 3, 6 and 9, then you would have the key to the universe."\n\n`
+
+    response += `Try asking me to calculate the Tesla pattern for any number!`
+
+    return {
+      content: response,
+      confidence: 0.95,
+      reasoning: ["Provided comprehensive Tesla/Vortex mathematics explanation", "Used built-in Tesla math knowledge"],
+    }
+  }
+
+  private generateCodeExample(language: string, concept: string): AIResponse {
+    let response = `💻 **${language.toUpperCase()} Code Example**\n\n`
+
+    if (language === "react" || concept.includes("react")) {
+      response += `**🔧 React Component Example:**\n`
+      response += `\`\`\`jsx\n`
+      response += `import { useState } from 'react'\n\n`
+      response += `function Counter() {\n`
+      response += `  const [count, setCount] = useState(0)\n\n`
+      response += `  return (\n`
+      response += `    <div className="counter">\n`
+      response += `      <h2>Count: {count}</h2>\n`
+      response += `      <button onClick={() => setCount(count + 1)}>\n`
+      response += `        Increment\n`
+      response += `      </button>\n`
+      response += `    </div>\n`
+      response += `  )\n`
+      response += `}\n\n`
+      response += `export default Counter\n`
+      response += `\`\`\`\n\n`
+      response += `**Key Features:**\n`
+      response += `• Uses React hooks (useState)\n`
+      response += `• Interactive button with click handler\n`
+      response += `• State management for counter\n`
+      response += `• JSX syntax for HTML-like structure\n`
+    } else if (language === "nextjs" || concept.includes("next")) {
+      response += `**🚀 Next.js Page Example:**\n`
+      response += `\`\`\`tsx\n`
+      response += `// app/page.tsx (App Router)\n`
+      response += `export default function HomePage() {\n`
+      response += `  return (\n`
+      response += `    <main className="container mx-auto p-4">\n`
+      response += `      <h1 className="text-3xl font-bold">Welcome to Next.js!</h1>\n`
+      response += `      <p className="mt-4">This is a server component.</p>\n`
+      response += `      <div className="mt-8">\n`
+      response += `        <h2 className="text-xl">Features:</h2>\n`
+      response += `        <ul className="list-disc ml-6">\n`
+      response += `          <li>Server-side rendering</li>\n`
+      response += `          <li>File-based routing</li>\n`
+      response += `          <li>Built-in optimization</li>\n`
+      response += `        </ul>\n`
+      response += `      </div>\n`
+      response += `    </main>\n`
+      response += `  )\n`
+      response += `}\n`
+      response += `\`\`\`\n\n`
+      response += `**Next.js Features:**\n`
+      response += `• App Router with file-based routing\n`
+      response += `• Server components by default\n`
+      response += `• Built-in Tailwind CSS support\n`
+      response += `• Automatic code splitting\n`
+    } else {
+      response += `**📝 JavaScript Example:**\n`
+      response += `\`\`\`javascript\n`
+      response += `// Modern JavaScript function\n`
+      response += `const greetUser = (name, age) => {\n`
+      response += `  return \`Hello \${name}, you are \${age} years old!\`\n`
+      response += `}\n\n`
+      response += `// Using the function\n`
+      response += `const message = greetUser("Alice", 25)\n`
+      response += `console.log(message)\n\n`
+      response += `// Async function example\n`
+      response += `const fetchData = async () => {\n`
+      response += `  try {\n`
+      response += `    const response = await fetch('/api/data')\n`
+      response += `    const data = await response.json()\n`
+      response += `    return data\n`
+      response += `  } catch (error) {\n`
+      response += `    console.error('Error:', error)\n`
+      response += `  }\n`
+      response += `}\n`
+      response += `\`\`\`\n\n`
+      response += `**JavaScript Features:**\n`
+      response += `• Arrow functions\n`
+      response += `• Template literals\n`
+      response += `• Async/await for promises\n`
+      response += `• Modern ES6+ syntax\n`
+    }
+
+    response += `\n✨ I've generated this code example and will remember it for future reference!`
+
+    return {
+      content: response,
+      confidence: 0.9,
+      reasoning: ["Generated comprehensive code example", "Provided language-specific features and explanations"],
     }
   }
 }
