@@ -40,78 +40,93 @@ export class CognitiveAISystem {
 
   public async processMessage(userMessage: string): Promise<AIResponse> {
     if (!this.isInitialized) {
+      console.log("🔄 System not initialized, initializing now...")
       await this.initialize()
     }
 
     console.log("🚀 Processing message with enhanced cognitive system:", userMessage)
 
-    // Extract and store personal information FIRST
+    // Store the message for learning
     this.extractAndStorePersonalInfo(userMessage)
 
     let response: AIResponse
 
-    // NEW: Check if it's a date/time query FIRST
-    if (this.enhancedKnowledge.isDateTimeQuery(userMessage)) {
-      response = {
-        content: this.enhancedKnowledge.handleDateTimeQuery(userMessage),
-        confidence: 0.95,
-        reasoning: ["Processed date/time query using temporal knowledge system"],
-      }
-    }
-    // Check if it's a math problem
-    else if (this.enhancedMath.analyzeMathExpression(userMessage).isMatch) {
-      const mathAnalysis = this.enhancedMath.analyzeMathExpression(userMessage)
-
-      // Try enhanced math processing with online APIs
-      try {
-        const enhancedMathResult = await this.enhancedKnowledge.processMathProblem(userMessage)
+    try {
+      // NEW: Check if it's a date/time query FIRST
+      if (this.enhancedKnowledge.isDateTimeQuery(userMessage)) {
         response = {
-          content: this.generateEnhancedMathResponse(mathAnalysis, enhancedMathResult),
-          confidence: enhancedMathResult.confidence || mathAnalysis.confidence,
-          reasoning: [...(mathAnalysis.reasoning || []), "Enhanced with online math APIs"],
-          mathAnalysis: { ...mathAnalysis, enhancedResult: enhancedMathResult },
-        }
-      } catch (error) {
-        // Fallback to local math processing
-        response = {
-          content: this.generateMathResponse(mathAnalysis),
-          confidence: mathAnalysis.confidence,
-          reasoning: mathAnalysis.reasoning,
-          mathAnalysis: mathAnalysis,
+          content: this.enhancedKnowledge.handleDateTimeQuery(userMessage),
+          confidence: 0.95,
+          reasoning: ["Processed date/time query using temporal knowledge system"],
         }
       }
-    }
-    // Check if it's asking about recently learned content
-    else if (this.isAskingAboutLearnedContent(userMessage)) {
-      response = await this.handleLearnedContentQuery(userMessage)
-    }
-    // Check if it's a word definition request
-    else if (this.isDefinitionRequest(userMessage)) {
-      response = await this.handleDefinitionRequest(userMessage)
-    }
-    // Check if it's a science/general knowledge request
-    else if (this.isKnowledgeRequest(userMessage)) {
-      response = await this.handleKnowledgeRequest(userMessage)
-    }
-    // NEW: Check if it's a coding question
-    else if (this.isCodingRequest(userMessage)) {
-      response = await this.handleCodingRequest(userMessage)
-    }
-    // Identity questions with enhanced system info
-    else if (this.isIdentityQuestion(userMessage)) {
-      response = await this.handleIdentityQuestion(userMessage)
-    }
-    // Default conversational response
-    else {
-      response = {
-        content: this.generateConversationalResponse(userMessage),
-        confidence: 0.8,
-        reasoning: ["Generated conversational response based on context and personal information"],
+      // Check if it's a math problem
+      else if (this.enhancedMath.analyzeMathExpression(userMessage).isMatch) {
+        const mathAnalysis = this.enhancedMath.analyzeMathExpression(userMessage)
+
+        try {
+          const enhancedMathResult = await Promise.race([
+            this.enhancedKnowledge.processMathProblem(userMessage),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Math timeout")), 3000)),
+          ])
+
+          response = {
+            content: this.generateEnhancedMathResponse(mathAnalysis, enhancedMathResult),
+            confidence: enhancedMathResult.confidence || mathAnalysis.confidence,
+            reasoning: [...(mathAnalysis.reasoning || []), "Enhanced with online math APIs"],
+            mathAnalysis: { ...mathAnalysis, enhancedResult: enhancedMathResult },
+          }
+        } catch (error) {
+          console.warn("Enhanced math processing failed, using local:", error)
+          response = {
+            content: this.generateMathResponse(mathAnalysis),
+            confidence: mathAnalysis.confidence,
+            reasoning: mathAnalysis.reasoning,
+            mathAnalysis: mathAnalysis,
+          }
+        }
+      }
+      // Check for learned content queries
+      else if (this.isAskingAboutLearnedContent(userMessage)) {
+        response = await this.handleLearnedContentQuery(userMessage)
+      }
+      // Check for definition requests
+      else if (this.isDefinitionRequest(userMessage)) {
+        response = await this.handleDefinitionRequest(userMessage)
+      }
+      // Check for knowledge requests
+      else if (this.isKnowledgeRequest(userMessage)) {
+        response = await this.handleKnowledgeRequest(userMessage)
+      }
+      // Check for coding requests
+      else if (this.isCodingRequest(userMessage)) {
+        response = await this.handleCodingRequest(userMessage)
+      }
+      // Identity questions
+      else if (this.isIdentityQuestion(userMessage)) {
+        response = await this.handleIdentityQuestion(userMessage)
+      }
+      // Default conversational response
+      else {
+        response = {
+          content: this.generateConversationalResponse(userMessage),
+          confidence: 0.8,
+          reasoning: ["Generated conversational response based on context and personal information"],
+        }
+      }
+
+      // Save the conversation
+      await this.saveConversation(userMessage, response.content)
+
+      return response
+    } catch (error) {
+      console.error("Error in message processing:", error)
+      return {
+        content: "I encountered an error processing your message. Please try again.",
+        confidence: 0.3,
+        reasoning: ["Error occurred during message processing"],
       }
     }
-
-    await this.saveConversation(userMessage, response.content)
-    return response
   }
 
   private generateEnhancedMathResponse(localAnalysis: any, enhancedResult: any): string {
@@ -147,6 +162,38 @@ export class CognitiveAISystem {
       }
       response += `• Used online mathematical APIs for verification\n`
       response += `• Stored this mathematical pattern for future use\n`
+    }
+
+    return response
+  }
+
+  private generateMathResponse(analysis: any): string {
+    let response = `🧮 **Mathematical Calculation**\n\n`
+
+    if (analysis.result !== undefined) {
+      response += `**Problem:** ${
+        analysis.numbers?.join(` ${this.getOperationSymbol(analysis.operation)} `) || "Mathematical expression"
+      } = **${analysis.result}**\n\n`
+
+      if (analysis.vortexData) {
+        response += `**🌀 Vortex Math Analysis:**\n`
+        response += `• Digital Root: ${analysis.vortexData.digitalRoot}\n`
+        response += `• Pattern: ${
+          analysis.vortexData.isTeslaNumber
+            ? "Tesla Number (3-6-9)"
+            : analysis.vortexData.isVortexNumber
+              ? "Vortex Cycle"
+              : "Standard"
+        }\n`
+        response += `• Analysis: ${analysis.vortexData.analysis}\n\n`
+      }
+
+      response += `**🧠 My Reasoning Process:**\n`
+      if (analysis.reasoning) {
+        analysis.reasoning.forEach((step: string, index: number) => {
+          response += `${index + 1}. ${step}\n`
+        })
+      }
     }
 
     return response
@@ -530,56 +577,36 @@ export class CognitiveAISystem {
     try {
       console.log("🚀 Initializing Enhanced Cognitive AI System...")
 
-      // Load system identity FIRST and wait for it
-      console.log("📋 Loading system identity...")
-      await this.loadSystemIdentity()
-
-      // Verify system identity loaded
-      if (this.systemIdentity?.name) {
-        console.log(`✅ System identity loaded: ${this.systemIdentity.name} v${this.systemIdentity.version}`)
-      } else {
-        console.warn("⚠️ System identity not loaded, using defaults")
+      // Load system identity with timeout
+      try {
+        await Promise.race([
+          this.loadSystemIdentity(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Identity timeout")), 3000)),
+        ])
+      } catch (error) {
+        console.warn("System identity loading timed out, using defaults:", error)
         this.setDefaultSystemIdentity()
       }
 
-      // Load learned knowledge with timeout
-      try {
-        await Promise.race([
-          this.loadLearnedKnowledge(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000)),
-        ])
-      } catch (error) {
-        console.warn("Learned knowledge loading timed out (non-critical):", error)
+      // Verify system identity loaded
+      if (this.systemIdentity?.name) {
+        console.log(`✅ System identity: ${this.systemIdentity.name} v${this.systemIdentity.version}`)
       }
 
-      // Load enhanced knowledge system
-      try {
-        await Promise.race([
-          this.enhancedKnowledge.loadLearnedKnowledge(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000)),
-        ])
-      } catch (error) {
-        console.warn("Enhanced knowledge loading timed out (non-critical):", error)
-      }
+      // Load other systems with error handling
+      const loadPromises = [
+        this.loadLearnedKnowledge().catch((e) => console.warn("Learned knowledge load failed:", e)),
+        this.enhancedKnowledge.loadLearnedKnowledge().catch((e) => console.warn("Enhanced knowledge load failed:", e)),
+        this.loadConversationHistory().catch((e) => console.warn("Conversation history load failed:", e)),
+        this.loadMemory().catch((e) => console.warn("Memory load failed:", e)),
+        this.loadVocabulary().catch((e) => console.warn("Vocabulary load failed:", e)),
+      ]
 
-      // Load other data with error handling
-      try {
-        await this.loadConversationHistory()
-      } catch (error) {
-        console.warn("Conversation history loading failed (non-critical):", error)
-      }
-
-      try {
-        await this.loadMemory()
-      } catch (error) {
-        console.warn("Memory loading failed (non-critical):", error)
-      }
-
-      try {
-        await this.loadVocabulary()
-      } catch (error) {
-        console.warn("Vocabulary loading failed (non-critical):", error)
-      }
+      // Load all with timeout
+      await Promise.race([
+        Promise.allSettled(loadPromises),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Load timeout")), 5000)),
+      ])
 
       this.systemStatus = "ready"
       this.isInitialized = true
@@ -954,7 +981,10 @@ export class CognitiveAISystem {
 
   private async loadSystemIdentity(): Promise<void> {
     try {
-      console.log("📋 Attempting to load system identity from seed_system.json...")
+      console.log("📋 Loading system identity from seed_system.json...")
+
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
 
       const response = await fetch("/seed_system.json", {
         method: "GET",
@@ -962,33 +992,40 @@ export class CognitiveAISystem {
           Accept: "application/json",
           "Cache-Control": "no-cache",
         },
+        signal: controller.signal,
       })
+
+      clearTimeout(timeoutId)
 
       if (response.ok) {
         const systemData = await response.json()
 
         if (systemData.identity) {
-          this.systemIdentity = systemData.identity
-          this.systemCapabilities = systemData.core_capabilities || []
-          this.knowledgeSources = systemData.knowledge_system
+          this.systemIdentity = {
+            name: systemData.identity.name || "ZacAI",
+            version: systemData.identity.version || "2.0.0",
+            purpose: systemData.identity.purpose || "To be an intelligent, learning browser-based AI assistant",
+            description: systemData.identity.description || "",
+            capabilities: systemData.identity.capabilities || [],
+          }
+
+          this.systemCapabilities = systemData.core_capabilities || systemData.identity.capabilities || []
+          this.knowledgeSources = systemData.knowledge_system || {}
 
           console.log(`✅ System identity loaded successfully:`)
           console.log(`   Name: ${this.systemIdentity.name}`)
           console.log(`   Version: ${this.systemIdentity.version}`)
           console.log(`   Capabilities: ${this.systemCapabilities.length} items`)
           return
-        } else {
-          console.warn("⚠️ seed_system.json found but missing identity section")
         }
-      } else {
-        console.warn(`⚠️ Failed to fetch seed_system.json: ${response.status} ${response.statusText}`)
       }
+
+      console.warn("⚠️ seed_system.json not found or invalid, using defaults")
     } catch (error) {
-      console.warn("⚠️ Could not load system identity from file:", error)
+      console.warn("⚠️ Could not load system identity:", error)
     }
 
-    // If we get here, loading failed - set defaults
-    console.log("📋 Setting default system identity...")
+    // Set robust defaults
     this.setDefaultSystemIdentity()
   }
 
