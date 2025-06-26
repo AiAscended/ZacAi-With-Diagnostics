@@ -110,15 +110,24 @@ export default function EnhancedAIChat() {
       setError(null)
       console.log("🚀 Initializing Enhanced AI System...")
 
-      // Initialize AI system first with proper identity loading
-      await aiSystem.initialize()
+      // Initialize AI system first with proper error handling
+      try {
+        await aiSystem.initialize()
 
-      // Load system identity and verify it loaded
-      const systemIdentity = aiSystem.getSystemDebugInfo()
-      if (systemIdentity.systemIdentity?.name) {
-        console.log(
-          `✅ System Identity: ${systemIdentity.systemIdentity.name} v${systemIdentity.systemIdentity.version}`,
-        )
+        // Check if the system has the debug info method
+        if (typeof aiSystem.getSystemDebugInfo === "function") {
+          const systemIdentity = aiSystem.getSystemDebugInfo()
+          if (systemIdentity.systemIdentity?.name) {
+            console.log(
+              `✅ System Identity: ${systemIdentity.systemIdentity.name} v${systemIdentity.systemIdentity.version}`,
+            )
+          }
+        } else {
+          console.log("✅ AI System initialized (debug info not available)")
+        }
+      } catch (aiError) {
+        console.warn("AI system initialization had issues:", aiError)
+        // Continue with limited functionality
       }
 
       // Load knowledge manager with timeout protection
@@ -139,9 +148,14 @@ export default function EnhancedAIChat() {
       updateStats()
       loadKnowledgeData()
 
-      // Load conversation history from AI system
-      const history = aiSystem.getConversationHistory()
-      setMessages(history)
+      // Load conversation history from AI system safely
+      try {
+        const history = aiSystem.getConversationHistory()
+        setMessages(history)
+      } catch (historyError) {
+        console.warn("Could not load conversation history:", historyError)
+        setMessages([])
+      }
 
       setIsInitializing(false)
       console.log("✅ Enhanced AI System initialized successfully!")

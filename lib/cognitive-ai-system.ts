@@ -572,10 +572,14 @@ export class CognitiveAISystem {
   }
 
   public async initialize(): Promise<void> {
-    if (this.isInitialized) return
+    if (this.isInitialized) {
+      console.log("✅ System already initialized")
+      return
+    }
 
     try {
       console.log("🚀 Initializing Enhanced Cognitive AI System...")
+      this.systemStatus = "initializing"
 
       // Load system identity with timeout
       try {
@@ -1134,6 +1138,10 @@ export class CognitiveAISystem {
       temporalSystemWorking: !!this.temporalSystem,
       enhancedKnowledgeWorking: !!this.enhancedKnowledge,
       initializationTime: Date.now(),
+      conversationCount: this.conversationHistory.length,
+      vocabularySize: this.vocabulary.size,
+      personalInfoCount: this.personalInfo.size,
+      factsCount: this.facts.size,
     }
   }
 }
