@@ -1,137 +1,142 @@
 {
-  "facts": {
-    "mathematics": {
-      "10x10": {
-        "result": 100,
-        "type": "multiplication",
-        "category": "basic_arithmetic",
-        "explanation": "Ten times ten equals one hundred",
-        "related_facts": ["10^2 = 100", "100 is a perfect square", "100 = 4 * 25"]
-      },
-      "multiplication_tables": {
-        "description": "Systematic arrangement of multiplication facts",
-        "importance": "Foundation for mathematical computation",
-        "patterns": ["Even numbers multiply to even", "Odd times odd equals odd"]
-      },
-      "perfect_squares": [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144],
-      "prime_numbers": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
-      "mathematical_constants": {
-        "pi": 3.14159265359,
-        "e": 2.71828182846,
-        "golden_ratio": 1.61803398875
+  "science": {
+    "definition": "Science is the systematic study of the natural world through observation, experimentation, and analysis to understand how things work and discover new knowledge.",
+    "scientific_method": {
+      "definition": "A systematic approach to investigating phenomena, acquiring new knowledge, or correcting previous knowledge",
+      "steps": [
+        "1. Observation - Notice something interesting or unusual",
+        "2. Question - Ask what, why, how, when, where",
+        "3. Hypothesis - Make an educated guess about the answer",
+        "4. Experiment - Test the hypothesis with controlled conditions",
+        "5. Analysis - Examine the data and results",
+        "6. Conclusion - Determine if hypothesis was correct",
+        "7. Communication - Share findings with others"
+      ]
+    },
+    "experiment": {
+      "definition": "A controlled test designed to prove or disprove a hypothesis",
+      "components": {
+        "aim": "The purpose or goal of the experiment - what you want to find out",
+        "hypothesis": "An educated prediction about what will happen",
+        "method": "Step-by-step instructions for conducting the experiment",
+        "materials": "List of equipment and substances needed",
+        "variables": {
+          "independent": "The factor you change or control",
+          "dependent": "The factor you measure or observe",
+          "controlled": "Factors kept the same to ensure fair testing"
+        },
+        "results": "The data and observations collected",
+        "conclusion": "What the results mean and whether hypothesis was correct"
       }
     },
-    "science": {
-      "physics": {
-        "speed_of_light": "299,792,458 meters per second",
-        "gravity_earth": "9.8 m/s²",
-        "absolute_zero": "-273.15°C or 0 Kelvin"
-      },
-      "chemistry": {
-        "water_formula": "H2O",
-        "periodic_table_elements": 118,
-        "states_of_matter": ["solid", "liquid", "gas", "plasma"]
-      },
-      "biology": {
-        "human_chromosomes": 46,
-        "dna_bases": ["A", "T", "G", "C"],
-        "kingdoms_of_life": ["Animalia", "Plantae", "Fungi", "Protista", "Monera"]
-      }
-    },
-    "geography": {
-      "continents": ["Asia", "Africa", "North America", "South America", "Antarctica", "Europe", "Australia"],
-      "oceans": ["Pacific", "Atlantic", "Indian", "Southern", "Arctic"],
-      "highest_mountain": "Mount Everest - 8,848 meters",
-      "longest_river": "Nile River - 6,650 kilometers"
-    },
-    "history": {
-      "world_wars": {
-        "ww1": "1914-1918",
-        "ww2": "1939-1945"
-      },
-      "ancient_civilizations": ["Egyptian", "Greek", "Roman", "Mesopotamian", "Chinese"],
-      "industrial_revolution": "1760-1840"
+    "branches_of_science": {
+      "physics": "Study of matter, energy, motion, and forces",
+      "chemistry": "Study of substances, their properties, and reactions",
+      "biology": "Study of living organisms and life processes",
+      "earth_science": "Study of Earth's structure, processes, and history",
+      "astronomy": "Study of celestial objects and space",
+      "environmental_science": "Study of environment and solutions to environmental problems"
     }
   },
-  "encyclopedia": {
-    "animals": {
-      "mammals": {
-        "characteristics": ["warm-blooded", "hair or fur", "milk production", "live birth"],
-        "examples": ["elephant", "whale", "human", "dog", "cat"]
-      },
-      "birds": {
-        "characteristics": ["feathers", "wings", "beak", "lay eggs", "hollow bones"],
-        "examples": ["eagle", "penguin", "ostrich", "hummingbird", "owl"]
-      },
-      "reptiles": {
-        "characteristics": ["cold-blooded", "scales", "lay eggs", "breathe air"],
-        "examples": ["snake", "lizard", "turtle", "crocodile", "iguana"]
-      }
+  "mathematics": {
+    "definition": "Mathematics is the study of numbers, shapes, patterns, and logical reasoning used to solve problems and understand the world around us.",
+    "branches": {
+      "arithmetic": "Basic operations with numbers: addition, subtraction, multiplication, division",
+      "algebra": "Using letters and symbols to represent numbers in equations",
+      "geometry": "Study of shapes, sizes, angles, and spatial relationships",
+      "statistics": "Collection, analysis, and interpretation of data",
+      "calculus": "Study of rates of change and accumulation",
+      "trigonometry": "Study of triangles and relationships between angles and sides"
     },
-    "plants": {
-      "trees": {
-        "deciduous": "lose leaves seasonally",
-        "evergreen": "keep leaves year-round",
-        "parts": ["roots", "trunk", "branches", "leaves"]
-      },
-      "flowers": {
-        "parts": ["petals", "stem", "leaves", "roots"],
-        "reproduction": "pollination and seed formation"
-      }
-    },
-    "technology": {
-      "computers": {
-        "components": ["CPU", "RAM", "storage", "motherboard"],
-        "types": ["desktop", "laptop", "tablet", "smartphone"]
-      },
-      "internet": {
-        "invention": "1960s-1990s",
-        "protocols": ["HTTP", "HTTPS", "FTP", "TCP/IP"],
-        "services": ["email", "web browsing", "social media", "streaming"]
-      }
-    },
-    "human_body": {
-      "systems": {
-        "circulatory": "heart, blood vessels, blood",
-        "respiratory": "lungs, airways, breathing",
-        "digestive": "stomach, intestines, food processing",
-        "nervous": "brain, spinal cord, nerves"
-      },
-      "senses": ["sight", "hearing", "smell", "taste", "touch"],
-      "organs": ["heart", "lungs", "liver", "kidneys", "brain"]
+    "fundamental_concepts": {
+      "number": "A mathematical object used to count, measure, and label",
+      "equation": "A mathematical statement showing two expressions are equal",
+      "formula": "A mathematical rule or relationship expressed using symbols",
+      "variable": "A symbol (usually a letter) representing an unknown number",
+      "constant": "A number that doesn't change in a given context"
     }
   },
-  "reference_sources": {
-    "dictionaries": {
-      "merriam_webster": "https://www.merriam-webster.com/",
-      "oxford": "https://www.oxfordlearnersdictionaries.com/",
-      "cambridge": "https://dictionary.cambridge.org/"
+  "history": {
+    "definition": "History is the study of past events, particularly human activities, societies, and civilizations to understand how the world has changed over time.",
+    "periods": {
+      "prehistoric": "Time before written records (before 3500 BCE)",
+      "ancient": "Early civilizations with writing (3500 BCE - 500 CE)",
+      "medieval": "Middle Ages (500 - 1500 CE)",
+      "renaissance": "Cultural rebirth in Europe (1400 - 1600 CE)",
+      "modern": "Industrial age to present (1500 CE - present)"
     },
-    "encyclopedias": {
-      "britannica": "https://www.britannica.com/",
-      "wikipedia": "https://en.wikipedia.org/",
-      "world_book": "https://www.worldbook.com/"
-    },
-    "thesaurus": {
-      "merriam_webster": "https://www.merriam-webster.com/thesaurus",
-      "thesaurus_com": "https://www.thesaurus.com/"
+    "important_concepts": {
+      "civilization": "Complex society with cities, government, religion, and culture",
+      "empire": "Large political unit controlling many territories and peoples",
+      "revolution": "Sudden, dramatic change in government, society, or technology",
+      "democracy": "Government where people have power through voting",
+      "monarchy": "Government ruled by a king or queen"
     }
   },
-  "learning_strategies": {
-    "memory_techniques": [
-      "repetition and practice",
-      "visual associations",
-      "mnemonics and acronyms",
-      "chunking information",
-      "spaced repetition"
-    ],
-    "study_methods": ["active reading", "note-taking", "summarization", "practice testing", "teaching others"],
-    "comprehension_skills": [
-      "identifying main ideas",
-      "making connections",
-      "asking questions",
-      "predicting outcomes",
-      "drawing conclusions"
-    ]
+  "geography": {
+    "definition": "Geography is the study of Earth's physical features, climate, countries, peoples, and the relationships between humans and their environment.",
+    "physical_geography": {
+      "landforms": "Mountains, valleys, plains, plateaus, hills",
+      "water_bodies": "Oceans, seas, rivers, lakes, streams",
+      "climate": "Long-term weather patterns in different regions",
+      "ecosystems": "Communities of living things and their environment"
+    },
+    "human_geography": {
+      "population": "Study of where people live and why",
+      "cities": "Large settlements where many people live and work",
+      "countries": "Political areas with governments and borders",
+      "culture": "Way of life including language, religion, customs, food"
+    },
+    "continents": {
+      "asia": "Largest continent with most people",
+      "africa": "Second largest continent, birthplace of humans",
+      "north_america": "Includes USA, Canada, Mexico",
+      "south_america": "Includes Brazil, Argentina, Peru",
+      "antarctica": "Coldest continent, mostly ice",
+      "europe": "Small continent with many countries",
+      "australia": "Smallest continent, also called Oceania"
+    }
+  },
+  "coding": {
+    "definition": "Coding (programming) is the process of creating instructions for computers using programming languages to build software, websites, and applications.",
+    "fundamental_concepts": {
+      "algorithm": "Step-by-step instructions to solve a problem",
+      "variable": "Container that stores data values",
+      "function": "Reusable block of code that performs a specific task",
+      "loop": "Code that repeats until a condition is met",
+      "conditional": "Code that runs only if certain conditions are true",
+      "debugging": "Process of finding and fixing errors in code"
+    },
+    "web_development": {
+      "html": "Markup language for creating web page structure",
+      "css": "Styling language for making web pages look good",
+      "javascript": "Programming language for interactive web features",
+      "react": "JavaScript library for building user interfaces",
+      "nextjs": "React framework for building full-stack web applications"
+    },
+    "react_concepts": {
+      "component": "Reusable piece of UI that can accept props and manage state",
+      "props": "Data passed from parent component to child component",
+      "state": "Data that can change over time within a component",
+      "jsx": "Syntax that allows writing HTML-like code in JavaScript",
+      "hooks": "Functions that let you use state and other React features"
+    },
+    "nextjs_concepts": {
+      "pages": "File-based routing system where each file becomes a route",
+      "api_routes": "Server-side functions for handling HTTP requests",
+      "ssr": "Server-side rendering for better performance and SEO",
+      "static_generation": "Pre-building pages at build time",
+      "app_router": "New routing system with improved features"
+    }
+  },
+  "general_knowledge": {
+    "water_cycle": "Continuous movement of water through evaporation, condensation, and precipitation",
+    "photosynthesis": "Process where plants use sunlight to make food from carbon dioxide and water",
+    "gravity": "Force that pulls objects toward each other, keeping us on Earth",
+    "solar_system": "Sun and all objects that orbit around it including planets and moons",
+    "democracy": "System of government where people vote to choose their leaders",
+    "ecosystem": "Community of living things interacting with their environment",
+    "renewable_energy": "Energy from sources that naturally replenish like solar and wind",
+    "climate_change": "Long-term changes in global weather patterns due to human activities"
   }
 }
