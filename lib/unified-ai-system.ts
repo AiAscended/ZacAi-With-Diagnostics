@@ -61,13 +61,87 @@ export class UnifiedAISystem {
 
   private initializeBasicVocabulary(): void {
     const basicWords = [
-      "hello", "hi", "hey", "goodbye", "bye", "thanks", "thank", "please", "yes", "no", "maybe", "sure", "okay", "ok",
-      "good", "bad", "great", "what", "who", "where", "when", "why", "how", "can", "could", "would", "like", "love",
-      "want", "need", "know", "think", "remember", "forget", "help", "sorry", "excuse", "understand", "explain",
-      "tell", "say", "calculate", "math", "number", "add", "subtract", "multiply", "divide", "times", "plus", "minus",
-      "equals", "result", "answer", "define", "meaning", "word", "learn", "learned", "new", "recent", "vortex", "tesla",
-      "science", "experiment", "method", "formula", "theory", "hypothesis", "data", "analysis", "conclusion",
-      "coding", "programming", "computer", "software", "website", "application", "function", "variable", "algorithm"
+      "hello",
+      "hi",
+      "hey",
+      "goodbye",
+      "bye",
+      "thanks",
+      "thank",
+      "please",
+      "yes",
+      "no",
+      "maybe",
+      "sure",
+      "okay",
+      "ok",
+      "good",
+      "bad",
+      "great",
+      "what",
+      "who",
+      "where",
+      "when",
+      "why",
+      "how",
+      "can",
+      "could",
+      "would",
+      "like",
+      "love",
+      "want",
+      "need",
+      "know",
+      "think",
+      "remember",
+      "forget",
+      "help",
+      "sorry",
+      "excuse",
+      "understand",
+      "explain",
+      "tell",
+      "say",
+      "calculate",
+      "math",
+      "number",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "times",
+      "plus",
+      "minus",
+      "equals",
+      "result",
+      "answer",
+      "define",
+      "meaning",
+      "word",
+      "learn",
+      "learned",
+      "new",
+      "recent",
+      "vortex",
+      "tesla",
+      "science",
+      "experiment",
+      "method",
+      "formula",
+      "theory",
+      "hypothesis",
+      "data",
+      "analysis",
+      "conclusion",
+      "coding",
+      "programming",
+      "computer",
+      "software",
+      "website",
+      "application",
+      "function",
+      "variable",
+      "algorithm",
     ]
 
     basicWords.forEach((word) => {
@@ -743,7 +817,8 @@ export class UnifiedAISystem {
     const mathData = this.extractAdvancedMathOperation(message)
     if (!mathData) {
       return {
-        content: "I couldn't parse that math expression. Try something like '3×3', '5+2', '3+3×3', or ask for a formula.",
+        content:
+          "I couldn't parse that math expression. Try something like '3×3', '5+2', '3+3×3', or ask for a formula.",
         confidence: 0.3,
         reasoning: ["Could not parse math expression with advanced parser"],
       }
@@ -1152,7 +1227,8 @@ export class UnifiedAISystem {
 
     if (!concept) {
       return {
-        content: "I couldn't identify the coding concept you're asking about. Try asking about React, Next.js, JavaScript, or specific programming topics.",
+        content:
+          "I couldn't identify the coding concept you're asking about. Try asking about React, Next.js, JavaScript, or specific programming topics.",
         confidence: 0.3,
         reasoning: ["Could not extract coding concept"],
       }
@@ -1383,7 +1459,7 @@ export class UnifiedAISystem {
   private getUniversalPattern(digitalRoot: number): string {
     const patterns = {
       1: "Unity and new beginnings",
-      2: "Duality and balance", 
+      2: "Duality and balance",
       3: "Creation and manifestation",
       4: "Stability and foundation",
       5: "Change and transformation",
@@ -1521,4 +1597,457 @@ export class UnifiedAISystem {
       /^\s*(\d+)\s*[/÷]\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
       /what\s*(?:is|does|equals?)\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
       /calculate\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
-      /can\s+you\s+do\s+(\d+)\s*[x×*+\-/÷\
+      /can\s+you\s+do\s+(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
+      /(\d+)\s*[x×*+\-/÷]\s*(\d+)\s*[=?]/i,
+      /formula/i,
+    ]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private isVocabularyLookup(message: string): boolean {
+    const patterns = [
+      /what\s+(?:is|does|means?)\s+(\w+)/i,
+      /define\s+(\w+)/i,
+      /meaning\s+of\s+(\w+)/i,
+      /(\w+)\s+definition/i,
+      /explain\s+(\w+)/i,
+    ]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private isKnowledgeQuery(message: string): boolean {
+    const patterns = [
+      /tell\s+me\s+about/i,
+      /what\s+is\s+(?!.*\d+.*[x×*+\-/÷])/i,
+      /explain\s+(?!.*\d+.*[x×*+\-/÷])/i,
+      /how\s+does/i,
+      /why\s+is/i,
+    ]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private isTeslaQuery(message: string): boolean {
+    const patterns = [/tesla/i, /vortex/i, /sacred\s+number/i, /digital\s+root/i, /369/i, /pattern\s+of\s+(\d+)/i]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private isSystemQuery(message: string): boolean {
+    const patterns = [/who\s+are\s+you/i, /what\s+are\s+you/i, /system/i, /diagnostic/i, /status/i, /capabilities/i]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  private isGreeting(message: string): boolean {
+    const patterns = [/^hi$/i, /^hello$/i, /^hey$/i, /good\s+morning/i, /good\s+afternoon/i, /good\s+evening/i]
+    return patterns.some((pattern) => pattern.test(message))
+  }
+
+  // Extraction methods
+  private extractWordFromMessage(message: string): string | null {
+    const patterns = [
+      /what\s+(?:is|does|means?)\s+(\w+)/i,
+      /define\s+(\w+)/i,
+      /meaning\s+of\s+(\w+)/i,
+      /(\w+)\s+definition/i,
+      /explain\s+(\w+)/i,
+    ]
+
+    for (const pattern of patterns) {
+      const match = message.match(pattern)
+      if (match) {
+        return match[1].toLowerCase()
+      }
+    }
+    return null
+  }
+
+  private extractTopicFromMessage(message: string): string | null {
+    const patterns = [
+      /tell\s+me\s+about\s+(.+)/i,
+      /what\s+is\s+(.+)/i,
+      /explain\s+(.+)/i,
+      /how\s+does\s+(.+)/i,
+      /why\s+is\s+(.+)/i,
+    ]
+
+    for (const pattern of patterns) {
+      const match = message.match(pattern)
+      if (match) {
+        return match[1].trim()
+      }
+    }
+    return null
+  }
+
+  private extractCodingConcept(message: string): string | null {
+    const concepts = ["react", "nextjs", "javascript", "typescript", "component", "function", "hook", "state", "props"]
+
+    for (const concept of concepts) {
+      if (message.toLowerCase().includes(concept)) {
+        return concept
+      }
+    }
+    return null
+  }
+
+  // Validation methods
+  private validateVocabularyEntry(entry: any): boolean {
+    return entry && entry.word && entry.definition && entry.source
+  }
+
+  private validateMathEntry(entry: any): boolean {
+    return entry && entry.concept && entry.data && entry.source
+  }
+
+  private validateFactEntry(entry: any): boolean {
+    return entry && entry.key && entry.value && entry.category
+  }
+
+  // Helper calculation methods
+  private determineMathType(concept: string, data: any): string {
+    if (concept.includes("formula")) return "formula"
+    if (concept.includes("table")) return "table"
+    if (concept.includes("calculation")) return "calculation"
+    return "concept"
+  }
+
+  private extractMathMethods(data: any): string[] {
+    const methods = []
+    if (typeof data === "object") {
+      if (data.methods) methods.push(...data.methods)
+      if (data.formula) methods.push("formula")
+      if (data.table) methods.push("table")
+    }
+    return methods.length > 0 ? methods : ["standard"]
+  }
+
+  private calculateMathDifficulty(data: any): number {
+    if (typeof data === "object" && data.difficulty) return data.difficulty
+    if (typeof data === "string" && data.includes("advanced")) return 4
+    if (typeof data === "string" && data.includes("complex")) return 3
+    return 2
+  }
+
+  private determineCodingType(concept: string): string {
+    if (concept.includes("react")) return "framework"
+    if (concept.includes("function")) return "function"
+    if (concept.includes("component")) return "component"
+    return "concept"
+  }
+
+  private extractProgrammingLanguage(concept: string, data: any): string {
+    if (concept.includes("javascript") || concept.includes("js")) return "JavaScript"
+    if (concept.includes("typescript") || concept.includes("ts")) return "TypeScript"
+    if (concept.includes("react")) return "React"
+    if (concept.includes("nextjs")) return "Next.js"
+    return "General"
+  }
+
+  private calculateCodingDifficulty(data: any): number {
+    if (typeof data === "object" && data.difficulty) return data.difficulty
+    return 2
+  }
+
+  private calculateWordDifficulty(wordData: any): number {
+    const word = wordData.word || ""
+    if (word.length > 10) return 4
+    if (word.length > 7) return 3
+    if (word.length > 4) return 2
+    return 1
+  }
+
+  // Context and conversation management
+  private updateConversationContext(message: string): void {
+    const chatMessage: ChatMessage = {
+      id: Date.now().toString(),
+      content: message,
+      role: "user",
+      timestamp: Date.now(),
+    }
+
+    this.conversationHistory.push(chatMessage)
+
+    // Keep only last 50 messages
+    if (this.conversationHistory.length > 50) {
+      this.conversationHistory = this.conversationHistory.slice(-50)
+    }
+
+    // Update context topics
+    const topics = this.extractTopicsFromMessage(message)
+    this.conversationContext.topics.push(...topics)
+
+    // Keep only unique topics
+    this.conversationContext.topics = [...new Set(this.conversationContext.topics)]
+  }
+
+  private extractTopicsFromMessage(message: string): string[] {
+    const topics = []
+    const keywords = ["math", "science", "coding", "tesla", "vocabulary", "formula", "calculation"]
+
+    keywords.forEach((keyword) => {
+      if (message.toLowerCase().includes(keyword)) {
+        topics.push(keyword)
+      }
+    })
+
+    return topics
+  }
+
+  // Background processing methods
+  private processLearningQueue(): void {
+    if (this.learningQueue.length === 0) return
+
+    const item = this.learningQueue.shift()
+    if (!item) return
+
+    console.log(`🎓 Processing learning queue item: ${item.type} - ${item.word || item.concept || item.topic}`)
+
+    // Add to appropriate learning pattern
+    const pattern: LearningPattern = {
+      type: item.type,
+      frequency: 1,
+      lastAccessed: Date.now(),
+      successRate: 0.5,
+      difficulty: 2,
+    }
+
+    this.learningPatterns.set(`${item.type}_${Date.now()}`, pattern)
+  }
+
+  private processAdvancedLearningQueue(): void {
+    this.processLearningQueue()
+  }
+
+  private analyzeLearningPatterns(): void {
+    console.log(`🧠 Analyzing ${this.learningPatterns.size} learning patterns...`)
+
+    // Simple pattern analysis
+    let totalSuccess = 0
+    let totalPatterns = 0
+
+    this.learningPatterns.forEach((pattern) => {
+      totalSuccess += pattern.successRate
+      totalPatterns++
+    })
+
+    if (totalPatterns > 0) {
+      this.performanceMetrics.learningRate = totalSuccess / totalPatterns
+      console.log(`📊 Current learning rate: ${(this.performanceMetrics.learningRate * 100).toFixed(1)}%`)
+    }
+  }
+
+  private analyzePerformance(): void {
+    if (this.performanceMetrics.responseTime.length > 0) {
+      const avgTime =
+        this.performanceMetrics.responseTime.reduce((a, b) => a + b, 0) / this.performanceMetrics.responseTime.length
+      console.log(`⚡ Average response time: ${avgTime.toFixed(0)}ms`)
+    }
+  }
+
+  private cleanupOldContext(): void {
+    const cutoff = Date.now() - 30 * 60 * 1000 // 30 minutes
+
+    // Clean old conversation history
+    this.conversationHistory = this.conversationHistory.filter((msg) => msg.timestamp > cutoff)
+
+    // Clean old learning patterns
+    this.learningPatterns.forEach((pattern, key) => {
+      if (pattern.lastAccessed < cutoff) {
+        this.learningPatterns.delete(key)
+      }
+    })
+  }
+
+  private updatePerformanceMetrics(responseTime: number): void {
+    this.performanceMetrics.responseTime.push(responseTime)
+
+    // Keep only last 100 response times
+    if (this.performanceMetrics.responseTime.length > 100) {
+      this.performanceMetrics.responseTime = this.performanceMetrics.responseTime.slice(-100)
+    }
+  }
+
+  // Storage methods
+  private async saveLearnedVocabulary(): Promise<void> {
+    try {
+      const learnedVocab = Array.from(this.vocabulary.entries())
+        .filter(([, entry]) => entry.source === "learned_api")
+        .map(([, entry]) => entry)
+
+      this.learntDataManager.saveLearnedVocabulary(learnedVocab)
+    } catch (error) {
+      console.warn("Failed to save learned vocabulary:", error)
+    }
+  }
+
+  private async saveLearnedMathematics(): Promise<void> {
+    try {
+      const learnedMath = Array.from(this.mathematics.entries())
+        .filter(([, entry]) => entry.source === "calculated")
+        .map(([, entry]) => entry)
+
+      this.learntDataManager.saveLearnedMathematics(learnedMath)
+    } catch (error) {
+      console.warn("Failed to save learned mathematics:", error)
+    }
+  }
+
+  private savePersonalInfo(): void {
+    try {
+      const personalData = Array.from(this.personalInfo.values())
+      localStorage.setItem("zacai_personal_info", JSON.stringify(personalData))
+    } catch (error) {
+      console.warn("Failed to save personal info:", error)
+    }
+  }
+
+  // Public diagnostic methods
+  public getSystemStatus(): string {
+    return this.systemStatus
+  }
+
+  public getSystemStats(): any {
+    return {
+      vocabulary: this.vocabulary.size,
+      mathematics: this.mathematics.size,
+      facts: this.facts.size,
+      codingKnowledge: this.codingKnowledge.size,
+      personalInfo: this.personalInfo.size,
+      conversationHistory: this.conversationHistory.length,
+      learningPatterns: this.learningPatterns.size,
+      backgroundLearning: this.backgroundLearning,
+      systemStatus: this.systemStatus,
+      isInitialized: this.isInitialized,
+    }
+  }
+
+  public getSystemDebugInfo(): any {
+    return {
+      seedDataLoaded: {
+        system: !!this.seedSystemData,
+        vocabulary: !!this.seedVocabData,
+        mathematics: !!this.seedMathData,
+        knowledge: !!this.seedKnowledgeData,
+        learning: !!this.seedLearningData,
+        coding: !!this.seedCodingData,
+      },
+      cognitiveStores: {
+        vocabulary: this.vocabulary.size,
+        mathematics: this.mathematics.size,
+        facts: this.facts.size,
+        codingKnowledge: this.codingKnowledge.size,
+        personalInfo: this.personalInfo.size,
+        reasoningChains: this.reasoningChains.size,
+        learningPatterns: this.learningPatterns.size,
+      },
+      systemState: {
+        status: this.systemStatus,
+        initialized: this.isInitialized,
+        backgroundLearning: this.backgroundLearning,
+        learningQueueSize: this.learningQueue.length,
+      },
+      performance: this.performanceMetrics,
+    }
+  }
+}
+
+// Type definitions
+interface ChatMessage {
+  id: string
+  content: string
+  role: "user" | "assistant"
+  timestamp: number
+}
+
+interface ConversationContext {
+  topics: string[]
+  entities: string[]
+  sentiment: "positive" | "negative" | "neutral"
+}
+
+interface VocabularyEntry {
+  word: string
+  definition: string
+  partOfSpeech: string
+  examples: string[]
+  phonetic: string
+  frequency: number
+  source: string
+  learned: number
+  confidence: number
+  synonyms: string[]
+  antonyms: string[]
+  difficulty: number
+}
+
+interface PersonalInfoEntry {
+  key: string
+  value: string
+  timestamp: number
+  importance: number
+  type: string
+  source: string
+}
+
+interface FactEntry {
+  key: string
+  value: string
+  category: string
+  source: string
+  confidence: number
+  timestamp: number
+  verified: boolean
+  relatedTopics: string[]
+}
+
+interface MathEntry {
+  concept: string
+  type: string
+  data: any
+  source: string
+  learned: number
+  confidence: number
+  methods: string[]
+  difficulty: number
+}
+
+interface CodingEntry {
+  concept: string
+  type: string
+  data: any
+  source: string
+  learned: number
+  confidence: number
+  language: string
+  difficulty: number
+}
+
+interface ReasoningChain {
+  type: string
+  steps: string[]
+  confidence: number
+}
+
+interface PerformanceMetrics {
+  responseTime: number[]
+  confidenceScores: number[]
+  successRate: number
+  learningRate: number
+}
+
+interface LearningPattern {
+  type: string
+  frequency: number
+  lastAccessed: number
+  successRate: number
+  difficulty: number
+}
+
+interface AIResponse {
+  content: string
+  confidence: number
+  reasoning: string[]
+  processingTime?: number
+  mathAnalysis?: any
+  methodUsed?: string
+  knowledgeUsed?: string[]
+}
