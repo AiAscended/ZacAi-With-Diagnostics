@@ -1519,4 +1519,6 @@ export class UnifiedAISystem {
       /^\s*(\d+)\s*\+\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
       /^\s*(\d+)\s*-\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
       /^\s*(\d+)\s*[/÷]\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
-      /what\s*(?:is|does|equals?)\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,\
+      /what\s*(?:is|does|equals?)\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
+      /calculate\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
+      /can\s+you\s+do\s+(\d+)\s*[x×*+\-/÷\
