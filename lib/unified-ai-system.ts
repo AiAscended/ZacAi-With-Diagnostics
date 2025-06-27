@@ -763,7 +763,7 @@ export class UnifiedAISystem {
       if (nameInfo) {
         reasoning.push("Retrieved stored name from personal memory")
         return {
-          content: `Your name is ${nameInfo.value}! I remember you telling me that earlier. I store personal information to make our conversations more meaningful.`,
+          content: `Ah, yes! Your name is ${nameInfo.value}. I remember you telling me that. I store personal information to make our conversations more meaningful.`,
           confidence: 0.95,
           reasoning,
         }
@@ -781,8 +781,8 @@ export class UnifiedAISystem {
     if (this.personalInfo.size > 0) {
       reasoning.push("Retrieved all stored personal information")
       let response = "Here's what I remember about you:\n\n"
-      Array.from(this.personalInfo.entries()).forEach(([key, entry]) => {
-        response += `• ${key}: ${entry.value}\n`
+      this.personalInfo.forEach((entry, key) => {
+        response += `• **${key}**: ${entry.value}\n`
       })
       response += "\nI keep this information to personalize our conversations!"
 
@@ -1389,21 +1389,45 @@ export class UnifiedAISystem {
 
   private async handleAdvancedContextualConversation(message: string): Promise<AIResponse> {
     const name = this.systemIdentity?.name || "ZacAI"
+    const userName = this.personalInfo.get("name")?.value
 
-    let response = `I'm ${name}, your advanced cognitive AI assistant. I understand you said: "${message}"\n\n`
-    response += `I can help you with:\n\n`
-    response += `🧮 **Mathematics** - Complex calculations using multiple methods\n`
-    response += `📖 **Vocabulary** - Comprehensive definitions from my knowledge base\n`
-    response += `🧠 **Knowledge** - Science, history, geography, and coding expertise\n`
-    response += `🌀 **Tesla Patterns** - Universal number analysis\n`
+    let response = ""
+    if (userName) {
+      response = `Hello ${userName}! 👋 I'm ${name}, your advanced cognitive AI assistant. I understand you said: "${message}"\n\n`
+    } else {
+      response = `Hello! 👋 I'm ${name}, your advanced cognitive AI assistant. I understand you said: "${message}"\n\n`
+    }
+
+    // Analyze the last few messages to understand the user's intent
+    const recentMessages = this.conversationHistory.slice(-5)
+    const topics = new Set<string>()
+    recentMessages.forEach((msg) => {
+      this.extractTopicsFromMessage(msg.content).forEach((topic) => topics.add(topic))
+    })
+
+    response += "Based on our conversation, I can help you with:\n\n"
+
+    if (topics.has("mathematics")) {
+      response += `🧮 **Mathematics** - Complex calculations using multiple methods\n`
+    }
+    if (topics.has("vocabulary")) {
+      response += `📖 **Vocabulary** - Comprehensive definitions from my knowledge base\n`
+    }
+    if (topics.has("science") || topics.has("coding")) {
+      response += `🧠 **Knowledge** - Science, history, geography, and coding expertise\n`
+    }
+    if (topics.has("tesla")) {
+      response += `🌀 **Tesla Patterns** - Universal number analysis\n`
+    }
+
     response += `💭 **Learning** - I grow smarter with every conversation\n\n`
     response += `What would you like to explore?`
 
     return {
       content: response,
       confidence: 0.8,
-      reasoning: ["Generated contextual conversation response"],
-      knowledgeUsed: ["comprehensive_capabilities"],
+      reasoning: ["Generated contextual conversation response based on recent messages"],
+      knowledgeUsed: ["comprehensive_capabilities", "conversation_history"],
     }
   }
 
