@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { SimpleAISystem } from "@/lib/simple-ai-system"
+import { UnifiedAISystem } from "@/lib/unified-ai-system"
 import {
   Brain,
   BookOpen,
@@ -66,7 +66,7 @@ interface AIStats {
 }
 
 export default function EnhancedAIChat() {
-  const [aiSystem] = useState(() => new SimpleAISystem())
+  const [aiSystem] = useState(() => new UnifiedAISystem())
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -107,7 +107,7 @@ export default function EnhancedAIChat() {
   const initializeSystem = async () => {
     try {
       setError(null)
-      console.log("🚀 Initializing ZacAI Simple System...")
+      console.log("🚀 Initializing ZacAI System...")
 
       await aiSystem.initialize()
       console.log("✅ ZacAI System initialized successfully")
@@ -180,7 +180,7 @@ export default function EnhancedAIChat() {
           partOfSpeech: String(entry?.partOfSpeech || "learned"),
           examples: String(entry?.examples || "From conversation"),
           category: String(entry?.category || entry?.source || "learned"),
-          source: String(entry?.source || "simple_ai_system"),
+          source: String(entry?.source || "unified_ai_system"),
         })),
 
         mathematics: Array.from(learnedMath.entries()).map(([concept, data]) => ({
@@ -189,7 +189,7 @@ export default function EnhancedAIChat() {
           category: String(data?.type || "learned"),
           examples: String(data?.examples || "From calculations"),
           difficulty: Number(data?.difficulty || 1),
-          source: String(data?.source || "simple_ai_system"),
+          source: String(data?.source || "unified_ai_system"),
         })),
 
         userInfo: Array.from(learnedUserInfo.entries()).map(([key, entry]) => ({
@@ -197,13 +197,13 @@ export default function EnhancedAIChat() {
           value: String(entry?.value || entry),
           importance: Number(entry?.importance || 0.5),
           timestamp: String(new Date(entry?.timestamp || Date.now()).toLocaleString()),
-          source: String(entry?.source || "simple_ai_system"),
+          source: String(entry?.source || "unified_ai_system"),
         })),
 
         facts: Array.from(learnedFacts.entries()).map(([topic, entry]) => ({
           topic: String(topic),
           content: String(entry?.value || entry),
-          source: String(entry?.source || "simple_ai_system"),
+          source: String(entry?.source || "unified_ai_system"),
           category: String(entry?.category || entry?.type || "learned"),
         })),
       }
@@ -222,7 +222,7 @@ export default function EnhancedAIChat() {
 
   const simulateThinking = async (userInput: string): Promise<string[]> => {
     const thinkingSteps = [
-      "🧠 Analyzing input with ZacAI simple architecture...",
+      "🧠 Analyzing input with ZacAI cognitive architecture...",
       "🔗 Checking seed data and learned knowledge...",
       "🎯 Determining optimal response strategy...",
       "📚 Accessing mathematical and linguistic resources...",
@@ -330,7 +330,7 @@ export default function EnhancedAIChat() {
       const aiData = aiSystem.exportData()
 
       const combinedData = {
-        simpleAISystem: aiData,
+        unifiedAISystem: aiData,
         exportDate: new Date().toISOString(),
         version: "2.0.0",
       }
@@ -339,7 +339,7 @@ export default function EnhancedAIChat() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `zacai-simple-export-${new Date().toISOString().split("T")[0]}.json`
+      a.download = `zacai-unified-export-${new Date().toISOString().split("T")[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
 
@@ -370,7 +370,7 @@ export default function EnhancedAIChat() {
             <p className="text-gray-600 mb-4">Loading seed data, mathematical knowledge, and AI components...</p>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Loading simple architecture</span>
+                <span>Loading unified architecture</span>
                 <RefreshCw className="w-4 h-4 animate-spin" />
               </div>
               <Progress value={85} className="h-2" />
@@ -393,7 +393,7 @@ export default function EnhancedAIChat() {
                 <BarChart3 className="w-8 h-8 text-blue-600" />
                 <div>
                   <h1 className="text-2xl font-bold">{systemInfo.name || "ZacAI"} Admin Dashboard</h1>
-                  <p className="text-sm text-gray-600">Simple AI System - Knowledge Management & Training Pipeline</p>
+                  <p className="text-sm text-gray-600">Unified AI System - Knowledge Management & Training Pipeline</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -422,11 +422,6 @@ export default function EnhancedAIChat() {
                     <BookOpen className="w-6 h-6 mx-auto mb-1 text-blue-600" />
                     <div className="text-xl font-bold">{stats.vocabulary}</div>
                     <div className="text-xs text-gray-500">Vocabulary</div>
-                    {stats.breakdown && (
-                      <div className="text-xs text-gray-400">
-                        {stats.breakdown.seedVocab}+{stats.breakdown.learnedVocab}
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
 
@@ -438,11 +433,6 @@ export default function EnhancedAIChat() {
                     <Calculator className="w-6 h-6 mx-auto mb-1 text-green-600" />
                     <div className="text-xl font-bold">{stats.mathematics}</div>
                     <div className="text-xs text-gray-500">Math</div>
-                    {stats.breakdown && (
-                      <div className="text-xs text-gray-400">
-                        {stats.breakdown.seedMath}+{stats.breakdown.learnedMath}
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
 
@@ -546,7 +536,7 @@ export default function EnhancedAIChat() {
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Online APIs</span>
+                        <span className="text-sm">Dictionary API</span>
                         <Badge variant="outline" className="bg-green-50">
                           ✅ Active
                         </Badge>
@@ -750,7 +740,7 @@ export default function EnhancedAIChat() {
                 <Brain className="w-5 h-5" />
                 {systemInfo.name || "ZacAI"}
                 <Badge variant="outline" className="ml-2">
-                  Simple System
+                  Unified System
                 </Badge>
                 <div className="w-3 h-3 rounded-full bg-green-500" />
               </CardTitle>
@@ -790,7 +780,7 @@ export default function EnhancedAIChat() {
                     </div>
                     <p className="text-lg font-medium mb-2">Hello! I'm {systemInfo.name || "ZacAI"} 🧠</p>
                     <p className="mb-4">
-                      I'm a simple AI system with integrated mathematical knowledge, vocabulary learning, and
+                      I'm an advanced AI system with integrated mathematical knowledge, vocabulary learning, and
                       comprehensive memory capabilities!
                     </p>
 
@@ -1047,21 +1037,11 @@ export default function EnhancedAIChat() {
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600">{stats.vocabulary}</div>
                       <div className="text-xs text-gray-500">Vocabulary</div>
-                      {stats.breakdown && (
-                        <div className="text-xs text-gray-400">
-                          {stats.breakdown.seedVocab}+{stats.breakdown.learnedVocab}
-                        </div>
-                      )}
                     </div>
 
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">{stats.mathematics}</div>
                       <div className="text-xs text-gray-500">Math</div>
-                      {stats.breakdown && (
-                        <div className="text-xs text-gray-400">
-                          {stats.breakdown.seedMath}+{stats.breakdown.learnedMath}
-                        </div>
-                      )}
                     </div>
 
                     <div className="text-center">
