@@ -1948,6 +1948,66 @@ export class UnifiedAISystem {
       performance: this.performanceMetrics,
     }
   }
+
+  public getStats(): any {
+    return {
+      vocabularySize: this.vocabulary.size,
+      mathFunctions: this.mathematics.size,
+      memoryEntries: this.personalInfo.size,
+      factsData: this.facts,
+      totalMessages: this.conversationHistory.length,
+      totalLearned: this.vocabulary.size + this.mathematics.size + this.facts.size + this.codingKnowledge.size,
+      systemStatus: this.systemStatus,
+      avgConfidence: this.calculateAverageConfidence(),
+      vocabularyData: this.vocabulary,
+      mathFunctionsData: this.mathematics,
+      personalInfoData: this.personalInfo,
+      codingData: this.codingKnowledge,
+    }
+  }
+
+  public getConversationHistory(): ChatMessage[] {
+    return this.conversationHistory
+  }
+
+  public exportData(): any {
+    return {
+      vocabulary: Array.from(this.vocabulary.entries()),
+      mathematics: Array.from(this.mathematics.entries()),
+      facts: Array.from(this.facts.entries()),
+      personalInfo: Array.from(this.personalInfo.entries()),
+      codingKnowledge: Array.from(this.codingKnowledge.entries()),
+      conversationHistory: this.conversationHistory,
+      systemIdentity: this.systemIdentity,
+      performanceMetrics: this.performanceMetrics,
+      exportTimestamp: Date.now(),
+    }
+  }
+
+  private calculateAverageConfidence(): number {
+    let totalConfidence = 0
+    let count = 0
+
+    // Calculate from vocabulary
+    this.vocabulary.forEach((entry) => {
+      totalConfidence += entry.confidence
+      count++
+    })
+
+    // Calculate from mathematics
+    this.mathematics.forEach((entry) => {
+      totalConfidence += entry.confidence
+      count++
+    })
+
+    // Calculate from facts
+    this.facts.forEach((entry) => {
+      totalConfidence += entry.confidence
+      count++
+    })
+
+    return count > 0 ? totalConfidence / count : 0.8
+  }
 }
 
 // Type definitions
