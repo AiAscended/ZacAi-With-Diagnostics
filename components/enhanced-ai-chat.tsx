@@ -172,37 +172,37 @@ export default function EnhancedAIChat() {
       const learnedFacts = aiStats.factsData || new Map()
 
       const processedData = {
-        vocabulary: Array.from(learnedVocab.entries()).map(([word, category]) => ({
-          word,
-          definition: `Learned word: ${word}`,
-          partOfSpeech: "learned",
-          examples: "From conversation",
-          category: category || "learned",
-          source: "unified_ai_system",
+        vocabulary: Array.from(learnedVocab.entries()).map(([word, entry]) => ({
+          word: String(word),
+          definition: String(entry?.definition || `Learned word: ${word}`),
+          partOfSpeech: String(entry?.partOfSpeech || "learned"),
+          examples: String(entry?.examples || "From conversation"),
+          category: String(entry?.category || entry?.source || "learned"),
+          source: String(entry?.source || "unified_ai_system"),
         })),
 
         mathematics: Array.from(learnedMath.entries()).map(([concept, data]) => ({
-          concept,
-          formula: data?.formula || "Mathematical pattern",
-          category: "learned",
-          examples: "From calculations",
-          difficulty: 1,
-          source: "unified_ai_system",
+          concept: String(concept),
+          formula: String(data?.formula || data?.data?.formula || "Mathematical pattern"),
+          category: String(data?.type || "learned"),
+          examples: String(data?.examples || "From calculations"),
+          difficulty: Number(data?.difficulty || 1),
+          source: String(data?.source || "unified_ai_system"),
         })),
 
         userInfo: Array.from(learnedUserInfo.entries()).map(([key, entry]) => ({
-          key,
-          value: entry?.value || entry,
-          importance: entry?.importance || 0.5,
-          timestamp: new Date(entry?.timestamp || Date.now()).toLocaleString(),
-          source: "unified_ai_system",
+          key: String(key),
+          value: String(entry?.value || entry),
+          importance: Number(entry?.importance || 0.5),
+          timestamp: String(new Date(entry?.timestamp || Date.now()).toLocaleString()),
+          source: String(entry?.source || "unified_ai_system"),
         })),
 
         facts: Array.from(learnedFacts.entries()).map(([topic, entry]) => ({
-          topic,
-          content: entry?.value || entry,
-          source: "unified_ai_system",
-          category: entry?.type || "learned",
+          topic: String(topic),
+          content: String(entry?.value || entry),
+          source: String(entry?.source || "unified_ai_system"),
+          category: String(entry?.category || entry?.type || "learned"),
         })),
       }
 
@@ -602,12 +602,12 @@ export default function EnhancedAIChat() {
                           <div key={index} className="border rounded p-3">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <h4 className="font-semibold">{item.word}</h4>
-                                <p className="text-sm text-gray-600">{item.definition}</p>
+                                <h4 className="font-semibold">{String(item.word)}</h4>
+                                <p className="text-sm text-gray-600">{String(item.definition)}</p>
                                 <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">{item.partOfSpeech}</Badge>
-                                  <Badge variant="secondary">{item.category}</Badge>
-                                  <Badge variant="outline">{item.source}</Badge>
+                                  <Badge variant="outline">{String(item.partOfSpeech)}</Badge>
+                                  <Badge variant="secondary">{String(item.category)}</Badge>
+                                  <Badge variant="outline">{String(item.source)}</Badge>
                                 </div>
                               </div>
                             </div>
@@ -636,12 +636,12 @@ export default function EnhancedAIChat() {
                           <div key={index} className="border rounded p-3">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <h4 className="font-semibold">{item.concept}</h4>
-                                <p className="text-sm text-gray-600">{item.formula}</p>
+                                <h4 className="font-semibold">{String(item.concept)}</h4>
+                                <p className="text-sm text-gray-600">{String(item.formula)}</p>
                                 <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">Difficulty: {item.difficulty}</Badge>
-                                  <Badge variant="secondary">{item.category}</Badge>
-                                  <Badge variant="outline">{item.source}</Badge>
+                                  <Badge variant="outline">Difficulty: {String(item.difficulty)}</Badge>
+                                  <Badge variant="secondary">{String(item.category)}</Badge>
+                                  <Badge variant="outline">{String(item.source)}</Badge>
                                 </div>
                               </div>
                             </div>
@@ -670,12 +670,12 @@ export default function EnhancedAIChat() {
                           <div key={index} className="border rounded p-3">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <h4 className="font-semibold">{item.key}</h4>
-                                <p className="text-sm text-gray-600">{item.value}</p>
+                                <h4 className="font-semibold">{String(item.key)}</h4>
+                                <p className="text-sm text-gray-600">{String(item.value)}</p>
                                 <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">Importance: {item.importance}</Badge>
-                                  <Badge variant="secondary">{item.timestamp}</Badge>
-                                  <Badge variant="outline">{item.source}</Badge>
+                                  <Badge variant="outline">Importance: {String(item.importance)}</Badge>
+                                  <Badge variant="secondary">{String(item.timestamp)}</Badge>
+                                  <Badge variant="outline">{String(item.source)}</Badge>
                                 </div>
                               </div>
                             </div>
@@ -704,11 +704,11 @@ export default function EnhancedAIChat() {
                           <div key={index} className="border rounded p-3">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <h4 className="font-semibold">{item.topic}</h4>
-                                <p className="text-sm text-gray-600">{item.content}</p>
+                                <h4 className="font-semibold">{String(item.topic)}</h4>
+                                <p className="text-sm text-gray-600">{String(item.content)}</p>
                                 <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">{item.category}</Badge>
-                                  <Badge variant="secondary">{item.source}</Badge>
+                                  <Badge variant="outline">{String(item.category)}</Badge>
+                                  <Badge variant="secondary">{String(item.source)}</Badge>
                                 </div>
                               </div>
                             </div>
@@ -883,7 +883,7 @@ export default function EnhancedAIChat() {
                               <div className="flex flex-wrap gap-1">
                                 {message.knowledgeUsed.map((knowledge, idx) => (
                                   <Badge key={idx} variant="secondary" className="text-xs">
-                                    {knowledge}
+                                    {String(knowledge)}
                                   </Badge>
                                 ))}
                               </div>
@@ -902,7 +902,7 @@ export default function EnhancedAIChat() {
                                     key={idx}
                                     variant="outline"
                                     size="sm"
-                                    className="text-xs h-6 px-2"
+                                    className="text-xs h-6 px-2 bg-transparent"
                                     onClick={() => setInput(suggestion)}
                                   >
                                     {suggestion}
