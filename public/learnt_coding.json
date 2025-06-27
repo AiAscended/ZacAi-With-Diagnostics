@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "version": "2.0.0",
+    "lastUpdated": "2025-01-27T10:44:48.000Z",
+    "totalEntries": 0,
+    "source": "learned_programming",
+    "description": "Programming concepts, React/Next.js knowledge learned through conversations"
+  },
+  "coding": {
+    "react": {},
+    "nextjs": {},
+    "javascript": {},
+    "typescript": {},
+    "debugging": {},
+    "apis": {}
+  }
+}

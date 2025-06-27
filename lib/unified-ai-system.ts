@@ -4,12 +4,14 @@ import { BrowserStorageManager } from "./browser-storage-manager"
 import { EnhancedKnowledgeSystem } from "./enhanced-knowledge-system"
 import { EnhancedMathProcessor } from "./enhanced-math-processor"
 import { TemporalKnowledgeSystem } from "./temporal-knowledge-system"
+import { LearntDataManager } from "./learnt-data-manager"
 
 export class UnifiedAISystem {
   private enhancedKnowledge = new EnhancedKnowledgeSystem()
   private enhancedMath = new EnhancedMathProcessor()
   private storageManager = new BrowserStorageManager()
   private temporalSystem = new TemporalKnowledgeSystem()
+  private learntDataManager = LearntDataManager.getInstance()
 
   // Core cognitive data stores
   private conversationHistory: ChatMessage[] = []
@@ -423,32 +425,39 @@ export class UnifiedAISystem {
     console.log("✅ API manager initialized")
   }
 
-  // STEP 4: Load stored learned knowledge
+  // STEP 4: Load stored learned knowledge - Updated to use LearntDataManager
   private async loadStoredKnowledge(): Promise<void> {
     console.log("💾 Loading stored learned knowledge...")
 
     try {
       // Load learned vocabulary
-      const storedVocab = localStorage.getItem("zacai_learned_vocabulary")
-      if (storedVocab) {
-        const vocabData = JSON.parse(storedVocab)
-        vocabData.forEach((entry: VocabularyEntry) => {
-          this.vocabulary.set(entry.word, entry)
-        })
-        console.log(`✅ Loaded ${vocabData.length} learned vocabulary entries`)
+      const learnedVocab = this.learntDataManager.loadLearnedVocabulary()
+      learnedVocab.forEach((entry) => {
+        this.vocabulary.set(entry.word, entry)
+      })
+      if (learnedVocab.length > 0) {
+        console.log(`✅ Loaded ${learnedVocab.length} learned vocabulary entries`)
       }
 
       // Load learned mathematics
-      const storedMath = localStorage.getItem("zacai_learned_mathematics")
-      if (storedMath) {
-        const mathData = JSON.parse(storedMath)
-        mathData.forEach((entry: MathEntry) => {
-          this.mathematics.set(entry.concept, entry)
-        })
-        console.log(`✅ Loaded ${mathData.length} learned math entries`)
+      const learnedMath = this.learntDataManager.loadLearnedMathematics()
+      learnedMath.forEach((entry) => {
+        this.mathematics.set(entry.concept, entry)
+      })
+      if (learnedMath.length > 0) {
+        console.log(`✅ Loaded ${learnedMath.length} learned math entries`)
       }
 
-      // Load personal info
+      // Load learned science/facts
+      const learnedScience = this.learntDataManager.loadLearnedScience()
+      learnedScience.forEach((entry) => {
+        this.facts.set(entry.key, entry)
+      })
+      if (learnedScience.length > 0) {
+        console.log(`✅ Loaded ${learnedScience.length} learned science entries`)
+      }
+
+      // Load personal info (keep existing method)
       const storedPersonal = localStorage.getItem("zacai_personal_info")
       if (storedPersonal) {
         const personalData = JSON.parse(storedPersonal)
@@ -456,16 +465,6 @@ export class UnifiedAISystem {
           this.personalInfo.set(entry.key, entry)
         })
         console.log(`✅ Loaded ${personalData.length} personal info entries`)
-      }
-
-      // Load facts
-      const storedFacts = localStorage.getItem("zacai_facts")
-      if (storedFacts) {
-        const factsData = JSON.parse(storedFacts)
-        factsData.forEach((entry: FactEntry) => {
-          this.facts.set(entry.key, entry)
-        })
-        console.log(`✅ Loaded ${factsData.length} fact entries`)
       }
     } catch (error) {
       console.warn("Failed to load stored knowledge:", error)
@@ -682,14 +681,29 @@ export class UnifiedAISystem {
   // MATH CALCULATION HANDLING
   private isMathCalculation(message: string): boolean {
     const patterns = [
+      // Direct calculations
       /^\s*(\d+)\s*[x×*]\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
       /^\s*(\d+)\s*\+\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
       /^\s*(\d+)\s*-\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
       /^\s*(\d+)\s*[/÷]\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
-      /what\s*(?:is|does)\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
+
+      // Question formats
+      /what\s*(?:is|does|equals?)\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
       /calculate\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
+      /can\s+you\s+do\s+(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
+      /solve\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
+
+      // Mixed operations
+      /(\d+)\s*[+-]\s*(\d+)\s*[x×*]\s*(\d+)/i,
+      /(\d+)\s*[x×*]\s*(\d+)\s*[+-]\s*(\d+)/i,
+
+      // Formula requests
       /math.*formula/i,
       /give.*me.*formula/i,
+      /show.*formula/i,
+
+      // General math keywords
+      /(?:math|calculate|computation|arithmetic)/i,
     ]
     return patterns.some((pattern) => pattern.test(message))
   }
@@ -706,55 +720,71 @@ export class UnifiedAISystem {
     const mathData = this.extractMathOperation(message)
     if (!mathData) {
       return {
-        content: "I couldn't parse that math expression. Try something like '3×3' or '5+2'.",
+        content: "I couldn't parse that math expression. Try something like '3×3', '5+2', or '3+3×3'.",
         confidence: 0.3,
         reasoning: ["Could not parse math expression"],
       }
     }
 
-    const { num1, num2, operation } = mathData
     let result: number | string = "Error"
     let seedUsed = false
+    let calculation = ""
 
-    // 1. Try to get from seed math data first
-    if (operation === "multiply") {
-      const seedResult = this.getFromSeedMath(num1, num2, "multiplication")
-      if (seedResult !== null) {
-        result = seedResult
-        seedUsed = true
+    // Handle complex expressions (order of operations)
+    if (mathData.operation === "complex" && mathData.expression) {
+      try {
+        // Parse expression like "3+3×3" with proper order of operations
+        result = Function('"use strict"; return (' + mathData.expression.replace(/[x×]/g, "*") + ")")()
+        calculation = mathData.expression.replace(/[x×]/g, "×")
+      } catch (error) {
+        result = "Error in calculation"
       }
-    }
+    } else {
+      // Handle simple operations
+      const { num1, num2, operation } = mathData
+      calculation = `${num1} ${this.getOperationSymbol(operation)} ${num2}`
 
-    // 2. Fallback to calculation
-    if (!seedUsed) {
-      switch (operation) {
-        case "add":
-          result = num1 + num2
-          break
-        case "subtract":
-          result = num1 - num2
-          break
-        case "multiply":
-          result = num1 * num2
-          break
-        case "divide":
-          result = num2 !== 0 ? num1 / num2 : "Cannot divide by zero"
-          break
+      // 1. Try to get from seed math data first
+      if (operation === "multiply") {
+        const seedResult = this.getFromSeedMath(num1, num2, "multiplication")
+        if (seedResult !== null) {
+          result = seedResult
+          seedUsed = true
+        }
+      }
+
+      // 2. Fallback to calculation
+      if (!seedUsed) {
+        switch (operation) {
+          case "add":
+            result = num1 + num2
+            break
+          case "subtract":
+            result = num1 - num2
+            break
+          case "multiply":
+            result = num1 * num2
+            break
+          case "divide":
+            result = num2 !== 0 ? num1 / num2 : "Cannot divide by zero"
+            break
+        }
       }
     }
 
     // 3. Store the calculation for future reference
     const mathEntry: MathEntry = {
-      concept: `${num1}_${operation}_${num2}`,
+      concept: `calculation_${Date.now()}`,
       type: "calculation",
-      data: { num1, num2, operation, result, seedUsed },
+      data: { calculation, result, seedUsed, timestamp: Date.now() },
       source: seedUsed ? "seed" : "calculated",
       learned: Date.now(),
       confidence: 0.95,
     }
     this.mathematics.set(mathEntry.concept, mathEntry)
+    await this.saveLearnedMathematics()
 
-    let response = `🧮 **${num1} ${this.getOperationSymbol(operation)} ${num2} = ${result}**\n\n`
+    let response = `🧮 **${calculation} = ${result}**\n\n`
 
     if (seedUsed) {
       response += `✅ **Used seed mathematical data** from arithmetic tables\n\n`
@@ -768,6 +798,11 @@ export class UnifiedAISystem {
       response += `🌀 **Tesla Analysis of ${result}:**\n`
       response += `• Digital Root: ${teslaAnalysis.digitalRoot}\n`
       response += `• Pattern: ${teslaAnalysis.type}\n`
+      if (teslaAnalysis.isTeslaNumber) {
+        response += `• ⚡ Tesla Sacred Number - Controls universal energy!\n`
+      } else if (teslaAnalysis.isVortexNumber) {
+        response += `• 🌀 Vortex Cycle Number - Part of infinite energy flow!\n`
+      }
     }
 
     return {
@@ -830,13 +865,34 @@ export class UnifiedAISystem {
   // VOCABULARY LOOKUP HANDLING
   private isVocabularyLookup(message: string): boolean {
     const patterns = [
-      /^what\s+(?:is|does|means?)\s+(?!you|your|my)([a-zA-Z]+(?:\s+[a-zA-Z]+)*)\s*\??\s*$/i,
-      /^define\s+(?!you|your|my)([a-zA-Z]+(?:\s+[a-zA-Z]+)*)\s*\??\s*$/i,
-      /^meaning\s+of\s+(?!you|your|my)([a-zA-Z]+(?:\s+[a-zA-Z]+)*)\s*\??\s*$/i,
-      /dictionary.*lookup/i,
-      /vocab.*json/i,
-      /meaning.*from.*vocab/i,
+      // Direct questions
+      /^what\s+(?:is|does|means?)\s+(?!you|your|my|i\s|we\s)([a-zA-Z]+(?:\s+[a-zA-Z]+)*)\s*\??\s*$/i,
+      /^define\s+(?!you|your|my|i\s|we\s)([a-zA-Z]+(?:\s+[a-zA-Z]+)*)\s*\??\s*$/i,
+      /^meaning\s+of\s+(?!you|your|my|i\s|we\s)([a-zA-Z]+(?:\s+[a-zA-Z]+)*)\s*\??\s*$/i,
+
+      // More flexible patterns
+      /what\s+does\s+([a-zA-Z]+)\s+mean/i,
+      /explain\s+([a-zA-Z]+)/i,
+      /definition\s+of\s+([a-zA-Z]+)/i,
+
+      // Single word queries that aren't personal
+      /^(?!you|your|my|i\s|we\s|they\s|them\s|him\s|her\s|his\s|hers\s)([a-zA-Z]+)\s*\??\s*$/i,
     ]
+
+    // Additional check - if it's a single word that's not a common personal word
+    const trimmed = message.trim().toLowerCase()
+    const personalWords = ["you", "your", "my", "me", "i", "we", "they", "them", "him", "her", "his", "hers"]
+    const commonWords = ["hello", "hi", "hey", "thanks", "thank", "please", "yes", "no", "ok", "okay"]
+
+    if (
+      trimmed.split(" ").length === 1 &&
+      !personalWords.includes(trimmed) &&
+      !commonWords.includes(trimmed) &&
+      /^[a-zA-Z]+$/.test(trimmed)
+    ) {
+      return true
+    }
+
     return patterns.some((pattern) => pattern.test(message))
   }
 
@@ -935,11 +991,18 @@ export class UnifiedAISystem {
   // KNOWLEDGE QUERY HANDLING
   private isKnowledgeQuery(message: string): boolean {
     const patterns = [
-      /tell me about (?!you|your)/i,
-      /what.*know.*about (?!you|your)/i,
-      /explain.*(?!you|your)/i,
+      /tell me about (?!you|your|my|i\s|we\s)/i,
+      /what.*know.*about (?!you|your|my|i\s|we\s)/i,
+      /explain.*(?!you|your|my|i\s|we\s)/i,
       /how.*work/i,
       /what.*(?:science|scientific)/i,
+      /describe\s+(?!you|your|my|i\s|we\s)/i,
+      /information\s+about\s+(?!you|your|my|i\s|we\s)/i,
+
+      // Science-specific patterns
+      /what\s+is\s+science/i,
+      /science\s+experiment/i,
+      /scientific\s+method/i,
     ]
     return patterns.some((pattern) => pattern.test(message))
   }
@@ -1203,26 +1266,77 @@ export class UnifiedAISystem {
 
   // HELPER METHODS
   private extractWordFromMessage(message: string): string {
-    const patterns = [/(?:what\s+(?:is|does|means?)|define|meaning\s+of)\s+(.+)/i, /dependencies/i, /meaning/i]
+    // Remove common question words and clean the message
+    const cleaned = message
+      .toLowerCase()
+      .replace(/^(what\s+(?:is|does|means?)|define|meaning\s+of|tell\s+me\s+about)\s+/i, "")
+      .replace(/[?!.]/g, "")
+      .trim()
+
+    // Handle specific patterns
+    const patterns = [
+      /(?:what\s+(?:is|does|means?)|define|meaning\s+of)\s+(.+)/i,
+      /^(.+)$/i, // Fallback - take the whole cleaned message
+    ]
 
     for (const pattern of patterns) {
       const match = message.match(pattern)
       if (match) {
-        if (pattern.source.includes("dependencies")) return "dependencies"
-        if (pattern.source.includes("meaning")) return "meaning"
-        return match[1].trim().replace(/[?!.]/g, "").toLowerCase()
+        const word = match[1].trim().replace(/[?!.]/g, "").toLowerCase()
+        // Filter out personal pronouns and common words that shouldn't be looked up
+        if (!["you", "your", "my", "me", "i", "we", "they", "them"].includes(word)) {
+          return word
+        }
       }
+    }
+
+    // If we get here, try the cleaned version
+    if (cleaned && !["you", "your", "my", "me", "i", "we", "they", "them"].includes(cleaned)) {
+      return cleaned
     }
 
     return ""
   }
 
   private extractTopicFromMessage(message: string): string {
-    const match = message.match(/(?:tell me about|what.*about|explain)\s+(.+)/i)
-    return match ? match[1].trim().replace(/[?!.]/g, "") : ""
+    const patterns = [
+      /(?:tell me about|what.*about|explain|describe)\s+(.+)/i,
+      /(?:what\s+is|what\s+are)\s+(.+)/i,
+      /(?:how\s+does|how\s+do)\s+(.+)\s+work/i,
+      /^(.+)$/i, // Fallback
+    ]
+
+    for (const pattern of patterns) {
+      const match = message.match(pattern)
+      if (match) {
+        const topic = match[1].trim().replace(/[?!.]/g, "")
+        // Filter out personal references
+        if (!topic.toLowerCase().includes("you") && !topic.toLowerCase().includes("your")) {
+          return topic
+        }
+      }
+    }
+
+    return ""
   }
 
-  private extractMathOperation(message: string): { num1: number; num2: number; operation: string } | null {
+  private extractMathOperation(
+    message: string,
+  ): { num1: number; num2: number; operation: string; expression?: string } | null {
+    // Handle complex expressions like 3+3×3
+    const complexMatch = message.match(/(\d+)\s*([+-])\s*(\d+)\s*([x×*])\s*(\d+)/i)
+    if (complexMatch) {
+      // For order of operations, we need to handle this specially
+      const [, num1, op1, num2, op2, num3] = complexMatch
+      return {
+        num1: Number.parseInt(num1),
+        num2: Number.parseInt(num2),
+        operation: "complex",
+        expression: `${num1}${op1}${num2}${op2}${num3}`,
+      }
+    }
+
+    // Handle simple operations
     const patterns = [
       { regex: /(\d+)\s*[x×*]\s*(\d+)/i, op: "multiply" },
       { regex: /(\d+)\s*\+\s*(\d+)/i, op: "add" },
@@ -1346,20 +1460,31 @@ export class UnifiedAISystem {
     })
   }
 
-  // STORAGE METHODS
+  // STORAGE METHODS - Updated to use LearntDataManager
   private async saveLearnedVocabulary(): Promise<void> {
     try {
       const learnedVocab = Array.from(this.vocabulary.values()).filter((v) => v.source === "learned_api")
-      localStorage.setItem("zacai_learned_vocabulary", JSON.stringify(learnedVocab))
+      await this.learntDataManager.saveLearnedVocabulary(learnedVocab)
     } catch (error) {
       console.warn("Failed to save learned vocabulary:", error)
+    }
+  }
+
+  private async saveLearnedMathematics(): Promise<void> {
+    try {
+      const learnedMath = Array.from(this.mathematics.values()).filter(
+        (m) => m.source === "calculated" || m.source === "learned_api",
+      )
+      await this.learntDataManager.saveLearnedMathematics(learnedMath)
+    } catch (error) {
+      console.warn("Failed to save learned mathematics:", error)
     }
   }
 
   private async saveLearnedFacts(): Promise<void> {
     try {
       const learnedFacts = Array.from(this.facts.values()).filter((f) => f.source === "learned_api")
-      localStorage.setItem("zacai_facts", JSON.stringify(learnedFacts))
+      await this.learntDataManager.saveLearnedScience(learnedFacts)
     } catch (error) {
       console.warn("Failed to save learned facts:", error)
     }
@@ -1371,6 +1496,21 @@ export class UnifiedAISystem {
       localStorage.setItem("zacai_personal_info", JSON.stringify(personalData))
     } catch (error) {
       console.warn("Failed to save personal info:", error)
+    }
+  }
+
+  private async saveLearnedMathematics(): Promise<void> {
+    try {
+      const learnedMath = Array.from(this.mathematics.values()).filter(
+        (m) => m.source === "calculated" || m.source === "learned_api",
+      )
+
+      // Try to save to learnt_maths.json (this would need server-side implementation)
+      // For now, save to localStorage as backup
+      localStorage.setItem("zacai_learned_mathematics", JSON.stringify(learnedMath))
+      console.log(`💾 Saved ${learnedMath.length} learned mathematics entries`)
+    } catch (error) {
+      console.warn("Failed to save learned mathematics:", error)
     }
   }
 
