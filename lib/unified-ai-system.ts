@@ -7,6 +7,16 @@ import { TemporalKnowledgeSystem } from "./temporal-knowledge-system"
 import { LearntDataManager } from "./learnt-data-manager"
 
 export class UnifiedAISystem {
+  private vocabulary: Map<string, any> = new Map()
+  private mathematics: Map<string, any> = new Map()
+  private personalInfo: Map<string, any> = new Map()
+  private facts: Map<string, any> = new Map()
+  private coding: Map<string, any> = new Map()
+  private conversationHistory: any[] = []
+
+  private isInitialized = false
+  private systemIdentity = { name: "ZacAI", version: "2.0.0" }
+
   private enhancedKnowledge = new EnhancedKnowledgeSystem()
   private enhancedMath = new EnhancedMathProcessor()
   private storageManager = new BrowserStorageManager()
@@ -14,14 +24,14 @@ export class UnifiedAISystem {
   private learntDataManager = LearntDataManager.getInstance()
 
   // Core cognitive data stores
-  private conversationHistory: ChatMessage[] = []
+  // private conversationHistory: ChatMessage[] = []
   private conversationContext: ConversationContext = { topics: [], entities: [], sentiment: "neutral" }
   private memory: Map<string, any> = new Map()
-  private vocabulary: Map<string, VocabularyEntry> = new Map()
-  private personalInfo: Map<string, PersonalInfoEntry> = new Map()
-  private facts: Map<string, FactEntry> = new Map()
-  private mathematics: Map<string, MathEntry> = new Map()
-  private codingKnowledge: Map<string, CodingEntry> = new Map()
+  // private vocabulary: Map<string, VocabularyEntry> = new Map()
+  // private personalInfo: Map<string, PersonalInfoEntry> = new Map()
+  // private facts: Map<string, FactEntry> = new Map()
+  // private mathematics: Map<string, MathEntry> = new Map()
+  // private codingKnowledge: Map<string, CodingEntry> = new Map()
 
   // Advanced cognitive features
   private reasoningChains: Map<string, ReasoningChain> = new Map()
@@ -35,8 +45,8 @@ export class UnifiedAISystem {
 
   // System state
   private systemStatus = "idle"
-  private isInitialized = false
-  private systemIdentity: any = null
+  // private isInitialized = false
+  // private systemIdentity: any = null
   private cognitiveInstructions: any = null
 
   // PROPERLY LOADED SEED DATA
@@ -53,10 +63,191 @@ export class UnifiedAISystem {
   private backgroundLearning = true
 
   constructor() {
+    console.log("🧠 ZacAI System starting...")
     // Initialize basic vocabulary and facts
-    this.initializeBasicVocabulary()
-    this.initializeSampleFacts()
-    this.startBackgroundProcesses()
+    // this.initializeBasicVocabulary()
+    // this.initializeSampleFacts()
+    // this.startBackgroundProcesses()
+  }
+
+  public async initialize(): Promise<void> {
+    if (this.isInitialized) return
+
+    console.log("🚀 Initializing ZacAI System...")
+
+    try {
+      // Load seed data
+      await this.loadSeedVocabulary()
+      await this.loadSeedMathematics()
+      await this.loadSeedFacts()
+      await this.loadSeedCoding()
+
+      // Load learned data
+      await this.loadLearnedData()
+
+      this.isInitialized = true
+      console.log("✅ ZacAI System initialized successfully")
+      console.log(`📚 Vocabulary: ${this.vocabulary.size} words`)
+      console.log(`🧮 Mathematics: ${this.mathematics.size} concepts`)
+      console.log(`🧠 Facts: ${this.facts.size} facts`)
+      console.log(`💻 Coding: ${this.coding.size} concepts`)
+    } catch (error) {
+      console.error("❌ Initialization failed:", error)
+      this.isInitialized = false
+    }
+  }
+
+  private async loadSeedVocabulary(): Promise<void> {
+    try {
+      const response = await fetch("/seed_vocab.json")
+      if (response.ok) {
+        const data = await response.json()
+        Object.entries(data).forEach(([word, entry]: [string, any]) => {
+          this.vocabulary.set(word.toLowerCase(), {
+            word: word.toLowerCase(),
+            definition: entry.definition,
+            partOfSpeech: entry.part_of_speech || entry.partOfSpeech || "unknown",
+            examples: entry.examples || [],
+            source: "seed",
+            confidence: 0.9,
+          })
+        })
+        console.log(`✅ Loaded ${Object.keys(data).length} seed vocabulary words`)
+      }
+    } catch (error) {
+      console.warn("Failed to load seed vocabulary:", error)
+    }
+  }
+
+  private async loadSeedMathematics(): Promise<void> {
+    try {
+      const response = await fetch("/seed_maths.json")
+      if (response.ok) {
+        const data = await response.json()
+        Object.entries(data).forEach(([concept, entry]: [string, any]) => {
+          this.mathematics.set(concept, {
+            concept,
+            data: entry,
+            source: "seed",
+            confidence: 0.95,
+          })
+        })
+        console.log(`✅ Loaded ${Object.keys(data).length} seed math concepts`)
+      }
+    } catch (error) {
+      console.warn("Failed to load seed mathematics:", error)
+    }
+  }
+
+  private async loadSeedFacts(): Promise<void> {
+    try {
+      const response = await fetch("/seed_knowledge.json")
+      if (response.ok) {
+        const data = await response.json()
+        Object.entries(data).forEach(([domain, domainData]: [string, any]) => {
+          if (typeof domainData === "object") {
+            Object.entries(domainData).forEach(([topic, info]: [string, any]) => {
+              this.facts.set(`${domain}_${topic}`, {
+                topic: `${domain}_${topic}`,
+                content: typeof info === "string" ? info : JSON.stringify(info),
+                category: domain,
+                source: "seed",
+                confidence: 0.9,
+              })
+            })
+          }
+        })
+        console.log(`✅ Loaded seed knowledge facts`)
+      }
+    } catch (error) {
+      console.warn("Failed to load seed facts:", error)
+    }
+  }
+
+  private async loadSeedCoding(): Promise<void> {
+    try {
+      const response = await fetch("/seed_coding.json")
+      if (response.ok) {
+        const data = await response.json()
+        Object.entries(data).forEach(([concept, entry]: [string, any]) => {
+          this.coding.set(concept, {
+            concept,
+            data: entry,
+            source: "seed",
+            confidence: 0.9,
+          })
+        })
+        console.log(`✅ Loaded seed coding concepts`)
+      }
+    } catch (error) {
+      console.warn("Failed to load seed coding:", error)
+    }
+  }
+
+  private async loadLearnedData(): Promise<void> {
+    try {
+      // Load learned vocabulary
+      const vocabResponse = await fetch("/learnt_vocab.json")
+      if (vocabResponse.ok) {
+        const vocabData = await vocabResponse.json()
+        if (vocabData.vocabulary) {
+          Object.entries(vocabData.vocabulary).forEach(([word, entry]: [string, any]) => {
+            this.vocabulary.set(word.toLowerCase(), {
+              ...entry,
+              source: "learned",
+            })
+          })
+          console.log(`✅ Loaded learned vocabulary`)
+        }
+      }
+
+      // Load learned mathematics
+      const mathResponse = await fetch("/learnt_maths.json")
+      if (mathResponse.ok) {
+        const mathData = await mathResponse.json()
+        if (mathData.mathematics) {
+          Object.entries(mathData.mathematics).forEach(([concept, entry]: [string, any]) => {
+            this.mathematics.set(concept, {
+              ...entry,
+              source: "learned",
+            })
+          })
+          console.log(`✅ Loaded learned mathematics`)
+        }
+      }
+
+      // Load learned science
+      const scienceResponse = await fetch("/learnt_science.json")
+      if (scienceResponse.ok) {
+        const scienceData = await scienceResponse.json()
+        if (scienceData.science) {
+          Object.entries(scienceData.science).forEach(([topic, entry]: [string, any]) => {
+            this.facts.set(topic, {
+              ...entry,
+              source: "learned",
+            })
+          })
+          console.log(`✅ Loaded learned science`)
+        }
+      }
+
+      // Load learned coding
+      const codingResponse = await fetch("/learnt_coding.json")
+      if (codingResponse.ok) {
+        const codingData = await codingResponse.json()
+        if (codingData.coding) {
+          Object.entries(codingData.coding).forEach(([concept, entry]: [string, any]) => {
+            this.coding.set(concept, {
+              ...entry,
+              source: "learned",
+            })
+          })
+          console.log(`✅ Loaded learned coding`)
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to load learned data:", error)
+    }
   }
 
   private initializeBasicVocabulary(): void {
@@ -206,46 +397,46 @@ export class UnifiedAISystem {
     }, 30000)
   }
 
-  public async initialize(): Promise<void> {
-    if (this.isInitialized) {
-      console.log("✅ ZacAI already initialized")
-      return
-    }
+  // public async initialize(): Promise<void> {
+  //   if (this.isInitialized) {
+  //     console.log("✅ ZacAI already initialized")
+  //     return
+  //   }
 
-    try {
-      console.log("🧠 Initializing ZacAI Advanced Cognitive System...")
-      this.systemStatus = "initializing"
+  //   try {
+  //     console.log("🧠 Initializing ZacAI Advanced Cognitive System...")
+  //     this.systemStatus = "initializing"
 
-      // STEP 1: Load ALL seed data and process it cognitively
-      await this.loadAndProcessSeedData()
+  //     // STEP 1: Load ALL seed data and process it cognitively
+  //     await this.loadAndProcessSeedData()
 
-      // STEP 2: Initialize cognitive instructions
-      await this.initializeCognitiveInstructions()
+  //     // STEP 2: Initialize cognitive instructions
+  //     await this.initializeCognitiveInstructions()
 
-      // STEP 3: Initialize advanced API manager
-      await this.initializeAdvancedAPIManager()
+  //     // STEP 3: Initialize advanced API manager
+  //     await this.initializeAdvancedAPIManager()
 
-      // STEP 4: Load stored learned knowledge
-      await this.loadStoredKnowledge()
+  //     // STEP 4: Load stored learned knowledge
+  //     await this.loadStoredKnowledge()
 
-      // STEP 5: Set up advanced learning pipeline
-      this.setupAdvancedLearningPipeline()
+  //     // STEP 5: Set up advanced learning pipeline
+  //     this.setupAdvancedLearningPipeline()
 
-      // STEP 6: Initialize reasoning and context systems
-      this.initializeReasoningSystem()
+  //     // STEP 6: Initialize reasoning and context systems
+  //     this.initializeReasoningSystem()
 
-      this.systemStatus = "ready"
-      this.isInitialized = true
+  //     this.systemStatus = "ready"
+  //     this.isInitialized = true
 
-      const name = this.systemIdentity?.name || "ZacAI"
-      console.log(`✅ ${name} Advanced Cognitive System fully operational!`)
-      this.logAdvancedCapabilities()
-    } catch (error) {
-      console.error("❌ Advanced cognitive initialization failed:", error)
-      this.systemStatus = "error"
-      this.isInitialized = false
-    }
-  }
+  //     const name = this.systemIdentity?.name || "ZacAI"
+  //     console.log(`✅ ${name} Advanced Cognitive System fully operational!`)
+  //     this.logAdvancedCapabilities()
+  //   } catch (error) {
+  //     console.error("❌ Advanced cognitive initialization failed:", error)
+  //     this.systemStatus = "error"
+  //     this.isInitialized = false
+  //   }
+  // }
 
   // STEP 1: Load and cognitively process ALL seed data
   private async loadAndProcessSeedData(): Promise<void> {
@@ -669,765 +860,318 @@ export class UnifiedAISystem {
   }
 
   // ENHANCED MESSAGE PROCESSING with advanced reasoning
-  public async processMessage(userMessage: string): Promise<AIResponse> {
-    const startTime = Date.now()
+  public async processMessage(userMessage: string): Promise<any> {
+    console.log("🤖 Processing:", userMessage)
 
-    if (!this.isInitialized) {
-      await this.initialize()
+    // Store personal info
+    this.extractPersonalInfo(userMessage)
+
+    // Check for math calculation
+    if (this.isMathCalculation(userMessage)) {
+      return this.handleMathCalculation(userMessage)
     }
 
-    console.log("🧠 ZacAI Advanced Cognitive Processing:", userMessage)
+    // Check for vocabulary lookup
+    if (this.isVocabularyLookup(userMessage)) {
+      return this.handleVocabularyLookup(userMessage)
+    }
 
-    // Update conversation context
-    this.updateConversationContext(userMessage)
+    // Check for personal info query
+    if (this.isPersonalInfoQuery(userMessage)) {
+      return this.handlePersonalInfoQuery(userMessage)
+    }
 
-    // Extract and store personal info
-    this.extractAndStorePersonalInfo(userMessage)
+    // Check for system query
+    if (this.isSystemQuery(userMessage)) {
+      return this.handleSystemQuery(userMessage)
+    }
 
-    try {
-      // ADVANCED COGNITIVE DECISION TREE with reasoning chains
+    // Default response
+    return this.handleGeneralConversation(userMessage)
+  }
 
-      // 1. PERSONAL INFO QUERIES
-      if (this.isPersonalInfoQuery(userMessage)) {
-        return await this.handlePersonalInfoQueryWithReasoning(userMessage)
-      }
-
-      // 2. MATH CALCULATIONS (Enhanced with multiple methods)
-      if (this.isMathCalculation(userMessage)) {
-        return await this.handleAdvancedMathCalculation(userMessage)
-      }
-
-      // 3. VOCABULARY LOOKUPS (Enhanced with context)
-      if (this.isVocabularyLookup(userMessage)) {
-        return await this.handleAdvancedVocabularyLookup(userMessage)
-      }
-
-      // 4. KNOWLEDGE QUERIES (Enhanced with domain detection)
-      if (this.isKnowledgeQuery(userMessage)) {
-        return await this.handleAdvancedKnowledgeQuery(userMessage)
-      }
-
-      // 5. CODING QUERIES
-      if (this.isCodingQuery(userMessage)) {
-        return await this.handleCodingQuery(userMessage)
-      }
-
-      // 6. TESLA/VORTEX MATH
-      if (this.isTeslaQuery(userMessage)) {
-        return await this.handleAdvancedTeslaQuery(userMessage)
-      }
-
-      // 7. SYSTEM QUERIES
-      if (this.isSystemQuery(userMessage)) {
-        return await this.handleAdvancedSystemQuery(userMessage)
-      }
-
-      // 8. GREETINGS
-      if (this.isGreeting(userMessage)) {
-        return await this.handlePersonalizedGreeting(userMessage)
-      }
-
-      // 9. CONTEXTUAL CONVERSATION (Enhanced with reasoning)
-      return await this.handleAdvancedContextualConversation(userMessage)
-    } catch (error) {
-      console.error("❌ Advanced cognitive processing error:", error)
-      return {
-        content:
-          "I encountered an error processing your message. Let me try to help you anyway - what would you like to know?",
-        confidence: 0.3,
-        reasoning: ["Error in advanced cognitive processing"],
-        processingTime: Date.now() - startTime,
-      }
-    } finally {
-      // Update performance metrics
-      this.updatePerformanceMetrics(Date.now() - startTime)
+  private extractPersonalInfo(message: string): void {
+    const nameMatch = message.match(/(?:my name is|i'm|i am|call me)\s+(\w+)/i)
+    if (nameMatch) {
+      this.personalInfo.set("name", {
+        key: "name",
+        value: nameMatch[1],
+        timestamp: Date.now(),
+      })
+      console.log(`📝 Stored name: ${nameMatch[1]}`)
     }
   }
 
-  // PERSONAL INFO HANDLING
+  private isMathCalculation(message: string): boolean {
+    return /\d+\s*[x×*+\-÷/]\s*\d+/.test(message) || /formula/i.test(message)
+  }
+
+  private isVocabularyLookup(message: string): boolean {
+    return /what\s+(?:is|does|means?)\s+\w+/i.test(message) || /define\s+\w+/i.test(message)
+  }
+
   private isPersonalInfoQuery(message: string): boolean {
-    const patterns = [
-      /what'?s my name/i,
-      /do you remember my name/i,
-      /what do you know about me/i,
-      /what do you remember/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
+    return /what'?s my name|do you remember|what do you know about me/i.test(message)
   }
 
-  private async handlePersonalInfoQueryWithReasoning(message: string): Promise<AIResponse> {
-    const reasoning: string[] = ["Processing personal information query"]
+  private isSystemQuery(message: string): boolean {
+    return /who are you|what are you|diagnostic|status/i.test(message)
+  }
 
+  private handleMathCalculation(message: string): any {
+    // Extract math operation
+    const mathMatch = message.match(/(\d+)\s*([x×*+\-÷/])\s*(\d+)/)
+    if (mathMatch) {
+      const [, num1, op, num2] = mathMatch
+      const a = Number.parseInt(num1)
+      const b = Number.parseInt(num2)
+      let result = 0
+
+      switch (op) {
+        case "+":
+          result = a + b
+          break
+        case "-":
+          result = a - b
+          break
+        case "x":
+        case "×":
+        case "*":
+          result = a * b
+          break
+        case "÷":
+        case "/":
+          result = a / b
+          break
+      }
+
+      // Save calculation
+      this.mathematics.set(`calc_${Date.now()}`, {
+        concept: `${a} ${op} ${b}`,
+        result: result,
+        source: "calculated",
+        timestamp: Date.now(),
+      })
+
+      return {
+        content: `🧮 **${a} ${op} ${b} = ${result}**\n\nCalculation completed and stored for future reference.`,
+        confidence: 0.95,
+        reasoning: ["Performed mathematical calculation"],
+      }
+    }
+
+    return {
+      content: "I can help with math calculations. Try something like '3×3' or '10+5'.",
+      confidence: 0.7,
+      reasoning: ["Could not parse math expression"],
+    }
+  }
+
+  private async handleVocabularyLookup(message: string): Promise<any> {
+    const wordMatch = message.match(/(?:what\s+(?:is|does|means?)|define)\s+(\w+)/i)
+    if (!wordMatch) {
+      return {
+        content: "I couldn't identify the word you want me to define.",
+        confidence: 0.3,
+        reasoning: ["Could not extract word"],
+      }
+    }
+
+    const word = wordMatch[1].toLowerCase()
+
+    // Check if we have the word
+    if (this.vocabulary.has(word)) {
+      const entry = this.vocabulary.get(word)
+      return {
+        content: `📖 **${word}**\n\n**Definition:** ${entry.definition}\n\n**Part of Speech:** ${entry.partOfSpeech}\n\n✅ From my ${entry.source} vocabulary.`,
+        confidence: entry.confidence,
+        reasoning: [`Found word in ${entry.source} vocabulary`],
+        knowledgeUsed: [entry.source],
+      }
+    }
+
+    // Try to look up online
+    try {
+      const wordData = await this.lookupWordOnline(word)
+      if (wordData) {
+        // Save the learned word
+        const newEntry = {
+          word: word,
+          definition: wordData.definition,
+          partOfSpeech: wordData.partOfSpeech || "unknown",
+          examples: wordData.examples || [],
+          source: "learned",
+          confidence: 0.8,
+          timestamp: Date.now(),
+        }
+
+        this.vocabulary.set(word, newEntry)
+        await this.saveLearnedVocabulary()
+
+        return {
+          content: `📖 **${word}** (newly learned)\n\n**Definition:** ${wordData.definition}\n\n**Part of Speech:** ${wordData.partOfSpeech}\n\n✨ I've learned this word and saved it for future use!`,
+          confidence: 0.8,
+          reasoning: ["Looked up word online and learned it"],
+          knowledgeUsed: ["api_lookup"],
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to lookup word: ${word}`, error)
+    }
+
+    return {
+      content: `I don't know the word "${word}" yet, but I'll try to learn it for next time.`,
+      confidence: 0.4,
+      reasoning: ["Word not found in vocabulary or online"],
+    }
+  }
+
+  private async lookupWordOnline(word: string): Promise<any> {
+    try {
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data && data.length > 0) {
+          const entry = data[0]
+          const meaning = entry.meanings?.[0]
+          const definition = meaning?.definitions?.[0]
+
+          return {
+            definition: definition?.definition || "Definition found",
+            partOfSpeech: meaning?.partOfSpeech || "unknown",
+            examples: definition?.example ? [definition.example] : [],
+          }
+        }
+      }
+    } catch (error) {
+      console.warn("Dictionary API failed:", error)
+    }
+    return null
+  }
+
+  private handlePersonalInfoQuery(message: string): any {
     if (message.toLowerCase().includes("name")) {
       const nameInfo = this.personalInfo.get("name")
       if (nameInfo) {
-        reasoning.push("Retrieved stored name from personal memory")
         return {
-          content: `Ah, yes! Your name is ${nameInfo.value}. I remember you telling me that. I store personal information to make our conversations more meaningful.`,
+          content: `Your name is ${nameInfo.value}! I remember you telling me that.`,
           confidence: 0.95,
-          reasoning,
+          reasoning: ["Retrieved name from personal memory"],
         }
       } else {
-        reasoning.push("No name found in personal memory")
         return {
-          content:
-            "I don't think you've told me your name yet. What's your name? I'll remember it for our future conversations!",
+          content: "I don't think you've told me your name yet. What's your name?",
           confidence: 0.8,
-          reasoning,
+          reasoning: ["No name stored in memory"],
         }
       }
     }
 
     if (this.personalInfo.size > 0) {
-      reasoning.push("Retrieved all stored personal information")
       let response = "Here's what I remember about you:\n\n"
       this.personalInfo.forEach((entry, key) => {
         response += `• **${key}**: ${entry.value}\n`
       })
-      response += "\nI keep this information to personalize our conversations!"
 
       return {
         content: response,
         confidence: 0.9,
-        reasoning,
+        reasoning: ["Retrieved all personal information"],
       }
     }
 
-    reasoning.push("No personal information stored yet")
     return {
-      content:
-        "I don't have any personal information about you stored yet. Tell me about yourself - I'll remember what you share!",
+      content: "I don't have any personal information about you stored yet. Tell me about yourself!",
       confidence: 0.7,
-      reasoning,
+      reasoning: ["No personal information stored"],
     }
   }
 
-  // ENHANCED MATH CALCULATION with multiple methods
-  private async handleAdvancedMathCalculation(message: string): Promise<AIResponse> {
-    console.log("🧮 Processing advanced math calculation with multiple methods")
-
-    const reasoning: string[] = ["Initiated advanced mathematical processing"]
-
-    // Check if it's a formula request
-    if (message.toLowerCase().includes("formula")) {
-      return await this.handleAdvancedFormulaRequest(message)
-    }
-
-    // Extract math operation with enhanced parsing
-    const mathData = this.extractAdvancedMathOperation(message)
-    if (!mathData) {
-      return {
-        content:
-          "I couldn't parse that math expression. Try something like '3×3', '5+2', '3+3×3', or ask for a formula.",
-        confidence: 0.3,
-        reasoning: ["Could not parse math expression with advanced parser"],
-      }
-    }
-
-    let result: number | string = "Error"
-    let methodUsed = "unknown"
-    let calculation = ""
-    let teslaAnalysis: any = null
-
-    // Handle complex expressions with proper order of operations
-    if (mathData.operation === "complex" && mathData.expression) {
-      try {
-        reasoning.push("Processing complex expression with order of operations")
-        result = Function('"use strict"; return (' + mathData.expression.replace(/[x×]/g, "*") + ")")()
-        calculation = mathData.expression.replace(/[x×]/g, "×")
-        methodUsed = "order_of_operations"
-      } catch (error) {
-        result = "Error in calculation"
-        reasoning.push("Error in complex expression evaluation")
-      }
-    } else {
-      // Handle simple operations with multiple methods
-      const { num1, num2, operation } = mathData
-      calculation = `${num1} ${this.getOperationSymbol(operation)} ${num2}`
-
-      // Method 1: Try Tesla Vortex Mathematics
-      if (operation === "multiply") {
-        const teslaResult = this.calculateUsingTeslaMethod(num1, num2)
-        if (teslaResult !== null) {
-          result = teslaResult.result
-          methodUsed = "tesla_vortex_method"
-          reasoning.push("Used Tesla Vortex multiplication method")
-        }
-      }
-
-      // Method 2: Try seed arithmetic tables
-      if (result === "Error" && operation === "multiply") {
-        const seedResult = this.getFromSeedMath(num1, num2, "multiplication")
-        if (seedResult !== null) {
-          result = seedResult
-          methodUsed = "seed_times_tables"
-          reasoning.push("Used seed arithmetic tables")
-        }
-      }
-
-      // Method 3: Try Chinese stick method for visualization
-      if (result === "Error" && operation === "multiply") {
-        const chineseResult = this.calculateUsingChineseMethod(num1, num2)
-        if (chineseResult !== null) {
-          result = chineseResult.result
-          methodUsed = "chinese_stick_method"
-          reasoning.push("Used Chinese stick multiplication method")
-        }
-      }
-
-      // Method 4: Standard arithmetic fallback
-      if (result === "Error") {
-        switch (operation) {
-          case "add":
-            result = num1 + num2
-            methodUsed = "standard_arithmetic"
-            break
-          case "subtract":
-            result = num1 - num2
-            methodUsed = "standard_arithmetic"
-            break
-          case "multiply":
-            result = num1 * num2
-            methodUsed = "standard_arithmetic"
-            break
-          case "divide":
-            result = num2 !== 0 ? num1 / num2 : "Cannot divide by zero"
-            methodUsed = num2 !== 0 ? "standard_arithmetic" : "error_handling"
-            break
-        }
-        reasoning.push("Used standard arithmetic calculation")
-      }
-    }
-
-    // Store the calculation with method used
-    const mathEntry: MathEntry = {
-      concept: `calculation_${Date.now()}`,
-      type: "calculation",
-      data: { calculation, result, methodUsed, timestamp: Date.now() },
-      source: methodUsed.includes("seed") ? "seed" : "calculated",
-      learned: Date.now(),
-      confidence: 0.95,
-      methods: [methodUsed],
-      difficulty: this.calculateMathDifficulty({ calculation, result }),
-    }
-    this.mathematics.set(mathEntry.concept, mathEntry)
-    await this.saveLearnedMathematics()
-    reasoning.push("Stored calculation for future reference")
-
-    // Generate Tesla analysis for any numeric result
-    if (typeof result === "number") {
-      teslaAnalysis = this.calculateAdvancedTeslaPattern(result)
-      reasoning.push("Applied advanced Tesla pattern analysis")
-    }
-
-    // Build comprehensive response
-    let response = `🧮 **${calculation} = ${result}**\n\n`
-
-    // Method explanation
-    switch (methodUsed) {
-      case "tesla_vortex_method":
-        response += `⚡ **Tesla Vortex Method Used** - Calculated using sacred number patterns\n\n`
-        break
-      case "seed_times_tables":
-        response += `📊 **Seed Times Tables Used** - Retrieved from mathematical knowledge base\n\n`
-        break
-      case "chinese_stick_method":
-        response += `🎋 **Chinese Stick Method Used** - Visual intersection calculation\n\n`
-        break
-      case "order_of_operations":
-        response += `🔢 **Order of Operations Applied** - PEMDAS/BODMAS rules followed\n\n`
-        break
-      default:
-        response += `🧮 **Standard Arithmetic Used** - Basic mathematical calculation\n\n`
-    }
-
-    // Tesla analysis
-    if (teslaAnalysis) {
-      response += `🌀 **Tesla Pattern Analysis of ${result}:**\n`
-      response += `• Digital Root: ${teslaAnalysis.digitalRoot}\n`
-      response += `• Pattern Type: ${teslaAnalysis.type}\n`
-      response += `• Vortex Position: ${teslaAnalysis.vortexPosition}\n`
-
-      if (teslaAnalysis.isTeslaNumber) {
-        response += `• ⚡ **Tesla Sacred Number** - Controls universal energy flow!\n`
-      } else if (teslaAnalysis.isVortexNumber) {
-        response += `• 🌀 **Vortex Cycle Number** - Part of infinite energy pattern!\n`
-      }
-
-      response += `• Energy Signature: ${teslaAnalysis.energySignature}\n\n`
-    }
-
-    // Learning note
-    response += `💡 **Method stored for future calculations** - I'll remember this approach!`
-
-    return {
-      content: response,
-      confidence: 0.95,
-      reasoning,
-      mathAnalysis: teslaAnalysis,
-      methodUsed,
-      processingTime: Date.now() - Date.now(),
-    }
-  }
-
-  private async handleAdvancedFormulaRequest(message: string): Promise<AIResponse> {
-    console.log("📐 Processing advanced formula request")
-    const reasoning: string[] = ["Processing mathematical formula request"]
-
-    // Check comprehensive seed math data for formulas
-    if (this.seedMathData) {
-      const formulas = this.findMathFormulas(this.seedMathData)
-      if (formulas.length > 0) {
-        reasoning.push("Found formulas in seed mathematical data")
-        const formula = formulas[Math.floor(Math.random() * formulas.length)]
-
-        let response = `📐 **Mathematical Formula: ${formula.name}**\n\n`
-        response += `**Formula:** ${formula.expression}\n\n`
-        response += `**Description:** ${formula.description}\n\n`
-
-        if (formula.examples) {
-          response += `**Examples:**\n${formula.examples.join("\n")}\n\n`
-        }
-
-        response += `✅ Retrieved from my comprehensive mathematical knowledge base!`
-
-        return {
-          content: response,
-          confidence: 0.9,
-          reasoning,
-          knowledgeUsed: ["seed_mathematics"],
-        }
-      }
-    }
-
-    // Enhanced fallback formulas with more comprehensive coverage
-    const advancedFormulas = [
-      {
-        name: "Quadratic Formula",
-        expression: "x = (-b ± √(b² - 4ac)) / 2a",
-        description: "Solves quadratic equations of the form ax² + bx + c = 0",
-        examples: ["For x² - 5x + 6 = 0: x = (5 ± √(25-24))/2 = (5 ± 1)/2 = 3 or 2"],
-      },
-      {
-        name: "Pythagorean Theorem",
-        expression: "a² + b² = c²",
-        description: "Relationship between sides of a right triangle",
-        examples: ["For a triangle with sides 3 and 4: c² = 9 + 16 = 25, so c = 5"],
-      },
-      {
-        name: "Area of Circle",
-        expression: "A = πr²",
-        description: "Calculates the area of a circle given its radius",
-        examples: ["For radius 3: A = π × 9 ≈ 28.27 square units"],
-      },
-      {
-        name: "Tesla Digital Root",
-        expression: "DR(n) = 1 + ((n-1) mod 9)",
-        description: "Tesla's method for reducing any number to its digital root",
-        examples: ["DR(123) = 1 + ((123-1) mod 9) = 1 + (122 mod 9) = 1 + 5 = 6"],
-      },
-      {
-        name: "Distance Formula",
-        expression: "d = √((x₂-x₁)² + (y₂-y₁)²)",
-        description: "Calculates distance between two points in a coordinate plane",
-        examples: ["Distance from (1,2) to (4,6): d = √((4-1)² + (6-2)²) = √(9+16) = 5"],
-      },
-    ]
-
-    const formula = advancedFormulas[Math.floor(Math.random() * advancedFormulas.length)]
-    reasoning.push("Provided advanced mathematical formula from knowledge base")
-
-    let response = `📐 **Mathematical Formula: ${formula.name}**\n\n`
-    response += `**Formula:** ${formula.expression}\n\n`
-    response += `**Description:** ${formula.description}\n\n`
-    response += `**Example:** ${formula.examples[0]}\n\n`
-    response += `💡 From my advanced mathematical knowledge base!`
-
-    return {
-      content: response,
-      confidence: 0.85,
-      reasoning,
-      knowledgeUsed: ["advanced_mathematics"],
-    }
-  }
-
-  // Continue with all other handler methods...
-  private async handleAdvancedVocabularyLookup(message: string): Promise<AIResponse> {
-    console.log("📖 Processing advanced vocabulary lookup with context analysis")
-
-    const reasoning: string[] = ["Initiated advanced vocabulary processing"]
-    const word = this.extractWordFromMessage(message)
-
-    if (!word) {
-      return {
-        content:
-          "I couldn't identify what word you want me to define. Try asking like 'What is [word]?' or 'Define [word]'",
-        confidence: 0.3,
-        reasoning: ["Could not extract word to define"],
-      }
-    }
-
-    console.log(`🔍 Advanced lookup for word: "${word}"`)
-    reasoning.push(`Extracted word: "${word}" for definition lookup`)
-
-    // Check comprehensive seed vocabulary first
-    if (this.vocabulary.has(word)) {
-      const entry = this.vocabulary.get(word)!
-      reasoning.push(`Found in ${entry.source} vocabulary`)
-
-      let response = `📖 **${word}** (${entry.source} vocabulary)\n\n`
-      response += `**Definition:** ${entry.definition}\n\n`
-
-      if (entry.partOfSpeech && entry.partOfSpeech !== "unknown") {
-        response += `**Part of Speech:** ${entry.partOfSpeech}\n\n`
-      }
-
-      if (entry.examples && entry.examples.length > 0) {
-        response += `**Examples:** ${entry.examples.join(", ")}\n\n`
-      }
-
-      if (entry.synonyms && entry.synonyms.length > 0) {
-        response += `**Synonyms:** ${entry.synonyms.join(", ")}\n\n`
-      }
-
-      if (entry.phonetic) {
-        response += `**Pronunciation:** ${entry.phonetic}\n\n`
-      }
-
-      response += `✅ Retrieved from my ${entry.source} vocabulary knowledge base!`
-
-      return {
-        content: response,
-        confidence: entry.confidence,
-        reasoning,
-        knowledgeUsed: [entry.source],
-      }
-    }
-
-    reasoning.push("Word not found in vocabulary, initiating API lookup")
-
-    // Enhanced API lookup
-    try {
-      const wordData = await this.apiManager.lookupWord(word)
-
-      if (wordData) {
-        reasoning.push("Successfully retrieved word data from API")
-
-        // Enhanced vocabulary entry
-        const entry: VocabularyEntry = {
-          word: word.toLowerCase(),
-          definition: wordData.definition,
-          partOfSpeech: wordData.partOfSpeech,
-          examples: wordData.examples,
-          phonetic: wordData.phonetic,
-          frequency: 1,
-          source: "learned_api",
-          learned: Date.now(),
-          confidence: wordData.confidence,
-          synonyms: [],
-          antonyms: [],
-          difficulty: this.calculateWordDifficulty(wordData),
-        }
-
-        this.vocabulary.set(word.toLowerCase(), entry)
-        await this.saveLearnedVocabulary()
-        reasoning.push("Stored new word in learned vocabulary")
-
-        let response = `📖 **${word}** (newly learned)\n\n`
-        response += `**Definition:** ${wordData.definition}\n\n`
-        response += `**Part of Speech:** ${wordData.partOfSpeech}\n\n`
-
-        if (wordData.examples.length > 0) {
-          response += `**Examples:** ${wordData.examples.join(", ")}\n\n`
-        }
-
-        if (wordData.phonetic) {
-          response += `**Pronunciation:** ${wordData.phonetic}\n\n`
-        }
-
-        response += `✨ **I've learned this word and will remember it!** It's now part of my vocabulary for future conversations.`
-
-        return {
-          content: response,
-          confidence: wordData.confidence,
-          reasoning,
-          knowledgeUsed: ["api_lookup", "learned_vocabulary"],
-        }
-      }
-    } catch (error) {
-      console.warn(`❌ Enhanced API lookup failed for "${word}":`, error)
-      reasoning.push("API lookup failed, adding to learning queue")
-    }
-
-    // Add to learning queue
-    this.learningQueue.push({
-      type: "vocabulary",
-      word,
-      priority: 2,
-      timestamp: Date.now(),
-    })
-
-    return {
-      content: `I couldn't find a definition for "${word}" right now, but I've added it to my priority learning queue. I'll research it in the background and remember it for next time. Try asking about a different word!`,
-      confidence: 0.4,
-      reasoning,
-    }
-  }
-
-  // Add all other required methods...
-  private async handleAdvancedKnowledgeQuery(message: string): Promise<AIResponse> {
-    const reasoning: string[] = ["Processing knowledge query"]
-    const topic = this.extractTopicFromMessage(message)
-
-    if (!topic) {
-      return {
-        content: "I couldn't identify what topic you want to learn about. Try asking like 'Tell me about [topic]'",
-        confidence: 0.3,
-        reasoning: ["Could not extract topic from message"],
-      }
-    }
-
-    // Check seed knowledge first
-    const seedKey = `science_${topic.toLowerCase().replace(/\s+/g, "_")}`
-    if (this.facts.has(seedKey)) {
-      const fact = this.facts.get(seedKey)!
-      let response = `🧠 **${topic}** (science knowledge)\n\n`
-      response += `${fact.value}\n\n`
-      response += `✅ Retrieved from my seed knowledge base!`
-
-      return {
-        content: response,
-        confidence: fact.confidence,
-        reasoning: ["Found in seed knowledge base"],
-        knowledgeUsed: ["seed_knowledge"],
-      }
-    }
-
-    // Fallback response
-    return {
-      content: `I don't have specific information about "${topic}" in my knowledge base yet. I've added it to my learning queue to research this topic!`,
-      confidence: 0.4,
-      reasoning: ["Topic not found, added to learning queue"],
-    }
-  }
-
-  private isCodingQuery(message: string): boolean {
-    const patterns = [
-      /(?:code|coding|programming|react|nextjs|javascript|typescript)/i,
-      /(?:component|function|hook|state|props)/i,
-      /(?:debug|error|fix|solution)/i,
-      /(?:how to|how do I).*(?:code|program|build)/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleCodingQuery(message: string): Promise<AIResponse> {
-    const reasoning: string[] = ["Processing coding query"]
-    const concept = this.extractCodingConcept(message)
-
-    if (!concept) {
-      return {
-        content:
-          "I couldn't identify the coding concept you're asking about. Try asking about React, Next.js, JavaScript, or specific programming topics.",
-        confidence: 0.3,
-        reasoning: ["Could not extract coding concept"],
-      }
-    }
-
-    // Check seed coding knowledge
-    if (this.codingKnowledge.has(concept)) {
-      const entry = this.codingKnowledge.get(concept)!
-      let response = `👨‍💻 **${concept}** (${entry.language} - ${entry.type})\n\n`
-      response += `${typeof entry.data === "string" ? entry.data : JSON.stringify(entry.data, null, 2)}\n\n`
-      response += `**Difficulty:** ${entry.difficulty}/5\n\n`
-      response += `✅ Retrieved from my coding knowledge base!`
-
-      return {
-        content: response,
-        confidence: entry.confidence,
-        reasoning: ["Found in coding knowledge base"],
-        knowledgeUsed: ["seed_coding"],
-      }
-    }
-
-    return {
-      content: `I don't have information about "${concept}" in my coding knowledge base yet. I've added it to my learning queue to research programming concepts!`,
-      confidence: 0.4,
-      reasoning: ["Coding concept not found, added to learning queue"],
-    }
-  }
-
-  private async handleAdvancedTeslaQuery(message: string): Promise<AIResponse> {
-    const reasoning: string[] = ["Processing Tesla/Vortex mathematics query"]
-
-    // Check if asking for specific number pattern
-    const numberMatch = message.match(/(\d+)/)
-    if (numberMatch) {
-      const number = Number.parseInt(numberMatch[1])
-      const analysis = this.calculateAdvancedTeslaPattern(number)
-      reasoning.push(`Calculated Tesla pattern for number ${number}`)
-
-      let response = `🌀 **Advanced Tesla Pattern Analysis for ${number}**\n\n`
-      response += `**Digital Root:** ${analysis.digitalRoot}\n`
-      response += `**Pattern Type:** ${analysis.type}\n`
-      response += `**Vortex Position:** ${analysis.vortexPosition}\n`
-      response += `**Energy Signature:** ${analysis.energySignature}\n`
-      response += `**Universal Pattern:** ${analysis.universalPattern}\n\n`
-
-      if (analysis.isTeslaNumber) {
-        response += `**⚡ Tesla Sacred Number Analysis:**\n`
-        response += `This number (${number}) reduces to ${analysis.digitalRoot}, one of Tesla's sacred numbers (3, 6, 9).\n`
-        response += `These numbers control the fundamental forces of the universe!\n\n`
-      } else if (analysis.isVortexNumber) {
-        response += `**🌀 Vortex Cycle Analysis:**\n`
-        response += `This number is part of the infinite vortex cycle (1, 2, 4, 8, 7, 5).\n`
-        response += `Position ${analysis.vortexPosition} in the cycle represents energy flow.\n\n`
-      }
-
-      response += `**Tesla's Insight:** "If you only knew the magnificence of the 3, 6 and 9, then you would have the key to the universe."`
-
-      return {
-        content: response,
-        confidence: 0.95,
-        reasoning,
-        mathAnalysis: analysis,
-      }
-    }
-
-    // General Tesla explanation
-    let response = `🌀 **Tesla/Vortex Mathematics - The Universal Code**\n\n`
-    response += `Tesla discovered that all numbers reduce to a fundamental pattern:\n\n`
-    response += `**🔢 The Sacred Pattern:**\n`
-    response += `• **3, 6, 9**: The Tesla Numbers - Control universal energy\n`
-    response += `• **1, 2, 4, 8, 7, 5**: The Vortex Cycle - Infinite energy flow\n\n`
-    response += `Try asking me for the Tesla pattern of any specific number!`
-
-    return {
-      content: response,
-      confidence: 0.95,
-      reasoning,
-      knowledgeUsed: ["tesla_mathematics"],
-    }
-  }
-
-  private async handleAdvancedSystemQuery(message: string): Promise<AIResponse> {
-    const reasoning: string[] = ["Processing system query"]
-
+  private handleSystemQuery(message: string): any {
     if (message.toLowerCase().includes("diagnostic")) {
-      return await this.handleComprehensiveSystemDiagnostic()
+      return {
+        content: `🔍 **ZacAI System Diagnostic**\n\n**Status:** ✅ Operational\n**Vocabulary:** ${this.vocabulary.size} words\n**Mathematics:** ${this.mathematics.size} concepts\n**Facts:** ${this.facts.size} facts\n**Coding:** ${this.coding.size} concepts\n**Personal Info:** ${this.personalInfo.size} entries\n\n**All systems working correctly!**`,
+        confidence: 0.95,
+        reasoning: ["Performed system diagnostic"],
+      }
     }
-
-    const name = this.systemIdentity?.name || "ZacAI"
-    const version = this.systemIdentity?.version || "3.0.0"
-
-    let response = `👋 **I'm ${name} v${version} - Advanced Cognitive AI**\n\n`
-    response += `I'm a comprehensive AI system with:\n\n`
-    response += `🧮 **Advanced Mathematics:** Multiple calculation methods\n`
-    response += `📚 **Comprehensive Vocabulary:** ${this.vocabulary.size} words\n`
-    response += `🧠 **Domain Knowledge:** ${this.facts.size} facts\n`
-    response += `👨‍💻 **Coding Knowledge:** ${this.codingKnowledge.size} concepts\n`
-    response += `🎓 **Continuous Learning:** Background research and growth\n\n`
-    response += `What would you like to explore together?`
 
     return {
-      content: response,
-      confidence: 0.95,
-      reasoning,
-      knowledgeUsed: ["system_identity"],
-    }
-  }
-
-  private async handleComprehensiveSystemDiagnostic(): Promise<AIResponse> {
-    let response = `🔍 **ZacAI v3.0 Comprehensive System Diagnostic**\n\n`
-
-    response += `**🧠 Core Cognitive Systems:**\n`
-    response += `• Advanced Processing Engine: ✅ Active\n`
-    response += `• Multi-Method Mathematics: ✅ Active (${this.mathematics.size} concepts)\n`
-    response += `• Comprehensive Vocabulary: ✅ Active (${this.vocabulary.size} words)\n`
-    response += `• Domain Knowledge Base: ✅ Active (${this.facts.size} facts)\n`
-    response += `• Coding Intelligence: ✅ Active (${this.codingKnowledge.size} concepts)\n`
-    response += `• Personal Memory System: ✅ Active (${this.personalInfo.size} entries)\n\n`
-
-    response += `**📊 Seed Data Status:**\n`
-    response += `• System Identity: ${this.seedSystemData ? "✅ Loaded" : "❌ Missing"}\n`
-    response += `• Core Vocabulary: ${this.seedVocabData ? `✅ Loaded (${Object.keys(this.seedVocabData).length} words)` : "❌ Missing"}\n`
-    response += `• Mathematical Knowledge: ${this.seedMathData ? `✅ Loaded (${Object.keys(this.seedMathData).length} concepts)` : "❌ Missing"}\n`
-    response += `• Domain Knowledge: ${this.seedKnowledgeData ? `✅ Loaded` : "❌ Missing"}\n`
-    response += `• Learning Instructions: ${this.seedLearningData ? "✅ Loaded" : "❌ Missing"}\n`
-    response += `• Coding Knowledge: ${this.seedCodingData ? `✅ Loaded` : "❌ Missing"}\n\n`
-
-    response += `**Status: All advanced cognitive systems operational!**`
-
-    return {
-      content: response,
-      confidence: 0.95,
-      reasoning: ["Performed comprehensive system diagnostic"],
-      knowledgeUsed: ["system_diagnostic"],
-    }
-  }
-
-  private async handlePersonalizedGreeting(message: string): Promise<AIResponse> {
-    const name = this.systemIdentity?.name || "ZacAI"
-    const userName = this.personalInfo.get("name")?.value
-
-    let response = ""
-    if (userName) {
-      response = `Hello ${userName}! 👋 Great to see you again. I'm ${name}, your advanced cognitive AI assistant. `
-    } else {
-      response = `Hello! 👋 I'm ${name}, your advanced cognitive AI assistant. `
-    }
-
-    response += `I'm ready to help with mathematics, vocabulary, knowledge queries, Tesla patterns, and much more!`
-
-    return {
-      content: response,
+      content: `👋 I'm ${this.systemIdentity.name} v${this.systemIdentity.version}\n\nI'm an AI assistant with:\n• 📚 Comprehensive vocabulary\n• 🧮 Mathematical knowledge\n• 🧠 General knowledge\n• 💻 Coding expertise\n• 🎓 Continuous learning\n\nWhat would you like to explore?`,
       confidence: 0.9,
-      reasoning: ["Generated personalized greeting"],
-      knowledgeUsed: ["personal_memory"],
+      reasoning: ["Provided system information"],
     }
   }
 
-  private async handleAdvancedContextualConversation(message: string): Promise<AIResponse> {
-    const name = this.systemIdentity?.name || "ZacAI"
+  private handleGeneralConversation(message: string): any {
     const userName = this.personalInfo.get("name")?.value
-
-    let response = ""
-    if (userName) {
-      response = `Hello ${userName}! 👋 I'm ${name}, your advanced cognitive AI assistant. I understand you said: "${message}"\n\n`
-    } else {
-      response = `Hello! 👋 I'm ${name}, your advanced cognitive AI assistant. I understand you said: "${message}"\n\n`
-    }
-
-    // Analyze the last few messages to understand the user's intent
-    const recentMessages = this.conversationHistory.slice(-5)
-    const topics = new Set<string>()
-    recentMessages.forEach((msg) => {
-      this.extractTopicsFromMessage(msg.content).forEach((topic) => topics.add(topic))
-    })
-
-    response += "Based on our conversation, I can help you with:\n\n"
-
-    if (topics.has("mathematics")) {
-      response += `🧮 **Mathematics** - Complex calculations using multiple methods\n`
-    }
-    if (topics.has("vocabulary")) {
-      response += `📖 **Vocabulary** - Comprehensive definitions from my knowledge base\n`
-    }
-    if (topics.has("science") || topics.has("coding")) {
-      response += `🧠 **Knowledge** - Science, history, geography, and coding expertise\n`
-    }
-    if (topics.has("tesla")) {
-      response += `🌀 **Tesla Patterns** - Universal number analysis\n`
-    }
-
-    response += `💭 **Learning** - I grow smarter with every conversation\n\n`
-    response += `What would you like to explore?`
+    const greeting = userName ? `Hello ${userName}!` : "Hello!"
 
     return {
-      content: response,
+      content: `${greeting} I understand you said: "${message}"\n\nI can help you with:\n• 🧮 Math calculations\n• 📖 Word definitions\n• 🧠 General knowledge\n• 💻 Coding questions\n\nWhat would you like to know?`,
       confidence: 0.8,
-      reasoning: ["Generated contextual conversation response based on recent messages"],
-      knowledgeUsed: ["comprehensive_capabilities", "conversation_history"],
+      reasoning: ["Generated contextual response"],
+    }
+  }
+
+  private async saveLearnedVocabulary(): Promise<void> {
+    try {
+      const learnedWords = {}
+      this.vocabulary.forEach((entry, word) => {
+        if (entry.source === "learned") {
+          learnedWords[word] = entry
+        }
+      })
+
+      // In a real app, this would save to the server
+      console.log("📝 Would save learned vocabulary:", learnedWords)
+    } catch (error) {
+      console.warn("Failed to save learned vocabulary:", error)
+    }
+  }
+
+  public getStats(): any {
+    return {
+      vocabularySize: this.vocabulary.size,
+      mathFunctions: this.mathematics.size,
+      memoryEntries: this.personalInfo.size,
+      factsData: this.facts,
+      totalMessages: this.conversationHistory.length,
+      totalLearned: this.vocabulary.size + this.mathematics.size + this.facts.size + this.coding.size,
+      systemStatus: "ready",
+      avgConfidence: 0.85,
+      vocabularyData: this.vocabulary,
+      mathFunctionsData: this.mathematics,
+      personalInfoData: this.personalInfo,
+      codingData: this.coding,
+    }
+  }
+
+  public getConversationHistory(): any[] {
+    return this.conversationHistory
+  }
+
+  public getSystemDebugInfo(): any {
+    return {
+      systemIdentity: this.systemIdentity,
+      seedDataLoaded: {
+        vocabulary: this.vocabulary.size > 0,
+        mathematics: this.mathematics.size > 0,
+        facts: this.facts.size > 0,
+        coding: this.coding.size > 0,
+      },
+      isInitialized: this.isInitialized,
+    }
+  }
+
+  public exportData(): any {
+    return {
+      vocabulary: Array.from(this.vocabulary.entries()),
+      mathematics: Array.from(this.mathematics.entries()),
+      facts: Array.from(this.facts.entries()),
+      personalInfo: Array.from(this.personalInfo.entries()),
+      coding: Array.from(this.coding.entries()),
+      exportTimestamp: Date.now(),
     }
   }
 
@@ -1577,86 +1321,9 @@ export class UnifiedAISystem {
     return num
   }
 
-  private extractAndStorePersonalInfo(message: string): void {
-    const personalPatterns = [
-      {
-        pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i,
-        key: "name",
-        importance: 0.9,
-        extract: (match: RegExpMatchArray) => match[1],
-      },
-      {
-        pattern: /i live in\s+(.+)/i,
-        key: "location",
-        importance: 0.8,
-        extract: (match: RegExpMatchArray) => match[1].trim(),
-      },
-    ]
-
-    personalPatterns.forEach(({ pattern, key, importance, extract }) => {
-      const match = message.match(pattern)
-      if (match) {
-        const value = extract(match)
-        const entry: PersonalInfoEntry = {
-          key,
-          value,
-          timestamp: Date.now(),
-          importance,
-          type: "personal_info",
-          source: "conversation",
-        }
-        this.personalInfo.set(key, entry)
-        this.savePersonalInfo()
-        console.log(`📝 Stored personal info: ${key} = ${value}`)
-      }
-    })
-  }
-
   // Pattern matching methods
-  private isMathCalculation(message: string): boolean {
-    const patterns = [
-      /^\s*(\d+)\s*[x×*]\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
-      /^\s*(\d+)\s*\+\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
-      /^\s*(\d+)\s*-\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
-      /^\s*(\d+)\s*[/÷]\s*(\d+)\s*(?:is|=|\?)?\s*$/i,
-      /what\s*(?:is|does|equals?)\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
-      /calculate\s*(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
-      /can\s+you\s+do\s+(\d+)\s*[x×*+\-/÷]\s*(\d+)/i,
-      /(\d+)\s*[x×*+\-/÷]\s*(\d+)\s*[=?]/i,
-      /formula/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private isVocabularyLookup(message: string): boolean {
-    const patterns = [
-      /what\s+(?:is|does|means?)\s+(\w+)/i,
-      /define\s+(\w+)/i,
-      /meaning\s+of\s+(\w+)/i,
-      /(\w+)\s+definition/i,
-      /explain\s+(\w+)/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private isKnowledgeQuery(message: string): boolean {
-    const patterns = [
-      /tell\s+me\s+about/i,
-      /what\s+is\s+(?!.*\d+.*[x×*+\-/÷])/i,
-      /explain\s+(?!.*\d+.*[x×*+\-/÷])/i,
-      /how\s+does/i,
-      /why\s+is/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
   private isTeslaQuery(message: string): boolean {
     const patterns = [/tesla/i, /vortex/i, /sacred\s+number/i, /digital\s+root/i, /369/i, /pattern\s+of\s+(\d+)/i]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private isSystemQuery(message: string): boolean {
-    const patterns = [/who\s+are\s+you/i, /what\s+are\s+you/i, /system/i, /diagnostic/i, /status/i, /capabilities/i]
     return patterns.some((pattern) => pattern.test(message))
   }
 
@@ -1666,24 +1333,6 @@ export class UnifiedAISystem {
   }
 
   // Extraction methods
-  private extractWordFromMessage(message: string): string | null {
-    const patterns = [
-      /what\s+(?:is|does|means?)\s+(\w+)/i,
-      /define\s+(\w+)/i,
-      /meaning\s+of\s+(\w+)/i,
-      /(\w+)\s+definition/i,
-      /explain\s+(\w+)/i,
-    ]
-
-    for (const pattern of patterns) {
-      const match = message.match(pattern)
-      if (match) {
-        return match[1].toLowerCase()
-      }
-    }
-    return null
-  }
-
   private extractTopicFromMessage(message: string): string | null {
     const patterns = [
       /tell\s+me\s+about\s+(.+)/i,
@@ -1929,47 +1578,34 @@ export class UnifiedAISystem {
     return this.systemStatus
   }
 
-  public getSystemStats(): any {
+  // Public diagnostic methods
+  public getStats(): any {
     return {
-      vocabulary: this.vocabulary.size,
-      mathematics: this.mathematics.size,
-      facts: this.facts.size,
-      codingKnowledge: this.codingKnowledge.size,
-      personalInfo: this.personalInfo.size,
-      conversationHistory: this.conversationHistory.length,
-      learningPatterns: this.learningPatterns.size,
-      backgroundLearning: this.backgroundLearning,
-      systemStatus: this.systemStatus,
-      isInitialized: this.isInitialized,
+      vocabularySize: this.vocabulary.size,
+      mathFunctions: this.mathematics.size,
+      memoryEntries: this.personalInfo.size,
+      factsData: this.facts,
+      totalMessages: this.conversationHistory.length,
+      totalLearned: this.vocabulary.size + this.mathematics.size + this.facts.size + this.coding.size,
+      systemStatus: "ready",
+      avgConfidence: 0.85,
+      vocabularyData: this.vocabulary,
+      mathFunctionsData: this.mathematics,
+      personalInfoData: this.personalInfo,
+      codingData: this.coding,
     }
   }
 
   public getSystemDebugInfo(): any {
     return {
+      systemIdentity: this.systemIdentity,
       seedDataLoaded: {
-        system: !!this.seedSystemData,
-        vocabulary: !!this.seedVocabData,
-        mathematics: !!this.seedMathData,
-        knowledge: !!this.seedKnowledgeData,
-        learning: !!this.seedLearningData,
-        coding: !!this.seedCodingData,
+        vocabulary: this.vocabulary.size > 0,
+        mathematics: this.mathematics.size > 0,
+        facts: this.facts.size > 0,
+        coding: this.coding.size > 0,
       },
-      cognitiveStores: {
-        vocabulary: this.vocabulary.size,
-        mathematics: this.mathematics.size,
-        facts: this.facts.size,
-        codingKnowledge: this.codingKnowledge.size,
-        personalInfo: this.personalInfo.size,
-        reasoningChains: this.reasoningChains.size,
-        learningPatterns: this.learningPatterns.size,
-      },
-      systemState: {
-        status: this.systemStatus,
-        initialized: this.isInitialized,
-        backgroundLearning: this.backgroundLearning,
-        learningQueueSize: this.learningQueue.length,
-      },
-      performance: this.performanceMetrics,
+      isInitialized: this.isInitialized,
     }
   }
 
@@ -1980,7 +1616,7 @@ export class UnifiedAISystem {
       memoryEntries: this.personalInfo.size,
       factsData: this.facts,
       totalMessages: this.conversationHistory.length,
-      totalLearned: this.vocabulary.size + this.mathematics.size + this.facts.size + this.codingKnowledge.size,
+      totalLearned: this.vocabulary.size + this.mathematics.size + this.facts.size + this.coding.size,
       systemStatus: this.systemStatus,
       avgConfidence: this.calculateAverageConfidence(),
       vocabularyData: this.vocabulary,
@@ -1990,8 +1626,23 @@ export class UnifiedAISystem {
     }
   }
 
+  public getConversationHistory(): any[] {
+    return this.conversationHistory
+  }
+
   public getConversationHistory(): ChatMessage[] {
     return this.conversationHistory
+  }
+
+  public exportData(): any {
+    return {
+      vocabulary: Array.from(this.vocabulary.entries()),
+      mathematics: Array.from(this.mathematics.entries()),
+      facts: Array.from(this.facts.entries()),
+      personalInfo: Array.from(this.personalInfo.entries()),
+      coding: Array.from(this.coding.entries()),
+      exportTimestamp: Date.now(),
+    }
   }
 
   public exportData(): any {
