@@ -97,9 +97,6 @@ export class CognitiveProcessor {
   private async initializeCoreComponents(): Promise<void> {
     console.log("🔧 Initializing core components...")
 
-    await this.enhancedKnowledge.initialize()
-    await this.temporalSystem.initialize()
-
     // Load system identity
     await this.loadSystemIdentity()
 
