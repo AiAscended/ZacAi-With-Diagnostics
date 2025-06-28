@@ -780,8 +780,7 @@ export default function EnhancedAIChat() {
                     </div>
                     <p className="text-lg font-medium mb-2">Hello! I'm {systemInfo.name || "ZacAI"} 🧠</p>
                     <p className="mb-4">
-                      I'm an advanced AI system with integrated mathematical knowledge, vocabulary learning, and
-                      comprehensive memory capabilities!
+                      I'm ZacAI - an advanced AI system with neural learning and comprehensive knowledge management!
                     </p>
 
                     <div className="grid grid-cols-2 gap-2 text-sm max-w-md mx-auto">

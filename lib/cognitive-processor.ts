@@ -148,6 +148,25 @@ export class CognitiveProcessor {
             timestamp: Date.now(),
           })
         })
+
+        // Add alphabet letters
+        const alphabet = "abcdefghijklmnopqrstuvwxyz".split("")
+        alphabet.forEach((letter) => {
+          this.vocabulary.set(letter, {
+            word: letter,
+            definition: `The letter ${letter.toUpperCase()} of the English alphabet`,
+            partOfSpeech: "noun",
+            examples: [`The word starts with ${letter}`],
+            source: "seed",
+            confidence: 0.98,
+            phonetic: `/${letter}/`,
+            synonyms: [],
+            antonyms: [],
+            frequency: 1,
+            timestamp: Date.now(),
+          })
+        })
+
         console.log(`✅ Loaded ${Object.keys(data).length} seed vocabulary words`)
       }
     } catch (error) {
@@ -439,7 +458,7 @@ export class CognitiveProcessor {
         confidence: 0.9,
       },
       {
-        pattern: /(\d+)\s*[+\-*/×÷x]\s*(\d+)/,
+        pattern: /(\d+)\s*[+\-*/×÷x]\s*(\d+)/i,
         intent: "math_calculation",
         confidence: 0.95,
       },
@@ -689,7 +708,7 @@ export class CognitiveProcessor {
   private async processDefinitionIteration(thought: string): Promise<any> {
     this.addThought("📖 Processing definition iteration...", "knowledge", 0.8)
 
-    const wordMatch = thought.match(/(?:what\s+(?:is|does|means?)|define)\s+(.+)/i)
+    const wordMatch = thought.match(/(?:what\s+(?:is|does|means?)|define)\s+([a-zA-Z]+)/i)
     if (!wordMatch) {
       return { type: "definition", confidence: 0.3, nextThought: "Could not extract word" }
     }
