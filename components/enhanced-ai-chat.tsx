@@ -11,7 +11,6 @@ import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { UnifiedAISystem } from "@/lib/unified-ai-system"
 import {
   Brain,
   BookOpen,
@@ -38,6 +37,7 @@ import {
 import KnowledgeManagementTab from "./knowledge-management-tab"
 import SystemSettingsTab from "./system-settings-tab"
 import MemorySystemTab from "./memory-system-tab"
+import { CognitiveProcessor } from "@/lib/cognitive-processor"
 
 interface ChatMessage {
   id: string
@@ -66,7 +66,7 @@ interface AIStats {
 }
 
 export default function EnhancedAIChat() {
-  const [aiSystem] = useState(() => new UnifiedAISystem())
+  const [aiSystem] = useState(() => new CognitiveProcessor())
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
