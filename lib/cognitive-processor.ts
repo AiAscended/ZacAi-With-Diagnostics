@@ -1,16 +1,12 @@
 "use client"
 
 import { BrowserStorageManager } from "./browser-storage-manager"
-import { EnhancedKnowledgeSystem } from "./enhanced-knowledge-system"
 import { EnhancedMathProcessor } from "./enhanced-math-processor"
-import { TemporalKnowledgeSystem } from "./temporal-knowledge-system"
 
 // ULTIMATE COGNITIVE PROCESSOR - ALL GOLDEN FEATURES MERGED
 export class CognitiveProcessor {
   // Core Systems
-  private enhancedKnowledge = new EnhancedKnowledgeSystem()
   private enhancedMath = new EnhancedMathProcessor()
-  private temporalSystem = new TemporalKnowledgeSystem()
   private storageManager = new BrowserStorageManager()
 
   // Neural Engine Components
@@ -37,12 +33,11 @@ export class CognitiveProcessor {
   private systemIdentity: SystemIdentity = {
     name: "ZacAI",
     version: "3.0.0",
-    purpose:
-      "Ultimate cognitive processing engine with neural learning, Tesla math, and comprehensive knowledge management",
+    purpose: "Advanced AI system with neural learning and comprehensive knowledge management",
   }
 
   constructor() {
-    console.log("🧠 Initializing Ultimate Cognitive Processor...")
+    console.log("🧠 Initializing ZacAI Cognitive Processor...")
     this.patternMatcher = new PatternMatcher()
     this.performanceMonitor = new PerformanceMonitor()
     this.initializeNeuralEngine()
@@ -81,7 +76,7 @@ export class CognitiveProcessor {
       const initTime = performance.now() - startTime
       this.performanceMonitor.logOperation("initialization", initTime)
 
-      console.log(`✅ Cognitive Processor ready! (${initTime.toFixed(2)}ms)`)
+      console.log(`✅ ZacAI Cognitive Processor ready! (${initTime.toFixed(2)}ms)`)
       console.log(`📚 Vocabulary: ${this.vocabulary.size} words`)
       console.log(`🧮 Mathematics: ${this.mathematics.size} concepts`)
       console.log(`🧠 Personal Info: ${this.personalInfo.size} entries`)
@@ -210,6 +205,18 @@ export class CognitiveProcessor {
             })
           })
         }
+
+        // Add mathematics definition
+        this.mathematics.set("mathematics", {
+          concept: "mathematics",
+          type: "definition",
+          formula:
+            "The study of numbers, quantities, shapes, and patterns using logical reasoning and systematic methods",
+          category: "core_definitions",
+          source: "seed",
+          confidence: 0.98,
+          timestamp: Date.now(),
+        })
 
         console.log(`✅ Loaded seed mathematics data`)
       }
@@ -347,7 +354,7 @@ export class CognitiveProcessor {
               category: "science",
               source: "learned",
               confidence: entry.confidence || 0.8,
-              timestamp: entry.timestamp || Date.now(),
+              timestamp: Date.now(),
             })
           })
           console.log(`✅ Loaded learned science`)
@@ -372,7 +379,7 @@ export class CognitiveProcessor {
               examples: entry.examples || [],
               source: "learned",
               confidence: entry.confidence || 0.8,
-              timestamp: entry.timestamp || Date.now(),
+              timestamp: Date.now(),
             })
           })
           console.log(`✅ Loaded learned coding`)
@@ -432,7 +439,7 @@ export class CognitiveProcessor {
         confidence: 0.9,
       },
       {
-        pattern: /(\d+)\s*[+\-*/×÷]\s*(\d+)/,
+        pattern: /(\d+)\s*[+\-*/×÷x]\s*(\d+)/,
         intent: "math_calculation",
         confidence: 0.95,
       },
@@ -499,7 +506,7 @@ export class CognitiveProcessor {
       const neuralResult = await this.neuralProcessing(userMessage, knowledgeResult)
 
       // Stage 5: Response Generation
-      const response = await this.generateResponse(userMessage, neuralResult)
+      const response = await this.generateResponse(userMessage, { thinkingResult, knowledgeResult, neuralResult })
 
       // Stage 6: Learning and Storage
       await this.learnFromInteraction(userMessage, response)
