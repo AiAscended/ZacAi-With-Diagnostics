@@ -7,13 +7,67 @@ export interface MatchResult {
   extractedEntities?: string[]
 }
 
+export interface Pattern {
+  pattern: RegExp
+  intent: string
+  confidence: number
+}
+
 export class PatternMatcher {
   private patterns: ConversationalPattern[]
   private knowledgeBase: KnowledgeEntry[]
+  private regexPatterns: Pattern[] = []
 
-  constructor(patterns: ConversationalPattern[], knowledgeBase: KnowledgeEntry[]) {
+  constructor(patterns: ConversationalPattern[] = [], knowledgeBase: KnowledgeEntry[] = []) {
     this.patterns = patterns
     this.knowledgeBase = knowledgeBase
+  }
+
+  // Method that was missing - needed by ReasoningEngine
+  public loadPatterns(patterns: Pattern[]): void {
+    this.regexPatterns = patterns
+    console.log(`✅ Loaded ${patterns.length} regex patterns`)
+  }
+
+  // Main pattern matching method used by ReasoningEngine
+  public matchPattern(input: string): { intent: string; confidence: number; matches?: any[] } {
+    const inputLower = input.toLowerCase().trim()
+
+    // First try regex patterns (used by ReasoningEngine)
+    for (const pattern of this.regexPatterns) {
+      const match = inputLower.match(pattern.pattern)
+      if (match) {
+        return {
+          intent: pattern.intent,
+          confidence: pattern.confidence,
+          matches: match,
+        }
+      }
+    }
+
+    // Then try enhanced math recognition
+    const mathMatch = this.enhancedMathRecognition(input)
+    if (mathMatch) {
+      return {
+        intent: mathMatch.intent,
+        confidence: mathMatch.confidence,
+      }
+    }
+
+    // Then try conversational patterns
+    const conversationalMatch = this.matchIntent(input)
+    if (conversationalMatch) {
+      return {
+        intent: conversationalMatch.intent,
+        confidence: conversationalMatch.confidence,
+      }
+    }
+
+    // Default fallback
+    return {
+      intent: "general_conversation",
+      confidence: 0.5,
+    }
   }
 
   private enhancedMathRecognition(input: string): MatchResult | null {
@@ -60,12 +114,6 @@ export class PatternMatcher {
   }
 
   public matchIntent(input: string): MatchResult | null {
-    // First try enhanced math recognition
-    const mathMatch = this.enhancedMathRecognition(input)
-    if (mathMatch) {
-      return mathMatch
-    }
-
     const inputLower = input.toLowerCase().trim()
     let bestMatch: MatchResult | null = null
     let highestConfidence = 0

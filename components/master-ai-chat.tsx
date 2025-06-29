@@ -7,541 +7,278 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
-import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
 import {
   Brain,
-  BookOpen,
-  TrendingUp,
-  Cloud,
-  Lightbulb,
-  Calculator,
-  Settings,
-  ThumbsUp,
-  ThumbsDown,
-  Download,
-  Search,
-  Zap,
-  ChevronDown,
-  ChevronUp,
+  MessageSquare,
   Database,
   Activity,
+  Download,
+  Settings,
+  Lightbulb,
+  Calculator,
+  BookOpen,
+  User,
+  Cpu,
   Wifi,
   WifiOff,
   AlertTriangle,
-  Clock,
-  Loader2,
   CheckCircle,
+  Clock,
+  TrendingUp,
 } from "lucide-react"
 import { ReasoningEngine } from "@/lib/reasoning-engine"
-import { setKnowledgeData } from "@/lib/knowledge-data"
-import type { ChatMessage } from "@/lib/types"
+import type { ChatMessage, ThoughtNode, SystemStats } from "@/lib/types"
 
-interface AIStats {
-  vocabulary: number
-  mathematics: number
-  userInfo: number
-  facts: number
-  conversations: number
-  totalEntries: number
-  lastUpdated: number
-  version: string
-  systemStatus?: string
-  avgConfidence?: number
-  breakdown?: any
-  vocabularySize?: number
-  mathFunctions?: number
-  memoryEntries?: number
-  seedProgress?: number
+interface MasterAIChatProps {
+  className?: string
 }
 
-export default function MasterAIChat() {
-  const [aiSystem] = useState(() => new ReasoningEngine())
+export default function MasterAIChat({ className = "" }: MasterAIChatProps) {
+  // Core State
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [showMetrics, setShowMetrics] = useState(true)
-  const [stats, setStats] = useState<AIStats>({
-    vocabulary: 0,
-    mathematics: 0,
-    userInfo: 0,
-    facts: 0,
-    conversations: 0,
-    totalEntries: 0,
-    lastUpdated: 0,
-    version: "5.0.0",
-    vocabularySize: 0,
-    mathFunctions: 0,
-    memoryEntries: 0,
-    seedProgress: 0,
-  })
-  const [systemInfo, setSystemInfo] = useState<any>({})
   const [isInitializing, setIsInitializing] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const [showThinking, setShowThinking] = useState<{ [key: string]: boolean }>({})
-  const [currentThinking, setCurrentThinking] = useState<string>("")
-  const [isThinking, setIsThinking] = useState(false)
-  const [loadingSteps, setLoadingSteps] = useState<any[]>([])
-  const [performanceMetrics, setPerformanceMetrics] = useState<any>({
-    initializationTime: 0,
-    firstResponseTime: 0,
-    averageResponseTime: 0,
-    memoryUsage: 0,
-  })
-  const [connectionStatus, setConnectionStatus] = useState<"good" | "slow" | "offline" | "checking">("checking")
-  const initStartTime = useRef<number>(0)
 
+  // System State
+  const [systemStats, setSystemStats] = useState<SystemStats | null>(null)
+  const [connectionStatus, setConnectionStatus] = useState<"good" | "slow" | "offline">("good")
+  const [systemStatus, setSystemStatus] = useState("initializing")
+
+  // UI State
+  const [activeTab, setActiveTab] = useState("chat")
+  const [showThinking, setShowThinking] = useState(true)
+  const [currentThinking, setCurrentThinking] = useState<ThoughtNode[]>([])
+
+  // Refs
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const reasoningEngineRef = useRef<ReasoningEngine | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Initialize the reasoning engine
   useEffect(() => {
-    runInitializationSequence()
+    const initializeEngine = async () => {
+      try {
+        console.log("🚀 Initializing Master AI Chat...")
+        setSystemStatus("initializing")
+
+        const engine = new ReasoningEngine()
+        await engine.initialize()
+
+        reasoningEngineRef.current = engine
+        setSystemStats(engine.getSystemStats())
+        setSystemStatus("ready")
+        setIsInitializing(false)
+
+        // Add welcome message
+        const welcomeMessage: ChatMessage = {
+          id: Date.now().toString(),
+          role: "assistant",
+          content: `🧠 **ZacAI Master Reasoning Engine Ready!**\n\nI'm your advanced AI assistant with:\n• 🧮 Tesla/Vortex Mathematics\n• 📚 Dynamic Vocabulary Learning\n• 🧠 Neural Network Processing\n• 💭 Iterative Thinking\n• 🔧 System Diagnostics\n\nTry asking me to calculate something, define a word, or run a system diagnostic!`,
+          timestamp: Date.now(),
+          confidence: 1.0,
+        }
+
+        setMessages([welcomeMessage])
+        console.log("✅ Master AI Chat initialized successfully!")
+      } catch (error) {
+        console.error("❌ Failed to initialize Master AI Chat:", error)
+        setSystemStatus("error")
+        setIsInitializing(false)
+
+        const errorMessage: ChatMessage = {
+          id: Date.now().toString(),
+          role: "assistant",
+          content:
+            "❌ **Initialization Error**\n\nI encountered an error during startup. Some features may not work correctly. Please refresh the page to try again.",
+          timestamp: Date.now(),
+          confidence: 0.3,
+        }
+
+        setMessages([errorMessage])
+      }
+    }
+
+    initializeEngine()
   }, [])
 
+  // Auto-scroll to bottom of messages
   useEffect(() => {
-    scrollToBottom()
-  }, [messages, currentThinking, loadingSteps])
-
-  const runInitializationSequence = async () => {
-    initStartTime.current = performance.now()
-    const initialSteps = [
-      { name: "System Startup", status: "pending", details: "Initializing core AI modules..." },
-      { name: "Memory Check", status: "pending", details: "Verifying memory integrity..." },
-      { name: "LocalStorage Access", status: "pending", details: "Checking browser storage..." },
-      { name: "Basic Vocabulary Load", status: "pending", details: "Loading essential words..." },
-      { name: "Math Functions Load", status: "pending", details: "Loading mathematical capabilities..." },
-      { name: "Conversation History", status: "pending", details: "Retrieving past interactions..." },
-      { name: "Memory System Ready", status: "pending", details: "Activating long-term memory..." },
-      { name: "Final Setup", status: "pending", details: "Completing system configurations..." },
-    ]
-    setLoadingSteps(initialSteps)
-    setConnectionStatus("checking")
-    setError(null)
-
-    const currentSteps = [...initialSteps]
-
-    const updateStep = (index: number, status: string, details?: string, errorMsg?: string, duration?: number) => {
-      currentSteps[index] = {
-        ...currentSteps[index],
-        status,
-        details: details || currentSteps[index].details,
-        error: errorMsg,
-        duration,
-      }
-      setLoadingSteps([...currentSteps])
-    }
-
-    const simulateDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms + Math.random() * 100))
-
-    // Simulate connection check
-    await simulateDelay(200)
-    setConnectionStatus("good")
-
-    try {
-      // Step 0: System Startup
-      let stepStartTime = performance.now()
-      updateStep(0, "loading", "Starting core AI modules...")
-      await simulateDelay(300)
-      await aiSystem.initializeCoreModules()
-      updateStep(0, "completed", "Core modules initialized.", undefined, performance.now() - stepStartTime)
-
-      // Step 1: Memory Check
-      stepStartTime = performance.now()
-      updateStep(1, "loading", "Verifying memory integrity...")
-      await simulateDelay(200)
-      await aiSystem.checkMemoryIntegrity()
-      updateStep(1, "completed", "Memory integrity verified.", undefined, performance.now() - stepStartTime)
-
-      // Step 2: LocalStorage Access
-      stepStartTime = performance.now()
-      updateStep(2, "loading", "Checking browser storage access...")
-      await simulateDelay(150)
-      await aiSystem.checkLocalStorageAccess()
-      updateStep(2, "completed", "Browser storage accessible.", undefined, performance.now() - stepStartTime)
-
-      // Step 3: Basic Vocabulary Load
-      stepStartTime = performance.now()
-      updateStep(3, "loading", "Loading essential vocabulary...")
-      await simulateDelay(400)
-      await aiSystem.loadVocabulary()
-      updateStep(
-        3,
-        "completed",
-        `Loaded ${aiSystem.getSystemStats().vocabularySize} words.`,
-        undefined,
-        performance.now() - stepStartTime,
-      )
-
-      // Step 4: Math Functions Load
-      stepStartTime = performance.now()
-      updateStep(4, "loading", "Loading mathematical capabilities...")
-      await simulateDelay(250)
-      await aiSystem.loadMathFunctions()
-      updateStep(
-        4,
-        "completed",
-        `Loaded ${aiSystem.getMathFunctionCount()} math functions.`,
-        undefined,
-        performance.now() - stepStartTime,
-      )
-
-      // Step 5: Conversation History
-      stepStartTime = performance.now()
-      updateStep(5, "loading", "Retrieving past conversations...")
-      await simulateDelay(350)
-      await aiSystem.loadConversationHistory()
-      const history = aiSystem.getConversationHistory()
-      const formattedHistory = history.map((msg: any, index: number) => ({
-        id: index.toString(),
-        role: msg.type === "user" ? "user" : "assistant",
-        content: msg.content,
-        timestamp: new Date(msg.timestamp).getTime(),
-      }))
-      setMessages(formattedHistory)
-      updateStep(
-        5,
-        "completed",
-        `Loaded ${history.length} conversations.`,
-        undefined,
-        performance.now() - stepStartTime,
-      )
-
-      // Step 6: Memory System Ready
-      stepStartTime = performance.now()
-      updateStep(6, "loading", "Activating long-term memory system...")
-      await simulateDelay(300)
-      await aiSystem.activateMemorySystem()
-      updateStep(
-        6,
-        "completed",
-        `Memory system active with ${aiSystem.getMemoryEntryCount()} entries.`,
-        undefined,
-        performance.now() - stepStartTime,
-      )
-
-      // Step 7: Final Setup
-      stepStartTime = performance.now()
-      updateStep(7, "loading", "Completing system configurations...")
-      await simulateDelay(100)
-      await aiSystem.finalizeSetup()
-      updateStep(7, "completed", "System ready for interaction.", undefined, performance.now() - stepStartTime)
-
-      const totalInitTime = performance.now() - initStartTime.current
-      setPerformanceMetrics((prev) => ({ ...prev, initializationTime: totalInitTime }))
-      setIsInitializing(false)
-      updateStats()
-      loadKnowledgeData()
-      console.log("✅ All initialization steps completed. System fully operational.")
-    } catch (e: any) {
-      console.error("❌ Initialization failed:", e)
-      setError(`System initialization failed: ${e.message || "Unknown error"}`)
-      setIsInitializing(false)
-      // Mark all subsequent steps as failed if an error occurs
-      const failedIndex = currentSteps.findIndex((step) => step.status === "loading")
-      if (failedIndex !== -1) {
-        for (let i = failedIndex; i < currentSteps.length; i++) {
-          updateStep(i, "failed", `Failed due to previous error: ${e.message || "Unknown error"}`)
-        }
-      }
-    }
-  }
-
-  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  }, [messages, currentThinking])
 
-  const updateStats = () => {
-    try {
-      const aiStats = aiSystem.getSystemStats()
-      setStats({
-        vocabulary: aiStats.vocabulary?.total || 0,
-        mathematics: aiStats.mathematics?.total || 0,
-        userInfo: aiStats.vocabulary?.learned || 0,
-        facts: aiStats.facts?.total || 0,
-        conversations: aiStats.conversations || 0,
-        totalEntries: aiStats.vocabulary?.total + aiStats.mathematics?.total + aiStats.facts?.total || 0,
-        lastUpdated: Date.now(),
-        version: "5.0.0",
-        systemStatus: "Ready",
-        avgConfidence: aiStats.avgConfidence || 0.85,
-        breakdown: aiStats,
-        vocabularySize: aiStats.vocabularySize || 0,
-        mathFunctions: aiStats.mathFunctions || 0,
-        memoryEntries: aiStats.memoryEntries || 0,
-        seedProgress: (aiStats.vocabulary?.total / 1000) * 100 || 0,
-      })
-    } catch (error) {
-      console.error("Failed to update stats:", error)
-    }
-  }
-
-  const loadKnowledgeData = () => {
-    try {
-      const vocabularyList = aiSystem.getVocabularyList()
-      const mathHistory = aiSystem.getMathematicsHistory()
-      const debugInfo = aiSystem.getSystemDebugInfo()
-
-      const processedData = {
-        vocabulary: vocabularyList.map((item) => ({
-          word: item.word,
-          definition: item.definition,
-          partOfSpeech: "word",
-          examples: "From vocabulary system",
-          category: item.source,
-          source: item.source,
-        })),
-
-        mathematics: mathHistory.map((item) => ({
-          concept: item.concept,
-          formula: typeof item.data === "string" ? item.data : JSON.stringify(item.data),
-          category: item.source,
-          examples: "From calculations",
-          difficulty: 1,
-          source: item.source,
-        })),
-
-        userInfo: [],
-        facts: [],
+  // Update system stats periodically
+  useEffect(() => {
+    const updateStats = () => {
+      if (reasoningEngineRef.current && systemStatus === "ready") {
+        setSystemStats(reasoningEngineRef.current.getSystemStats())
       }
-      setKnowledgeData(processedData)
-    } catch (error) {
-      console.error("❌ Failed to load knowledge data:", error)
-    }
-  }
-
-  const simulateThinking = async (userInput: string): Promise<string[]> => {
-    const thinkingSteps = [
-      "🧠 Analyzing input with ZacAI cognitive architecture...",
-      "🔗 Checking seed data and learned knowledge...",
-      "🎯 Determining optimal response strategy...",
-      "📚 Accessing mathematical and linguistic resources...",
-      "💭 Generating comprehensive response...",
-      "✨ Finalizing answer with confidence scoring...",
-    ]
-
-    const finalThinking: string[] = []
-
-    for (let i = 0; i < thinkingSteps.length; i++) {
-      setCurrentThinking(thinkingSteps[i])
-      finalThinking.push(thinkingSteps[i])
-      await new Promise((resolve) => setTimeout(resolve, 300))
     }
 
-    return finalThinking
-  }
+    const interval = setInterval(updateStats, 5000)
+    return () => clearInterval(interval)
+  }, [systemStatus])
 
+  // Handle message submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || isLoading) return
+    if (!input.trim() || isLoading || !reasoningEngineRef.current) return
 
-    const userInput = input.trim()
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input.trim(),
+      timestamp: Date.now(),
+    }
+
+    setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
-    setIsThinking(true)
-    setCurrentThinking("")
-    setError(null)
-
-    const startTime = performance.now()
+    setCurrentThinking([])
 
     try {
-      const userMessage: ChatMessage = {
-        id: Date.now().toString(),
-        role: "user",
-        content: userInput,
-        timestamp: Date.now(),
-      }
+      const response = await reasoningEngineRef.current.processMessage(input.trim())
 
-      setMessages((prev) => [...prev, userMessage])
+      // Update thinking display
+      setCurrentThinking(response.thinking || [])
 
-      const thinkingSteps = await simulateThinking(userInput)
+      // Update connection status
+      setConnectionStatus(response.connectionStatus as "good" | "slow" | "offline")
+      setSystemStatus(response.systemStatus)
 
-      const response = await aiSystem.processMessage(userInput)
-      const responseTime = performance.now() - startTime
-
-      const aiMessage: ChatMessage = {
+      const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: response.content,
         timestamp: Date.now(),
         confidence: response.confidence,
-        knowledgeUsed: response.knowledgeUsed || [],
-        suggestions: generateSuggestions(userInput, response.content),
-        thinking: [...thinkingSteps, ...(response.reasoning || [])],
+        knowledgeUsed: response.knowledgeUsed,
+        thinking: response.reasoning,
         mathAnalysis: response.mathAnalysis,
-        responseTime: responseTime,
+        responseTime: response.processingTime,
       }
 
-      setMessages((prev) => [...prev, aiMessage])
+      setMessages((prev) => [...prev, assistantMessage])
 
-      setPerformanceMetrics((prev: any) => {
-        const newAvg = prev.averageResponseTime === 0 ? responseTime : (prev.averageResponseTime + responseTime) / 2
-        return {
-          ...prev,
-          averageResponseTime: newAvg,
-          firstResponseTime: prev.firstResponseTime === 0 ? responseTime : prev.firstResponseTime,
-        }
-      })
+      // Update system stats
+      setSystemStats(reasoningEngineRef.current.getSystemStats())
+    } catch (error) {
+      console.error("❌ Error processing message:", error)
 
-      updateStats()
-    } catch (error: any) {
-      console.error("Error processing message:", error)
-      setError(`Failed to process message: ${error.message || "Unknown error"}`)
-      setInput(userInput)
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "❌ I encountered an error processing your message. Please try again.",
+        timestamp: Date.now(),
+        confidence: 0.3,
+      }
+
+      setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
-      setIsThinking(false)
-      setCurrentThinking("")
     }
   }
 
-  const generateSuggestions = (userInput: string, aiResponse: string): string[] => {
-    const suggestions: string[] = []
+  // Handle system diagnostic
+  const runDiagnostic = async () => {
+    if (!reasoningEngineRef.current) return
 
-    if (aiResponse.includes("math") || aiResponse.includes("calculate") || aiResponse.includes("result")) {
-      suggestions.push("Try another calculation", "What's 15 × 23?", "Calculate 25 + 17")
-    }
-
-    if (aiResponse.includes("remember") || aiResponse.includes("learn")) {
-      suggestions.push("What do you remember about me?", "Tell me what you've learned")
-    }
-
-    if (userInput.toLowerCase().includes("what") || userInput.toLowerCase().includes("how")) {
-      suggestions.push("Can you explain more?", "Give me an example")
-    }
-
-    if (/\d/.test(userInput)) {
-      suggestions.push("Try a different math problem", "What's 2x2?", "Calculate 5+5")
-    }
-
-    suggestions.push("Tell me something interesting", "What can you do?", "Self diagnostic")
-
-    return suggestions.slice(0, 4)
-  }
-
-  const handleExport = () => {
+    setIsLoading(true)
     try {
-      const aiData = aiSystem.exportData()
+      const response = await reasoningEngineRef.current.processMessage("system diagnostic")
 
-      const combinedData = {
-        cognitiveProcessor: aiData,
-        exportDate: new Date().toISOString(),
-        version: "5.0.0",
+      const diagnosticMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: response.content,
+        timestamp: Date.now(),
+        confidence: response.confidence,
       }
 
-      const blob = new Blob([JSON.stringify(combinedData, null, 2)], { type: "application/json" })
+      setMessages((prev) => [...prev, diagnosticMessage])
+      setSystemStats(reasoningEngineRef.current.getSystemStats())
+    } catch (error) {
+      console.error("❌ Diagnostic failed:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Export system data
+  const exportData = () => {
+    if (!reasoningEngineRef.current) return
+
+    try {
+      const data = reasoningEngineRef.current.exportData()
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `zacai-master-export-${new Date().toISOString().split("T")[0]}.json`
+      a.download = `zacai-export-${new Date().toISOString().split("T")[0]}.json`
+      document.body.appendChild(a)
       a.click()
+      document.body.removeChild(a)
       URL.revokeObjectURL(url)
-
-      console.log("✅ Data exported successfully")
     } catch (error) {
-      console.error("Export failed:", error)
-      alert("Failed to export data")
+      console.error("❌ Export failed:", error)
     }
   }
 
-  const formatTimestamp = (timestamp: number) => {
+  // Clear conversation
+  const clearConversation = () => {
+    setMessages([])
+    setCurrentThinking([])
+  }
+
+  // Format timestamp
+  const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString()
   }
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence > 0.7) return "text-green-600"
-    if (confidence > 0.4) return "text-yellow-600"
-    return "text-red-600"
-  }
-
+  // Get connection status icon
   const getConnectionIcon = () => {
     switch (connectionStatus) {
       case "good":
-        return <Wifi className="w-4 h-4 text-green-500" />
+        return <Wifi className="h-4 w-4 text-green-500" />
       case "slow":
-        return <Wifi className="w-4 h-4 text-yellow-500" />
+        return <Wifi className="h-4 w-4 text-yellow-500" />
       case "offline":
-        return <WifiOff className="w-4 h-4 text-red-500" />
-      case "checking":
-      default:
-        return <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+        return <WifiOff className="h-4 w-4 text-red-500" />
     }
   }
 
-  const getStepIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="w-4 h-4 text-gray-400" />
-      case "loading":
-        return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
-      case "completed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />
-      case "failed":
-        return <AlertTriangle className="w-4 h-4 text-red-500" />
+  // Get system status color
+  const getSystemStatusColor = () => {
+    switch (systemStatus) {
+      case "ready":
+        return "text-green-500"
+      case "initializing":
+        return "text-yellow-500"
+      case "error":
+        return "text-red-500"
       default:
-        return <Clock className="w-4 h-4 text-gray-400" />
+        return "text-gray-500"
     }
   }
 
   if (isInitializing) {
     return (
-      <div className="h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
+      <div className={`flex items-center justify-center min-h-screen ${className}`}>
+        <Card className="w-96">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Brain className="w-6 h-6" />
-              ZacAI Master System Loading
-              {getConnectionIcon()}
+              <Brain className="h-6 w-6 animate-pulse" />
+              Initializing ZacAI...
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Connection Status */}
-            <Alert>
-              <Activity className="h-4 w-4" />
-              <AlertDescription>
-                Connection: <strong className="capitalize">{connectionStatus}</strong>
-                {connectionStatus === "slow" && " - This may affect loading times"}
-                {connectionStatus === "offline" && " - Some features may not work"}
-              </AlertDescription>
-            </Alert>
-
-            {/* Loading Steps */}
-            <div className="space-y-3">
-              {loadingSteps.map((step, index) => (
-                <div key={step.name} className="flex items-center gap-3 p-3 border rounded-lg">
-                  {getStepIcon(step.status)}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{step.name}</span>
-                      {step.duration && <span className="text-xs text-gray-500">{step.duration.toFixed(0)}ms</span>}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {step.error ? <span className="text-red-600">Error: {step.error}</span> : step.details}
-                    </div>
-                  </div>
-                </div>
-              ))}
+          <CardContent>
+            <div className="space-y-4">
+              <Progress value={75} className="w-full" />
+              <p className="text-sm text-muted-foreground">Loading neural networks and knowledge base...</p>
             </div>
-
-            {/* Overall Progress */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Overall Progress</span>
-                <span>
-                  {loadingSteps.filter((s) => s.status === "completed").length} / {loadingSteps.length}
-                </span>
-              </div>
-              <Progress
-                value={(loadingSteps.filter((s) => s.status === "completed").length / loadingSteps.length) * 100}
-                className="h-2"
-              />
-            </div>
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
           </CardContent>
         </Card>
       </div>
@@ -549,423 +286,424 @@ export default function MasterAIChat() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        <Card className="flex-1 m-4 flex flex-col">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="w-5 h-5" />
-                ZacAI Master System
-                <Badge variant="outline">v5.0.0</Badge>
-                {getConnectionIcon()}
-              </CardTitle>
-
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-600">Init: {performanceMetrics.initializationTime.toFixed(0)}ms</div>
-                <div className="text-sm text-gray-600">Avg: {performanceMetrics.averageResponseTime.toFixed(0)}ms</div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">Metrics</span>
-                  <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
-                </div>
+    <div className={`flex flex-col h-screen max-w-6xl mx-auto p-4 ${className}`}>
+      {/* Header */}
+      <Card className="mb-4">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Brain className="h-8 w-8 text-blue-500" />
+              <div>
+                <CardTitle className="text-xl">ZacAI Master Reasoning Engine</CardTitle>
+                <p className="text-sm text-muted-foreground">Advanced AI with Neural Learning & Tesla Mathematics</p>
               </div>
             </div>
-          </CardHeader>
+            <div className="flex items-center gap-2">
+              {getConnectionIcon()}
+              <Badge variant={systemStatus === "ready" ? "default" : "secondary"}>
+                <span className={getSystemStatusColor()}>{systemStatus}</span>
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
-          <CardContent className="flex-1 flex flex-col">
-            <ScrollArea className="flex-1 overflow-y-auto space-y-4 mb-4 pr-4">
-              {messages.length === 0 && (
-                <div className="text-center text-gray-500 mt-8">
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Brain className="w-12 h-12 opacity-50" />
-                    <Calculator className="w-8 h-8 opacity-30" />
-                    <Zap className="w-6 h-6 opacity-20" />
+      {/* Main Content */}
+      <div className="flex-1 flex gap-4">
+        {/* Chat Section */}
+        <div className="flex-1 flex flex-col">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="chat" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="thinking" className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4" />
+                Thinking
+              </TabsTrigger>
+              <TabsTrigger value="knowledge" className="flex items-center gap-2">
+                <Database className="h-4 w-4" />
+                Knowledge
+              </TabsTrigger>
+              <TabsTrigger value="system" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                System
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Chat Tab */}
+            <TabsContent value="chat" className="flex-1 flex flex-col">
+              <Card className="flex-1 flex flex-col">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Conversation</CardTitle>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setShowThinking(!showThinking)}>
+                        <Lightbulb className="h-4 w-4 mr-1" />
+                        {showThinking ? "Hide" : "Show"} Thinking
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={clearConversation}>
+                        Clear
+                      </Button>
+                    </div>
                   </div>
-                  <p className="text-lg font-medium mb-2">Hello! I'm ZacAI Master System 🧠</p>
-                  <p className="mb-4">
-                    Advanced AI with neural learning, Tesla mathematics, comprehensive knowledge management, and
-                    cognitive processing!
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-2 text-sm max-w-md mx-auto">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInput("2x2=")}
-                      className="text-left justify-start"
-                    >
-                      <Calculator className="w-4 h-4 mr-2" />
-                      2x2=
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInput("Tesla 369")}
-                      className="text-left justify-start"
-                    >
-                      <Zap className="w-4 h-4 mr-2" />
-                      Tesla 369
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInput("What is serendipity")}
-                      className="text-left justify-start"
-                    >
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      What is serendipity
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInput("Self diagnostic")}
-                      className="text-left justify-start"
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Self diagnostic
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-[80%] rounded-lg p-4 ${
-                      message.role === "user" ? "bg-blue-500 text-white" : "bg-white border shadow-sm"
-                    }`}
-                  >
-                    <div className="text-sm mb-2 whitespace-pre-wrap">{message.content}</div>
-
-                    {message.role === "assistant" && (
-                      <div className="space-y-3 mt-3">
-                        {message.thinking && message.thinking.length > 0 && (
-                          <div className="border-l-2 border-blue-300 pl-3">
-                            <button
-                              onClick={() => setShowThinking((prev) => ({ ...prev, [message.id]: !prev[message.id] }))}
-                              className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                            >
-                              {showThinking[message.id] ? (
-                                <ChevronUp className="w-3 h-3" />
-                              ) : (
-                                <ChevronDown className="w-3 h-3" />
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col">
+                  <ScrollArea className="flex-1 pr-4">
+                    <div className="space-y-4">
+                      {messages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-[80%] rounded-lg p-3 ${
+                              message.role === "user" ? "bg-blue-500 text-white" : "bg-muted"
+                            }`}
+                          >
+                            <div className="whitespace-pre-wrap">{message.content}</div>
+                            <div className="flex items-center gap-2 mt-2 text-xs opacity-70">
+                              <Clock className="h-3 w-3" />
+                              {formatTime(message.timestamp)}
+                              {message.confidence && (
+                                <>
+                                  <Separator orientation="vertical" className="h-3" />
+                                  <span>Confidence: {Math.round(message.confidence * 100)}%</span>
+                                </>
                               )}
-                              <Brain className="w-3 h-3" />
-                              <span>AI Thinking Process</span>
-                            </button>
-                            {showThinking[message.id] && (
-                              <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded space-y-1">
-                                {message.thinking.map((step, idx) => (
-                                  <div key={idx} className="flex items-start gap-2">
-                                    <div className="w-1 h-1 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
-                                    <span>{step}</span>
-                                  </div>
+                              {message.responseTime && (
+                                <>
+                                  <Separator orientation="vertical" className="h-3" />
+                                  <span>{message.responseTime.toFixed(0)}ms</span>
+                                </>
+                              )}
+                            </div>
+                            {message.knowledgeUsed && message.knowledgeUsed.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {message.knowledgeUsed.slice(0, 3).map((knowledge, idx) => (
+                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                    {knowledge}
+                                  </Badge>
                                 ))}
                               </div>
                             )}
                           </div>
-                        )}
+                        </div>
+                      ))}
 
-                        {message.mathAnalysis && (
-                          <div className="bg-green-50 border border-green-200 rounded p-2">
-                            <div className="text-xs text-green-700 font-medium mb-1">Mathematical Analysis</div>
-                            <div className="text-xs text-green-600">
-                              Operation: {message.mathAnalysis.operation} | Confidence:{" "}
-                              {Math.round(message.mathAnalysis.confidence * 100)}%
-                              {message.mathAnalysis.seedDataUsed && " | Used Seed Data"}
-                            </div>
+                      {/* Current Thinking Display */}
+                      {isLoading && showThinking && currentThinking.length > 0 && (
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Brain className="h-4 w-4 animate-pulse" />
+                            <span className="text-sm font-medium">Thinking Process</span>
                           </div>
-                        )}
-
-                        {message.knowledgeUsed && message.knowledgeUsed.length > 0 && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Search className="w-3 h-3" />
-                              <span>Knowledge used:</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1">
-                              {message.knowledgeUsed.map((knowledge, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  {String(knowledge)}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {message.suggestions && message.suggestions.length > 0 && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Lightbulb className="w-3 h-3" />
-                              <span>Try these:</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1">
-                              {message.suggestions.map((suggestion, idx) => (
-                                <Button
-                                  key={idx}
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-xs h-6 px-2 bg-transparent"
-                                  onClick={() => setInput(suggestion)}
-                                >
-                                  {suggestion}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex items-center justify-between text-xs opacity-70">
-                          <div className="flex items-center gap-2">
-                            <span>{formatTimestamp(message.timestamp)}</span>
-                            {message.confidence && (
-                              <div className="flex items-center gap-1">
-                                <Cloud className="w-3 h-3" />
-                                <div
-                                  className={`w-2 h-2 rounded-full ${
-                                    message.confidence > 0.7
-                                      ? "bg-green-500"
-                                      : message.confidence > 0.4
-                                        ? "bg-yellow-500"
-                                        : "bg-red-500"
-                                  }`}
-                                />
-                                <span className={getConfidenceColor(message.confidence)}>
-                                  {Math.round(message.confidence * 100)}%
-                                </span>
+                          <div className="space-y-1">
+                            {currentThinking.slice(-5).map((thought) => (
+                              <div key={thought.id} className="text-xs text-muted-foreground">
+                                {thought.emoji} {thought.content}
                               </div>
-                            )}
-                            {message.responseTime && (
-                              <span className="text-gray-500">{message.responseTime.toFixed(0)}ms</span>
-                            )}
+                            ))}
                           </div>
+                        </div>
+                      )}
 
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0"
-                              onClick={() => console.log("Positive feedback")}
-                            >
-                              <ThumbsUp className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0"
-                              onClick={() => console.log("Negative feedback")}
-                            >
-                              <ThumbsDown className="w-3 h-3" />
-                            </Button>
+                      {isLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-muted rounded-lg p-3">
+                            <div className="flex items-center gap-2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                              <span className="text-sm">Processing...</span>
+                            </div>
                           </div>
+                        </div>
+                      )}
+
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </ScrollArea>
+
+                  {/* Input Form */}
+                  <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
+                    <Input
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Ask me anything... Try math, definitions, or 'system diagnostic'"
+                      disabled={isLoading}
+                      className="flex-1"
+                    />
+                    <Button type="submit" disabled={isLoading || !input.trim()}>
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Thinking Tab */}
+            <TabsContent value="thinking" className="flex-1">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5" />
+                    Cognitive Process
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-96">
+                    {currentThinking.length > 0 ? (
+                      <div className="space-y-2">
+                        {currentThinking.map((thought) => (
+                          <div key={thought.id} className="flex items-start gap-2 p-2 rounded bg-muted/50">
+                            <span className="text-lg">{thought.emoji}</span>
+                            <div className="flex-1">
+                              <div className="text-sm">{thought.content}</div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {thought.type} • {Math.round(thought.confidence * 100)}% confidence
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        <Lightbulb className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No active thinking process</p>
+                        <p className="text-sm">Send a message to see my reasoning</p>
+                      </div>
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Knowledge Tab */}
+            <TabsContent value="knowledge" className="flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="h-5 w-5" />
+                      Vocabulary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {systemStats && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Total Words:</span>
+                          <Badge>{systemStats.vocabulary.total}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Learned:</span>
+                          <Badge variant="secondary">{systemStats.vocabulary.learned}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Seed:</span>
+                          <Badge variant="outline">{systemStats.vocabulary.seed}</Badge>
                         </div>
                       </div>
                     )}
+                  </CardContent>
+                </Card>
 
-                    {message.role === "user" && (
-                      <div className="text-xs opacity-70 mt-2">{formatTimestamp(message.timestamp)}</div>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {isThinking && currentThinking && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 border shadow-sm rounded-lg p-4 max-w-[80%]">
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
-                      <Brain className="w-4 h-4 text-blue-500 animate-pulse" />
-                      <span className="text-sm text-gray-600 italic">{currentThinking}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {isLoading && !isThinking && (
-                <div className="flex justify-start">
-                  <div className="bg-white border shadow-sm rounded-lg p-4 max-w-[80%]">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm text-gray-500">ZacAI is processing...</span>
-                      <Cloud className="w-4 h-4 text-gray-400 animate-pulse" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </ScrollArea>
-
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything - math, Tesla patterns, definitions, or system analysis!"
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button type="submit" disabled={isLoading || !input.trim()}>
-                <Zap className="w-4 h-4 mr-2" />
-                Send
-              </Button>
-            </form>
-
-            {error && (
-              <Alert variant="destructive" className="mt-2">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Sidebar */}
-      {showMetrics && (
-        <div className="w-80 flex-shrink-0 p-4 overflow-hidden">
-          <Tabs defaultValue="stats" className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
-              <TabsTrigger value="stats">Stats</TabsTrigger>
-              <TabsTrigger value="memory">Memory</TabsTrigger>
-              <TabsTrigger value="tools">Tools</TabsTrigger>
-            </TabsList>
-
-            <div className="flex-1 mt-4 overflow-hidden">
-              <TabsContent value="stats" className="h-full">
-                <Card className="h-full">
+                <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4" />
-                      System Stats
+                    <CardTitle className="flex items-center gap-2">
+                      <Calculator className="h-5 w-5" />
+                      Mathematics
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{stats.conversations}</div>
-                        <div className="text-xs text-gray-500">Messages</div>
+                  <CardContent>
+                    {systemStats && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Total Concepts:</span>
+                          <Badge>{systemStats.mathematics.total}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Calculations:</span>
+                          <Badge variant="secondary">{systemStats.mathematics.calculations}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Functions:</span>
+                          <Badge variant="outline">{systemStats.mathematics.functions}</Badge>
+                        </div>
                       </div>
+                    )}
+                  </CardContent>
+                </Card>
 
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{stats.vocabulary}</div>
-                        <div className="text-xs text-gray-500">Vocabulary</div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-5 w-5" />
+                      Memory
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {systemStats && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Memory Entries:</span>
+                          <Badge>{systemStats.memoryEntries}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Conversations:</span>
+                          <Badge variant="secondary">{systemStats.conversations}</Badge>
+                        </div>
                       </div>
+                    )}
+                  </CardContent>
+                </Card>
 
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">{stats.memoryEntries}</div>
-                        <div className="text-xs text-gray-500">Memories</div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="h-5 w-5" />
+                      Facts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {systemStats && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Total Facts:</span>
+                          <Badge>{systemStats.facts.total}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Verified:</span>
+                          <Badge variant="secondary">{systemStats.facts.verified}</Badge>
+                        </div>
                       </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
 
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-orange-600">{stats.mathematics}</div>
-                        <div className="text-xs text-gray-500">Math Funcs</div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Confidence</span>
-                        <span className={getConfidenceColor(stats.avgConfidence || 0)}>
-                          {Math.round((stats.avgConfidence || 0) * 100)}%
+            {/* System Tab */}
+            <TabsContent value="system" className="flex-1">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Activity className="h-4 w-4" />
+                        System Status
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-2">
+                        {systemStatus === "ready" ? (
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : systemStatus === "error" ? (
+                          <AlertTriangle className="h-5 w-5 text-red-500" />
+                        ) : (
+                          <Clock className="h-5 w-5 text-yellow-500" />
+                        )}
+                        <span className={`font-medium ${getSystemStatusColor()}`}>
+                          {systemStatus.charAt(0).toUpperCase() + systemStatus.slice(1)}
                         </span>
                       </div>
-                      <Progress value={(stats.avgConfidence || 0) * 100} className="h-2" />
-                    </div>
+                    </CardContent>
+                  </Card>
 
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>System Progress</span>
-                        <span>{Math.round(stats.seedProgress || 0)}%</span>
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Cpu className="h-4 w-4" />
+                        Performance
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span>Avg Confidence:</span>
+                          <span>{systemStats ? Math.round(systemStats.avgConfidence * 100) : 0}%</span>
+                        </div>
+                        <Progress value={systemStats ? systemStats.avgConfidence * 100 : 0} className="h-2" />
                       </div>
-                      <Progress value={stats.seedProgress || 0} className="h-2" />
-                    </div>
+                    </CardContent>
+                  </Card>
 
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <p>• Neural networks: Active</p>
-                      <p>• Tesla mathematics: Enabled</p>
-                      <p>• Learning system: Online</p>
-                      <p>• Memory system: Active</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        {getConnectionIcon()}
+                        Connection
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <span className="text-sm font-medium">
+                        {connectionStatus.charAt(0).toUpperCase() + connectionStatus.slice(1)}
+                      </span>
+                    </CardContent>
+                  </Card>
+                </div>
 
-              <TabsContent value="memory" className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Database className="w-4 h-4" />
-                      Memory System
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      System Controls
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Vocabulary</span>
-                        <span>{stats.vocabulary} words</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Mathematics</span>
-                        <span>{stats.mathematics} concepts</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Facts</span>
-                        <span>{stats.facts} entries</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Conversations</span>
-                        <span>{stats.conversations} messages</span>
-                      </div>
-                    </div>
-
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <p>• Persistent storage: Active</p>
-                      <p>• Auto-save: Enabled</p>
-                      <p>• Learning mode: Continuous</p>
-                      <p>• Memory integrity: Good</p>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      <Button onClick={runDiagnostic} disabled={isLoading}>
+                        <Activity className="h-4 w-4 mr-2" />
+                        Run Diagnostic
+                      </Button>
+                      <Button variant="outline" onClick={exportData}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Export Data
+                      </Button>
+                      <Button variant="outline" onClick={clearConversation}>
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Clear Chat
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              <TabsContent value="tools" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Settings className="w-4 h-4" />
-                      System Tools
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Button onClick={handleExport} className="w-full bg-transparent" variant="outline">
-                      <Download className="w-4 h-4 mr-2" />
-                      Export Data
-                    </Button>
-
-                    <Button onClick={() => setInput("Self diagnostic")} className="w-full" variant="outline">
-                      <Activity className="w-4 h-4 mr-2" />
-                      Run Diagnostic
-                    </Button>
-
-                    <Button onClick={() => setInput("What can you do?")} className="w-full" variant="outline">
-                      <Brain className="w-4 h-4 mr-2" />
-                      Show Capabilities
-                    </Button>
-
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <p>• System version: {stats.version}</p>
-                      <p>• Status: {stats.systemStatus}</p>
-                      <p>• Connection: {connectionStatus}</p>
-                      <p>• Last update: {new Date(stats.lastUpdated).toLocaleTimeString()}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </div>
+                {systemStats && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5" />
+                        System Statistics
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <div className="font-medium">Vocabulary</div>
+                          <div className="text-2xl font-bold text-blue-500">{systemStats.vocabularySize}</div>
+                        </div>
+                        <div>
+                          <div className="font-medium">Math Functions</div>
+                          <div className="text-2xl font-bold text-green-500">{systemStats.mathFunctions}</div>
+                        </div>
+                        <div>
+                          <div className="font-medium">Conversations</div>
+                          <div className="text-2xl font-bold text-purple-500">{systemStats.conversations}</div>
+                        </div>
+                        <div>
+                          <div className="font-medium">Memory Entries</div>
+                          <div className="text-2xl font-bold text-orange-500">{systemStats.memoryEntries}</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
-      )}
+      </div>
     </div>
   )
 }

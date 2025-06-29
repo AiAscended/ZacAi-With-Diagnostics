@@ -1,202 +1,119 @@
-import type { VocabularyLoader, WordEntry } from "./vocabulary-loader"
+import type { VocabularyLoader } from "./vocabulary-loader"
 
-export interface TokenInfo {
-  token: string
-  id: number
-  wordEntry?: WordEntry
-  isKnown: boolean
-  subwords?: string[]
+export interface Token {
+  text: string
+  type: string
+  position: number
+  confidence: number
 }
 
 export class AdvancedTokenizer {
   private vocabularyLoader: VocabularyLoader
-  private tokenToId: Map<string, number> = new Map()
-  private idToToken: Map<number, string> = new Map()
-  private nextId = 0
-  private specialTokens = {
-    PAD: 0,
-    UNK: 1,
-    START: 2,
-    END: 3,
-  }
+  private isInitialized = false
 
   constructor(vocabularyLoader: VocabularyLoader) {
     this.vocabularyLoader = vocabularyLoader
-    this.initializeSpecialTokens()
-  }
-
-  private initializeSpecialTokens(): void {
-    const tokens = ["<PAD>", "<UNK>", "<START>", "<END>"]
-    tokens.forEach((token, index) => {
-      this.tokenToId.set(token, index)
-      this.idToToken.set(index, token)
-    })
-    this.nextId = tokens.length
+    console.log("🔤 AdvancedTokenizer initialized")
   }
 
   public async initialize(): Promise<void> {
+    if (this.isInitialized) return
+
+    console.log("🔤 Initializing tokenizer...")
     await this.vocabularyLoader.loadVocabulary()
-    console.log("Advanced tokenizer initialized with vocabulary")
+    this.isInitialized = true
+    console.log("🔤 Tokenizer initialization complete")
   }
 
-  public tokenize(text: string): TokenInfo[] {
-    const words = this.preprocessText(text)
-    const tokens: TokenInfo[] = []
+  public tokenize(text: string): Token[] {
+    const tokens: Token[] = []
+    const words = text.toLowerCase().match(/\b\w+\b/g) || []
 
-    for (const word of words) {
-      const tokenInfo = this.processWord(word)
-      tokens.push(tokenInfo)
-    }
+    words.forEach((word, index) => {
+      const token: Token = {
+        text: word,
+        type: this.getTokenType(word),
+        position: index,
+        confidence: this.getTokenConfidence(word),
+      }
+      tokens.push(token)
+    })
 
     return tokens
   }
 
-  private preprocessText(text: string): string[] {
-    // Advanced text preprocessing
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s'-]/g, " ") // Keep apostrophes and hyphens
-      .replace(/\s+/g, " ")
-      .trim()
-      .split(" ")
-      .filter((word) => word.length > 0)
+  private getTokenType(word: string): string {
+    // Check if it's a number
+    if (/^\d+$/.test(word)) {
+      return "number"
+    }
+
+    // Check if it's a mathematical operator
+    if (["+", "-", "*", "/", "=", "×", "÷"].includes(word)) {
+      return "operator"
+    }
+
+    // Check if it's in vocabulary
+    if (this.vocabularyLoader.hasWord(word)) {
+      return "known_word"
+    }
+
+    // Check if it's a common word pattern
+    if (word.length <= 2) {
+      return "short_word"
+    }
+
+    if (word.length >= 10) {
+      return "long_word"
+    }
+
+    return "unknown_word"
   }
 
-  private processWord(word: string): TokenInfo {
-    // Check if word exists in vocabulary
-    const wordEntry = this.vocabularyLoader.getWord(word)
-
-    if (wordEntry) {
-      // Known word
-      const id = this.getOrCreateTokenId(word)
-      return {
-        token: word,
-        id,
-        wordEntry,
-        isKnown: true,
-      }
+  private getTokenConfidence(word: string): number {
+    if (this.vocabularyLoader.hasWord(word)) {
+      return 0.9
     }
 
-    // Unknown word - try subword tokenization
-    const subwords = this.subwordTokenize(word)
-    if (subwords.length > 1) {
-      const id = this.getOrCreateTokenId(word)
-      return {
-        token: word,
-        id,
-        isKnown: false,
-        subwords,
-      }
+    if (/^\d+$/.test(word)) {
+      return 0.95
     }
 
-    // Completely unknown
-    return {
-      token: word,
-      id: this.specialTokens.UNK,
-      isKnown: false,
+    if (["+", "-", "*", "/", "=", "×", "÷"].includes(word)) {
+      return 0.98
     }
+
+    // Lower confidence for unknown words
+    return 0.3
   }
 
-  private subwordTokenize(word: string): string[] {
-    const subwords: string[] = []
-    let remaining = word
-
-    // Try to break down unknown words into known parts
-    while (remaining.length > 0) {
-      let found = false
-
-      // Try progressively shorter prefixes
-      for (let i = Math.min(remaining.length, 8); i >= 2; i--) {
-        const prefix = remaining.substring(0, i)
-        if (this.vocabularyLoader.getWord(prefix)) {
-          subwords.push(prefix)
-          remaining = remaining.substring(i)
-          found = true
-          break
-        }
-      }
-
-      if (!found) {
-        // If no prefix found, take first character and continue
-        subwords.push(remaining[0])
-        remaining = remaining.substring(1)
-      }
-    }
-
-    return subwords
-  }
-
-  private getOrCreateTokenId(token: string): number {
-    if (this.tokenToId.has(token)) {
-      return this.tokenToId.get(token)!
-    }
-
-    const id = this.nextId++
-    this.tokenToId.set(token, id)
-    this.idToToken.set(id, token)
-    return id
-  }
-
-  public encode(text: string, maxLength = 128): number[] {
+  public analyzeText(text: string): any {
     const tokens = this.tokenize(text)
-    const encoded = [this.specialTokens.START]
-
-    for (const tokenInfo of tokens) {
-      if (encoded.length >= maxLength - 1) break
-
-      if (tokenInfo.subwords && tokenInfo.subwords.length > 1) {
-        // Add subword tokens
-        for (const subword of tokenInfo.subwords) {
-          const subwordEntry = this.vocabularyLoader.getWord(subword)
-          if (subwordEntry) {
-            encoded.push(this.getOrCreateTokenId(subword))
-          } else {
-            encoded.push(this.specialTokens.UNK)
-          }
-          if (encoded.length >= maxLength - 1) break
-        }
-      } else {
-        encoded.push(tokenInfo.id)
-      }
-    }
-
-    encoded.push(this.specialTokens.END)
-
-    // Pad to maxLength
-    while (encoded.length < maxLength) {
-      encoded.push(this.specialTokens.PAD)
-    }
-
-    return encoded.slice(0, maxLength)
-  }
-
-  public decode(tokenIds: number[]): string {
-    const tokens = tokenIds
-      .filter((id) => id !== this.specialTokens.PAD && id !== this.specialTokens.START && id !== this.specialTokens.END)
-      .map((id) => this.idToToken.get(id) || "<UNK>")
-
-    return tokens.join(" ")
-  }
-
-  public getTokenInfo(text: string): {
-    tokens: TokenInfo[]
-    knownWords: number
-    unknownWords: number
-    totalTokens: number
-  } {
-    const tokens = this.tokenize(text)
-    const knownWords = tokens.filter((t) => t.isKnown).length
-    const unknownWords = tokens.filter((t) => !t.isKnown).length
+    const knownWords = tokens.filter((t) => t.type === "known_word").length
+    const unknownWords = tokens.filter((t) => t.type === "unknown_word").length
+    const numbers = tokens.filter((t) => t.type === "number").length
+    const operators = tokens.filter((t) => t.type === "operator").length
 
     return {
-      tokens,
+      totalTokens: tokens.length,
       knownWords,
       unknownWords,
-      totalTokens: tokens.length,
+      numbers,
+      operators,
+      averageConfidence: tokens.reduce((sum, t) => sum + t.confidence, 0) / tokens.length,
+      tokens: tokens.slice(0, 10), // Return first 10 tokens for analysis
     }
   }
 
-  public getVocabularySize(): number {
-    return this.nextId
+  public extractKeywords(text: string): string[] {
+    const tokens = this.tokenize(text)
+    return tokens
+      .filter((t) => t.type === "known_word" && t.text.length > 3)
+      .map((t) => t.text)
+      .slice(0, 5) // Return top 5 keywords
+  }
+
+  public isInitialized(): boolean {
+    return this.isInitialized
   }
 }

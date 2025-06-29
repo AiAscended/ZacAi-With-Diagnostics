@@ -1,8 +1,11 @@
-import type { WordEntry } from "./types"
-
-export interface VocabularyLoader {
-  loadVocabulary(): Promise<void>
-  getWord(word: string): WordEntry | null
+export interface WordEntry {
+  word: string
+  definition: string
+  partOfSpeech?: string
+  examples?: string[]
+  phonetic?: string
+  synonyms?: string[]
+  antonyms?: string[]
 }
 
 export class VocabularyLoader {
@@ -10,97 +13,103 @@ export class VocabularyLoader {
   private isLoaded = false
 
   constructor() {
-    this.vocabulary = new Map()
+    console.log("📚 VocabularyLoader initialized")
   }
 
   public async loadVocabulary(): Promise<void> {
     if (this.isLoaded) return
 
+    console.log("📚 Loading vocabulary...")
+
+    // Load basic vocabulary first
+    this.loadBasicVocabulary()
+
+    // Try to load from seed file
     try {
-      // Load basic vocabulary
-      const basicWords = [
-        { word: "hello", definition: "A greeting", partOfSpeech: "interjection" },
-        { word: "goodbye", definition: "A farewell", partOfSpeech: "interjection" },
-        { word: "yes", definition: "An affirmative answer", partOfSpeech: "adverb" },
-        { word: "no", definition: "A negative answer", partOfSpeech: "adverb" },
-        { word: "please", definition: "Used to make a polite request", partOfSpeech: "adverb" },
-        { word: "thank", definition: "To express gratitude", partOfSpeech: "verb" },
-        { word: "help", definition: "To assist or aid", partOfSpeech: "verb" },
-        { word: "learn", definition: "To acquire knowledge", partOfSpeech: "verb" },
-        { word: "understand", definition: "To comprehend", partOfSpeech: "verb" },
-        { word: "know", definition: "To be aware of", partOfSpeech: "verb" },
-      ]
+      const response = await fetch("/seed_vocab.json")
+      if (response.ok) {
+        const data = await response.json()
+        let loadedCount = 0
 
-      basicWords.forEach((word) => {
-        this.vocabulary.set(word.word.toLowerCase(), {
-          word: word.word.toLowerCase(),
-          definition: word.definition,
-          partOfSpeech: word.partOfSpeech,
-          examples: [`Example usage of ${word.word}`],
-          phonetic: `/${word.word}/`,
-          synonyms: [],
-          antonyms: [],
-        })
-      })
-
-      // Try to load from seed data
-      try {
-        const response = await fetch("/seed_vocab.json")
-        if (response.ok) {
-          const data = await response.json()
-          Object.entries(data).forEach(([word, entry]: [string, any]) => {
-            this.vocabulary.set(word.toLowerCase(), {
-              word: word.toLowerCase(),
-              definition: entry.definition || "No definition available",
-              partOfSpeech: entry.part_of_speech || entry.partOfSpeech || "unknown",
-              examples: entry.examples || [],
-              phonetic: entry.phonetic || "",
-              synonyms: entry.synonyms || [],
-              antonyms: entry.antonyms || [],
-            })
+        Object.entries(data).forEach(([word, entry]: [string, any]) => {
+          this.vocabulary.set(word.toLowerCase(), {
+            word: word.toLowerCase(),
+            definition: entry.definition || "No definition available",
+            partOfSpeech: entry.part_of_speech || entry.partOfSpeech || "unknown",
+            examples: entry.examples || [],
+            phonetic: entry.phonetic || "",
+            synonyms: entry.synonyms || [],
+            antonyms: entry.antonyms || [],
           })
-        }
-      } catch (error) {
-        console.warn("Could not load seed vocabulary, using basic vocabulary only")
-      }
+          loadedCount++
+        })
 
-      this.isLoaded = true
-      console.log(`✅ Vocabulary loaded: ${this.vocabulary.size} words`)
+        console.log(`📚 Loaded ${loadedCount} words from seed vocabulary`)
+      }
     } catch (error) {
-      console.error("Error loading vocabulary:", error)
-      this.isLoaded = true // Mark as loaded even if failed to prevent infinite retries
+      console.warn("Could not load seed vocabulary, using basic vocabulary only")
     }
+
+    this.isLoaded = true
+    console.log(`📚 Vocabulary loading complete: ${this.vocabulary.size} words`)
+  }
+
+  private loadBasicVocabulary(): void {
+    const basicWords = [
+      { word: "hello", definition: "A greeting", partOfSpeech: "interjection" },
+      { word: "hi", definition: "An informal greeting", partOfSpeech: "interjection" },
+      { word: "goodbye", definition: "A farewell", partOfSpeech: "interjection" },
+      { word: "yes", definition: "An affirmative answer", partOfSpeech: "adverb" },
+      { word: "no", definition: "A negative answer", partOfSpeech: "adverb" },
+      { word: "please", definition: "Used to make a polite request", partOfSpeech: "adverb" },
+      { word: "thank", definition: "To express gratitude", partOfSpeech: "verb" },
+      { word: "thanks", definition: "Expression of gratitude", partOfSpeech: "noun" },
+      { word: "help", definition: "To assist or aid", partOfSpeech: "verb" },
+      { word: "what", definition: "Used to ask for information", partOfSpeech: "pronoun" },
+      { word: "how", definition: "In what way or manner", partOfSpeech: "adverb" },
+      { word: "why", definition: "For what reason", partOfSpeech: "adverb" },
+      { word: "when", definition: "At what time", partOfSpeech: "adverb" },
+      { word: "where", definition: "In or to what place", partOfSpeech: "adverb" },
+      { word: "who", definition: "What person or people", partOfSpeech: "pronoun" },
+      { word: "good", definition: "Having positive qualities", partOfSpeech: "adjective" },
+      { word: "bad", definition: "Having negative qualities", partOfSpeech: "adjective" },
+      { word: "big", definition: "Large in size", partOfSpeech: "adjective" },
+      { word: "small", definition: "Little in size", partOfSpeech: "adjective" },
+      { word: "new", definition: "Recently made or created", partOfSpeech: "adjective" },
+      { word: "old", definition: "Having lived for a long time", partOfSpeech: "adjective" },
+      { word: "happy", definition: "Feeling joy", partOfSpeech: "adjective" },
+      { word: "sad", definition: "Feeling sorrow", partOfSpeech: "adjective" },
+      { word: "love", definition: "Deep affection", partOfSpeech: "noun" },
+      { word: "like", definition: "To find agreeable", partOfSpeech: "verb" },
+      { word: "know", definition: "To be aware of", partOfSpeech: "verb" },
+      { word: "think", definition: "To have thoughts", partOfSpeech: "verb" },
+      { word: "learn", definition: "To acquire knowledge", partOfSpeech: "verb" },
+      { word: "understand", definition: "To comprehend", partOfSpeech: "verb" },
+      { word: "remember", definition: "To recall", partOfSpeech: "verb" },
+      { word: "forget", definition: "To fail to remember", partOfSpeech: "verb" },
+    ]
+
+    basicWords.forEach((entry) => {
+      this.vocabulary.set(entry.word, {
+        word: entry.word,
+        definition: entry.definition,
+        partOfSpeech: entry.partOfSpeech,
+        examples: [`Example usage of ${entry.word}`],
+        phonetic: "",
+        synonyms: [],
+        antonyms: [],
+      })
+    })
+
+    console.log(`📚 Loaded ${basicWords.length} basic vocabulary words`)
   }
 
   public getWord(word: string): WordEntry | null {
-    const entry = this.vocabulary.get(word.toLowerCase())
-    return entry || null
+    return this.vocabulary.get(word.toLowerCase()) || null
   }
 
-  public getWordDefinition(word: string): WordEntry | null {
-    return this.getWord(word)
-  }
-
-  public searchWords(query: string, limit = 10): WordEntry[] {
-    const results: WordEntry[] = []
-    const queryLower = query.toLowerCase()
-
-    for (const [word, entry] of this.vocabulary) {
-      if (
-        word.includes(queryLower) ||
-        entry.definition.toLowerCase().includes(queryLower) ||
-        (entry.examples && entry.examples.some((ex) => ex.toLowerCase().includes(queryLower)))
-      ) {
-        results.push(entry)
-        if (results.length >= limit) break
-      }
-    }
-
-    return results
-  }
-
-  public addWord(wordEntry: WordEntry): void {
-    this.vocabulary.set(wordEntry.word.toLowerCase(), wordEntry)
+  public hasWord(word: string): boolean {
+    return this.vocabulary.has(word.toLowerCase())
   }
 
   public getVocabularySize(): number {
@@ -111,30 +120,14 @@ export class VocabularyLoader {
     return Array.from(this.vocabulary.values())
   }
 
-  public hasWord(word: string): boolean {
-    return this.vocabulary.has(word.toLowerCase())
+  public addWord(entry: WordEntry): void {
+    this.vocabulary.set(entry.word.toLowerCase(), entry)
   }
 
-  public removeWord(word: string): boolean {
-    return this.vocabulary.delete(word.toLowerCase())
-  }
-
-  public clearVocabulary(): void {
-    this.vocabulary.clear()
-    this.isLoaded = false
-  }
-
-  public exportVocabulary(): any {
-    const exported: any = {}
-    this.vocabulary.forEach((entry, word) => {
-      exported[word] = entry
-    })
-    return exported
-  }
-
-  public importVocabulary(data: any): void {
-    Object.entries(data).forEach(([word, entry]: [string, any]) => {
-      this.vocabulary.set(word.toLowerCase(), entry as WordEntry)
-    })
+  public searchWords(query: string): WordEntry[] {
+    const queryLower = query.toLowerCase()
+    return Array.from(this.vocabulary.values()).filter(
+      (entry) => entry.word.includes(queryLower) || entry.definition.toLowerCase().includes(queryLower),
+    )
   }
 }
