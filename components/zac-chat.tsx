@@ -259,6 +259,14 @@ export function ZacChat() {
               <span>Response Time:</span>
               <Badge variant="secondary">{stats.responseTime || 0}ms</Badge>
             </div>
+            <div className="flex justify-between">
+              <span>Knowledge Graph:</span>
+              <Badge variant="secondary">{stats.knowledgeGraphSize || 0} nodes</Badge>
+            </div>
+            <div className="flex justify-between">
+              <span>Neural Connections:</span>
+              <Badge variant="secondary">{stats.neuralConnections || 0}</Badge>
+            </div>
 
             {stats.breakdown && (
               <div className="pt-3 border-t">
