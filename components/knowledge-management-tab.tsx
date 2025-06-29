@@ -29,29 +29,9 @@ export default function KnowledgeManagementTab() {
     setIsLoading(true)
     try {
       // Simulate loading knowledge base
-      const mockKnowledge: KnowledgeEntry[] = [
-        {
-          id: "1",
-          topic: "Mathematics Basics",
-          content: "Basic arithmetic operations including addition, subtraction, multiplication, and division.",
-          category: "Math",
-          timestamp: Date.now() - 86400000,
-        },
-        {
-          id: "2",
-          topic: "Conversation Patterns",
-          content: "Common greeting patterns and response templates for natural conversation flow.",
-          category: "Language",
-          timestamp: Date.now() - 172800000,
-        },
-        {
-          id: "3",
-          topic: "Memory Management",
-          content: "Techniques for storing and retrieving user information and conversation context.",
-          category: "System",
-          timestamp: Date.now() - 259200000,
-        },
-      ]
+      const vocabResponse = await fetch("/seed_vocab.json")
+      const vocabData = await vocabResponse.json()
+      const mockKnowledge: KnowledgeEntry[] = vocabData.vocabulary || []
       setKnowledgeBase(mockKnowledge)
     } catch (error) {
       console.error("Failed to load knowledge base:", error)
