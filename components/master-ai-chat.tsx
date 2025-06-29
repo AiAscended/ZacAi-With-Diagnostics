@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Alert, AlertDescription } from "@/components/ui/alert" // Added Alert components
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Brain,
   BookOpen,
@@ -21,13 +21,10 @@ import {
   Settings,
   ThumbsUp,
   ThumbsDown,
-  Download,
   Search,
   Zap,
-  User,
   ChevronDown,
   ChevronUp,
-  Database,
   Activity,
   Wifi,
   WifiOff,
@@ -35,22 +32,10 @@ import {
   Clock,
   Loader2,
   CheckCircle,
-} from "lucide-react" // Added CheckCircle for diagnostic steps
+} from "lucide-react"
 import { ReasoningEngine } from "@/lib/reasoning-engine"
-import { setKnowledgeData } from "@/lib/knowledge-data" // Declare the variable before using it
-
-interface ChatMessage {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: number
-  confidence?: number
-  knowledgeUsed?: string[]
-  suggestions?: string[]
-  thinking?: string[]
-  mathAnalysis?: any
-  responseTime?: number // Added for performance tracking
-}
+import { setKnowledgeData } from "@/lib/knowledge-data"
+import type { ChatMessage } from "@/lib/types"
 
 interface AIStats {
   vocabulary: number
@@ -64,10 +49,10 @@ interface AIStats {
   systemStatus?: string
   avgConfidence?: number
   breakdown?: any
-  vocabularySize?: number // From DiagnosticAISystem
-  mathFunctions?: number // From DiagnosticAISystem
-  memoryEntries?: number // From DiagnosticAISystem
-  seedProgress?: number // For overall seeding progress
+  vocabularySize?: number
+  mathFunctions?: number
+  memoryEntries?: number
+  seedProgress?: number
 }
 
 export default function MasterAIChat() {
@@ -75,7 +60,7 @@ export default function MasterAIChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [showMetrics, setShowMetrics] = useState(true) // Default to true for diagnostics
+  const [showMetrics, setShowMetrics] = useState(true)
   const [stats, setStats] = useState<AIStats>({
     vocabulary: 0,
     mathematics: 0,
@@ -84,7 +69,7 @@ export default function MasterAIChat() {
     conversations: 0,
     totalEntries: 0,
     lastUpdated: 0,
-    version: "3.0.0",
+    version: "5.0.0",
     vocabularySize: 0,
     mathFunctions: 0,
     memoryEntries: 0,
@@ -102,7 +87,7 @@ export default function MasterAIChat() {
     initializationTime: 0,
     firstResponseTime: 0,
     averageResponseTime: 0,
-    memoryUsage: 0, // Placeholder, actual memory usage is hard to get in browser
+    memoryUsage: 0,
   })
   const [connectionStatus, setConnectionStatus] = useState<"good" | "slow" | "offline" | "checking">("checking")
   const initStartTime = useRef<number>(0)
@@ -148,7 +133,7 @@ export default function MasterAIChat() {
 
     // Simulate connection check
     await simulateDelay(200)
-    setConnectionStatus("good") // Assume good connection for now
+    setConnectionStatus("good")
 
     try {
       // Step 0: System Startup
@@ -274,14 +259,14 @@ export default function MasterAIChat() {
         conversations: aiStats.conversations || 0,
         totalEntries: aiStats.vocabulary?.total + aiStats.mathematics?.total + aiStats.facts?.total || 0,
         lastUpdated: Date.now(),
-        version: "3.0.0",
+        version: "5.0.0",
         systemStatus: "Ready",
-        avgConfidence: aiStats.avgConfidence || 0.85, // Use actual avgConfidence if available
+        avgConfidence: aiStats.avgConfidence || 0.85,
         breakdown: aiStats,
         vocabularySize: aiStats.vocabularySize || 0,
         mathFunctions: aiStats.mathFunctions || 0,
         memoryEntries: aiStats.memoryEntries || 0,
-        seedProgress: (aiStats.vocabulary?.total / 1000) * 100 || 0, // Example progress
+        seedProgress: (aiStats.vocabulary?.total / 1000) * 100 || 0,
       })
     } catch (error) {
       console.error("Failed to update stats:", error)
@@ -313,8 +298,8 @@ export default function MasterAIChat() {
           source: item.source,
         })),
 
-        userInfo: [], // Will be populated as user shares information
-        facts: [], // Will be populated as facts are learned
+        userInfo: [],
+        facts: [],
       }
       setKnowledgeData(processedData)
     } catch (error) {
@@ -438,14 +423,14 @@ export default function MasterAIChat() {
       const combinedData = {
         cognitiveProcessor: aiData,
         exportDate: new Date().toISOString(),
-        version: "3.0.0",
+        version: "5.0.0",
       }
 
       const blob = new Blob([JSON.stringify(combinedData, null, 2)], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `zacai-cognitive-export-${new Date().toISOString().split("T")[0]}.json`
+      a.download = `zacai-master-export-${new Date().toISOString().split("T")[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
 
@@ -502,7 +487,7 @@ export default function MasterAIChat() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Brain className="w-6 h-6" />
-              AI System Diagnostic Loading
+              ZacAI Master System Loading
               {getConnectionIcon()}
             </CardTitle>
           </CardHeader>
@@ -570,8 +555,8 @@ export default function MasterAIChat() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Brain className="w-5 h-5" />
-                {systemInfo.name || "ZacAI"}
-                <Badge variant="outline">Cognitive System</Badge>
+                ZacAI Master System
+                <Badge variant="outline">v5.0.0</Badge>
                 {getConnectionIcon()}
               </CardTitle>
 
@@ -579,7 +564,7 @@ export default function MasterAIChat() {
                 <div className="text-sm text-gray-600">Init: {performanceMetrics.initializationTime.toFixed(0)}ms</div>
                 <div className="text-sm text-gray-600">Avg: {performanceMetrics.averageResponseTime.toFixed(0)}ms</div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">Admin</span>
+                  <span className="text-sm">Metrics</span>
                   <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
                 </div>
               </div>
@@ -593,10 +578,11 @@ export default function MasterAIChat() {
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <Brain className="w-12 h-12 opacity-50" />
                     <Calculator className="w-8 h-8 opacity-30" />
+                    <Zap className="w-6 h-6 opacity-20" />
                   </div>
-                  <p className="text-lg font-medium mb-2">Hello! I'm {systemInfo.name || "ZacAI"} 🧠</p>
+                  <p className="text-lg font-medium mb-2">Hello! I'm ZacAI Master System 🧠</p>
                   <p className="mb-4">
-                    I'm ZacAI - an advanced AI system with neural learning and comprehensive knowledge management!
+                    Advanced AI with neural learning, Tesla mathematics, comprehensive knowledge management, and cognitive processing!
                   </p>
 
                   <div className="grid grid-cols-2 gap-2 text-sm max-w-md mx-auto">
@@ -612,20 +598,20 @@ export default function MasterAIChat() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => setInput("Tesla 369")}
+                      className="text-left justify-start"
+                    >
+                      <Zap className="w-4 h-4 mr-2" />
+                      Tesla 369
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setInput("What is serendipity")}
                       className="text-left justify-start"
                     >
                       <BookOpen className="w-4 h-4 mr-2" />
                       What is serendipity
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInput("My name is Ron")}
-                      className="text-left justify-start"
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      My name is Ron
                     </Button>
                     <Button
                       variant="outline"
@@ -797,8 +783,8 @@ export default function MasterAIChat() {
                 <div className="flex justify-start">
                   <div className="bg-white border shadow-sm rounded-lg p-4 max-w-[80%]">
                     <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
-                      <span className="text-sm text-gray-500">{systemInfo.name || "ZacAI"} is processing...</span>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm text-gray-500">ZacAI is processing...</span>
                       <Cloud className="w-4 h-4 text-gray-400 animate-pulse" />
                     </div>
                   </div>
@@ -812,7 +798,7 @@ export default function MasterAIChat() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything - math, definitions, coding, or self-analysis!"
+                placeholder="Ask me anything - math, Tesla patterns, definitions, or system analysis!"
                 disabled={isLoading}
                 className="flex-1"
               />
@@ -877,104 +863,30 @@ export default function MasterAIChat() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Confidence</span>
-                        <span className={getConfidenceColor(stats.avgConfidence)}>
-                          {Math.round(stats.avgConfidence * 100)}%
+                        <span className={getConfidenceColor(stats.avgConfidence || 0)}>
+                          {Math.round((stats.avgConfidence || 0) * 100)}%
                         </span>
                       </div>
-                      <Progress value={stats.avgConfidence * 100} className="h-2" />
+                      <Progress value={(stats.avgConfidence || 0) * 100} className="h-2" />
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Vocabulary Seeding</span>
-                        <span>{Math.round(stats.seedProgress)}%</span>
+                        <span>System Progress</span>
+                        <span>{Math.round(stats.seedProgress || 0)}%</span>
                       </div>
-                      <Progress value={stats.seedProgress} className="h-2" />
+                      <Progress value={stats.seedProgress || 0} className="h-2" />
+                    </div>
+
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p>• Neural networks: Active</p>
+                      <p>• Tesla mathematics: Enabled</p>
+                      <p>• Learning system: Online</p>
+                      <p>• Memory system: Active</p>
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
               <TabsContent value="memory" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Database className="w-4 h-4" />
-                      Memory System
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="text-sm text-gray-600">
-                      <p className="mb-2">The AI remembers:</p>
-                      <ul className="space-y-1 text-xs">
-                        <li>• Previous conversations</li>
-                        <li>• Topics you've discussed</li>
-                        <li>• Your preferences</li>
-                        <li>• Mathematical calculations</li>
-                        <li>• Context from earlier messages</li>
-                      </ul>
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <div className="text-sm font-medium mb-2">Try These</div>
-                      <div className="space-y-2 text-xs">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-left justify-start bg-transparent"
-                          onClick={() => setInput("Remember that I work as a developer")}
-                        >
-                          "Remember that I work as a developer"
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-left justify-start bg-transparent"
-                          onClick={() => setInput("What did we talk about earlier?")}
-                        >
-                          "What did we talk about earlier?"
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-left justify-start bg-transparent"
-                          onClick={() => setInput("Calculate the square root of 144")}
-                        >
-                          "Calculate the square root of 144"
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="tools" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Settings className="w-4 h-4" />
-                      AI Tools
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Button onClick={handleExport} className="w-full bg-transparent" variant="outline">
-                      <Download className="w-4 h-4 mr-2" />
-                      Export Data
-                    </Button>
-
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <p>• Vocabulary seeding adds words safely</p>
-                      <p>• Mathematical functions included</p>
-                      <p>• Background processing prevents crashes</p>
-                      <p>• Export saves all AI data</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </div>
-          </Tabs>
-        </div>
-      )}
-    </div>
-  )
-}
+                \

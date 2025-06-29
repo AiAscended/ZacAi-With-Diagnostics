@@ -5,6 +5,19 @@ import { EnhancedMathProcessor } from "./enhanced-math-processor"
 import { VocabularyLoader } from "./vocabulary-loader"
 import { AdvancedTokenizer } from "./advanced-tokenizer"
 import { PatternMatcher } from "./pattern-matcher"
+import { PerformanceMonitor } from "./performance-monitor"
+import type {
+  VocabularyEntry,
+  MathEntry,
+  PersonalInfoEntry,
+  FactEntry,
+  CodingEntry,
+  ChatMessage,
+  ThoughtNode,
+  SystemIdentity,
+  ReasoningEngineResponse,
+  SystemStats,
+} from "./types"
 
 // MASTER REASONING ENGINE - ALL GOLDEN CODE FROM ALL AI SYSTEMS MERGED
 export class ReasoningEngine {
@@ -44,7 +57,8 @@ export class ReasoningEngine {
   private systemIdentity: SystemIdentity = {
     name: "ZacAI",
     version: "5.0.0",
-    purpose: "Master AI reasoning engine with neural learning, Tesla mathematics, comprehensive knowledge management, and advanced cognitive processing",
+    purpose:
+      "Master AI reasoning engine with neural learning, Tesla mathematics, comprehensive knowledge management, and advanced cognitive processing",
   }
 
   // Learning Stats (from enhanced systems)
@@ -132,16 +146,16 @@ export class ReasoningEngine {
   // CORE INITIALIZATION METHODS (merged from all systems)
   private async initializeCoreComponents(): Promise<void> {
     console.log("🔧 Initializing core components...")
-    
+
     // Load system identity (from unified-ai-system.ts)
     await this.loadSystemIdentity()
-    
+
     // Initialize vocabulary loader (from enhanced systems)
     await this.vocabularyLoader.loadVocabulary()
-    
+
     // Initialize tokenizer (from enhanced systems)
     await this.tokenizer.initialize()
-    
+
     console.log("✅ Core components initialized")
   }
 
@@ -181,7 +195,7 @@ export class ReasoningEngine {
     try {
       console.log("🔍 Loading comprehensive seed vocabulary...")
       const response = await fetch("/seed_vocab.json")
-      
+
       if (response.ok) {
         const data = await response.json()
         console.log("📊 Raw vocabulary data keys count:", Object.keys(data).length)
@@ -328,7 +342,7 @@ export class ReasoningEngine {
 
         this.mathematics.set("vortex_cycle", {
           concept: "Vortex Mathematics Cycle",
-          type: "tesla_math", 
+          type: "tesla_math",
           formula: "1-2-4-8-7-5 infinite cycle pattern",
           category: "tesla_mathematics",
           source: "seed",
@@ -563,7 +577,7 @@ export class ReasoningEngine {
       new Array(64).fill(0).map(() => Math.random() - 0.5),
     )
     this.neuralWeights.set(
-      "hidden_layer_2", 
+      "hidden_layer_2",
       new Array(32).fill(0).map(() => Math.random() - 0.5),
     )
     this.neuralWeights.set(
@@ -717,7 +731,11 @@ export class ReasoningEngine {
     const teslaNumbers = [
       { number: 3, meaning: "Creation and manifestation", properties: ["Creative force", "Trinity", "Growth"] },
       { number: 6, meaning: "Harmony and balance", properties: ["Perfect harmony", "Balance", "Stability"] },
-      { number: 9, meaning: "Completion and universal wisdom", properties: ["Universal completion", "Wisdom", "Finality"] },
+      {
+        number: 9,
+        meaning: "Completion and universal wisdom",
+        properties: ["Universal completion", "Wisdom", "Finality"],
+      },
     ]
 
     teslaNumbers.forEach(({ number, meaning, properties }) => {
@@ -741,7 +759,7 @@ export class ReasoningEngine {
 
     // Initialize performance monitoring
     this.performanceLog = []
-    
+
     // Initialize connection monitoring
     this.monitorConnection()
 
@@ -784,7 +802,7 @@ export class ReasoningEngine {
     try {
       // Try multiple storage methods (from reliable-ai-system.ts)
       let conversations = await this.storageManager.loadConversations()
-      
+
       // Fallback to localStorage (from simple systems)
       if (!conversations || conversations.length === 0) {
         const stored = localStorage.getItem("reasoning_engine_conversations")
@@ -794,9 +812,8 @@ export class ReasoningEngine {
       }
 
       // Filter and validate conversations (from diagnostic systems)
-      this.conversationHistory = conversations.filter((msg) => 
-        msg && msg.id && msg.role && msg.content && 
-        (msg.role === "user" || msg.role === "assistant")
+      this.conversationHistory = conversations.filter(
+        (msg) => msg && msg.id && msg.role && msg.content && (msg.role === "user" || msg.role === "assistant"),
       )
 
       console.log(`✅ Loaded ${this.conversationHistory.length} conversation messages`)
@@ -811,32 +828,113 @@ export class ReasoningEngine {
     // Essential words for basic conversation (from all chat systems)
     const basicWords = [
       // Greetings and social
-      "hello", "hi", "hey", "goodbye", "bye", "thanks", "thank", "please", 
-      "yes", "no", "maybe", "sure", "okay", "ok", "good", "bad", "great",
-      
+      "hello",
+      "hi",
+      "hey",
+      "goodbye",
+      "bye",
+      "thanks",
+      "thank",
+      "please",
+      "yes",
+      "no",
+      "maybe",
+      "sure",
+      "okay",
+      "ok",
+      "good",
+      "bad",
+      "great",
+
       // Question words
-      "what", "who", "where", "when", "why", "how", "can", "could", "would",
-      
+      "what",
+      "who",
+      "where",
+      "when",
+      "why",
+      "how",
+      "can",
+      "could",
+      "would",
+
       // Common verbs
-      "like", "love", "want", "need", "know", "think", "remember", "forget",
-      "help", "sorry", "excuse", "understand", "explain", "tell", "say",
-      
+      "like",
+      "love",
+      "want",
+      "need",
+      "know",
+      "think",
+      "remember",
+      "forget",
+      "help",
+      "sorry",
+      "excuse",
+      "understand",
+      "explain",
+      "tell",
+      "say",
+
       // Math and numbers
-      "calculate", "math", "number", "add", "subtract", "multiply", "divide",
-      "times", "plus", "minus", "equals", "result", "answer", "sum", 
-      "difference", "product", "quotient",
-      
+      "calculate",
+      "math",
+      "number",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "times",
+      "plus",
+      "minus",
+      "equals",
+      "result",
+      "answer",
+      "sum",
+      "difference",
+      "product",
+      "quotient",
+
       // Tesla mathematics
-      "tesla", "vortex", "digital", "root", "pattern", "sacred", "energy",
-      "frequency", "vibration", "universe", "infinity",
-      
+      "tesla",
+      "vortex",
+      "digital",
+      "root",
+      "pattern",
+      "sacred",
+      "energy",
+      "frequency",
+      "vibration",
+      "universe",
+      "infinity",
+
       // AI and learning
-      "learn", "teach", "study", "practice", "try", "attempt", "succeed",
-      "fail", "improve", "better", "best", "worst", "smart", "intelligent",
-      
+      "learn",
+      "teach",
+      "study",
+      "practice",
+      "try",
+      "attempt",
+      "succeed",
+      "fail",
+      "improve",
+      "better",
+      "best",
+      "worst",
+      "smart",
+      "intelligent",
+
       // System words
-      "system", "diagnostic", "status", "health", "performance", "memory",
-      "brain", "neural", "network", "process", "analyze", "compute",
+      "system",
+      "diagnostic",
+      "status",
+      "health",
+      "performance",
+      "memory",
+      "brain",
+      "neural",
+      "network",
+      "process",
+      "analyze",
+      "compute",
     ]
 
     basicWords.forEach((word) => {
@@ -919,9 +1017,7 @@ export class ReasoningEngine {
       // Stage 2: Iterative Thinking Process (from cognitive-processor.ts)
       let processingResult
       if (this.iterativeThinking && patternMatch.confidence < 0.9) {
-        processingResult = await this.iterativeThinking ? 
-          await this.performIterativeThinking(userMessage, patternMatch) :
-          await this.processInputByIntent(userMessage, patternMatch)
+        processingResult = await this.performIterativeThinking(userMessage, patternMatch)
       } else {
         processingResult = await this.processInputByIntent(userMessage, patternMatch)
       }
@@ -971,7 +1067,8 @@ export class ReasoningEngine {
       const processingTime = performance.now() - startTime
 
       return {
-        content: "I encountered an error processing your message. My diagnostic systems are analyzing the issue. Please try again.",
+        content:
+          "I encountered an error processing your message. My diagnostic systems are analyzing the issue. Please try again.",
         confidence: 0.3,
         reasoning: [`❌ Error: ${error}`],
         knowledgeUsed: ["error_handling"],
@@ -1038,11 +1135,7 @@ export class ReasoningEngine {
         "Do I know this word already?",
         "Should I look it up online?",
       ],
-      personal_info: [
-        "What personal information was shared?",
-        "How should I store this?",
-        "What should I remember?",
-      ],
+      personal_info: ["What personal information was shared?", "How should I store this?", "What should I remember?"],
     }
 
     const intentPrompts = prompts[intent as keyof typeof prompts] || [
@@ -1634,3 +1727,517 @@ export class ReasoningEngine {
       confidence: 0.9,
       capabilities,
     }
+  }
+
+  // EXPLANATION REQUEST PROCESSING
+  private async processExplanationRequest(input: string): Promise<any> {
+    this.addThought("📚 Processing explanation request...", "explanation", 0.8)
+
+    const topicMatch = input.match(/(?:tell\s+me\s+about|explain)\s+(.+)/i)
+    const topic = topicMatch ? topicMatch[1].trim() : input
+
+    // Search for relevant knowledge
+    const relevantFacts = Array.from(this.facts.values()).filter(
+      (fact) =>
+        fact.topic.toLowerCase().includes(topic.toLowerCase()) ||
+        fact.content.toLowerCase().includes(topic.toLowerCase()),
+    )
+
+    const relevantVocab = Array.from(this.vocabulary.values()).filter(
+      (word) =>
+        word.word.toLowerCase().includes(topic.toLowerCase()) ||
+        word.definition.toLowerCase().includes(topic.toLowerCase()),
+    )
+
+    return {
+      type: "explanation_request",
+      topic: topic,
+      relevantFacts: relevantFacts.slice(0, 3),
+      relevantVocab: relevantVocab.slice(0, 2),
+      confidence: relevantFacts.length > 0 || relevantVocab.length > 0 ? 0.8 : 0.4,
+    }
+  }
+
+  // GENERAL CONVERSATION PROCESSING
+  private async processGeneralConversation(input: string): Promise<any> {
+    this.addThought("💬 Processing general conversation...", "conversation", 0.7)
+
+    return {
+      type: "general_conversation",
+      input: input,
+      confidence: 0.7,
+      message: "General conversation processed",
+    }
+  }
+
+  // GENERAL ITERATION PROCESSING
+  private async processGeneralIteration(thought: string): Promise<any> {
+    this.addThought("🔄 Processing general iteration...", "iteration", 0.6)
+
+    return {
+      type: "general_iteration",
+      confidence: 0.6,
+      nextThought: `Processed: ${thought}`,
+    }
+  }
+
+  // KNOWLEDGE ACTIVATION (Stage 3)
+  private async activateKnowledge(userMessage: string, processingResult: any): Promise<any> {
+    this.addThought("📚 Activating relevant knowledge...", "knowledge", 0.8)
+
+    const knowledgeUsed: string[] = []
+    const activatedKnowledge: any = {}
+
+    // Activate vocabulary knowledge
+    const words = userMessage.toLowerCase().split(/\s+/)
+    words.forEach((word) => {
+      const vocabEntry = this.vocabulary.get(word)
+      if (vocabEntry) {
+        knowledgeUsed.push(`vocab:${word}`)
+        activatedKnowledge[`vocab_${word}`] = vocabEntry
+      }
+    })
+
+    // Activate mathematical knowledge if math-related
+    if (processingResult.type === "mathematical" || processingResult.type === "tesla_math") {
+      const mathEntries = Array.from(this.mathematics.entries()).slice(0, 5)
+      mathEntries.forEach(([key, entry]) => {
+        knowledgeUsed.push(`math:${key}`)
+        activatedKnowledge[`math_${key}`] = entry
+      })
+    }
+
+    // Activate personal information if relevant
+    if (processingResult.type === "personal_info" || processingResult.type === "memory_storage") {
+      const personalEntries = Array.from(this.personalInfo.entries()).slice(0, 3)
+      personalEntries.forEach(([key, entry]) => {
+        knowledgeUsed.push(`personal:${key}`)
+        activatedKnowledge[`personal_${key}`] = entry
+      })
+    }
+
+    this.addThought(`📚 Activated ${knowledgeUsed.length} knowledge entries`, "knowledge", 0.8)
+
+    return {
+      knowledgeUsed,
+      activatedKnowledge,
+      confidence: knowledgeUsed.length > 0 ? 0.8 : 0.5,
+    }
+  }
+
+  // NEURAL PROCESSING (Stage 4)
+  private async neuralProcessing(userMessage: string, knowledgeResult: any): Promise<any> {
+    this.addThought("🧠 Performing neural processing...", "neural", 0.7)
+
+    // Simple neural processing simulation
+    const inputVector = this.createInputVector(userMessage)
+    const processedVector = this.processNeuralLayers(inputVector)
+
+    // Update neural weights based on processing
+    this.updateNeuralWeights(inputVector, processedVector)
+
+    this.addThought("🧠 Neural processing complete", "neural", 0.8)
+
+    return {
+      inputVector: inputVector.slice(0, 5), // Only show first 5 for brevity
+      processedVector: processedVector.slice(0, 5),
+      confidence: 0.7,
+    }
+  }
+
+  private createInputVector(message: string): number[] {
+    // Create a simple input vector from the message
+    const vector = new Array(128).fill(0)
+    const words = message.toLowerCase().split(/\s+/)
+
+    words.forEach((word, index) => {
+      if (index < 128) {
+        vector[index] = word.length / 10 // Simple encoding
+      }
+    })
+
+    return vector
+  }
+
+  private processNeuralLayers(inputVector: number[]): number[] {
+    let currentVector = [...inputVector]
+
+    // Process through each neural layer
+    const layers = ["input_layer", "hidden_layer_1", "hidden_layer_2", "output_layer"]
+
+    layers.forEach((layerName) => {
+      const weights = this.neuralWeights.get(layerName) || []
+      if (weights.length > 0) {
+        currentVector = this.applyLayerWeights(currentVector, weights)
+      }
+    })
+
+    return currentVector
+  }
+
+  private applyLayerWeights(vector: number[], weights: number[]): number[] {
+    const result = new Array(weights.length).fill(0)
+
+    for (let i = 0; i < result.length; i++) {
+      for (let j = 0; j < Math.min(vector.length, weights.length); j++) {
+        result[i] += vector[j] * weights[j] * 0.1 // Simple weight application
+      }
+      result[i] = Math.tanh(result[i]) // Activation function
+    }
+
+    return result
+  }
+
+  private updateNeuralWeights(inputVector: number[], outputVector: number[]): void {
+    // Simple weight update based on learning rate
+    const inputLayer = this.neuralWeights.get("input_layer") || []
+
+    for (let i = 0; i < Math.min(inputLayer.length, inputVector.length); i++) {
+      inputLayer[i] += this.learningRate * (outputVector[i % outputVector.length] || 0)
+    }
+
+    this.neuralWeights.set("input_layer", inputLayer)
+    this.learningStats.neuralUpdates++
+  }
+
+  // RESPONSE GENERATION (Stage 5)
+  private async generateResponse(userMessage: string, processingData: any): Promise<any> {
+    this.addThought("✨ Generating response...", "generation", 0.9)
+
+    const { processingResult, knowledgeResult, neuralResult, patternMatch } = processingData
+
+    let content = ""
+    let confidence = 0.7
+    const knowledgeUsed = knowledgeResult.knowledgeUsed || []
+
+    switch (processingResult.type) {
+      case "mathematical":
+        if (processingResult.answer !== undefined) {
+          content = `The answer is ${processingResult.answer}. I calculated this using ${processingResult.operation} with the numbers ${processingResult.numbers?.join(" and ")}.`
+          confidence = processingResult.confidence
+        } else {
+          content = "I had trouble processing that mathematical expression. Could you rephrase it?"
+          confidence = 0.3
+        }
+        break
+
+      case "tesla_math":
+        if (processingResult.teslaAnalysis) {
+          const analysis = processingResult.teslaAnalysis
+          content = `Tesla Mathematics Analysis for ${analysis.number}:\n\n`
+          content += `Digital Root: ${analysis.digitalRoot}\n`
+          content += `Type: ${analysis.type}\n`
+          content += `Analysis: ${analysis.analysis}\n\n`
+
+          if (analysis.isTeslaNumber) {
+            content += `This is one of Tesla's sacred numbers! ${analysis.meaning}`
+          } else if (analysis.isVortexNumber) {
+            content += `This number is part of the vortex cycle at position ${analysis.position}.`
+          } else {
+            content +=
+              "This number falls outside the primary Tesla/Vortex patterns but still has its own unique digital root signature."
+          }
+          confidence = 0.95
+        } else {
+          content = "I couldn't perform Tesla mathematics analysis on that input. Please provide a number to analyze."
+          confidence = 0.3
+        }
+        break
+
+      case "definition_request":
+        if (processingResult.definition) {
+          const def = processingResult.definition
+          content = `**${def.word}** (${def.partOfSpeech}): ${def.definition}`
+          if (def.examples && def.examples.length > 0) {
+            content += `\n\nExample: ${def.examples[0]}`
+          }
+          if (def.phonetic) {
+            content += `\n\nPronunciation: ${def.phonetic}`
+          }
+          confidence = def.confidence
+          knowledgeUsed.push(`definition:${def.word}`)
+        } else {
+          content = `I don't know the definition of "${processingResult.word}". I tried to look it up but couldn't find it. Could you provide the definition so I can learn?`
+          confidence = 0.4
+        }
+        break
+
+      case "personal_info":
+        if (processingResult.personalInfo && Object.keys(processingResult.personalInfo).length > 0) {
+          const info = processingResult.personalInfo
+          const infoKeys = Object.keys(info)
+          content = `I've stored your personal information: ${infoKeys.map((key) => `${key}: ${info[key]}`).join(", ")}. I'll remember this for our future conversations!`
+          confidence = 0.9
+        } else {
+          content =
+            "I didn't detect any personal information to store. You can tell me things like 'My name is...' or 'I work as...' and I'll remember them."
+          confidence = 0.6
+        }
+        break
+
+      case "memory_storage":
+        if (processingResult.memoryContent) {
+          content = `I'll remember that: "${processingResult.memoryContent}". This has been stored in my memory system.`
+          confidence = 0.9
+        } else {
+          content =
+            "I couldn't extract what you wanted me to remember. Try saying 'Remember that...' followed by what you'd like me to store."
+          confidence = 0.4
+        }
+        break
+
+      case "greeting":
+        content = `Hello! I'm ${this.systemIdentity.name}, your advanced AI assistant with neural learning capabilities. I can help with mathematics (including Tesla/Vortex math), vocabulary, personal memory, and much more. What would you like to explore today?`
+        confidence = 0.9
+        break
+
+      case "system_diagnostic":
+        if (processingResult.diagnosticData) {
+          const data = processingResult.diagnosticData
+          content = `🔧 **System Diagnostic Report**\n\n`
+          content += `Status: ${data.systemStatus}\n`
+          content += `Vocabulary: ${data.vocabularySize} words\n`
+          content += `Mathematics: ${data.mathSize} concepts\n`
+          content += `Facts: ${data.factsSize} entries\n`
+          content += `Conversations: ${data.conversationCount}\n`
+          content += `Neural Networks: ${data.neuralWeightsLoaded ? "Active" : "Inactive"}\n`
+          content += `Connection: ${data.connectionStatus}\n`
+          content += `Memory Usage: ${data.memoryUsage.used}MB / ${data.memoryUsage.total}MB\n\n`
+          content += `Learning Stats:\n`
+          content += `- Words Learned: ${data.learningStats.wordsLearned}\n`
+          content += `- Conversations: ${data.learningStats.conversationsHad}\n`
+          content += `- Tesla Calculations: ${data.learningStats.teslaCalculations}\n`
+          content += `- Neural Updates: ${data.learningStats.neuralUpdates}\n\n`
+          content += `All systems operational! 🚀`
+          confidence = 0.95
+        }
+        break
+
+      case "capability_inquiry":
+        if (processingResult.capabilities) {
+          content = `I'm ${this.systemIdentity.name} - ${this.systemIdentity.purpose}\n\n**My Capabilities:**\n\n`
+          Object.entries(processingResult.capabilities).forEach(([key, desc]) => {
+            content += `• **${key.charAt(0).toUpperCase() + key.slice(1)}**: ${desc}\n`
+          })
+          content += `\nI'm continuously learning and improving through our interactions!`
+          confidence = 0.9
+        }
+        break
+
+      case "explanation_request":
+        if (processingResult.relevantFacts && processingResult.relevantFacts.length > 0) {
+          content = `Here's what I know about "${processingResult.topic}":\n\n`
+          processingResult.relevantFacts.forEach((fact: any, index: number) => {
+            content += `${index + 1}. ${fact.content}\n`
+          })
+          confidence = processingResult.confidence
+        } else {
+          content = `I don't have specific information about "${processingResult.topic}" in my knowledge base. Would you like to tell me about it so I can learn?`
+          confidence = 0.4
+        }
+        break
+
+      default:
+        content = `I processed your message with ${Math.round(patternMatch.confidence * 100)}% confidence. I'm continuously learning and improving my responses. Is there something specific you'd like help with?`
+        confidence = patternMatch.confidence
+    }
+
+    this.addThought(`✨ Generated response (${Math.round(confidence * 100)}% confidence)`, "generation", confidence)
+
+    return {
+      content,
+      confidence,
+      knowledgeUsed,
+      mathAnalysis: processingResult.mathAnalysis,
+      teslaAnalysis: processingResult.teslaAnalysis,
+    }
+  }
+
+  // LEARNING AND STORAGE (Stage 6)
+  private async learnFromInteraction(userMessage: string, response: any): Promise<void> {
+    this.addThought("📝 Learning from interaction...", "learning", 0.8)
+
+    // Store conversation in history
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: userMessage,
+      timestamp: Date.now(),
+    }
+
+    const assistantMsg: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: response.content,
+      timestamp: Date.now(),
+      confidence: response.confidence,
+      knowledgeUsed: response.knowledgeUsed,
+    }
+
+    this.conversationHistory.push(userMsg, assistantMsg)
+
+    // Keep only recent conversations
+    if (this.conversationHistory.length > 1000) {
+      this.conversationHistory = this.conversationHistory.slice(-1000)
+    }
+
+    // Save to storage
+    try {
+      await this.storageManager.saveConversations(this.conversationHistory)
+      localStorage.setItem("reasoning_engine_conversations", JSON.stringify(this.conversationHistory))
+    } catch (error) {
+      console.warn("Failed to save conversation history:", error)
+    }
+
+    // Save neural weights
+    try {
+      const weightsObj: any = {}
+      this.neuralWeights.forEach((weights, layer) => {
+        weightsObj[layer] = weights
+      })
+      localStorage.setItem("reasoning_engine_neural_weights", JSON.stringify(weightsObj))
+    } catch (error) {
+      console.warn("Failed to save neural weights:", error)
+    }
+
+    this.addThought("📝 Learning complete", "learning", 0.9)
+  }
+
+  // PUBLIC API METHODS FOR UI INTEGRATION
+  public getSystemStats(): SystemStats {
+    const vocabBySource = Array.from(this.vocabulary.values()).reduce((acc, entry) => {
+      acc[entry.source] = (acc[entry.source] || 0) + 1
+      return acc
+    }, {} as any)
+
+    const mathBySource = Array.from(this.mathematics.values()).reduce((acc, entry) => {
+      acc[entry.source] = (acc[entry.source] || 0) + 1
+      return acc
+    }, {} as any)
+
+    return {
+      vocabulary: {
+        total: this.vocabulary.size,
+        learned: vocabBySource.learned_api || 0,
+        seed: vocabBySource.seed || 0,
+      },
+      mathematics: {
+        total: this.mathematics.size,
+        calculations: mathBySource.calculated || 0,
+        functions: mathBySource.basic || 0,
+      },
+      facts: {
+        total: this.facts.size,
+        verified: Array.from(this.facts.values()).filter((f) => f.verified).length,
+      },
+      conversations: this.conversationHistory.length,
+      avgConfidence: 0.85, // Calculate from recent interactions
+      vocabularySize: this.vocabulary.size,
+      mathFunctions: this.mathematics.size,
+      memoryEntries: this.personalInfo.size,
+    }
+  }
+
+  public getVocabularyList(): any[] {
+    return Array.from(this.vocabulary.values()).map((entry) => ({
+      word: entry.word,
+      definition: entry.definition,
+      source: entry.source,
+      confidence: entry.confidence,
+    }))
+  }
+
+  public getMathematicsHistory(): any[] {
+    return Array.from(this.mathematics.values()).map((entry) => ({
+      concept: entry.concept,
+      data: entry.formula,
+      source: entry.source,
+      timestamp: entry.timestamp,
+    }))
+  }
+
+  public getSystemDebugInfo(): any {
+    return {
+      isInitialized: this.isInitialized,
+      systemStatus: this.systemStatus,
+      vocabularySize: this.vocabulary.size,
+      mathSize: this.mathematics.size,
+      factsSize: this.facts.size,
+      conversationCount: this.conversationHistory.length,
+      neuralLayers: this.neuralWeights.size,
+      learningStats: this.learningStats,
+    }
+  }
+
+  public getConversationHistory(): any[] {
+    return this.conversationHistory.map((msg) => ({
+      type: msg.role,
+      content: msg.content,
+      timestamp: msg.timestamp,
+    }))
+  }
+
+  public exportData(): any {
+    return {
+      vocabulary: Object.fromEntries(this.vocabulary),
+      mathematics: Object.fromEntries(this.mathematics),
+      personalInfo: Object.fromEntries(this.personalInfo),
+      facts: Object.fromEntries(this.facts),
+      coding: Object.fromEntries(this.coding),
+      conversationHistory: this.conversationHistory,
+      systemIdentity: this.systemIdentity,
+      learningStats: this.learningStats,
+      neuralWeights: Object.fromEntries(this.neuralWeights),
+      exportTimestamp: Date.now(),
+    }
+  }
+
+  // MOCK METHODS FOR UI COMPATIBILITY
+  public async initializeCoreModules(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+
+  public async checkMemoryIntegrity(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+
+  public async checkLocalStorageAccess(): Promise<void> {
+    try {
+      localStorage.setItem("test", "test")
+      localStorage.removeItem("test")
+    } catch (error) {
+      throw new Error("LocalStorage access denied")
+    }
+  }
+
+  public async loadVocabulary(): Promise<void> {
+    // Already loaded in initialization
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+
+  public async loadMathFunctions(): Promise<void> {
+    // Already loaded in initialization
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+
+  public async loadConversationHistory(): Promise<void> {
+    // Already loaded in initialization
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+
+  public async activateMemorySystem(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+
+  public async finalizeSetup(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+
+  public getMathFunctionCount(): number {
+    return Array.from(this.mathematics.values()).filter((entry) => entry.type === "function").length
+  }
+
+  public getMemoryEntryCount(): number {
+    return this.personalInfo.size
+  }
+}
