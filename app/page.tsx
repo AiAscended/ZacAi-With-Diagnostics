@@ -1,9 +1,9 @@
-import ZacAIChat from "@/components/zac-ai-chat"
+import MasterAIChat from "@/components/master-ai-chat"
 
 export default function Home() {
   return (
     <main className="h-screen">
-      <ZacAIChat />
+      <MasterAIChat />
     </main>
   )
 }

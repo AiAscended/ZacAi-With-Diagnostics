@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ReliableAISystem } from "@/lib/reliable-ai-system"
+import { ReasoningEngine } from "@/lib/reasoning-engine"
 import { CheckCircle, XCircle, AlertCircle, RefreshCw } from "lucide-react"
 
 interface DiagnosticResult {
@@ -15,7 +15,7 @@ interface DiagnosticResult {
 }
 
 export default function AIDiagnosticPanel() {
-  const [aiSystem] = useState(() => new ReliableAISystem())
+  const [aiSystem] = useState(() => new ReasoningEngine())
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([])
   const [isRunning, setIsRunning] = useState(false)
 
