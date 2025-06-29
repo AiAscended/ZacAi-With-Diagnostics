@@ -1,4 +1,4 @@
-// MASTER TYPE DEFINITIONS FOR ZACAI REASONING ENGINE
+// COMPLETE TYPE DEFINITIONS FOR ZACAI MASTER SYSTEM
 
 export interface VocabularyEntry {
   word: string
@@ -13,6 +13,16 @@ export interface VocabularyEntry {
   frequency: number
   timestamp: number
   category: string
+}
+
+export interface WordEntry {
+  word: string
+  definition: string
+  partOfSpeech?: string
+  examples?: string[]
+  phonetic?: string
+  synonyms?: string[]
+  antonyms?: string[]
 }
 
 export interface MathEntry {
@@ -70,7 +80,6 @@ export interface ChatMessage {
   suggestions?: string[]
   thinking?: string[]
   mathAnalysis?: any
-  teslaAnalysis?: any
   responseTime?: number
 }
 
@@ -99,7 +108,29 @@ export interface ReasoningEngineResponse {
   processingTime: number
   thinking: ThoughtNode[]
   systemStatus: string
-  connectionStatus: "good" | "slow" | "offline"
+  connectionStatus: string
+}
+
+export interface SystemStats {
+  vocabulary: {
+    total: number
+    learned: number
+    seed: number
+  }
+  mathematics: {
+    total: number
+    calculations: number
+    functions: number
+  }
+  facts: {
+    total: number
+    verified: number
+  }
+  conversations: number
+  avgConfidence: number
+  vocabularySize: number
+  mathFunctions: number
+  memoryEntries: number
 }
 
 export interface PatternMatch {
@@ -108,13 +139,19 @@ export interface PatternMatch {
   matches?: any[]
 }
 
-export interface SystemStats {
-  vocabulary: { total: number; learned: number; seed: number }
-  mathematics: { total: number; calculations: number; functions: number }
-  facts: { total: number; verified: number }
-  conversations: number
-  avgConfidence: number
-  vocabularySize: number
-  mathFunctions: number
-  memoryEntries: number
+export interface Pattern {
+  pattern: RegExp
+  intent: string
+  confidence: number
+}
+
+export interface PerformanceMetrics {
+  operation: string
+  duration: number
+  timestamp: number
+}
+
+export interface VocabularyLoader {
+  loadVocabulary(): Promise<void>
+  getWord(word: string): WordEntry | null
 }
