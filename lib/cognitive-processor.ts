@@ -167,7 +167,7 @@ export class CognitiveProcessor {
           })
         })
 
-        console.log(`✅ Loaded ${Object.keys(data).length} seed vocabulary words`)
+        console.log(`✅ Loaded ${Object.keys(data).length + 26} seed vocabulary words (including alphabet)`)
       }
     } catch (error) {
       console.warn("Failed to load seed vocabulary:", error)

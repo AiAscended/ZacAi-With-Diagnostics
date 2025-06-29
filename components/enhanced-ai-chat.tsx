@@ -19,20 +19,15 @@ import {
   Cloud,
   Lightbulb,
   Calculator,
-  BarChart3,
   Settings,
   ThumbsUp,
   ThumbsDown,
   RefreshCw,
-  Download,
   Search,
   Zap,
-  FileText,
   User,
   ChevronDown,
   ChevronUp,
-  Database,
-  Activity,
 } from "lucide-react"
 import KnowledgeManagementTab from "./knowledge-management-tab"
 import SystemSettingsTab from "./system-settings-tab"
@@ -88,13 +83,6 @@ export default function EnhancedAIChat() {
   const [showThinking, setShowThinking] = useState<{ [key: string]: boolean }>({})
   const [currentThinking, setCurrentThinking] = useState<string>("")
   const [isThinking, setIsThinking] = useState(false)
-  const [activeDataView, setActiveDataView] = useState<string>("overview")
-  const [knowledgeData, setKnowledgeData] = useState<any>({
-    vocabulary: [],
-    mathematics: [],
-    userInfo: [],
-    facts: [],
-  })
 
   useEffect(() => {
     initializeSystem()
@@ -122,7 +110,6 @@ export default function EnhancedAIChat() {
       }
 
       updateStats()
-      loadKnowledgeData()
 
       const history = aiSystem.getConversationHistory()
       setMessages(history)
@@ -161,63 +148,6 @@ export default function EnhancedAIChat() {
     } catch (error) {
       console.error("Failed to update stats:", error)
     }
-  }
-
-  const loadKnowledgeData = () => {
-    try {
-      const aiStats = aiSystem.getStats()
-      console.log("📚 Loading knowledge data from AI system...")
-
-      const learnedVocab = aiStats.vocabularyData || new Map()
-      const learnedMath = aiStats.mathFunctionsData || new Map()
-      const learnedUserInfo = aiStats.personalInfoData || new Map()
-      const learnedFacts = aiStats.factsData || new Map()
-
-      const processedData = {
-        vocabulary: Array.from(learnedVocab.entries()).map(([word, entry]) => ({
-          word: String(word),
-          definition: String(entry?.definition || `Learned word: ${word}`),
-          partOfSpeech: String(entry?.partOfSpeech || "learned"),
-          examples: String(entry?.examples || "From conversation"),
-          category: String(entry?.category || entry?.source || "learned"),
-          source: String(entry?.source || "cognitive_processor"),
-        })),
-
-        mathematics: Array.from(learnedMath.entries()).map(([concept, data]) => ({
-          concept: String(concept),
-          formula: String(data?.formula || data?.data?.formula || "Mathematical pattern"),
-          category: String(data?.type || "learned"),
-          examples: String(data?.examples || "From calculations"),
-          difficulty: Number(data?.difficulty || 1),
-          source: String(data?.source || "cognitive_processor"),
-        })),
-
-        userInfo: Array.from(learnedUserInfo.entries()).map(([key, entry]) => ({
-          key: String(key),
-          value: String(entry?.value || entry),
-          importance: Number(entry?.importance || 0.5),
-          timestamp: String(new Date(entry?.timestamp || Date.now()).toLocaleString()),
-          source: String(entry?.source || "cognitive_processor"),
-        })),
-
-        facts: Array.from(learnedFacts.entries()).map(([topic, entry]) => ({
-          topic: String(topic),
-          content: String(entry?.value || entry),
-          source: String(entry?.source || "cognitive_processor"),
-          category: String(entry?.category || entry?.type || "learned"),
-        })),
-      }
-
-      setKnowledgeData(processedData)
-      console.log("✅ Knowledge data loaded:", processedData)
-    } catch (error) {
-      console.error("Failed to load knowledge data:", error)
-    }
-  }
-
-  const handleQuickLinkClick = (dataType: string) => {
-    setActiveDataView(dataType)
-    loadKnowledgeData()
   }
 
   const simulateThinking = async (userInput: string): Promise<string[]> => {
@@ -288,7 +218,6 @@ export default function EnhancedAIChat() {
 
       setTimeout(() => {
         updateStats()
-        loadKnowledgeData()
       }, 500)
     } catch (error) {
       console.error("Error processing message:", error)
@@ -381,353 +310,6 @@ export default function EnhancedAIChat() {
     )
   }
 
-  // ADMIN DASHBOARD VIEW
-  if (showMetrics) {
-    return (
-      <div className="h-screen bg-gray-50 overflow-hidden">
-        <div className="h-full flex flex-col">
-          {/* Header */}
-          <div className="flex-shrink-0 p-4 bg-white border-b">
-            <div className="flex items-center justify-between max-w-7xl mx-auto">
-              <div className="flex items-center gap-3">
-                <BarChart3 className="w-8 h-8 text-blue-600" />
-                <div>
-                  <h1 className="text-2xl font-bold">{systemInfo.name || "ZacAI"} Admin Dashboard</h1>
-                  <p className="text-sm text-gray-600">Advanced AI System - Knowledge Management & Training Pipeline</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Button variant="outline" onClick={handleExport}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Export
-                </Button>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">Chat</span>
-                  <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
-                  <span className="text-sm">Admin</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Stats Bar */}
-          <div className="flex-shrink-0 p-4 bg-white border-b">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-5 gap-4">
-                <Card
-                  className="cursor-pointer hover:bg-blue-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("vocabulary")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <BookOpen className="w-6 h-6 mx-auto mb-1 text-blue-600" />
-                    <div className="text-xl font-bold">{stats.vocabulary}</div>
-                    <div className="text-xs text-gray-500">Vocabulary</div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:bg-green-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("mathematics")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <Calculator className="w-6 h-6 mx-auto mb-1 text-green-600" />
-                    <div className="text-xl font-bold">{stats.mathematics}</div>
-                    <div className="text-xs text-gray-500">Math</div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:bg-purple-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("userInfo")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <User className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-xl font-bold">{stats.userInfo}</div>
-                    <div className="text-xs text-gray-500">User Info</div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:bg-orange-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("facts")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <FileText className="w-6 h-6 mx-auto mb-1 text-orange-600" />
-                    <div className="text-xl font-bold">{stats.facts}</div>
-                    <div className="text-xs text-gray-500">Facts</div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:bg-red-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("overview")}
-                >
-                  <CardContent className="p-3 text-center">
-                    <MessageCircle className="w-6 h-6 mx-auto mb-1 text-red-600" />
-                    <div className="text-xl font-bold">{stats.conversations}</div>
-                    <div className="text-xs text-gray-500">Conversations</div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 overflow-auto">
-            <div className="max-w-7xl mx-auto p-4">
-              {activeDataView === "overview" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Brain className="w-5 h-5" />
-                        System Overview
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center p-3 bg-blue-50 rounded">
-                          <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
-                          <div className="text-sm text-blue-600">Total Knowledge</div>
-                        </div>
-                        <div className="text-center p-3 bg-green-50 rounded">
-                          <div className="text-2xl font-bold text-green-600">
-                            {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "85%"}
-                          </div>
-                          <div className="text-sm text-green-600">Avg Confidence</div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Status</span>
-                          <Badge variant="default">{stats.systemStatus || "Ready"}</Badge>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Version</span>
-                          <span className="font-mono">{stats.version}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Last Updated</span>
-                          <span className="text-xs">{new Date(stats.lastUpdated).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Database className="w-5 h-5" />
-                        Data Sources
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Seed Math Data</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Loaded
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Seed Vocabulary</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Loaded
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Dictionary API</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Active
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Learning System</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Active
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Activity className="w-5 h-5" />
-                        System Health
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Math Processor</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Working
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Vocabulary System</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Working
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Dictionary API</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Working
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Memory System</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Working
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {activeDataView === "vocabulary" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>📖 Vocabulary Knowledge Base</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {knowledgeData.vocabulary.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No vocabulary entries yet. Start a conversation to build the knowledge base!</p>
-                        </div>
-                      ) : (
-                        knowledgeData.vocabulary.slice(0, 20).map((item: any, index: number) => (
-                          <div key={index} className="border rounded p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{String(item.word)}</h4>
-                                <p className="text-sm text-gray-600">{String(item.definition)}</p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">{String(item.partOfSpeech)}</Badge>
-                                  <Badge variant="secondary">{String(item.category)}</Badge>
-                                  <Badge variant="outline">{String(item.source)}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeDataView === "mathematics" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>🧮 Mathematical Knowledge Base</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {knowledgeData.mathematics.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <Calculator className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No math patterns yet. Try some calculations to build the knowledge base!</p>
-                        </div>
-                      ) : (
-                        knowledgeData.mathematics.slice(0, 20).map((item: any, index: number) => (
-                          <div key={index} className="border rounded p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{String(item.concept)}</h4>
-                                <p className="text-sm text-gray-600">{String(item.formula)}</p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">Difficulty: {String(item.difficulty)}</Badge>
-                                  <Badge variant="secondary">{String(item.category)}</Badge>
-                                  <Badge variant="outline">{String(item.source)}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeDataView === "userInfo" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>👤 User Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {knowledgeData.userInfo.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No user information yet. Share some details about yourself!</p>
-                        </div>
-                      ) : (
-                        knowledgeData.userInfo.slice(0, 20).map((item: any, index: number) => (
-                          <div key={index} className="border rounded p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{String(item.key)}</h4>
-                                <p className="text-sm text-gray-600">{String(item.value)}</p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">Importance: {String(item.importance)}</Badge>
-                                  <Badge variant="secondary">{String(item.timestamp)}</Badge>
-                                  <Badge variant="outline">{String(item.source)}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeDataView === "facts" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>📚 Facts Knowledge Base</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {knowledgeData.facts.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No facts yet. Ask me about science, history, or other topics!</p>
-                        </div>
-                      ) : (
-                        knowledgeData.facts.slice(0, 20).map((item: any, index: number) => (
-                          <div key={index} className="border rounded p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{String(item.topic)}</h4>
-                                <p className="text-sm text-gray-600">{String(item.content)}</p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">{String(item.category)}</Badge>
-                                  <Badge variant="secondary">{String(item.source)}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // MAIN CHAT INTERFACE
   return (
     <div className="flex h-screen bg-gray-50">
@@ -740,7 +322,7 @@ export default function EnhancedAIChat() {
                 <Brain className="w-5 h-5" />
                 {systemInfo.name || "ZacAI"}
                 <Badge variant="outline" className="ml-2">
-                  Cognitive System
+                  Advanced AI System
                 </Badge>
                 <div className="w-3 h-3 rounded-full bg-green-500" />
               </CardTitle>
