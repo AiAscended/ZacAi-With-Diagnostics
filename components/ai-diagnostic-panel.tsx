@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ReasoningEngine } from "@/lib/reasoning-engine"
+import { ReasoningEngine } from "@/lib/reasoning-engine" // Corrected import path
 import { CheckCircle, XCircle, AlertCircle, RefreshCw } from "lucide-react"
 
 interface DiagnosticResult {
@@ -37,26 +37,26 @@ export default function AIDiagnosticPanel() {
       })
 
       // Test 2: Stats Method
-      const stats = aiSystem.getStats()
+      const stats = aiSystem.getSystemStats() // Use getSystemStats for consistency
       results.push({
         test: "Stats Method - Math Functions",
-        status: typeof stats.mathFunctions === "number" ? "pass" : "fail",
-        message: `Math functions stat: ${stats.mathFunctions} (${typeof stats.mathFunctions})`,
-        details: { value: stats.mathFunctions, type: typeof stats.mathFunctions },
+        status: typeof stats.mathematics === "number" ? "pass" : "fail", // Check mathematics property
+        message: `Math functions stat: ${stats.mathematics} (${typeof stats.mathematics})`,
+        details: { value: stats.mathematics, type: typeof stats.mathematics },
       })
 
       // Test 3: Vocabulary Size
       results.push({
         test: "Vocabulary Size",
-        status: stats.vocabularySize > 0 ? "pass" : "fail",
-        message: `Vocabulary contains ${stats.vocabularySize} words`,
-        details: { count: stats.vocabularySize },
+        status: stats.vocabulary?.total > 0 ? "pass" : "fail", // Check vocabulary.total
+        message: `Vocabulary contains ${stats.vocabulary?.total} words`,
+        details: { count: stats.vocabulary?.total },
       })
 
       // Test 4: Memory System
       results.push({
         test: "Memory System",
-        status: stats.memoryEntries >= 0 ? "pass" : "fail",
+        status: stats.memoryEntries >= 0 ? "pass" : "fail", // Assuming memoryEntries is directly available or derived
         message: `Memory contains ${stats.memoryEntries} entries`,
         details: { count: stats.memoryEntries },
       })
@@ -97,11 +97,11 @@ export default function AIDiagnosticPanel() {
         message: `Export contains ${Object.keys(exportData).length} data types`,
         details: { keys: Object.keys(exportData) },
       })
-    } catch (error) {
+    } catch (error: any) {
       results.push({
         test: "System Initialization",
         status: "fail",
-        message: `Error: ${error}`,
+        message: `Error: ${error.message || "Unknown error"}`,
         details: { error: error },
       })
     }
