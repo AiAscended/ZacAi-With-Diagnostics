@@ -1,156 +1,131 @@
 "use client"
 
+import { BrowserStorageManager } from "./browser-storage-manager"
 import { EnhancedMathProcessor } from "./enhanced-math-processor"
-import { TemporalKnowledgeSystem } from "./temporal-knowledge-system"
 
-interface CognitivePathway {
-  name: string
-  weight: number
-  activation: number
-  connections: Map<string, number>
-}
-
-interface NeuralWeight {
-  input: string
-  output: string
-  weight: number
-  lastUpdate: number
-}
-
-interface KnowledgeNode {
-  concept: string
-  embeddings: number[]
-  connections: Map<string, number>
-  confidence: number
-  lastAccessed: number
-}
-
-interface MemoryTrace {
-  content: string
-  timestamp: number
-  importance: number
-  associations: string[]
-  decay: number
-}
-
-// UNIFIED COGNITIVE PROCESSOR - THE MAIN BRAIN
+// ULTIMATE COGNITIVE PROCESSOR - ALL GOLDEN FEATURES MERGED
 export class CognitiveProcessor {
-  private pathways: Map<string, CognitivePathway> = new Map()
-  private neuralWeights: Map<string, NeuralWeight> = new Map()
-  private knowledgeGraph: Map<string, KnowledgeNode> = new Map()
-  private workingMemory: MemoryTrace[] = []
-  private longTermMemory: Map<string, MemoryTrace> = new Map()
-  private vocabulary: Map<string, any> = new Map()
-  private mathematics: Map<string, any> = new Map()
-  private personalInfo: Map<string, any> = new Map()
-  private conversationHistory: any[] = []
-  private learningRate = 0.1
-  private attentionMechanism: Map<string, number> = new Map()
-  private contextWindow: string[] = []
+  // Core Systems
+  private enhancedMath = new EnhancedMathProcessor()
+  private storageManager = new BrowserStorageManager()
+
+  // Neural Engine Components
+  private neuralWeights: Map<string, number[]> = new Map()
+  private learningRate = 0.01
+  private modelVersion = 1
+
+  // Knowledge Storage
+  private vocabulary: Map<string, VocabularyEntry> = new Map()
+  private mathematics: Map<string, MathEntry> = new Map()
+  private personalInfo: Map<string, PersonalInfoEntry> = new Map()
+  private facts: Map<string, FactEntry> = new Map()
+  private coding: Map<string, CodingEntry> = new Map()
+  private conversationHistory: ChatMessage[] = []
+
+  // Cognitive Systems
+  private thoughtStream: ThoughtNode[] = []
+  private patternMatcher: PatternMatcher
+  private performanceMonitor: PerformanceMonitor
+
+  // System State
   private isInitialized = false
-  private processingStats = {
-    totalProcessed: 0,
-    avgConfidence: 0,
-    learningProgress: 0,
-    responseTime: 0,
-    pathwayActivations: new Map<string, number>(),
-  }
-  private knowledgeBase: Map<string, any> = new Map()
-  private personalMemory: Map<string, any> = new Map()
-  private vocabularySystem: Map<string, any> = new Map()
-  private mathematicsEngine: EnhancedMathProcessor
-  private temporalSystem: TemporalKnowledgeSystem
-  private neuralWeightsOld: Map<string, number[]> = new Map()
-  private conversationHistoryOld: any[] = []
-  private learningRateOld = 0.01
-  private confidenceThreshold = 0.7
-  private isInitializedOld = false
-  private systemStats = {
-    totalMessages: 0,
-    vocabularySize: 0,
-    mathFunctions: 0,
-    memoryEntries: 0,
-    avgConfidence: 0,
-    responseTime: 0,
-    learningProgress: 0,
+  private systemStatus = "initializing"
+  private systemIdentity: SystemIdentity = {
+    name: "ZacAI",
+    version: "3.0.0",
+    purpose: "Advanced AI system with neural learning and comprehensive knowledge management",
   }
 
   constructor() {
-    console.log("🧠 Advanced Cognitive Processor initializing...")
-    this.initializePathways()
-    console.log("🧠 Initializing Advanced Cognitive Processor...")
-    this.mathematicsEngine = new EnhancedMathProcessor()
-    this.temporalSystem = new TemporalKnowledgeSystem()
-  }
-
-  private initializePathways(): void {
-    const pathwayConfigs = [
-      { name: "mathematical", weight: 0.8, activation: 0 },
-      { name: "linguistic", weight: 0.9, activation: 0 },
-      { name: "personal", weight: 0.7, activation: 0 },
-      { name: "factual", weight: 0.8, activation: 0 },
-      { name: "conversational", weight: 0.6, activation: 0 },
-      { name: "temporal", weight: 0.5, activation: 0 },
-      { name: "creative", weight: 0.4, activation: 0 },
-      { name: "analytical", weight: 0.9, activation: 0 },
-    ]
-
-    pathwayConfigs.forEach((config) => {
-      this.pathways.set(config.name, {
-        ...config,
-        connections: new Map(),
-      })
-    })
+    console.log("🧠 Initializing ZacAI Cognitive Processor...")
+    this.patternMatcher = new PatternMatcher()
+    this.performanceMonitor = new PerformanceMonitor()
+    this.initializeNeuralEngine()
   }
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
 
-    console.log("🚀 Initializing Advanced Cognitive Processor...")
+    const startTime = performance.now()
+    this.systemStatus = "initializing"
 
     try {
-      // Load seed data
-      await Promise.all([
-        this.loadSeedVocabulary(),
-        this.loadSeedMathematics(),
-        this.loadPersonalMemory(),
-        this.initializeNeuralWeights(),
-        this.buildKnowledgeGraph(),
-      ])
+      console.log("🚀 Starting cognitive processor initialization...")
 
-      this.isInitialized = true
-      console.log("✅ Advanced Cognitive Processor ready!")
-    } catch (error) {
-      console.error("❌ Initialization failed:", error)
-      throw error
-    }
-    if (this.isInitializedOld) return
-
-    try {
-      console.log("🚀 Loading cognitive systems...")
+      // Initialize core systems
+      await this.initializeCoreComponents()
 
       // Load all seed data
-      await Promise.all([
-        this.loadSeedVocabularyOld(),
-        this.loadSeedMathematicsOld(),
-        this.loadSeedKnowledge(),
-        this.loadSeedSystem(),
-        this.loadPersonalMemoryOld(),
-      ])
+      await this.loadAllSeedData()
 
-      // Initialize neural weights
-      this.initializeNeuralWeightsOld()
+      // Load learned data
+      await this.loadAllLearnedData()
 
-      // Initialize subsystems
-      await this.temporalSystem.initialize?.()
+      // Initialize neural networks
+      await this.initializeNeuralNetworks()
 
-      this.isInitializedOld = true
-      this.updateStatsOld()
-      console.log("✅ Cognitive Processor fully initialized!")
+      // Load conversation history
+      await this.loadConversationHistory()
+
+      // Initialize pattern recognition
+      await this.initializePatternRecognition()
+
+      this.systemStatus = "ready"
+      this.isInitialized = true
+
+      const initTime = performance.now() - startTime
+      this.performanceMonitor.logOperation("initialization", initTime)
+
+      console.log(`✅ ZacAI Cognitive Processor ready! (${initTime.toFixed(2)}ms)`)
+      console.log(`📚 Vocabulary: ${this.vocabulary.size} words`)
+      console.log(`🧮 Mathematics: ${this.mathematics.size} concepts`)
+      console.log(`🧠 Personal Info: ${this.personalInfo.size} entries`)
+      console.log(`📖 Facts: ${this.facts.size} facts`)
+      console.log(`💻 Coding: ${this.coding.size} concepts`)
     } catch (error) {
-      console.error("❌ Cognitive Processor initialization failed:", error)
+      console.error("❌ Cognitive processor initialization failed:", error)
+      this.systemStatus = "error"
       throw error
     }
+  }
+
+  private async initializeCoreComponents(): Promise<void> {
+    console.log("🔧 Initializing core components...")
+
+    // Load system identity
+    await this.loadSystemIdentity()
+
+    console.log("✅ Core components initialized")
+  }
+
+  private async loadSystemIdentity(): Promise<void> {
+    try {
+      const response = await fetch("/seed_system.json")
+      if (response.ok) {
+        const systemData = await response.json()
+        if (systemData.identity) {
+          this.systemIdentity = {
+            ...this.systemIdentity,
+            ...systemData.identity,
+          }
+        }
+      }
+    } catch (error) {
+      console.warn("Could not load system identity, using defaults")
+    }
+  }
+
+  private async loadAllSeedData(): Promise<void> {
+    console.log("📚 Loading all seed data...")
+
+    await Promise.all([
+      this.loadSeedVocabulary(),
+      this.loadSeedMathematics(),
+      this.loadSeedKnowledge(),
+      this.loadSeedCoding(),
+    ])
+
+    console.log("✅ All seed data loaded")
   }
 
   private async loadSeedVocabulary(): Promise<void> {
@@ -159,21 +134,43 @@ export class CognitiveProcessor {
       if (response.ok) {
         const data = await response.json()
         Object.entries(data).forEach(([word, entry]: [string, any]) => {
-          const embeddings = this.generateEmbeddings(word + " " + entry.definition)
           this.vocabulary.set(word.toLowerCase(), {
             word: word.toLowerCase(),
             definition: entry.definition,
             partOfSpeech: entry.part_of_speech || "unknown",
             examples: entry.examples || [],
-            embeddings,
-            confidence: 0.9,
             source: "seed",
+            confidence: 0.95,
+            phonetic: entry.phonetic || "",
+            synonyms: entry.synonyms || [],
+            antonyms: entry.antonyms || [],
+            frequency: entry.frequency || 1,
+            timestamp: Date.now(),
           })
         })
-        console.log(`✅ Loaded ${Object.keys(data).length} vocabulary entries with embeddings`)
+
+        // Add alphabet letters
+        const alphabet = "abcdefghijklmnopqrstuvwxyz".split("")
+        alphabet.forEach((letter) => {
+          this.vocabulary.set(letter, {
+            word: letter,
+            definition: `The letter ${letter.toUpperCase()} of the English alphabet`,
+            partOfSpeech: "noun",
+            examples: [`The word starts with ${letter}`],
+            source: "seed",
+            confidence: 0.98,
+            phonetic: `/${letter}/`,
+            synonyms: [],
+            antonyms: [],
+            frequency: 1,
+            timestamp: Date.now(),
+          })
+        })
+
+        console.log(`✅ Loaded ${Object.keys(data).length} seed vocabulary words`)
       }
     } catch (error) {
-      console.warn("Failed to load vocabulary:", error)
+      console.warn("Failed to load seed vocabulary:", error)
     }
   }
 
@@ -182,1271 +179,68 @@ export class CognitiveProcessor {
       const response = await fetch("/seed_maths.json")
       if (response.ok) {
         const data = await response.json()
-        Object.entries(data).forEach(([concept, entry]: [string, any]) => {
-          this.mathematics.set(concept, {
-            concept,
-            data: entry,
-            embeddings: this.generateEmbeddings(concept + " " + JSON.stringify(entry)),
-            confidence: 0.95,
-            source: "seed",
-          })
-        })
-        console.log("✅ Loaded mathematical knowledge with embeddings")
-      }
-    } catch (error) {
-      console.warn("Failed to load mathematics:", error)
-    }
-  }
 
-  private loadPersonalMemory(): void {
-    try {
-      const stored = localStorage.getItem("cognitive_personal_memory")
-      if (stored) {
-        const data = JSON.parse(stored)
-        data.forEach((entry: any) => {
-          this.personalInfo.set(entry.key, {
-            ...entry,
-            embeddings: this.generateEmbeddings(entry.key + " " + entry.value),
-          })
-        })
-        console.log(`✅ Loaded ${data.length} personal memory entries`)
-      }
-    } catch (error) {
-      console.warn("Failed to load personal memory:", error)
-    }
-  }
-
-  private initializeNeuralWeights(): void {
-    // Initialize connection weights between pathways
-    const pathwayNames = Array.from(this.pathways.keys())
-
-    pathwayNames.forEach((from) => {
-      pathwayNames.forEach((to) => {
-        if (from !== to) {
-          const key = `${from}->${to}`
-          this.neuralWeights.set(key, {
-            input: from,
-            output: to,
-            weight: Math.random() * 0.5 + 0.25, // Random weight between 0.25-0.75
-            lastUpdate: Date.now(),
+        // Load mathematical vocabulary
+        if (data.mathematical_vocabulary) {
+          Object.entries(data.mathematical_vocabulary).forEach(([term, definition]: [string, any]) => {
+            this.mathematics.set(`vocab_${term}`, {
+              concept: term,
+              type: "vocabulary",
+              formula: String(definition),
+              category: "mathematical_terms",
+              source: "seed",
+              confidence: 0.95,
+              timestamp: Date.now(),
+            })
           })
         }
-      })
-    })
 
-    console.log(`✅ Initialized ${this.neuralWeights.size} neural connections`)
-  }
-
-  private buildKnowledgeGraph(): void {
-    // Build connections between vocabulary, math, and personal info
-    const allConcepts = [
-      ...Array.from(this.vocabulary.keys()),
-      ...Array.from(this.mathematics.keys()),
-      ...Array.from(this.personalInfo.keys()),
-    ]
-
-    allConcepts.forEach((concept) => {
-      const embeddings = this.generateEmbeddings(concept)
-      const connections = new Map<string, number>()
-
-      // Find related concepts using embedding similarity
-      allConcepts.forEach((otherConcept) => {
-        if (concept !== otherConcept) {
-          const otherEmbeddings = this.generateEmbeddings(otherConcept)
-          const similarity = this.cosineSimilarity(embeddings, otherEmbeddings)
-          if (similarity > 0.3) {
-            connections.set(otherConcept, similarity)
-          }
-        }
-      })
-
-      this.knowledgeGraph.set(concept, {
-        concept,
-        embeddings,
-        connections,
-        confidence: 0.8,
-        lastAccessed: Date.now(),
-      })
-    })
-
-    console.log(`✅ Built knowledge graph with ${this.knowledgeGraph.size} nodes`)
-  }
-
-  private generateEmbeddings(text: string): number[] {
-    // Simple embedding generation (in real implementation, use proper embeddings)
-    const words = text.toLowerCase().split(/\s+/)
-    const embedding = new Array(128).fill(0)
-
-    words.forEach((word, index) => {
-      for (let i = 0; i < word.length && i < embedding.length; i++) {
-        embedding[i] += (word.charCodeAt(i % word.length) * (index + 1)) / words.length
-      }
-    })
-
-    // Normalize
-    const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0))
-    return embedding.map((val) => (magnitude > 0 ? val / magnitude : 0))
-  }
-
-  private cosineSimilarity(a: number[], b: number[]): number {
-    if (a.length !== b.length) return 0
-
-    let dotProduct = 0
-    let normA = 0
-    let normB = 0
-
-    for (let i = 0; i < a.length; i++) {
-      dotProduct += a[i] * b[i]
-      normA += a[i] * a[i]
-      normB += b[i] * b[i]
-    }
-
-    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB))
-  }
-
-  // MAIN COGNITIVE PROCESSING PIPELINE
-  public async processMessage(userMessage: string): Promise<CognitiveResponse> {
-    const startTime = Date.now()
-
-    if (!this.isInitialized) {
-      await this.initialize()
-    }
-
-    console.log("🧠 Processing with advanced cognition:", userMessage)
-
-    // Update context window
-    this.contextWindow.push(userMessage)
-    if (this.contextWindow.length > 10) {
-      this.contextWindow.shift()
-    }
-
-    // Generate input embeddings
-    const inputEmbeddings = this.generateEmbeddings(userMessage)
-
-    // Activate pathways based on input
-    const pathwayActivations = this.activatePathways(userMessage, inputEmbeddings)
-
-    // Process through multiple pathways simultaneously
-    const pathwayResults = await Promise.all([
-      this.processMathematical(userMessage, pathwayActivations.get("mathematical") || 0),
-      this.processLinguistic(userMessage, pathwayActivations.get("linguistic") || 0),
-      this.processPersonal(userMessage, pathwayActivations.get("personal") || 0),
-      this.processFactual(userMessage, pathwayActivations.get("factual") || 0),
-      this.processConversational(userMessage, pathwayActivations.get("conversational") || 0),
-      this.processTemporal(userMessage, pathwayActivations.get("temporal") || 0),
-    ])
-
-    // Synthesize results using attention mechanism
-    const synthesizedResponse = this.synthesizeResponse(pathwayResults, pathwayActivations)
-
-    // Update neural weights based on processing
-    this.updateNeuralWeights(pathwayActivations, synthesizedResponse.confidence)
-
-    // Store in memory
-    this.storeInMemory(userMessage, synthesizedResponse)
-
-    // Update stats
-    const responseTime = Date.now() - startTime
-    this.updateStats(pathwayActivations, synthesizedResponse.confidence, responseTime)
-
-    console.log(`🧠 Processing: "${userMessage}"`)
-
-    try {
-      // Stage 1: Input Analysis & Classification
-      const inputAnalysis = await this.analyzeInput(userMessage)
-      console.log(
-        `📊 Input classified as: ${inputAnalysis.type} (confidence: ${Math.round(inputAnalysis.confidence * 100)}%)`,
-      )
-
-      // Stage 2: Multi-Pathway Cognitive Processing
-      const cognitiveResults = await this.processCognitivePathways(userMessage, inputAnalysis)
-
-      // Stage 3: Knowledge Synthesis & Learning
-      const synthesis = await this.synthesizeKnowledge(cognitiveResults, userMessage)
-
-      // Stage 4: Response Generation
-      const response = await this.generateIntelligentResponse(synthesis, userMessage)
-
-      // Stage 5: Learning & Memory Update
-      await this.updateMemoryAndLearning(userMessage, response)
-
-      // Update stats
-      this.systemStats.totalMessages++
-      this.systemStats.responseTime = Date.now() - startTime
-      this.updateStatsOld()
-
-      console.log(`✅ Response generated in ${Date.now() - startTime}ms`)
-
-      return {
-        content: synthesizedResponse.content,
-        confidence: synthesizedResponse.confidence,
-        reasoning: synthesizedResponse.reasoning,
-        pathways: synthesizedResponse.pathways,
-        learningExtracted: [],
-      }
-    } catch (error) {
-      console.error("❌ Cognitive processing error:", error)
-      return {
-        content: "I encountered an error processing your message. Please try again.",
-        confidence: 0.3,
-        reasoning: [`Error: ${error}`],
-        pathways: ["error"],
-        learningExtracted: [],
-      }
-    }
-  }
-
-  private activatePathways(input: string, embeddings: number[]): Map<string, number> {
-    const activations = new Map<string, number>()
-
-    // Mathematical pathway
-    if (/\d+\s*[+\-*/×÷]\s*\d+|math|calculate|equation|formula/.test(input)) {
-      activations.set("mathematical", 0.9)
-    }
-
-    // Linguistic pathway
-    if (/what\s+(is|does|means?)|define|definition|word|language/.test(input)) {
-      activations.set("linguistic", 0.8)
-    }
-
-    // Personal pathway
-    if (/my\s+name|i\s+am|remember|about\s+me|personal/.test(input)) {
-      activations.set("personal", 0.7)
-    }
-
-    // Factual pathway
-    if (/who|what|when|where|why|how|fact|information/.test(input)) {
-      activations.set("factual", 0.6)
-    }
-
-    // Conversational pathway (always active)
-    activations.set("conversational", 0.5)
-
-    // Temporal pathway
-    if (/time|date|when|ago|future|past|now|today/.test(input)) {
-      activations.set("temporal", 0.4)
-    }
-
-    // Use embeddings to find related concepts
-    this.knowledgeGraph.forEach((node, concept) => {
-      const similarity = this.cosineSimilarity(embeddings, node.embeddings)
-      if (similarity > 0.5) {
-        // Boost relevant pathways based on knowledge graph
-        activations.forEach((activation, pathway) => {
-          activations.set(pathway, Math.min(1.0, activation + similarity * 0.2))
-        })
-      }
-    })
-
-    return activations
-  }
-
-  private async processMathematical(input: string, activation: number): Promise<any> {
-    if (activation < 0.1) return null
-
-    // Enhanced mathematical processing
-    const mathPatterns = [
-      /(\d+(?:\.\d+)?)\s*([+\-*/×÷])\s*(\d+(?:\.\d+)?)/g,
-      /what\s+is\s+(\d+(?:\.\d+)?)\s*([+\-*/×÷])\s*(\d+(?:\.\d+)?)/gi,
-      /calculate\s+(\d+(?:\.\d+)?)\s*([+\-*/×÷])\s*(\d+(?:\.\d+)?)/gi,
-    ]
-
-    for (const pattern of mathPatterns) {
-      const match = pattern.exec(input)
-      if (match) {
-        const [, num1Str, operator, num2Str] = match
-        const num1 = Number.parseFloat(num1Str)
-        const num2 = Number.parseFloat(num2Str)
-
-        let result: number
-        let operation: string
-
-        switch (operator) {
-          case "+":
-            result = num1 + num2
-            operation = "addition"
-            break
-          case "-":
-            result = num1 - num2
-            operation = "subtraction"
-            break
-          case "*":
-          case "×":
-            result = num1 * num2
-            operation = "multiplication"
-            break
-          case "/":
-          case "÷":
-            result = num2 !== 0 ? num1 / num2 : Number.NaN
-            operation = "division"
-            break
-          default:
-            continue
-        }
-
-        if (!isNaN(result)) {
-          return {
-            pathway: "mathematical",
-            content: `🧮 **Mathematical Processing**\n\n**Expression:** ${num1} ${operator} ${num2}\n**Result:** ${result}\n**Operation:** ${operation}\n\n*Processed through advanced mathematical pathway*`,
-            confidence: activation * 0.95,
-            reasoning: [
-              `Detected mathematical expression: ${num1} ${operator} ${num2}`,
-              `Applied ${operation} operation`,
-              `Calculated result: ${result}`,
-              `Mathematical pathway activation: ${Math.round(activation * 100)}%`,
-            ],
-          }
-        }
-      }
-    }
-
-    return {
-      pathway: "mathematical",
-      content: "I can help with mathematical calculations. Try expressions like '15 × 7' or 'what is 25 + 13?'",
-      confidence: activation * 0.3,
-      reasoning: ["Mathematical pathway activated but no valid expression found"],
-    }
-  }
-
-  private async processLinguistic(input: string, activation: number): Promise<any> {
-    if (activation < 0.1) return null
-
-    const wordMatch = input.match(/(?:what\s+(?:is|does|means?)|define)\s+(\w+)/i)
-    if (!wordMatch) return null
-
-    const word = wordMatch[1].toLowerCase()
-
-    // Check existing vocabulary
-    if (this.vocabulary.has(word)) {
-      const entry = this.vocabulary.get(word)
-      return {
-        pathway: "linguistic",
-        content: `📖 **Linguistic Processing**\n\n**Word:** ${word}\n**Definition:** ${entry.definition}\n**Part of Speech:** ${entry.partOfSpeech}\n\n*Retrieved from vocabulary database*`,
-        confidence: activation * entry.confidence,
-        reasoning: [
-          `Found word "${word}" in vocabulary database`,
-          `Retrieved definition and linguistic information`,
-          `Linguistic pathway activation: ${Math.round(activation * 100)}%`,
-        ],
-      }
-    }
-
-    // Try to learn new word
-    try {
-      const wordData = await this.learnNewWord(word)
-      if (wordData) {
-        return {
-          pathway: "linguistic",
-          content: `📖 **Linguistic Learning**\n\n**Word:** ${word} *(newly learned)*\n**Definition:** ${wordData.definition}\n**Part of Speech:** ${wordData.partOfSpeech}\n\n*Learned and stored in vocabulary*`,
-          confidence: activation * 0.8,
-          reasoning: [
-            `Word "${word}" not found in existing vocabulary`,
-            `Successfully learned new word from external source`,
-            `Added to vocabulary database with embeddings`,
-            `Linguistic pathway activation: ${Math.round(activation * 100)}%`,
-          ],
-        }
-      }
-    } catch (error) {
-      console.warn("Failed to learn new word:", error)
-    }
-
-    return {
-      pathway: "linguistic",
-      content: `I don't know the word "${word}" yet, but I'm always learning new vocabulary.`,
-      confidence: activation * 0.4,
-      reasoning: [`Word "${word}" not found and could not be learned`],
-    }
-  }
-
-  private async learnNewWord(word: string): Promise<any> {
-    try {
-      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data && data.length > 0) {
-          const entry = data[0]
-          const meaning = entry.meanings?.[0]
-          const definition = meaning?.definitions?.[0]
-
-          const wordData = {
-            definition: definition?.definition || "Definition found",
-            partOfSpeech: meaning?.partOfSpeech || "unknown",
-            examples: definition?.example ? [definition.example] : [],
-          }
-
-          // Store in vocabulary with embeddings
-          const embeddings = this.generateEmbeddings(word + " " + wordData.definition)
-          this.vocabulary.set(word, {
-            word,
-            ...wordData,
-            embeddings,
-            confidence: 0.8,
-            source: "learned",
-            timestamp: Date.now(),
+        // Load mathematical symbols
+        if (data.mathematical_symbols) {
+          Object.entries(data.mathematical_symbols).forEach(([symbol, data]: [string, any]) => {
+            this.mathematics.set(`symbol_${symbol}`, {
+              concept: symbol,
+              type: "symbol",
+              formula: (data as any).meaning,
+              category: "mathematical_symbols",
+              source: "seed",
+              confidence: 0.95,
+              timestamp: Date.now(),
+            })
           })
-
-          // Update knowledge graph
-          this.updateKnowledgeGraph(word, embeddings)
-
-          return wordData
         }
-      }
-    } catch (error) {
-      console.warn("Dictionary API failed:", error)
-    }
-    return null
-  }
 
-  private processPersonal(input: string, activation: number): any {
-    if (activation < 0.1) return null
-
-    // Extract personal information
-    this.extractPersonalInfo(input)
-
-    // Handle personal queries
-    if (/what'?s\s+my\s+name|my\s+name|remember.*name/i.test(input)) {
-      const name = this.personalInfo.get("name")
-      if (name) {
-        return {
-          pathway: "personal",
-          content: `💾 **Personal Memory**\n\nYour name is **${name.value}**.\n\n*Retrieved from personal memory system*`,
-          confidence: activation * 0.95,
-          reasoning: [
-            "Retrieved name from personal memory",
-            `Personal pathway activation: ${Math.round(activation * 100)}%`,
-          ],
+        // Load calculation methods
+        if (data.calculation_methods) {
+          Object.entries(data.calculation_methods).forEach(([method, data]: [string, any]) => {
+            this.mathematics.set(`method_${method}`, {
+              concept: method,
+              type: "method",
+              formula: JSON.stringify(data),
+              category: "calculation_methods",
+              source: "seed",
+              confidence: 0.95,
+              timestamp: Date.now(),
+            })
+          })
         }
-      } else {
-        return {
-          pathway: "personal",
-          content: "I don't have your name stored yet. What would you like me to call you?",
-          confidence: activation * 0.7,
-          reasoning: ["No name found in personal memory"],
-        }
-      }
-    }
 
-    if (/what.*remember|know.*about.*me|personal.*info/i.test(input)) {
-      if (this.personalInfo.size > 0) {
-        let content = "💾 **Personal Memory System**\n\nHere's what I remember about you:\n\n"
-        this.personalInfo.forEach((entry, key) => {
-          content += `• **${key}**: ${entry.value}\n`
-        })
-        content += "\n*Retrieved from personal memory database*"
-
-        return {
-          pathway: "personal",
-          content,
-          confidence: activation * 0.9,
-          reasoning: [
-            `Retrieved ${this.personalInfo.size} personal memory entries`,
-            `Personal pathway activation: ${Math.round(activation * 100)}%`,
-          ],
-        }
-      } else {
-        return {
-          pathway: "personal",
-          content: "I don't have any personal information stored about you yet. Tell me about yourself!",
-          confidence: activation * 0.6,
-          reasoning: ["No personal information found in memory"],
-        }
-      }
-    }
-
-    return null
-  }
-
-  private extractPersonalInfo(input: string): void {
-    const patterns = [
-      { pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i, key: "name" },
-      { pattern: /i live in\s+([^.!?]+)/i, key: "location" },
-      { pattern: /i work (?:as|at)\s+([^.!?]+)/i, key: "work" },
-      { pattern: /i am\s+(\d+)\s+years?\s+old/i, key: "age" },
-    ]
-
-    patterns.forEach(({ pattern, key }) => {
-      const match = input.match(pattern)
-      if (match) {
-        const value = match[1].trim()
-        this.personalInfo.set(key, {
-          key,
-          value,
+        // Add mathematics definition
+        this.mathematics.set("mathematics", {
+          concept: "mathematics",
+          type: "definition",
+          formula:
+            "The study of numbers, quantities, shapes, and patterns using logical reasoning and systematic methods",
+          category: "core_definitions",
+          source: "seed",
+          confidence: 0.98,
           timestamp: Date.now(),
-          embeddings: this.generateEmbeddings(key + " " + value),
         })
-        this.savePersonalMemory()
-        console.log(`📝 Stored personal info: ${key} = ${value}`)
-      }
-    })
-  }
 
-  private processFactual(input: string, activation: number): any {
-    if (activation < 0.1) return null
-
-    // Use knowledge graph to find relevant information
-    const inputEmbeddings = this.generateEmbeddings(input)
-    let bestMatch: { concept: string; similarity: number; node: KnowledgeNode } | null = null
-
-    this.knowledgeGraph.forEach((node, concept) => {
-      const similarity = this.cosineSimilarity(inputEmbeddings, node.embeddings)
-      if (similarity > 0.4 && (!bestMatch || similarity > bestMatch.similarity)) {
-        bestMatch = { concept, similarity, node }
-      }
-    })
-
-    if (bestMatch) {
-      // Update last accessed
-      bestMatch.node.lastAccessed = Date.now()
-
-      return {
-        pathway: "factual",
-        content: `🔍 **Knowledge Synthesis**\n\nBased on my knowledge graph, I found relevant information about "${bestMatch.concept}".\n\n*Similarity: ${Math.round(bestMatch.similarity * 100)}%*\n*Factual pathway processing*`,
-        confidence: activation * bestMatch.similarity,
-        reasoning: [
-          `Found relevant concept: ${bestMatch.concept}`,
-          `Knowledge similarity: ${Math.round(bestMatch.similarity * 100)}%`,
-          `Factual pathway activation: ${Math.round(activation * 100)}%`,
-        ],
-      }
-    }
-
-    return null
-  }
-
-  private processConversational(input: string, activation: number): any {
-    // Always provide a conversational response as fallback
-    const greetings = ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"]
-    const isGreeting = greetings.some((greeting) => input.toLowerCase().includes(greeting))
-
-    if (isGreeting) {
-      const userName = this.personalInfo.get("name")?.value
-      const greeting = userName ? `Hello ${userName}!` : "Hello!"
-
-      return {
-        pathway: "conversational",
-        content: `👋 **Conversational Processing**\n\n${greeting} I'm your advanced cognitive processor, ready to help with:\n\n• 🧮 Mathematical calculations\n• 📖 Vocabulary and definitions\n• 💾 Personal memory management\n• 🔍 Knowledge synthesis\n• ⏰ Temporal awareness\n\nWhat would you like to explore?`,
-        confidence: activation * 0.8,
-        reasoning: [
-          "Detected greeting pattern",
-          userName ? "Personalized response using stored name" : "Generic friendly greeting",
-          `Conversational pathway activation: ${Math.round(activation * 100)}%`,
-        ],
-      }
-    }
-
-    return {
-      pathway: "conversational",
-      content: `🧠 **Cognitive Processing**\n\nI understand you said: "${input}"\n\nI'm processing this through multiple cognitive pathways. I can help with mathematics, vocabulary, personal memory, and knowledge synthesis.\n\n*Advanced cognitive processing active*`,
-      confidence: activation * 0.6,
-      reasoning: [
-        "General conversational processing",
-        "Multiple pathways available for assistance",
-        `Conversational pathway activation: ${Math.round(activation * 100)}%`,
-      ],
-    }
-  }
-
-  private processTemporal(input: string, activation: number): any {
-    if (activation < 0.1) return null
-
-    if (/what.*time|current.*time|time.*now/i.test(input)) {
-      const now = new Date()
-      return {
-        pathway: "temporal",
-        content: `⏰ **Temporal Processing**\n\n**Current Time:** ${now.toLocaleTimeString()}\n**Date:** ${now.toLocaleDateString()}\n**Timestamp:** ${now.getTime()}\n\n*Temporal awareness system active*`,
-        confidence: activation * 0.95,
-        reasoning: [
-          "Temporal query detected",
-          "Retrieved current system time",
-          `Temporal pathway activation: ${Math.round(activation * 100)}%`,
-        ],
-      }
-    }
-
-    return null
-  }
-
-  private synthesizeResponse(results: any[], activations: Map<string, number>): any {
-    // Filter out null results
-    const validResults = results.filter((r) => r !== null)
-
-    if (validResults.length === 0) {
-      return {
-        content:
-          "🧠 I'm processing your request through multiple cognitive pathways, but I need more specific information to provide a helpful response.",
-        confidence: 0.4,
-        reasoning: ["No pathways produced valid results"],
-      }
-    }
-
-    // If only one result, return it
-    if (validResults.length === 1) {
-      return validResults[0]
-    }
-
-    // Multiple results - use attention mechanism to synthesize
-    let bestResult = validResults[0]
-    let maxScore = bestResult.confidence * (activations.get(bestResult.pathway) || 0)
-
-    validResults.forEach((result) => {
-      const score = result.confidence * (activations.get(result.pathway) || 0)
-      if (score > maxScore) {
-        maxScore = score
-        bestResult = result
-      }
-    })
-
-    // Add synthesis information
-    const pathwaysUsed = validResults.map((r) => r.pathway).join(", ")
-    bestResult.reasoning.push(`Synthesized from pathways: ${pathwaysUsed}`)
-    bestResult.reasoning.push(`Selected best result from ${validResults.length} pathway responses`)
-
-    return bestResult
-  }
-
-  private updateNeuralWeights(activations: Map<string, number>, confidence: number): void {
-    // Update weights based on successful processing
-    activations.forEach((activation, pathway) => {
-      if (activation > 0.5) {
-        // Strengthen connections for successful pathways
-        this.pathways.get(pathway)!.weight = Math.min(
-          1.0,
-          this.pathways.get(pathway)!.weight + this.learningRate * confidence * activation,
-        )
-      }
-    })
-
-    // Update inter-pathway connections
-    const activePathways = Array.from(activations.keys()).filter((p) => activations.get(p)! > 0.3)
-    activePathways.forEach((from) => {
-      activePathways.forEach((to) => {
-        if (from !== to) {
-          const key = `${from}->${to}`
-          const weight = this.neuralWeights.get(key)
-          if (weight) {
-            weight.weight = Math.min(1.0, weight.weight + this.learningRate * 0.1)
-            weight.lastUpdate = Date.now()
-          }
-        }
-      })
-    })
-  }
-
-  private storeInMemory(input: string, response: any): void {
-    const memoryTrace: MemoryTrace = {
-      content: `${input} -> ${response.content}`,
-      timestamp: Date.now(),
-      importance: response.confidence,
-      associations: response.pathways || [],
-      decay: 1.0,
-    }
-
-    this.workingMemory.push(memoryTrace)
-
-    // Keep working memory limited
-    if (this.workingMemory.length > 50) {
-      // Move important memories to long-term storage
-      const important = this.workingMemory.filter((m) => m.importance > 0.7)
-      important.forEach((memory) => {
-        this.longTermMemory.set(memory.timestamp.toString(), memory)
-      })
-
-      this.workingMemory = this.workingMemory.slice(-25)
-    }
-
-    this.conversationHistory.push({
-      input,
-      response: response.content,
-      confidence: response.confidence,
-      pathways: response.pathways,
-      timestamp: Date.now(),
-    })
-  }
-
-  private updateKnowledgeGraph(concept: string, embeddings: number[]): void {
-    const connections = new Map<string, number>()
-
-    // Find connections to existing concepts
-    this.knowledgeGraph.forEach((node, existingConcept) => {
-      if (concept !== existingConcept) {
-        const similarity = this.cosineSimilarity(embeddings, node.embeddings)
-        if (similarity > 0.3) {
-          connections.set(existingConcept, similarity)
-          // Add reverse connection
-          node.connections.set(concept, similarity)
-        }
-      }
-    })
-
-    this.knowledgeGraph.set(concept, {
-      concept,
-      embeddings,
-      connections,
-      confidence: 0.8,
-      lastAccessed: Date.now(),
-    })
-  }
-
-  private updateStats(activations: Map<string, number>, confidence: number, responseTime: number): void {
-    this.processingStats.totalProcessed++
-    this.processingStats.avgConfidence =
-      (this.processingStats.avgConfidence * (this.processingStats.totalProcessed - 1) + confidence) /
-      this.processingStats.totalProcessed
-    this.processingStats.responseTime = responseTime
-    this.processingStats.learningProgress = Math.min(
-      100,
-      ((this.vocabulary.size - 432) / 1000) * 100 + // Vocabulary growth
-        this.personalInfo.size * 10 + // Personal info
-        (this.processingStats.totalProcessed / 100) * 10, // Experience
-    )
-
-    activations.forEach((activation, pathway) => {
-      const current = this.processingStats.pathwayActivations.get(pathway) || 0
-      this.processingStats.pathwayActivations.set(pathway, current + activation)
-    })
-  }
-
-  private savePersonalMemory(): void {
-    try {
-      const personalData = Array.from(this.personalInfo.values())
-      localStorage.setItem("cognitive_personal_memory", JSON.stringify(personalData))
-    } catch (error) {
-      console.warn("Failed to save personal memory:", error)
-    }
-  }
-
-  public getStats(): any {
-    const seedVocab = Array.from(this.vocabulary.values()).filter((v) => v.source === "seed").length
-    const learnedVocab = Array.from(this.vocabulary.values()).filter((v) => v.source === "learned").length
-
-    return {
-      vocabularySize: this.vocabulary.size,
-      mathFunctions: this.mathematics.size,
-      memoryEntries: this.personalInfo.size,
-      totalMessages: this.processingStats.totalProcessed,
-      avgConfidence: this.processingStats.avgConfidence,
-      responseTime: this.processingStats.responseTime,
-      learningProgress: this.processingStats.learningProgress,
-      knowledgeGraphSize: this.knowledgeGraph.size,
-      neuralConnections: this.neuralWeights.size,
-      workingMemorySize: this.workingMemory.length,
-      longTermMemorySize: this.longTermMemory.size,
-      breakdown: {
-        seedVocab,
-        learnedVocab,
-      },
-      pathwayActivations: Object.fromEntries(this.processingStats.pathwayActivations),
-    }
-  }
-
-  public exportData(): any {
-    return {
-      vocabulary: Array.from(this.vocabulary.entries()),
-      mathematics: Array.from(this.mathematics.entries()),
-      personalInfo: Array.from(this.personalInfo.entries()),
-      knowledgeGraph: Array.from(this.knowledgeGraph.entries()),
-      neuralWeights: Array.from(this.neuralWeights.entries()),
-      conversationHistory: this.conversationHistory,
-      stats: this.processingStats,
-      exportTimestamp: Date.now(),
-      version: "Advanced Cognitive Processor v2.0",
-    }
-  }
-
-  public getDebugInfo(): any {
-    return {
-      isInitialized: this.isInitialized,
-      pathways: Object.fromEntries(this.pathways),
-      contextWindow: this.contextWindow,
-      learningRate: this.learningRate,
-      stats: this.processingStats,
-    }
-  }
-
-  // ADVANCED INPUT ANALYSIS
-  private async analyzeInput(input: string): Promise<InputAnalysis> {
-    const analysis: InputAnalysis = {
-      type: "conversational",
-      confidence: 0.5,
-      complexity: 0.3,
-      features: {
-        hasNumbers: /\d/.test(input),
-        hasMathOperators: /[+\-×*÷/=]/.test(input),
-        hasQuestions: /\?/.test(input),
-        hasPersonalInfo: /\b(my|i|me|am|have|name|wife|cats|family)\b/i.test(input),
-        hasTimeReference: this.temporalSystem.isDateTimeQuery(input),
-        hasVocabularyRequest: /\b(what\s+(?:is|does|means?)|define)\s+\w+/i.test(input),
-        wordCount: input.split(/\s+/).length,
-        sentiment: this.analyzeSentiment(input),
-      },
-      keywords: this.extractKeywords(input),
-    }
-
-    // Advanced classification logic
-    if (analysis.features.hasMathOperators && analysis.features.hasNumbers) {
-      analysis.type = "mathematical"
-      analysis.confidence = 0.95
-      analysis.complexity = this.calculateMathComplexity(input)
-    } else if (analysis.features.hasVocabularyRequest) {
-      analysis.type = "vocabulary"
-      analysis.confidence = 0.9
-      analysis.complexity = 0.4
-    } else if (analysis.features.hasPersonalInfo) {
-      analysis.type = "personal"
-      analysis.confidence = 0.8
-      analysis.complexity = 0.5
-    } else if (analysis.features.hasTimeReference) {
-      analysis.type = "temporal"
-      analysis.confidence = 0.85
-      analysis.complexity = 0.4
-    } else if (analysis.features.hasQuestions) {
-      analysis.type = "inquiry"
-      analysis.confidence = 0.7
-      analysis.complexity = 0.6
-    }
-
-    return analysis
-  }
-
-  // MULTI-PATHWAY COGNITIVE PROCESSING
-  private async processCognitivePathways(input: string, analysis: InputAnalysis): Promise<CognitiveResults> {
-    const pathwayResults: PathwayResult[] = []
-    const activePathways: string[] = []
-
-    // Mathematical Pathway
-    if (analysis.type === "mathematical" || analysis.features.hasNumbers) {
-      activePathways.push("mathematical")
-      const mathResult = await this.processMathematicalPathway(input)
-      pathwayResults.push(mathResult)
-    }
-
-    // Vocabulary Pathway
-    if (analysis.type === "vocabulary" || analysis.features.hasVocabularyRequest) {
-      activePathways.push("vocabulary")
-      const vocabResult = await this.processVocabularyPathway(input)
-      pathwayResults.push(vocabResult)
-    }
-
-    // Personal Memory Pathway
-    if (analysis.type === "personal" || analysis.features.hasPersonalInfo) {
-      activePathways.push("personal")
-      const personalResult = await this.processPersonalPathway(input)
-      pathwayResults.push(personalResult)
-    }
-
-    // Temporal Pathway
-    if (analysis.type === "temporal" || analysis.features.hasTimeReference) {
-      activePathways.push("temporal")
-      const temporalResult = await this.processTemporalPathway(input)
-      pathwayResults.push(temporalResult)
-    }
-
-    // Knowledge Retrieval Pathway
-    if (analysis.type === "inquiry" || analysis.features.hasQuestions) {
-      activePathways.push("knowledge")
-      const knowledgeResult = await this.processKnowledgePathway(input)
-      pathwayResults.push(knowledgeResult)
-    }
-
-    // Always include conversational pathway as fallback
-    activePathways.push("conversational")
-    const conversationalResult = await this.processConversationalPathway(input, analysis)
-    pathwayResults.push(conversationalResult)
-
-    return {
-      pathways: activePathways,
-      results: pathwayResults,
-      primaryResult: pathwayResults.reduce((best, current) => (current.confidence > best.confidence ? current : best)),
-    }
-  }
-
-  // MATHEMATICAL PATHWAY PROCESSING
-  private async processMathematicalPathway(input: string): Promise<PathwayResult> {
-    console.log("🧮 Processing mathematical pathway...")
-
-    try {
-      const mathAnalysis = this.mathematicsEngine.analyzeMathExpression(input)
-
-      if (mathAnalysis.isMatch && mathAnalysis.result !== undefined) {
-        return {
-          pathway: "mathematical",
-          confidence: mathAnalysis.confidence,
-          data: {
-            answer: mathAnalysis.result,
-            operation: mathAnalysis.operation,
-            numbers: mathAnalysis.numbers,
-            steps: this.generateMathSteps(mathAnalysis),
-            reasoning: mathAnalysis.reasoning,
-          },
-        }
+        console.log(`✅ Loaded seed mathematics data`)
       }
     } catch (error) {
-      console.error("Mathematical pathway error:", error)
-    }
-
-    return {
-      pathway: "mathematical",
-      confidence: 0.2,
-      data: { error: "Could not process mathematical expression" },
-    }
-  }
-
-  // VOCABULARY PATHWAY PROCESSING
-  private async processVocabularyPathway(input: string): Promise<PathwayResult> {
-    console.log("📖 Processing vocabulary pathway...")
-
-    const wordMatch = input.match(/(?:what\s+(?:is|does|means?)|define)\s+(\w+)/i)
-    if (!wordMatch) {
-      return {
-        pathway: "vocabulary",
-        confidence: 0.3,
-        data: { error: "Could not extract word to define" },
-      }
-    }
-
-    const word = wordMatch[1].toLowerCase()
-
-    // Check existing vocabulary
-    if (this.vocabularySystem.has(word)) {
-      const entry = this.vocabularySystem.get(word)
-      return {
-        pathway: "vocabulary",
-        confidence: 0.9,
-        data: {
-          word,
-          definition: entry.definition,
-          partOfSpeech: entry.partOfSpeech,
-          examples: entry.examples,
-          source: entry.source,
-        },
-      }
-    }
-
-    // Try to learn new word
-    try {
-      const newWordData = await this.learnNewWordOld(word)
-      if (newWordData) {
-        return {
-          pathway: "vocabulary",
-          confidence: 0.8,
-          data: {
-            word,
-            ...newWordData,
-            source: "learned",
-            isNew: true,
-          },
-        }
-      }
-    } catch (error) {
-      console.error("Vocabulary learning error:", error)
-    }
-
-    return {
-      pathway: "vocabulary",
-      confidence: 0.4,
-      data: { word, error: "Word not found and could not be learned" },
-    }
-  }
-
-  // PERSONAL MEMORY PATHWAY PROCESSING
-  private async processPersonalPathway(input: string): Promise<PathwayResult> {
-    console.log("👤 Processing personal pathway...")
-
-    // Extract personal information
-    const extractedInfo = this.extractPersonalInformationOld(input)
-
-    // Store new personal information
-    for (const info of extractedInfo) {
-      this.personalMemory.set(info.key, {
-        ...info,
-        timestamp: Date.now(),
-        confidence: 0.9,
-      })
-    }
-
-    // Query personal information
-    if (input.toLowerCase().includes("remember") || input.toLowerCase().includes("my name")) {
-      const personalData = Array.from(this.personalMemory.entries())
-      return {
-        pathway: "personal",
-        confidence: 0.9,
-        data: {
-          memories: personalData,
-          newInfo: extractedInfo,
-        },
-      }
-    }
-
-    return {
-      pathway: "personal",
-      confidence: 0.7,
-      data: {
-        newInfo: extractedInfo,
-        totalMemories: this.personalMemory.size,
-      },
-    }
-  }
-
-  // TEMPORAL PATHWAY PROCESSING
-  private async processTemporalPathway(input: string): Promise<PathwayResult> {
-    console.log("⏰ Processing temporal pathway...")
-
-    try {
-      const temporalResponse = this.temporalSystem.handleDateTimeQuery(input)
-      return {
-        pathway: "temporal",
-        confidence: 0.9,
-        data: {
-          response: temporalResponse,
-          currentTime: this.temporalSystem.getCurrentDateTime(),
-        },
-      }
-    } catch (error) {
-      return {
-        pathway: "temporal",
-        confidence: 0.3,
-        data: { error: "Could not process temporal query" },
-      }
-    }
-  }
-
-  // KNOWLEDGE RETRIEVAL PATHWAY
-  private async processKnowledgePathway(input: string): Promise<PathwayResult> {
-    console.log("🔍 Processing knowledge pathway...")
-
-    const searchResults = this.searchKnowledgeBase(input)
-
-    if (searchResults.length > 0) {
-      return {
-        pathway: "knowledge",
-        confidence: 0.8,
-        data: {
-          results: searchResults.slice(0, 3),
-          totalFound: searchResults.length,
-        },
-      }
-    }
-
-    return {
-      pathway: "knowledge",
-      confidence: 0.4,
-      data: { message: "No specific knowledge found for this query" },
-    }
-  }
-
-  // CONVERSATIONAL PATHWAY PROCESSING
-  private async processConversationalPathway(input: string, analysis: InputAnalysis): Promise<PathwayResult> {
-    console.log("💬 Processing conversational pathway...")
-
-    const userName = this.personalMemory.get("name")?.value
-    const greeting = userName ? `${userName}, ` : ""
-
-    // Greeting detection
-    if (/^(hi|hello|hey)$/i.test(input.trim())) {
-      return {
-        pathway: "conversational",
-        confidence: 0.9,
-        data: {
-          response: `${greeting}Hello! I'm your advanced AI assistant. I can help with math, vocabulary, remember personal information, and much more. What would you like to explore?`,
-          type: "greeting",
-        },
-      }
-    }
-
-    // Default conversational response
-    return {
-      pathway: "conversational",
-      confidence: 0.6,
-      data: {
-        response: `${greeting}I understand you said: "${input}". I'm here to help with calculations, definitions, personal memory, and general questions. What would you like to know?`,
-        type: "general",
-      },
-    }
-  }
-
-  // KNOWLEDGE SYNTHESIS
-  private async synthesizeKnowledge(results: CognitiveResults, originalInput: string): Promise<KnowledgeSynthesis> {
-    console.log("🔗 Synthesizing knowledge from cognitive pathways...")
-
-    const primaryResult = results.primaryResult
-    const userName = this.personalMemory.get("name")?.value
-
-    return {
-      primaryPathway: primaryResult.pathway,
-      confidence: primaryResult.confidence,
-      data: primaryResult.data,
-      userName,
-      allResults: results.results,
-      synthesis: this.createSynthesis(results.results, originalInput),
-    }
-  }
-
-  // INTELLIGENT RESPONSE GENERATION
-  private async generateIntelligentResponse(
-    synthesis: KnowledgeSynthesis,
-    originalInput: string,
-  ): Promise<ResponseGeneration> {
-    console.log("💡 Generating intelligent response...")
-
-    const namePrefix = synthesis.userName ? `${synthesis.userName}, ` : ""
-    let content = ""
-    let reasoning: string[] = []
-    const learningExtracted: string[] = []
-
-    switch (synthesis.primaryPathway) {
-      case "mathematical":
-        if (synthesis.data.answer !== undefined) {
-          content = `${namePrefix}🧮 **${synthesis.data.answer}**\n\n`
-          if (synthesis.data.steps) {
-            content += `**Steps:**\n${synthesis.data.steps.join("\n")}\n\n`
-          }
-          content += `**Operation:** ${synthesis.data.operation}`
-          reasoning = synthesis.data.reasoning || ["Performed mathematical calculation"]
-        } else {
-          content = `${namePrefix}I can help with math calculations. Try something like "5×5" or "10+3".`
-          reasoning = ["Could not process mathematical expression"]
-        }
-        break
-
-      case "vocabulary":
-        if (synthesis.data.definition) {
-          content = `${namePrefix}📖 **${synthesis.data.word}**\n\n`
-          content += `**Definition:** ${synthesis.data.definition}\n\n`
-          if (synthesis.data.partOfSpeech) {
-            content += `**Part of Speech:** ${synthesis.data.partOfSpeech}\n\n`
-          }
-          if (synthesis.data.examples && synthesis.data.examples.length > 0) {
-            content += `**Examples:** ${synthesis.data.examples.join(", ")}\n\n`
-          }
-          content += `**Source:** ${synthesis.data.source}`
-
-          if (synthesis.data.isNew) {
-            content += "\n\n✨ I've learned this word!"
-            learningExtracted.push(`vocabulary: ${synthesis.data.word}`)
-          }
-
-          reasoning = ["Retrieved/learned word definition"]
-        } else {
-          content = `${namePrefix}I don't know the word "${synthesis.data.word}" yet.`
-          reasoning = ["Word not found in vocabulary"]
-        }
-        break
-
-      case "personal":
-        if (synthesis.data.memories && synthesis.data.memories.length > 0) {
-          content = `${namePrefix}Here's what I remember about you:\n\n`
-          synthesis.data.memories.forEach(([key, entry]: [string, any]) => {
-            content += `• **${key}**: ${entry.value}\n`
-          })
-          reasoning = ["Retrieved personal memories"]
-        } else if (synthesis.data.newInfo && synthesis.data.newInfo.length > 0) {
-          content = `${namePrefix}Thanks for sharing that information! I'll remember it.`
-          synthesis.data.newInfo.forEach((info: any) => {
-            learningExtracted.push(`personal: ${info.key}`)
-          })
-          reasoning = ["Stored new personal information"]
-        } else {
-          content = `${namePrefix}I don't have any personal information stored yet. Tell me about yourself!`
-          reasoning = ["No personal information available"]
-        }
-        break
-
-      case "temporal":
-        content = `${namePrefix}${synthesis.data.response}`
-        reasoning = ["Provided temporal information"]
-        break
-
-      case "knowledge":
-        if (synthesis.data.results && synthesis.data.results.length > 0) {
-          content = `${namePrefix}Here's what I found:\n\n`
-          synthesis.data.results.forEach((result: any, index: number) => {
-            content += `${index + 1}. ${result.content || result.data}\n`
-          })
-          reasoning = ["Retrieved knowledge from database"]
-        } else {
-          content = `${namePrefix}I don't have specific information about that topic.`
-          reasoning = ["No knowledge found"]
-        }
-        break
-
-      default:
-        content = synthesis.data.response || `${namePrefix}I understand. How can I help you?`
-        reasoning = ["Generated conversational response"]
-    }
-
-    return {
-      content,
-      confidence: synthesis.confidence,
-      reasoning,
-      learningExtracted,
-    }
-  }
-
-  // MEMORY AND LEARNING UPDATE
-  private async updateMemoryAndLearning(userMessage: string, response: ResponseGeneration): Promise<void> {
-    console.log("🧠 Updating memory and learning...")
-
-    // Store conversation
-    this.conversationHistoryOld.push({
-      timestamp: Date.now(),
-      userMessage,
-      aiResponse: response.content,
-      confidence: response.confidence,
-      learningExtracted: response.learningExtracted,
-    })
-
-    // Keep only recent conversations
-    if (this.conversationHistoryOld.length > 100) {
-      this.conversationHistoryOld = this.conversationHistoryOld.slice(-80)
-    }
-
-    // Update neural weights based on confidence
-    this.updateNeuralWeightsOld(userMessage, response.confidence)
-
-    // Save to persistent storage
-    this.saveToStorageOld()
-  }
-
-  // HELPER METHODS
-  private async loadSeedVocabularyOld(): Promise<void> {
-    try {
-      const response = await fetch("/seed_vocab.json")
-      if (response.ok) {
-        const data = await response.json()
-        Object.entries(data).forEach(([word, entry]: [string, any]) => {
-          this.vocabularySystem.set(word.toLowerCase(), {
-            word: word.toLowerCase(),
-            definition: entry.definition,
-            partOfSpeech: entry.part_of_speech || "unknown",
-            examples: entry.examples || [],
-            source: "seed",
-          })
-        })
-        console.log(`✅ Loaded ${Object.keys(data).length} vocabulary words`)
-      }
-    } catch (error) {
-      console.warn("Failed to load vocabulary:", error)
-    }
-  }
-
-  private async loadSeedMathematicsOld(): Promise<void> {
-    try {
-      const response = await fetch("/seed_maths.json")
-      if (response.ok) {
-        const data = await response.json()
-        Object.entries(data).forEach(([concept, entry]: [string, any]) => {
-          this.knowledgeBase.set(`math_${concept}`, {
-            type: "mathematics",
-            concept,
-            data: entry,
-            source: "seed",
-          })
-        })
-        console.log(`✅ Loaded mathematics knowledge`)
-      }
-    } catch (error) {
-      console.warn("Failed to load mathematics:", error)
+      console.warn("Failed to load seed mathematics:", error)
     }
   }
 
@@ -1455,342 +249,992 @@ export class CognitiveProcessor {
       const response = await fetch("/seed_knowledge.json")
       if (response.ok) {
         const data = await response.json()
-        Object.entries(data).forEach(([topic, entry]: [string, any]) => {
-          this.knowledgeBase.set(topic, {
-            type: "knowledge",
-            topic,
-            data: entry,
-            source: "seed",
-          })
-        })
-        console.log(`✅ Loaded general knowledge`)
-      }
-    } catch (error) {
-      console.warn("Failed to load knowledge:", error)
-    }
-  }
-
-  private async loadSeedSystem(): Promise<void> {
-    try {
-      const response = await fetch("/seed_system.json")
-      if (response.ok) {
-        const data = await response.json()
-        this.knowledgeBase.set("system", {
-          type: "system",
-          data,
-          source: "seed",
-        })
-        console.log(`✅ Loaded system configuration`)
-      }
-    } catch (error) {
-      console.warn("Failed to load system config:", error)
-    }
-  }
-
-  private loadPersonalMemoryOld(): void {
-    try {
-      const stored = localStorage.getItem("cognitive_processor_memory")
-      if (stored) {
-        const data = JSON.parse(stored)
-        data.forEach((entry: any) => {
-          this.personalMemory.set(entry.key, entry)
-        })
-        console.log(`✅ Loaded ${data.length} personal memories`)
-      }
-    } catch (error) {
-      console.warn("Failed to load personal memory:", error)
-    }
-  }
-
-  private initializeNeuralWeightsOld(): void {
-    // Initialize basic neural weights for learning
-    const categories = ["mathematical", "vocabulary", "personal", "temporal", "knowledge", "conversational"]
-    categories.forEach((category) => {
-      this.neuralWeightsOld.set(
-        category,
-        Array(10)
-          .fill(0)
-          .map(() => Math.random() * 0.1),
-      )
-    })
-    console.log("✅ Neural weights initialized")
-  }
-
-  private calculateMathComplexity(input: string): number {
-    const operators = (input.match(/[+\-×*÷/]/g) || []).length
-    const numbers = (input.match(/\d+/g) || []).length
-    return Math.min(0.9, 0.3 + operators * 0.2 + numbers * 0.1)
-  }
-
-  private analyzeSentiment(input: string): string {
-    const positive = /\b(good|great|awesome|love|like|happy|excellent)\b/i.test(input)
-    const negative = /\b(bad|hate|terrible|awful|sad|angry|frustrated)\b/i.test(input)
-
-    if (positive && !negative) return "positive"
-    if (negative && !positive) return "negative"
-    return "neutral"
-  }
-
-  private extractKeywords(input: string): string[] {
-    return input
-      .toLowerCase()
-      .split(/\s+/)
-      .filter((word) => word.length > 3)
-      .filter(
-        (word) =>
-          !/^(the|and|for|are|but|not|you|all|can|had|her|was|one|our|out|day|get|has|him|his|how|man|new|now|old|see|two|way|who)$/.test(
-            word,
-          ),
-      )
-      .slice(0, 5)
-  }
-
-  private generateMathSteps(analysis: any): string[] {
-    if (analysis.operation === "multiply" && analysis.numbers.length === 2) {
-      return [`${analysis.numbers[0]} × ${analysis.numbers[1]} = ${analysis.result}`]
-    }
-    if (analysis.operation === "add" && analysis.numbers.length === 2) {
-      return [`${analysis.numbers[0]} + ${analysis.numbers[1]} = ${analysis.result}`]
-    }
-    return [`Result: ${analysis.result}`]
-  }
-
-  private async learnNewWordOld(word: string): Promise<any> {
-    try {
-      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data && data.length > 0) {
-          const entry = data[0]
-          const meaning = entry.meanings?.[0]
-          const definition = meaning?.definitions?.[0]
-
-          const wordData = {
-            definition: definition?.definition || "Definition found",
-            partOfSpeech: meaning?.partOfSpeech || "unknown",
-            examples: definition?.example ? [definition.example] : [],
+        Object.entries(data).forEach(([domain, domainData]: [string, any]) => {
+          if (typeof domainData === "object") {
+            Object.entries(domainData).forEach(([topic, info]: [string, any]) => {
+              this.facts.set(`${domain}_${topic}`, {
+                topic: `${domain}: ${topic}`,
+                content: typeof info === "string" ? info : JSON.stringify(info),
+                category: domain,
+                source: "seed",
+                confidence: 0.9,
+                timestamp: Date.now(),
+              })
+            })
           }
+        })
+        console.log(`✅ Loaded seed knowledge facts`)
+      }
+    } catch (error) {
+      console.warn("Failed to load seed knowledge:", error)
+    }
+  }
 
-          // Store the learned word
-          this.vocabularySystem.set(word, {
-            word,
-            ...wordData,
-            source: "learned",
+  private async loadSeedCoding(): Promise<void> {
+    try {
+      const response = await fetch("/seed_coding.json")
+      if (response.ok) {
+        const data = await response.json()
+        Object.entries(data).forEach(([concept, entry]: [string, any]) => {
+          this.coding.set(concept, {
+            concept,
+            language: (entry as any).language || "javascript",
+            description: (entry as any).description || "Coding concept",
+            examples: (entry as any).examples || [],
+            source: "seed",
+            confidence: 0.9,
             timestamp: Date.now(),
           })
+        })
+        console.log(`✅ Loaded seed coding concepts`)
+      }
+    } catch (error) {
+      console.warn("Failed to load seed coding:", error)
+    }
+  }
 
-          return wordData
+  private async loadAllLearnedData(): Promise<void> {
+    console.log("📖 Loading all learned data...")
+
+    await Promise.all([
+      this.loadLearnedVocabulary(),
+      this.loadLearnedMathematics(),
+      this.loadLearnedScience(),
+      this.loadLearnedCoding(),
+    ])
+
+    console.log("✅ All learned data loaded")
+  }
+
+  private async loadLearnedVocabulary(): Promise<void> {
+    try {
+      const response = await fetch("/learnt_vocab.json")
+      if (response.ok) {
+        const data = await response.json()
+        if (data.vocabulary) {
+          Object.entries(data.vocabulary).forEach(([word, entry]: [string, any]) => {
+            this.vocabulary.set(word.toLowerCase(), {
+              word: word.toLowerCase(),
+              definition: entry.definition,
+              partOfSpeech: entry.partOfSpeech || "unknown",
+              examples: entry.examples || [],
+              source: "learned_api",
+              confidence: entry.confidence || 0.8,
+              phonetic: entry.phonetic || "",
+              synonyms: entry.synonyms || [],
+              antonyms: entry.antonyms || [],
+              frequency: entry.frequency || 1,
+              timestamp: entry.timestamp || Date.now(),
+            })
+          })
+          console.log(`✅ Loaded learned vocabulary`)
         }
       }
     } catch (error) {
-      console.warn("Failed to learn new word:", error)
+      console.warn("Failed to load learned vocabulary:", error)
     }
-    return null
   }
 
-  private extractPersonalInformationOld(input: string): any[] {
-    const info: any[] = []
+  private async loadLearnedMathematics(): Promise<void> {
+    try {
+      const response = await fetch("/learnt_maths.json")
+      if (response.ok) {
+        const data = await response.json()
+        if (data.mathematics) {
+          Object.entries(data.mathematics).forEach(([concept, entry]: [string, any]) => {
+            this.mathematics.set(concept, {
+              concept,
+              type: entry.type || "learned",
+              formula: entry.formula || entry.result || "Mathematical concept",
+              category: entry.category || "learned",
+              source: "learned",
+              confidence: entry.confidence || 0.8,
+              timestamp: entry.timestamp || Date.now(),
+            })
+          })
+          console.log(`✅ Loaded learned mathematics`)
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to load learned mathematics:", error)
+    }
+  }
 
+  private async loadLearnedScience(): Promise<void> {
+    try {
+      const response = await fetch("/learnt_science.json")
+      if (response.ok) {
+        const data = await response.json()
+        if (data.science) {
+          Object.entries(data.science).forEach(([topic, entry]: [string, any]) => {
+            this.facts.set(`science_${topic}`, {
+              topic: `Science: ${topic}`,
+              content: entry.content || entry.extract || "Scientific concept",
+              category: "science",
+              source: "learned",
+              confidence: entry.confidence || 0.8,
+              timestamp: Date.now(),
+            })
+          })
+          console.log(`✅ Loaded learned science`)
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to load learned science:", error)
+    }
+  }
+
+  private async loadLearnedCoding(): Promise<void> {
+    try {
+      const response = await fetch("/learnt_coding.json")
+      if (response.ok) {
+        const data = await response.json()
+        if (data.coding) {
+          Object.entries(data.coding).forEach(([concept, entry]: [string, any]) => {
+            this.coding.set(concept, {
+              concept,
+              language: entry.language || "javascript",
+              description: entry.description || "Coding concept",
+              examples: entry.examples || [],
+              source: "learned",
+              confidence: entry.confidence || 0.8,
+              timestamp: Date.now(),
+            })
+          })
+          console.log(`✅ Loaded learned coding`)
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to load learned coding:", error)
+    }
+  }
+
+  private initializeNeuralEngine(): void {
+    console.log("🧠 Initializing neural engine...")
+
+    // Initialize basic neural weights
+    this.neuralWeights.set(
+      "input_layer",
+      new Array(100).fill(0).map(() => Math.random() - 0.5),
+    )
+    this.neuralWeights.set(
+      "hidden_layer",
+      new Array(50).fill(0).map(() => Math.random() - 0.5),
+    )
+    this.neuralWeights.set(
+      "output_layer",
+      new Array(100).fill(0).map(() => Math.random() - 0.5),
+    )
+
+    console.log("✅ Neural engine initialized")
+  }
+
+  private async initializeNeuralNetworks(): Promise<void> {
+    console.log("🔗 Initializing neural networks...")
+
+    // Load saved neural weights if available
+    try {
+      const stored = localStorage.getItem("cognitive_neural_weights")
+      if (stored) {
+        const weights = JSON.parse(stored)
+        Object.entries(weights).forEach(([layer, values]: [string, any]) => {
+          this.neuralWeights.set(layer, values)
+        })
+        console.log("✅ Loaded saved neural weights")
+      }
+    } catch (error) {
+      console.warn("Could not load neural weights, using random initialization")
+    }
+  }
+
+  private async initializePatternRecognition(): void {
+    console.log("🎯 Initializing pattern recognition...")
+
+    // Initialize conversation patterns
     const patterns = [
-      { pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i, key: "name" },
-      { pattern: /i am (\d+) years old/i, key: "age" },
-      { pattern: /i work as (?:a |an )?(.+)/i, key: "job" },
-      { pattern: /i like (.+)/i, key: "likes" },
-      { pattern: /i live in (.+)/i, key: "location" },
-      { pattern: /i have (\d+) (.+)/i, key: "possessions" },
+      {
+        pattern: /what\s+(?:is|does|means?)\s+(.+)/i,
+        intent: "definition_request",
+        confidence: 0.9,
+      },
+      {
+        pattern: /(\d+)\s*[+\-*/×÷x]\s*(\d+)/i,
+        intent: "math_calculation",
+        confidence: 0.95,
+      },
+      {
+        pattern: /tesla.*(?:pattern|math|number)/i,
+        intent: "tesla_math",
+        confidence: 0.9,
+      },
+      {
+        pattern: /my\s+name\s+is\s+(\w+)/i,
+        intent: "personal_info",
+        confidence: 0.95,
+      },
     ]
 
-    patterns.forEach(({ pattern, key }) => {
-      const match = input.match(pattern)
-      if (match && match[1]) {
-        info.push({
-          key: key === "possessions" ? match[2] : key,
-          value: match[1].trim(),
-          importance: key === "name" ? 0.9 : 0.7,
-        })
+    this.patternMatcher.loadPatterns(patterns)
+    console.log("✅ Pattern recognition initialized")
+  }
+
+  private async loadConversationHistory(): Promise<void> {
+    try {
+      const conversations = await this.storageManager.loadConversations()
+      this.conversationHistory = conversations.filter((msg) => msg && msg.id && msg.role && msg.content)
+      console.log(`✅ Loaded ${this.conversationHistory.length} conversation messages`)
+    } catch (error) {
+      console.warn("Failed to load conversation history:", error)
+      this.conversationHistory = []
+    }
+  }
+
+  // MAIN COGNITIVE PROCESSING METHOD
+  public async processMessage(userMessage: string): Promise<CognitiveResponse> {
+    const startTime = performance.now()
+
+    if (!this.isInitialized) {
+      await this.initialize()
+    }
+
+    console.log("🧠 Processing with cognitive engine:", userMessage)
+
+    // Clear thought stream for new processing
+    this.thoughtStream = []
+
+    // Start cognitive flow
+    this.addThought("🌊 COGNITIVE FLOW INITIATED", "system", 1.0)
+    this.addThought(`📥 Input received: "${userMessage}"`, "input", 0.9)
+
+    try {
+      // Stage 1: Pattern Recognition
+      const patternMatch = this.patternMatcher.matchPattern(userMessage)
+      this.addThought(
+        `🎯 Pattern match: ${patternMatch.intent} (${Math.round(patternMatch.confidence * 100)}%)`,
+        "analysis",
+        patternMatch.confidence,
+      )
+
+      // Stage 2: Iterative Thinking Process
+      const thinkingResult = await this.iterativeThinking(userMessage, patternMatch)
+
+      // Stage 3: Knowledge Activation
+      const knowledgeResult = await this.activateKnowledge(userMessage, thinkingResult)
+
+      // Stage 4: Neural Processing
+      const neuralResult = await this.neuralProcessing(userMessage, knowledgeResult)
+
+      // Stage 5: Response Generation
+      const response = await this.generateResponse(userMessage, { thinkingResult, knowledgeResult, neuralResult })
+
+      // Stage 6: Learning and Storage
+      await this.learnFromInteraction(userMessage, response)
+
+      const processingTime = performance.now() - startTime
+      this.performanceMonitor.logOperation("message_processing", processingTime)
+
+      this.addThought(`✅ Processing complete (${processingTime.toFixed(2)}ms)`, "success", 0.95)
+
+      return {
+        content: response.content,
+        confidence: response.confidence,
+        reasoning: this.thoughtStream.map((t) => `${t.emoji} ${t.content}`),
+        knowledgeUsed: response.knowledgeUsed,
+        mathAnalysis: response.mathAnalysis,
+        processingTime,
+      }
+    } catch (error) {
+      console.error("❌ Cognitive processing error:", error)
+      const processingTime = performance.now() - startTime
+
+      return {
+        content: "I encountered an error processing your message. Please try again.",
+        confidence: 0.3,
+        reasoning: [`❌ Error: ${error}`],
+        knowledgeUsed: [],
+        processingTime,
+      }
+    }
+  }
+
+  private addThought(content: string, type: string, confidence: number, emoji = ""): void {
+    const thought: ThoughtNode = {
+      id: Date.now() + Math.random(),
+      content,
+      type,
+      confidence,
+      timestamp: Date.now(),
+      emoji: emoji || this.getEmoji(type),
+    }
+    this.thoughtStream.push(thought)
+    console.log(`${thought.emoji} ${content}`)
+  }
+
+  private getEmoji(type: string): string {
+    const emojiMap: { [key: string]: string } = {
+      system: "🌊",
+      input: "📥",
+      analysis: "🔍",
+      mathematical: "🧮",
+      reasoning: "💭",
+      verification: "✅",
+      error: "❌",
+      success: "🎉",
+      iteration: "🔄",
+      breakthrough: "💡",
+      knowledge: "📚",
+      neural: "🧠",
+    }
+    return emojiMap[type] || "🤔"
+  }
+
+  private async iterativeThinking(input: string, patternMatch: any): Promise<any> {
+    this.addThought("🔄 Starting iterative thinking process...", "iteration", 0.8)
+
+    let currentThought = input
+    let iteration = 0
+    const maxIterations = 3
+    let bestResult: any = null
+    let confidence = 0
+
+    while (iteration < maxIterations) {
+      iteration++
+      this.addThought(`🔄 Iteration ${iteration}: Processing "${currentThought}"`, "iteration", 0.7)
+
+      // Generate self-prompt
+      const selfPrompt = this.generateSelfPrompt(currentThought, patternMatch.intent, iteration)
+      this.addThought(`❓ Self-prompt: ${selfPrompt}`, "reasoning", 0.8)
+
+      // Process iteration
+      const iterationResult = await this.processIteration(currentThought, selfPrompt, patternMatch.intent)
+
+      if (iterationResult.confidence > confidence) {
+        bestResult = iterationResult
+        confidence = iterationResult.confidence
+        this.addThought(`💡 New best result (confidence: ${Math.round(confidence * 100)}%)`, "breakthrough", confidence)
+      }
+
+      if (confidence > 0.9) {
+        this.addThought("🎯 High confidence achieved - stopping iterations", "success", confidence)
+        break
+      }
+
+      currentThought = iterationResult.nextThought || currentThought
+    }
+
+    this.addThought(`✅ Iterative thinking complete after ${iteration} iterations`, "success", confidence)
+    return bestResult
+  }
+
+  private generateSelfPrompt(thought: string, intent: string, iteration: number): string {
+    const prompts = {
+      math_calculation: [
+        "What numbers and operations are involved?",
+        "What is the correct order of operations?",
+        "Can I break this into simpler steps?",
+      ],
+      definition_request: [
+        "What word needs to be defined?",
+        "Do I know this word already?",
+        "Should I look it up online?",
+      ],
+      tesla_math: [
+        "What number should I analyze?",
+        "How do I calculate the digital root?",
+        "What Tesla pattern applies?",
+      ],
+      personal_info: ["What personal information was shared?", "How should I store this?", "What should I remember?"],
+    }
+
+    const intentPrompts = prompts[intent as keyof typeof prompts] || [
+      "What is being asked?",
+      "How should I respond?",
+      "What knowledge do I need?",
+    ]
+
+    return intentPrompts[Math.min(iteration - 1, intentPrompts.length - 1)]
+  }
+
+  private async processIteration(thought: string, selfPrompt: string, intent: string): Promise<any> {
+    switch (intent) {
+      case "math_calculation":
+        return this.processMathIteration(thought)
+      case "definition_request":
+        return this.processDefinitionIteration(thought)
+      case "tesla_math":
+        return this.processTeslaMathIteration(thought)
+      case "personal_info":
+        return this.processPersonalInfoIteration(thought)
+      default:
+        return this.processGeneralIteration(thought)
+    }
+  }
+
+  private async processMathIteration(thought: string): Promise<any> {
+    this.addThought("🧮 Processing mathematical iteration...", "mathematical", 0.8)
+
+    const mathAnalysis = this.enhancedMath.analyzeMathExpression(thought)
+
+    if (mathAnalysis.isMatch && mathAnalysis.result !== undefined) {
+      // Store the calculation
+      const calcKey = `calc_${Date.now()}`
+      this.mathematics.set(calcKey, {
+        concept: `${mathAnalysis.numbers?.join(` ${mathAnalysis.operation} `)} = ${mathAnalysis.result}`,
+        type: "calculation",
+        formula: `${mathAnalysis.numbers?.join(` ${mathAnalysis.operation} `)} = ${mathAnalysis.result}`,
+        category: "calculations",
+        source: "calculated",
+        confidence: mathAnalysis.confidence,
+        timestamp: Date.now(),
+      })
+
+      return {
+        type: "mathematical",
+        answer: mathAnalysis.result,
+        operation: mathAnalysis.operation,
+        numbers: mathAnalysis.numbers,
+        confidence: mathAnalysis.confidence,
+        nextThought: `Verify: ${mathAnalysis.result}`,
+      }
+    }
+
+    return {
+      type: "mathematical",
+      confidence: 0.3,
+      nextThought: "Unable to process mathematical expression",
+    }
+  }
+
+  private async processDefinitionIteration(thought: string): Promise<any> {
+    this.addThought("📖 Processing definition iteration...", "knowledge", 0.8)
+
+    const wordMatch = thought.match(/(?:what\s+(?:is|does|means?)|define)\s+([a-zA-Z]+)/i)
+    if (!wordMatch) {
+      return { type: "definition", confidence: 0.3, nextThought: "Could not extract word" }
+    }
+
+    const word = wordMatch[1].toLowerCase().trim()
+
+    // Check if we know the word
+    const knownWord = this.vocabulary.get(word)
+    if (knownWord) {
+      return {
+        type: "definition",
+        word: word,
+        definition: knownWord,
+        confidence: knownWord.confidence,
+        nextThought: `Found definition for ${word}`,
+      }
+    }
+
+    // Try to learn the word
+    const learnedWord = await this.learnNewWord(word)
+    if (learnedWord) {
+      return {
+        type: "definition",
+        word: word,
+        definition: learnedWord,
+        confidence: learnedWord.confidence,
+        nextThought: `Learned new word: ${word}`,
+      }
+    }
+
+    return {
+      type: "definition",
+      confidence: 0.4,
+      nextThought: `Could not find definition for ${word}`,
+    }
+  }
+
+  private async processTeslaMathIteration(thought: string): Promise<any> {
+    this.addThought("⚡ Processing Tesla math iteration...", "mathematical", 0.9)
+
+    // Extract number from input
+    const numberMatch = thought.match(/(\d+)/)
+    if (!numberMatch) {
+      return {
+        type: "tesla_math",
+        confidence: 0.3,
+        nextThought: "No number found for Tesla analysis",
+      }
+    }
+
+    const number = Number.parseInt(numberMatch[1])
+    const digitalRoot = this.calculateDigitalRoot(number)
+    const vortexData = this.getVortexAnalysis(number)
+
+    return {
+      type: "tesla_math",
+      number: number,
+      digitalRoot: digitalRoot,
+      vortexData: vortexData,
+      confidence: 0.95,
+      nextThought: `Tesla analysis complete for ${number}`,
+    }
+  }
+
+  private calculateDigitalRoot(num: number): number {
+    while (num >= 10) {
+      num = num
+        .toString()
+        .split("")
+        .reduce((sum, digit) => sum + Number.parseInt(digit), 0)
+    }
+    return num
+  }
+
+  private getVortexAnalysis(number: number): any {
+    const digitalRoot = this.calculateDigitalRoot(number)
+    const teslaNumbers = [3, 6, 9]
+    const vortexCycle = [1, 2, 4, 8, 7, 5]
+
+    const isTeslaNumber = teslaNumbers.includes(digitalRoot)
+    const isVortexNumber = vortexCycle.includes(digitalRoot)
+
+    return {
+      digitalRoot,
+      isTeslaNumber,
+      isVortexNumber,
+      type: isTeslaNumber ? "Tesla Number" : isVortexNumber ? "Vortex Cycle" : "Standard",
+      analysis: isTeslaNumber
+        ? `Tesla Number ${digitalRoot} - ${this.getTeslaNumberMeaning(digitalRoot)}`
+        : isVortexNumber
+          ? `Vortex Cycle position ${vortexCycle.indexOf(digitalRoot) + 1}`
+          : "Standard number outside Tesla/Vortex patterns",
+    }
+  }
+
+  private getTeslaNumberMeaning(number: number): string {
+    const meanings = {
+      3: "Creation and manifestation",
+      6: "Harmony and balance",
+      9: "Completion and universal wisdom",
+    }
+    return meanings[number as keyof typeof meanings] || "Unknown Tesla number"
+  }
+
+  private async processPersonalInfoIteration(thought: string): Promise<any> {
+    this.addThought("👤 Processing personal info iteration...", "knowledge", 0.8)
+
+    const personalInfo = this.extractPersonalInfo(thought)
+
+    // Store personal information
+    Object.entries(personalInfo).forEach(([key, value]) => {
+      this.personalInfo.set(key, {
+        key,
+        value: String(value),
+        timestamp: Date.now(),
+        importance: 0.8,
+        type: "personal_info",
+        source: "conversation",
+      })
+    })
+
+    return {
+      type: "personal_info",
+      personalInfo: personalInfo,
+      confidence: 0.9,
+      nextThought: "Personal information stored",
+    }
+  }
+
+  private extractPersonalInfo(text: string): any {
+    const info: any = {}
+
+    // Extract name
+    const nameMatch = text.match(/my name is (\w+)/i)
+    if (nameMatch) info.name = nameMatch[1]
+
+    // Extract other personal details
+    const patterns = [
+      { pattern: /i have (\d+) (cats?|dogs?|pets?)/i, key: "pets" },
+      { pattern: /i have a wife/i, key: "marital_status", value: "married" },
+      { pattern: /i work as (?:a |an )?(.+)/i, key: "job" },
+      { pattern: /i live in (.+)/i, key: "location" },
+    ]
+
+    patterns.forEach(({ pattern, key, value }) => {
+      const match = text.match(pattern)
+      if (match) {
+        info[key] = value || match[1]
       }
     })
 
     return info
   }
 
-  private searchKnowledgeBase(query: string): any[] {
-    const results: any[] = []
-    const queryLower = query.toLowerCase()
+  private async processGeneralIteration(thought: string): Promise<any> {
+    return {
+      type: "general",
+      confidence: 0.6,
+      nextThought: "Processing general conversation",
+    }
+  }
 
-    for (const [key, entry] of this.knowledgeBase.entries()) {
-      if (key.toLowerCase().includes(queryLower) || JSON.stringify(entry.data).toLowerCase().includes(queryLower)) {
-        results.push({
-          key,
-          content: entry.data,
-          type: entry.type,
-          relevance: this.calculateRelevanceOld(query, key),
-        })
+  private async activateKnowledge(input: string, thinkingResult: any): Promise<any> {
+    this.addThought("📚 Activating knowledge networks...", "knowledge", 0.8)
+
+    const relevantKnowledge: any[] = []
+    const inputWords = input.toLowerCase().split(/\s+/)
+
+    // Search vocabulary
+    for (const [word, entry] of this.vocabulary.entries()) {
+      if (inputWords.includes(word)) {
+        relevantKnowledge.push({ type: "vocabulary", data: entry, relevance: 0.9 })
       }
     }
 
-    return results.sort((a, b) => b.relevance - a.relevance)
+    // Search mathematics
+    for (const [concept, entry] of this.mathematics.entries()) {
+      const relevance = this.calculateRelevance(inputWords, concept + " " + entry.formula)
+      if (relevance > 0.3) {
+        relevantKnowledge.push({ type: "mathematics", data: entry, relevance })
+      }
+    }
+
+    // Search facts
+    for (const [topic, entry] of this.facts.entries()) {
+      const relevance = this.calculateRelevance(inputWords, topic + " " + entry.content)
+      if (relevance > 0.3) {
+        relevantKnowledge.push({ type: "facts", data: entry, relevance })
+      }
+    }
+
+    relevantKnowledge.sort((a, b) => b.relevance - a.relevance)
+
+    this.addThought(`🔗 Activated ${relevantKnowledge.length} knowledge items`, "knowledge", 0.8)
+
+    return {
+      knowledge: relevantKnowledge.slice(0, 5),
+      totalActivated: relevantKnowledge.length,
+    }
   }
 
-  private calculateRelevanceOld(query: string, text: string): number {
-    const queryWords = query.toLowerCase().split(" ")
-    const textWords = text.toLowerCase().split(" ")
+  private calculateRelevance(inputWords: string[], text: string): number {
+    const textWords = text.toLowerCase().split(/\s+/)
     let matches = 0
 
-    queryWords.forEach((queryWord) => {
-      textWords.forEach((textWord) => {
-        if (textWord.includes(queryWord) || queryWord.includes(textWord)) {
-          matches++
-        }
-      })
+    for (const word of inputWords) {
+      if (textWords.includes(word)) {
+        matches++
+      }
+    }
+
+    return matches / Math.max(inputWords.length, textWords.length)
+  }
+
+  private async neuralProcessing(input: string, knowledgeResult: any): Promise<any> {
+    this.addThought("🧠 Neural processing...", "neural", 0.8)
+
+    // Simple neural network forward pass
+    const inputVector = this.textToVector(input)
+    const hiddenLayer = this.neuralWeights.get("hidden_layer") || []
+    const outputLayer = this.neuralWeights.get("output_layer") || []
+
+    // Calculate neural output (simplified)
+    let neuralScore = 0
+    for (let i = 0; i < Math.min(inputVector.length, hiddenLayer.length); i++) {
+      neuralScore += inputVector[i] * hiddenLayer[i]
+    }
+
+    const confidence = Math.max(0.5, Math.min(0.95, (neuralScore + 1) / 2))
+
+    this.addThought(`🧠 Neural confidence: ${Math.round(confidence * 100)}%`, "neural", confidence)
+
+    return {
+      neuralScore,
+      confidence,
+      processing: "neural_network_v1",
+    }
+  }
+
+  private textToVector(text: string): number[] {
+    // Simple text to vector conversion
+    const vector = new Array(50).fill(0)
+    const words = text.toLowerCase().split(/\s+/)
+
+    words.forEach((word, index) => {
+      const hash = this.simpleHash(word) % 50
+      vector[hash] += 1 / words.length
     })
 
-    return matches / queryWords.length
+    return vector
   }
 
-  private createSynthesis(results: PathwayResult[], originalInput: string): any {
+  private simpleHash(str: string): number {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i)
+      hash = (hash << 5) - hash + char
+      hash = hash & hash // Convert to 32-bit integer
+    }
+    return Math.abs(hash)
+  }
+
+  private async generateResponse(input: string, processingResult: any): Promise<any> {
+    this.addThought("💭 Generating response...", "reasoning", 0.9)
+
+    // Use thinking result to generate appropriate response
+    const thinkingResult = processingResult.thinkingResult || {}
+
+    if (thinkingResult.type === "mathematical") {
+      return this.generateMathResponse(thinkingResult)
+    } else if (thinkingResult.type === "definition") {
+      return this.generateDefinitionResponse(thinkingResult)
+    } else if (thinkingResult.type === "tesla_math") {
+      return this.generateTeslaMathResponse(thinkingResult)
+    } else if (thinkingResult.type === "personal_info") {
+      return this.generatePersonalInfoResponse(thinkingResult)
+    } else {
+      return this.generateGeneralResponse(input)
+    }
+  }
+
+  private generateMathResponse(result: any): any {
+    const response = `🧮 **Mathematical Calculation**\n\nThe answer is: **${result.answer}**\n\nOperation: ${result.operation}\nNumbers: ${result.numbers?.join(", ")}\n\n✅ Calculation stored in mathematical knowledge base.`
+
     return {
-      totalPathways: results.length,
-      highestConfidence: Math.max(...results.map((r) => r.confidence)),
-      averageConfidence: results.reduce((sum, r) => sum + r.confidence, 0) / results.length,
-      pathwayBreakdown: results.map((r) => ({ pathway: r.pathway, confidence: r.confidence })),
+      content: response,
+      confidence: result.confidence,
+      knowledgeUsed: ["mathematical_processor", "calculation_storage"],
+      mathAnalysis: result,
     }
   }
 
-  private updateNeuralWeightsOld(input: string, confidence: number): void {
-    // Simple weight update based on confidence
-    const inputType = this.classifyInputType(input)
-    const weights = this.neuralWeightsOld.get(inputType)
+  private generateDefinitionResponse(result: any): any {
+    if (result.definition) {
+      const def = result.definition
+      const response = `📖 **${def.word}** (${def.partOfSpeech})\n\n**Definition:** ${def.definition}\n\n${def.examples?.length > 0 ? `**Example:** "${def.examples[0]}"\n\n` : ""}**Source:** ${def.source === "seed" ? "Built-in knowledge" : "Dictionary API"}\n\n${def.source === "learned_api" ? "✨ I've learned this word and will remember it!" : ""}`
 
-    if (weights) {
-      for (let i = 0; i < weights.length; i++) {
-        weights[i] += this.learningRateOld * (confidence - 0.5)
+      return {
+        content: response,
+        confidence: result.confidence,
+        knowledgeUsed: [def.source, "vocabulary_system"],
       }
-      this.neuralWeightsOld.set(inputType, weights)
+    } else {
+      return {
+        content: `I couldn't find a definition for that word. Could you help me learn it?`,
+        confidence: 0.4,
+        knowledgeUsed: ["vocabulary_search"],
+      }
     }
   }
 
-  private classifyInputType(input: string): string {
-    if (/\d+\s*[+\-×*÷/]\s*\d+/.test(input)) return "mathematical"
-    if (/what\s+(?:is|does|means?)\s+\w+/i.test(input)) return "vocabulary"
-    if (/\b(my|i|me|am|have)\b/i.test(input)) return "personal"
-    if (/what.*time|when|today/i.test(input)) return "temporal"
-    if (/\?/.test(input)) return "knowledge"
-    return "conversational"
+  private generateTeslaMathResponse(result: any): any {
+    const response = `⚡ **Tesla/Vortex Mathematics Analysis**\n\n**Number:** ${result.number}\n**Digital Root:** ${result.digitalRoot}\n**Type:** ${result.vortexData.type}\n\n**Analysis:** ${result.vortexData.analysis}\n\n${result.vortexData.isTeslaNumber ? "🌟 This is one of Tesla's sacred numbers!" : "🔄 This number is part of the infinite vortex cycle."}\n\n*"If you only knew the magnificence of the 3, 6 and 9, then you would have the key to the universe." - Nikola Tesla*`
+
+    return {
+      content: response,
+      confidence: result.confidence,
+      knowledgeUsed: ["tesla_mathematics", "vortex_analysis", "digital_root_calculation"],
+    }
   }
 
-  private saveToStorageOld(): void {
+  private generatePersonalInfoResponse(result: any): any {
+    const info = result.personalInfo
+    let response = "👤 **Personal Information Stored**\n\n"
+
+    Object.entries(info).forEach(([key, value]) => {
+      response += `• **${key}**: ${value}\n`
+    })
+
+    response += "\n✅ I'll remember this information for our future conversations!"
+
+    return {
+      content: response,
+      confidence: result.confidence,
+      knowledgeUsed: ["personal_memory", "information_storage"],
+    }
+  }
+
+  private generateGeneralResponse(input: string): any {
+    const responses = [
+      "I understand what you're saying. How can I help you further?",
+      "That's interesting! What would you like to explore about this topic?",
+      "I'm processing that information. Is there something specific you'd like to know?",
+      "Thanks for sharing that with me. What else would you like to discuss?",
+    ]
+
+    const response = responses[Math.floor(Math.random() * responses.length)]
+
+    return {
+      content: response,
+      confidence: 0.7,
+      knowledgeUsed: ["conversational_ai"],
+    }
+  }
+
+  private async learnFromInteraction(input: string, response: any): Promise<void> {
+    this.addThought("📝 Learning from interaction...", "knowledge", 0.8)
+
+    // Store conversation
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input,
+      timestamp: Date.now(),
+    }
+
+    const aiMsg: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: response.content,
+      timestamp: Date.now(),
+      confidence: response.confidence,
+    }
+
+    this.conversationHistory.push(userMsg, aiMsg)
+
+    // Neural learning (simplified)
+    await this.updateNeuralWeights(input, response)
+
+    // Save data
+    await this.saveAllData()
+
+    this.addThought("✅ Learning complete", "success", 0.9)
+  }
+
+  private async updateNeuralWeights(input: string, response: any): Promise<void> {
+    // Simple learning rule: adjust weights based on confidence
+    const inputVector = this.textToVector(input)
+    const learningSignal = response.confidence > 0.8 ? 1 : -1
+
+    const hiddenWeights = this.neuralWeights.get("hidden_layer") || []
+    for (let i = 0; i < Math.min(inputVector.length, hiddenWeights.length); i++) {
+      hiddenWeights[i] += this.learningRate * learningSignal * inputVector[i]
+    }
+
+    this.neuralWeights.set("hidden_layer", hiddenWeights)
+
+    // Save neural weights
     try {
-      const personalData = Array.from(this.personalMemory.values())
-      localStorage.setItem("cognitive_processor_memory", JSON.stringify(personalData))
-
-      const conversationData = this.conversationHistoryOld.slice(-20) // Keep last 20
-      localStorage.setItem("cognitive_processor_history", JSON.stringify(conversationData))
-
-      console.log("💾 Saved to persistent storage")
+      const weightsData = Object.fromEntries(this.neuralWeights)
+      localStorage.setItem("cognitive_neural_weights", JSON.stringify(weightsData))
     } catch (error) {
-      console.warn("Failed to save to storage:", error)
+      console.warn("Could not save neural weights:", error)
     }
   }
 
-  private updateStatsOld(): void {
-    this.systemStats.vocabularySize = this.vocabularySystem.size
-    this.systemStats.mathFunctions = Array.from(this.knowledgeBase.keys()).filter((k) => k.startsWith("math_")).length
-    this.systemStats.memoryEntries = this.personalMemory.size
+  private async learnNewWord(word: string): Promise<VocabularyEntry | null> {
+    try {
+      this.addThought(`🔍 Looking up word: ${word}`, "knowledge", 0.7)
 
-    if (this.conversationHistoryOld.length > 0) {
-      this.systemStats.avgConfidence =
-        this.conversationHistoryOld.slice(-10).reduce((sum, conv) => sum + conv.confidence, 0) /
-        Math.min(10, this.conversationHistoryOld.length)
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data && data[0]) {
+          const entry = data[0]
+          const meaning = entry.meanings?.[0]
+          const definition = meaning?.definitions?.[0]
+
+          const newWord: VocabularyEntry = {
+            word: word.toLowerCase(),
+            definition: definition?.definition || "No definition available",
+            partOfSpeech: meaning?.partOfSpeech || "unknown",
+            examples: definition?.example ? [definition.example] : [],
+            source: "learned_api",
+            confidence: 0.8,
+            phonetic: entry.phonetic || "",
+            synonyms: definition?.synonyms || [],
+            antonyms: definition?.antonyms || [],
+            frequency: 1,
+            timestamp: Date.now(),
+          }
+
+          this.vocabulary.set(word.toLowerCase(), newWord)
+          this.addThought(`✅ Learned new word: ${word}`, "success", 0.9)
+
+          return newWord
+        }
+      }
+    } catch (error) {
+      this.addThought(`❌ Failed to lookup word: ${word}`, "error", 0.3)
     }
 
-    this.systemStats.learningProgress = Math.min(100, (this.systemStats.totalMessages / 100) * 100)
+    return null
+  }
+
+  private async saveAllData(): Promise<void> {
+    try {
+      // Save conversation history
+      await this.storageManager.saveConversations(this.conversationHistory)
+
+      // Save personal info
+      const personalInfoArray = Array.from(this.personalInfo.entries())
+      localStorage.setItem("cognitive_personal_info", JSON.stringify(personalInfoArray))
+
+      // Keep conversation history manageable
+      if (this.conversationHistory.length > 100) {
+        this.conversationHistory = this.conversationHistory.slice(-80)
+      }
+    } catch (error) {
+      console.warn("Failed to save data:", error)
+    }
   }
 
   // PUBLIC API METHODS
-  public getStatsOld(): any {
-    return {
-      ...this.systemStats,
-      breakdown: {
-        seedVocab: Array.from(this.vocabularySystem.values()).filter((v) => v.source === "seed").length,
-        learnedVocab: Array.from(this.vocabularySystem.values()).filter((v) => v.source === "learned").length,
-      },
-    }
-  }
-
-  public getConversationHistoryOld(): any[] {
-    return this.conversationHistoryOld.slice(-20)
-  }
-
-  public exportDataOld(): any {
-    return {
-      vocabulary: Array.from(this.vocabularySystem.entries()),
-      personalMemory: Array.from(this.personalMemory.entries()),
-      knowledgeBase: Array.from(this.knowledgeBase.entries()),
-      conversationHistory: this.conversationHistoryOld,
-      neuralWeights: Array.from(this.neuralWeightsOld.entries()),
-      stats: this.systemStats,
-      exportTimestamp: Date.now(),
-    }
-  }
-
-  public async importDataOld(data: any): Promise<void> {
-    try {
-      if (data.vocabulary) {
-        this.vocabularySystem = new Map(data.vocabulary)
-      }
-      if (data.personalMemory) {
-        this.personalMemory = new Map(data.personalMemory)
-      }
-      if (data.knowledgeBase) {
-        this.knowledgeBase = new Map(data.knowledgeBase)
-      }
-      if (data.conversationHistory) {
-        this.conversationHistoryOld = data.conversationHistory
-      }
-      if (data.neuralWeights) {
-        this.neuralWeightsOld = new Map(data.neuralWeights)
-      }
-
-      this.updateStatsOld()
-      this.saveToStorageOld()
-      console.log("✅ Data imported successfully")
-    } catch (error) {
-      console.error("❌ Failed to import data:", error)
-      throw error
-    }
-  }
-
-  private savePersonalMemory(): void {
-    try {
-      const personalData = Array.from(this.personalInfo.values())
-      localStorage.setItem("cognitive_personal_memory", JSON.stringify(personalData))
-    } catch (error) {
-      console.warn("Failed to save personal memory:", error)
-    }
-  }
-
   public getStats(): any {
     const seedVocab = Array.from(this.vocabulary.values()).filter((v) => v.source === "seed").length
-    const learnedVocab = Array.from(this.vocabulary.values()).filter((v) => v.source === "learned").length
+    const learnedVocab = Array.from(this.vocabulary.values()).filter((v) => v.source === "learned_api").length
+    const seedMath = Array.from(this.mathematics.values()).filter((m) => m.source === "seed").length
+    const calculatedMath = Array.from(this.mathematics.values()).filter((m) => m.source === "calculated").length
+
+    const assistantMessages = this.conversationHistory.filter((m) => m.role === "assistant" && m.confidence)
+    const avgConfidence =
+      assistantMessages.length > 0
+        ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
+        : 0
 
     return {
+      totalMessages: this.conversationHistory.length,
       vocabularySize: this.vocabulary.size,
       mathFunctions: this.mathematics.size,
       memoryEntries: this.personalInfo.size,
-      totalMessages: this.processingStats.totalProcessed,
-      avgConfidence: this.processingStats.avgConfidence,
-      responseTime: this.processingStats.responseTime,
-      learningProgress: this.processingStats.learningProgress,
-      knowledgeGraphSize: this.knowledgeGraph.size,
-      neuralConnections: this.neuralWeights.size,
-      workingMemorySize: this.workingMemory.length,
-      longTermMemorySize: this.longTermMemory.size,
+      factsData: this.facts,
+      totalLearned: learnedVocab + calculatedMath,
+      systemStatus: this.systemStatus,
+      avgConfidence: Math.round(avgConfidence * 100) / 100,
+
+      // Detailed breakdown
       breakdown: {
         seedVocab,
         learnedVocab,
+        seedMath,
+        calculatedMath,
+        seedFacts: Array.from(this.facts.values()).filter((f) => f.source === "seed").length,
+        learnedFacts: Array.from(this.facts.values()).filter((f) => f.source === "learned").length,
+        seedCoding: Array.from(this.coding.values()).filter((c) => c.source === "seed").length,
+        learnedCoding: Array.from(this.coding.values()).filter((c) => c.source === "learned").length,
       },
-      pathwayActivations: Object.fromEntries(this.processingStats.pathwayActivations),
+
+      // Data access for admin
+      vocabularyData: this.vocabulary,
+      mathFunctionsData: this.mathematics,
+      personalInfoData: this.personalInfo,
+      codingData: this.coding,
+
+      // Performance stats
+      performanceStats: this.performanceMonitor.getStats(),
+    }
+  }
+
+  public getConversationHistory(): ChatMessage[] {
+    return [...this.conversationHistory]
+  }
+
+  public getSystemDebugInfo(): any {
+    return {
+      isInitialized: this.isInitialized,
+      systemStatus: this.systemStatus,
+      systemIdentity: this.systemIdentity,
+      vocabularySize: this.vocabulary.size,
+      mathSize: this.mathematics.size,
+      factsSize: this.facts.size,
+      codingSize: this.coding.size,
+      conversationCount: this.conversationHistory.length,
+      neuralWeightsLoaded: this.neuralWeights.size > 0,
+      thoughtStreamSize: this.thoughtStream.length,
+      performanceMetrics: this.performanceMonitor.getStats(),
     }
   }
 
@@ -1798,77 +1242,185 @@ export class CognitiveProcessor {
     return {
       vocabulary: Array.from(this.vocabulary.entries()),
       mathematics: Array.from(this.mathematics.entries()),
+      facts: Array.from(this.facts.entries()),
       personalInfo: Array.from(this.personalInfo.entries()),
-      knowledgeGraph: Array.from(this.knowledgeGraph.entries()),
+      coding: Array.from(this.coding.entries()),
+      conversations: this.conversationHistory,
       neuralWeights: Array.from(this.neuralWeights.entries()),
-      conversationHistory: this.conversationHistory,
-      stats: this.processingStats,
+      systemIdentity: this.systemIdentity,
       exportTimestamp: Date.now(),
-      version: "Advanced Cognitive Processor v2.0",
+      version: "3.0.0",
     }
   }
 
-  public getDebugInfo(): any {
+  // Compatibility methods for existing UI
+  public async sendMessage(userMessage: string): Promise<string> {
+    const response = await this.processMessage(userMessage)
+    return response.content
+  }
+}
+
+// SUPPORTING CLASSES
+
+class PatternMatcher {
+  private patterns: PatternRule[] = []
+
+  public loadPatterns(patterns: PatternRule[]): void {
+    this.patterns = patterns
+  }
+
+  public matchPattern(input: string): PatternMatch {
+    for (const pattern of this.patterns) {
+      const match = input.match(pattern.pattern)
+      if (match) {
+        return {
+          intent: pattern.intent,
+          confidence: pattern.confidence,
+          match: match,
+          pattern: pattern.pattern,
+        }
+      }
+    }
+
     return {
-      isInitialized: this.isInitialized,
-      pathways: Object.fromEntries(this.pathways),
-      contextWindow: this.contextWindow,
-      learningRate: this.learningRate,
-      stats: this.processingStats,
+      intent: "general",
+      confidence: 0.5,
+      match: null,
+      pattern: null,
+    }
+  }
+}
+
+class PerformanceMonitor {
+  private operations: PerformanceLog[] = []
+
+  public logOperation(operation: string, duration: number): void {
+    this.operations.push({
+      operation,
+      duration,
+      timestamp: Date.now(),
+    })
+
+    // Keep only recent operations
+    if (this.operations.length > 100) {
+      this.operations = this.operations.slice(-50)
+    }
+  }
+
+  public getStats(): any {
+    const avgResponseTime =
+      this.operations.length > 0
+        ? this.operations.reduce((sum, op) => sum + op.duration, 0) / this.operations.length
+        : 0
+
+    return {
+      totalOperations: this.operations.length,
+      avgResponseTime: Math.round(avgResponseTime * 100) / 100,
+      recentOperations: this.operations.slice(-10),
     }
   }
 }
 
 // TYPE DEFINITIONS
-interface InputAnalysis {
+interface VocabularyEntry {
+  word: string
+  definition: string
+  partOfSpeech: string
+  examples: string[]
+  source: string
+  confidence: number
+  phonetic: string
+  synonyms: string[]
+  antonyms: string[]
+  frequency: number
+  timestamp: number
+}
+
+interface MathEntry {
+  concept: string
+  type: string
+  formula: string
+  category: string
+  source: string
+  confidence: number
+  timestamp: number
+}
+
+interface PersonalInfoEntry {
+  key: string
+  value: string
+  timestamp: number
+  importance: number
+  type: string
+  source: string
+}
+
+interface FactEntry {
+  topic: string
+  content: string
+  category: string
+  source: string
+  confidence: number
+  timestamp: number
+}
+
+interface CodingEntry {
+  concept: string
+  language: string
+  description: string
+  examples: string[]
+  source: string
+  confidence: number
+  timestamp: number
+}
+
+interface ChatMessage {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: number
+  confidence?: number
+}
+
+interface ThoughtNode {
+  id: number
+  content: string
   type: string
   confidence: number
-  complexity: number
-  features: {
-    hasNumbers: boolean
-    hasMathOperators: boolean
-    hasQuestions: boolean
-    hasPersonalInfo: boolean
-    hasTimeReference: boolean
-    hasVocabularyRequest: boolean
-    wordCount: number
-    sentiment: string
-  }
-  keywords: string[]
+  timestamp: number
+  emoji: string
 }
 
-interface PathwayResult {
-  pathway: string
+interface PatternRule {
+  pattern: RegExp
+  intent: string
   confidence: number
-  data: any
 }
 
-interface CognitiveResults {
-  pathways: string[]
-  results: PathwayResult[]
-  primaryResult: PathwayResult
-}
-
-interface KnowledgeSynthesis {
-  primaryPathway: string
+interface PatternMatch {
+  intent: string
   confidence: number
-  data: any
-  userName?: string
-  allResults: PathwayResult[]
-  synthesis: any
+  match: RegExpMatchArray | null
+  pattern: RegExp | null
 }
 
-interface ResponseGeneration {
-  content: string
-  confidence: number
-  reasoning: string[]
-  learningExtracted: string[]
+interface PerformanceLog {
+  operation: string
+  duration: number
+  timestamp: number
+}
+
+interface SystemIdentity {
+  name: string
+  version: string
+  purpose: string
 }
 
 interface CognitiveResponse {
   content: string
   confidence: number
   reasoning: string[]
-  pathways: string[]
-  learningExtracted: string[]
+  knowledgeUsed: string[]
+  mathAnalysis?: any
+  processingTime: number
 }

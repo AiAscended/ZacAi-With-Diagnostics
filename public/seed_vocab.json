@@ -1,2367 +1,2663 @@
 {
   "a": {
-    "definition": "The first letter of the English alphabet",
-    "part_of_speech": "noun",
-    "examples": ["A is for apple"]
-  },
-  "ability": {
-    "definition": "The capacity or skill to do something",
-    "part_of_speech": "noun",
-    "examples": ["She has the ability to solve complex problems"]
-  },
-  "able": {
-    "definition": "Having the power, skill, or means to do something",
-    "part_of_speech": "adjective",
-    "examples": ["He is able to speak three languages"]
-  },
-  "about": {
-    "definition": "On the subject of; concerning",
-    "part_of_speech": "preposition",
-    "examples": ["Tell me about your day"]
-  },
-  "above": {
-    "definition": "In or to a higher place",
-    "part_of_speech": "preposition",
-    "examples": ["The bird flew above the trees"]
-  },
-  "accept": {
-    "definition": "To receive willingly",
-    "part_of_speech": "verb",
-    "examples": ["I accept your apology"]
-  },
-  "according": {
-    "definition": "As stated by or in",
-    "part_of_speech": "preposition",
-    "examples": ["According to the weather report, it will rain"]
-  },
-  "account": {
-    "definition": "A record of financial transactions",
-    "part_of_speech": "noun",
-    "examples": ["Check your bank account balance"]
-  },
-  "across": {
-    "definition": "From one side to the other",
-    "part_of_speech": "preposition",
-    "examples": ["Walk across the street carefully"]
-  },
-  "action": {
-    "definition": "The process of doing something",
-    "part_of_speech": "noun",
-    "examples": ["Take action to solve the problem"]
-  },
-  "activity": {
-    "definition": "A thing that a person or group does",
-    "part_of_speech": "noun",
-    "examples": ["Swimming is a healthy activity"]
-  },
-  "actually": {
-    "definition": "In fact; really",
-    "part_of_speech": "adverb",
-    "examples": ["I actually enjoyed the movie"]
-  },
-  "add": {
-    "definition": "To put together with something else",
-    "part_of_speech": "verb",
-    "examples": ["Add sugar to the coffee"]
-  },
-  "address": {
-    "definition": "The location where someone lives or works",
-    "part_of_speech": "noun",
-    "examples": ["What is your home address?"]
-  },
-  "administration": {
-    "definition": "The management of a business or organization",
-    "part_of_speech": "noun",
-    "examples": ["The school administration made new rules"]
-  },
-  "admit": {
-    "definition": "To confess or acknowledge",
-    "part_of_speech": "verb",
-    "examples": ["He had to admit his mistake"]
-  },
-  "adult": {
-    "definition": "A person who is fully grown",
-    "part_of_speech": "noun",
-    "examples": ["Children must be accompanied by an adult"]
-  },
-  "affect": {
-    "definition": "To make a change to something",
-    "part_of_speech": "verb",
-    "examples": ["The rain will affect our picnic plans"]
-  },
-  "after": {
-    "definition": "Following in time or place",
-    "part_of_speech": "preposition",
-    "examples": ["We'll eat after the meeting"]
-  },
-  "again": {
-    "definition": "Once more; another time",
-    "part_of_speech": "adverb",
-    "examples": ["Please say that again"]
-  },
-  "against": {
-    "definition": "In opposition to",
-    "part_of_speech": "preposition",
-    "examples": ["He voted against the proposal"]
-  },
-  "age": {
-    "definition": "The length of time someone has lived",
-    "part_of_speech": "noun",
-    "examples": ["What is your age?"]
-  },
-  "agency": {
-    "definition": "An organization that provides services",
-    "part_of_speech": "noun",
-    "examples": ["The travel agency booked our flight"]
-  },
-  "agent": {
-    "definition": "A person who acts on behalf of another",
-    "part_of_speech": "noun",
-    "examples": ["The real estate agent showed us the house"]
-  },
-  "ago": {
-    "definition": "In the past",
-    "part_of_speech": "adverb",
-    "examples": ["I met him two years ago"]
-  },
-  "agree": {
-    "definition": "To have the same opinion",
-    "part_of_speech": "verb",
-    "examples": ["I agree with your decision"]
-  },
-  "agreement": {
-    "definition": "A mutual understanding between parties",
-    "part_of_speech": "noun",
-    "examples": ["They signed the agreement yesterday"]
-  },
-  "ahead": {
-    "definition": "In front; in advance",
-    "part_of_speech": "adverb",
-    "examples": ["Look ahead before crossing"]
-  },
-  "air": {
-    "definition": "The mixture of gases we breathe",
-    "part_of_speech": "noun",
-    "examples": ["Fresh air is good for health"]
-  },
-  "all": {
-    "definition": "The whole quantity or extent",
-    "part_of_speech": "determiner",
-    "examples": ["All students must attend"]
-  },
-  "allow": {
-    "definition": "To permit or let happen",
-    "part_of_speech": "verb",
-    "examples": ["Please allow me to help"]
-  },
-  "almost": {
-    "definition": "Nearly; not quite",
-    "part_of_speech": "adverb",
-    "examples": ["I'm almost finished with my work"]
-  },
-  "alone": {
-    "definition": "By oneself; without others",
-    "part_of_speech": "adjective",
-    "examples": ["She prefers to work alone"]
-  },
-  "along": {
-    "definition": "In company with; together with",
-    "part_of_speech": "preposition",
-    "examples": ["Come along with us"]
-  },
-  "already": {
-    "definition": "Before now; by this time",
-    "part_of_speech": "adverb",
-    "examples": ["I have already eaten lunch"]
-  },
-  "also": {
-    "definition": "In addition; too",
-    "part_of_speech": "adverb",
-    "examples": ["She is also coming to the party"]
-  },
-  "although": {
-    "definition": "Despite the fact that",
-    "part_of_speech": "conjunction",
-    "examples": ["Although it's raining, we'll go out"]
-  },
-  "always": {
-    "definition": "At all times; forever",
-    "part_of_speech": "adverb",
-    "examples": ["She always arrives on time"]
-  },
-  "american": {
-    "definition": "Relating to America or its people",
-    "part_of_speech": "adjective",
-    "examples": ["American culture is diverse"]
-  },
-  "among": {
-    "definition": "In the middle of; surrounded by",
-    "part_of_speech": "preposition",
-    "examples": ["She was among friends"]
-  },
-  "amount": {
-    "definition": "A quantity of something",
-    "part_of_speech": "noun",
-    "examples": ["A large amount of money"]
-  },
-  "analysis": {
-    "definition": "Detailed examination of something",
-    "part_of_speech": "noun",
-    "examples": ["The analysis revealed interesting patterns"]
-  },
-  "and": {
-    "definition": "Used to connect words or phrases",
-    "part_of_speech": "conjunction",
-    "examples": ["Bread and butter"]
-  },
-  "animal": {
-    "definition": "A living creature that can move",
-    "part_of_speech": "noun",
-    "examples": ["The dog is a friendly animal"]
-  },
-  "another": {
-    "definition": "One more; a different one",
-    "part_of_speech": "determiner",
-    "examples": ["Would you like another cup of tea?"]
-  },
-  "answer": {
-    "definition": "A response to a question",
-    "part_of_speech": "noun",
-    "examples": ["What is the answer to this problem?"]
-  },
-  "any": {
-    "definition": "One or some, regardless of which",
-    "part_of_speech": "determiner",
-    "examples": ["Do you have any questions?"]
-  },
-  "anyone": {
-    "definition": "Any person",
-    "part_of_speech": "pronoun",
-    "examples": ["Anyone can learn to cook"]
-  },
-  "anything": {
-    "definition": "Any thing",
-    "part_of_speech": "pronoun",
-    "examples": ["Is there anything I can do to help?"]
-  },
-  "appear": {
-    "definition": "To come into sight; to seem",
-    "part_of_speech": "verb",
-    "examples": ["Stars appear at night"]
-  },
-  "apply": {
-    "definition": "To put to use; to request formally",
-    "part_of_speech": "verb",
-    "examples": ["Apply for the job online"]
-  },
-  "approach": {
-    "definition": "To come near or closer to",
-    "part_of_speech": "verb",
-    "examples": ["Approach the problem systematically"]
-  },
-  "area": {
-    "definition": "A region or space",
-    "part_of_speech": "noun",
-    "examples": ["This area is known for its restaurants"]
-  },
-  "argue": {
-    "definition": "To give reasons for or against",
-    "part_of_speech": "verb",
-    "examples": ["They argue about politics"]
-  },
-  "arm": {
-    "definition": "The upper limb of the human body",
-    "part_of_speech": "noun",
-    "examples": ["He broke his arm playing football"]
-  },
-  "around": {
-    "definition": "On all sides; approximately",
-    "part_of_speech": "preposition",
-    "examples": ["Walk around the block"]
-  },
-  "arrive": {
-    "definition": "To reach a destination",
-    "part_of_speech": "verb",
-    "examples": ["The train will arrive at 3 PM"]
-  },
-  "art": {
-    "definition": "Creative expression through visual works",
-    "part_of_speech": "noun",
-    "examples": ["She studies art at university"]
-  },
-  "article": {
-    "definition": "A piece of writing; a particular item",
-    "part_of_speech": "noun",
-    "examples": ["I read an interesting article today"]
-  },
-  "artist": {
-    "definition": "A person who creates art",
-    "part_of_speech": "noun",
-    "examples": ["The artist painted a beautiful landscape"]
-  },
-  "as": {
-    "definition": "To the same degree; while",
-    "part_of_speech": "adverb",
-    "examples": ["As tall as a tree"]
-  },
-  "ask": {
-    "definition": "To request information or help",
-    "part_of_speech": "verb",
-    "examples": ["Ask me if you need help"]
-  },
-  "assume": {
-    "definition": "To suppose without proof",
-    "part_of_speech": "verb",
-    "examples": ["Don't assume you know the answer"]
-  },
-  "at": {
-    "definition": "Expressing location or time",
-    "part_of_speech": "preposition",
-    "examples": ["Meet me at the park at 5 PM"]
-  },
-  "attack": {
-    "definition": "To assault or criticize forcefully",
-    "part_of_speech": "verb",
-    "examples": ["The dog might attack if threatened"]
-  },
-  "attempt": {
-    "definition": "To try to do something",
-    "part_of_speech": "verb",
-    "examples": ["She will attempt to climb the mountain"]
-  },
-  "attend": {
-    "definition": "To be present at",
-    "part_of_speech": "verb",
-    "examples": ["Please attend the meeting tomorrow"]
-  },
-  "attention": {
-    "definition": "The act of focusing on something",
-    "part_of_speech": "noun",
-    "examples": ["Pay attention to the instructions"]
-  },
-  "attorney": {
-    "definition": "A lawyer",
-    "part_of_speech": "noun",
-    "examples": ["The attorney represented his client well"]
-  },
-  "attract": {
-    "definition": "To draw toward oneself",
-    "part_of_speech": "verb",
-    "examples": ["Flowers attract bees"]
-  },
-  "audience": {
-    "definition": "A group of people watching or listening",
-    "part_of_speech": "noun",
-    "examples": ["The audience applauded loudly"]
-  },
-  "author": {
-    "definition": "A person who writes books",
-    "part_of_speech": "noun",
-    "examples": ["The author signed copies of her book"]
-  },
-  "authority": {
-    "definition": "The power to give orders",
-    "part_of_speech": "noun",
-    "examples": ["The teacher has authority in the classroom"]
-  },
-  "available": {
-    "definition": "Able to be used or obtained",
-    "part_of_speech": "adjective",
-    "examples": ["Is this seat available?"]
-  },
-  "avoid": {
-    "definition": "To keep away from",
-    "part_of_speech": "verb",
-    "examples": ["Avoid walking alone at night"]
-  },
-  "away": {
-    "definition": "To or at a distance",
-    "part_of_speech": "adverb",
-    "examples": ["Put your toys away"]
-  },
-  "baby": {
-    "definition": "A very young child",
-    "part_of_speech": "noun",
-    "examples": ["The baby is sleeping peacefully"]
-  },
-  "back": {
-    "definition": "The rear part; to return",
-    "part_of_speech": "noun",
-    "examples": ["I'll be back in an hour"]
-  },
-  "bad": {
-    "definition": "Of poor quality; unpleasant",
-    "part_of_speech": "adjective",
-    "examples": ["That was a bad movie"]
-  },
-  "bag": {
-    "definition": "A container for carrying things",
-    "part_of_speech": "noun",
-    "examples": ["Pack your clothes in the bag"]
-  },
-  "ball": {
-    "definition": "A round object used in games",
-    "part_of_speech": "noun",
-    "examples": ["Throw the ball to me"]
-  },
-  "bank": {
-    "definition": "A financial institution",
-    "part_of_speech": "noun",
-    "examples": ["I need to go to the bank"]
-  },
-  "bar": {
-    "definition": "A place that serves alcoholic drinks",
-    "part_of_speech": "noun",
-    "examples": ["They met at the local bar"]
-  },
-  "base": {
-    "definition": "The bottom or foundation",
-    "part_of_speech": "noun",
-    "examples": ["The base of the mountain"]
-  },
-  "be": {
-    "definition": "To exist; to have the quality of",
-    "part_of_speech": "verb",
-    "examples": ["To be or not to be"]
-  },
-  "beat": {
-    "definition": "To strike repeatedly; to defeat",
-    "part_of_speech": "verb",
-    "examples": ["Beat the eggs until fluffy"]
-  },
-  "beautiful": {
-    "definition": "Pleasing to look at",
-    "part_of_speech": "adjective",
-    "examples": ["What a beautiful sunset"]
-  },
-  "because": {
-    "definition": "For the reason that",
-    "part_of_speech": "conjunction",
-    "examples": ["I'm happy because it's sunny"]
-  },
-  "become": {
-    "definition": "To grow to be; to come to be",
-    "part_of_speech": "verb",
-    "examples": ["She wants to become a doctor"]
-  },
-  "bed": {
-    "definition": "A piece of furniture for sleeping",
-    "part_of_speech": "noun",
-    "examples": ["Time to go to bed"]
-  },
-  "before": {
-    "definition": "Earlier than; in front of",
-    "part_of_speech": "preposition",
-    "examples": ["Wash your hands before eating"]
-  },
-  "begin": {
-    "definition": "To start",
-    "part_of_speech": "verb",
-    "examples": ["Let's begin the meeting"]
-  },
-  "behavior": {
-    "definition": "The way someone acts",
-    "part_of_speech": "noun",
-    "examples": ["His behavior was very polite"]
-  },
-  "behind": {
-    "definition": "At the back of",
-    "part_of_speech": "preposition",
-    "examples": ["Hide behind the tree"]
-  },
-  "believe": {
-    "definition": "To think something is true",
-    "part_of_speech": "verb",
-    "examples": ["I believe in you"]
-  },
-  "benefit": {
-    "definition": "An advantage or profit",
-    "part_of_speech": "noun",
-    "examples": ["Exercise has many health benefits"]
-  },
-  "best": {
-    "definition": "Of the highest quality",
-    "part_of_speech": "adjective",
-    "examples": ["This is the best pizza in town"]
-  },
-  "better": {
-    "definition": "More good; improved",
-    "part_of_speech": "adjective",
-    "examples": ["I feel better today"]
-  },
-  "between": {
-    "definition": "In the space separating two things",
-    "part_of_speech": "preposition",
-    "examples": ["Sit between your parents"]
-  },
-  "beyond": {
-    "definition": "On the far side of; more than",
-    "part_of_speech": "preposition",
-    "examples": ["Look beyond the horizon"]
-  },
-  "big": {
-    "definition": "Large in size",
-    "part_of_speech": "adjective",
-    "examples": ["That's a big house"]
-  },
-  "bill": {
-    "definition": "A statement of charges; paper money",
-    "part_of_speech": "noun",
-    "examples": ["Pay the electricity bill"]
-  },
-  "billion": {
-    "definition": "One thousand million",
-    "part_of_speech": "number",
-    "examples": ["The company is worth billions"]
-  },
-  "bit": {
-    "definition": "A small piece or amount",
-    "part_of_speech": "noun",
-    "examples": ["Just a bit of sugar, please"]
-  },
-  "black": {
-    "definition": "The darkest color",
-    "part_of_speech": "adjective",
-    "examples": ["She wore a black dress"]
-  },
-  "blood": {
-    "definition": "The red liquid in the body",
-    "part_of_speech": "noun",
-    "examples": ["Blood carries oxygen to organs"]
-  },
-  "blue": {
-    "definition": "The color of the sky",
-    "part_of_speech": "adjective",
-    "examples": ["The ocean looks blue today"]
-  },
-  "board": {
-    "definition": "A flat piece of wood; a group of directors",
-    "part_of_speech": "noun",
-    "examples": ["Write on the board"]
-  },
-  "body": {
-    "definition": "The physical structure of a person",
-    "part_of_speech": "noun",
-    "examples": ["Exercise keeps your body healthy"]
-  },
-  "book": {
-    "definition": "A written work with pages",
-    "part_of_speech": "noun",
-    "examples": ["I'm reading a good book"]
-  },
-  "born": {
-    "definition": "Brought into existence",
-    "part_of_speech": "verb",
-    "examples": ["She was born in 1990"]
-  },
-  "both": {
-    "definition": "The two; one and the other",
-    "part_of_speech": "determiner",
-    "examples": ["Both answers are correct"]
-  },
-  "box": {
-    "definition": "A container with sides and a lid",
-    "part_of_speech": "noun",
-    "examples": ["Put the toys in the box"]
-  },
-  "boy": {
-    "definition": "A male child",
-    "part_of_speech": "noun",
-    "examples": ["The boy is playing soccer"]
-  },
-  "break": {
-    "definition": "To separate into pieces; a pause",
-    "part_of_speech": "verb",
-    "examples": ["Don't break the glass"]
-  },
-  "bring": {
-    "definition": "To carry or take along",
-    "part_of_speech": "verb",
-    "examples": ["Bring your umbrella"]
-  },
-  "brother": {
-    "definition": "A male sibling",
-    "part_of_speech": "noun",
-    "examples": ["My brother is older than me"]
-  },
-  "budget": {
-    "definition": "A plan for spending money",
-    "part_of_speech": "noun",
-    "examples": ["We need to stick to our budget"]
-  },
-  "build": {
-    "definition": "To construct or create",
-    "part_of_speech": "verb",
-    "examples": ["They will build a new school"]
-  },
-  "building": {
-    "definition": "A structure with walls and a roof",
-    "part_of_speech": "noun",
-    "examples": ["The office building is very tall"]
-  },
-  "business": {
-    "definition": "Commercial activity; a company",
-    "part_of_speech": "noun",
-    "examples": ["She owns a small business"]
-  },
-  "but": {
-    "definition": "However; except",
-    "part_of_speech": "conjunction",
-    "examples": ["I like coffee but not tea"]
-  },
-  "buy": {
-    "definition": "To purchase",
-    "part_of_speech": "verb",
-    "examples": ["I need to buy groceries"]
-  },
-  "by": {
-    "definition": "Near; through the action of",
-    "part_of_speech": "preposition",
-    "examples": ["Stand by the door"]
-  },
-  "call": {
-    "definition": "To telephone; to shout",
-    "part_of_speech": "verb",
-    "examples": ["Call me tomorrow"]
-  },
-  "camera": {
-    "definition": "A device for taking photographs",
-    "part_of_speech": "noun",
-    "examples": ["She took photos with her camera"]
-  },
-  "campaign": {
-    "definition": "An organized effort to achieve a goal",
-    "part_of_speech": "noun",
-    "examples": ["The election campaign was intense"]
-  },
-  "can": {
-    "definition": "To be able to; a metal container",
-    "part_of_speech": "verb",
-    "examples": ["I can help you with that"]
-  },
-  "cancer": {
-    "definition": "A serious disease",
-    "part_of_speech": "noun",
-    "examples": ["Early detection of cancer saves lives"]
-  },
-  "candidate": {
-    "definition": "A person running for office",
-    "part_of_speech": "noun",
-    "examples": ["The candidate gave a speech"]
-  },
-  "capital": {
-    "definition": "The main city of a country",
-    "part_of_speech": "noun",
-    "examples": ["Paris is the capital of France"]
-  },
-  "car": {
-    "definition": "A motor vehicle",
-    "part_of_speech": "noun",
-    "examples": ["My car needs gas"]
-  },
-  "card": {
-    "definition": "A piece of stiff paper",
-    "part_of_speech": "noun",
-    "examples": ["Send her a birthday card"]
-  },
-  "care": {
-    "definition": "To feel concern or interest",
-    "part_of_speech": "verb",
-    "examples": ["I care about your feelings"]
-  },
-  "career": {
-    "definition": "A person's profession or occupation",
-    "part_of_speech": "noun",
-    "examples": ["She has a successful career in law"]
-  },
-  "carry": {
-    "definition": "To transport or bear",
-    "part_of_speech": "verb",
-    "examples": ["Carry the bags upstairs"]
-  },
-  "case": {
-    "definition": "An instance or example",
-    "part_of_speech": "noun",
-    "examples": ["In this case, we should wait"]
-  },
-  "catch": {
-    "definition": "To capture or grab",
-    "part_of_speech": "verb",
-    "examples": ["Catch the ball"]
-  },
-  "cause": {
-    "definition": "To make happen; a reason",
-    "part_of_speech": "verb",
-    "examples": ["What caused the accident?"]
-  },
-  "cell": {
-    "definition": "The basic unit of life",
-    "part_of_speech": "noun",
-    "examples": ["Plant cells have walls"]
-  },
-  "center": {
-    "definition": "The middle point",
-    "part_of_speech": "noun",
-    "examples": ["Meet me at the town center"]
-  },
-  "central": {
-    "definition": "In the center; most important",
-    "part_of_speech": "adjective",
-    "examples": ["The central issue needs attention"]
-  },
-  "century": {
-    "definition": "A period of 100 years",
-    "part_of_speech": "noun",
-    "examples": ["We live in the 21st century"]
-  },
-  "certain": {
-    "definition": "Sure; particular",
-    "part_of_speech": "adjective",
-    "examples": ["I'm certain about my decision"]
-  },
-  "certainly": {
-    "definition": "Without doubt",
-    "part_of_speech": "adverb",
-    "examples": ["I will certainly help you"]
-  },
-  "chair": {
-    "definition": "A seat with a back",
-    "part_of_speech": "noun",
-    "examples": ["Sit in the comfortable chair"]
-  },
-  "challenge": {
-    "definition": "A difficult task",
-    "part_of_speech": "noun",
-    "examples": ["Learning a language is a challenge"]
-  },
-  "chance": {
-    "definition": "An opportunity; possibility",
-    "part_of_speech": "noun",
-    "examples": ["Give me a chance to explain"]
-  },
-  "change": {
-    "definition": "To make or become different",
-    "part_of_speech": "verb",
-    "examples": ["Change your clothes"]
-  },
-  "character": {
-    "definition": "A person in a story; moral qualities",
-    "part_of_speech": "noun",
-    "examples": ["She's the main character"]
-  },
-  "charge": {
-    "definition": "To ask for payment; to rush forward",
-    "part_of_speech": "verb",
-    "examples": ["How much do you charge?"]
-  },
-  "check": {
-    "definition": "To examine; a written order for money",
-    "part_of_speech": "verb",
-    "examples": ["Check your answers"]
-  },
-  "child": {
-    "definition": "A young human being",
-    "part_of_speech": "noun",
-    "examples": ["The child is learning to read"]
-  },
-  "choice": {
-    "definition": "An option; the act of choosing",
-    "part_of_speech": "noun",
-    "examples": ["You have a difficult choice"]
-  },
-  "choose": {
-    "definition": "To select from alternatives",
-    "part_of_speech": "verb",
-    "examples": ["Choose your favorite color"]
-  },
-  "church": {
-    "definition": "A building for religious worship",
-    "part_of_speech": "noun",
-    "examples": ["They go to church on Sundays"]
-  },
-  "citizen": {
-    "definition": "A member of a country",
-    "part_of_speech": "noun",
-    "examples": ["Every citizen has rights"]
-  },
-  "city": {
-    "definition": "A large town",
-    "part_of_speech": "noun",
-    "examples": ["New York is a big city"]
-  },
-  "civil": {
-    "definition": "Relating to citizens; polite",
-    "part_of_speech": "adjective",
-    "examples": ["Civil rights are important"]
-  },
-  "claim": {
-    "definition": "To state or assert",
-    "part_of_speech": "verb",
-    "examples": ["He claims to be innocent"]
-  },
-  "class": {
-    "definition": "A group of students; a category",
-    "part_of_speech": "noun",
-    "examples": ["Math class starts at 9 AM"]
-  },
-  "clear": {
-    "definition": "Easy to see through; obvious",
-    "part_of_speech": "adjective",
-    "examples": ["The water is crystal clear"]
-  },
-  "clearly": {
-    "definition": "In a clear manner; obviously",
-    "part_of_speech": "adverb",
-    "examples": ["Speak clearly so I can understand"]
-  },
-  "close": {
-    "definition": "Near; to shut",
-    "part_of_speech": "adjective",
-    "examples": ["Close the door, please"]
-  },
-  "coach": {
-    "definition": "A person who trains athletes",
-    "part_of_speech": "noun",
-    "examples": ["The coach motivated the team"]
-  },
-  "cold": {
-    "definition": "Having a low temperature",
-    "part_of_speech": "adjective",
-    "examples": ["It's cold outside today"]
-  },
-  "collection": {
-    "definition": "A group of objects gathered together",
-    "part_of_speech": "noun",
-    "examples": ["She has a coin collection"]
-  },
-  "college": {
-    "definition": "An institution of higher education",
-    "part_of_speech": "noun",
-    "examples": ["He's studying at college"]
-  },
-  "color": {
-    "definition": "The appearance of things in light",
-    "part_of_speech": "noun",
-    "examples": ["What's your favorite color?"]
-  },
-  "come": {
-    "definition": "To move toward",
-    "part_of_speech": "verb",
-    "examples": ["Come here, please"]
-  },
-  "commercial": {
-    "definition": "Related to business; an advertisement",
-    "part_of_speech": "adjective",
-    "examples": ["The commercial district is busy"]
-  },
-  "common": {
-    "definition": "Occurring frequently; shared",
-    "part_of_speech": "adjective",
-    "examples": ["It's a common mistake"]
-  },
-  "community": {
-    "definition": "A group of people living together",
-    "part_of_speech": "noun",
-    "examples": ["Our community is very friendly"]
-  },
-  "company": {
-    "definition": "A business organization",
-    "part_of_speech": "noun",
-    "examples": ["She works for a tech company"]
-  },
-  "compare": {
-    "definition": "To examine similarities and differences",
-    "part_of_speech": "verb",
-    "examples": ["Compare these two options"]
-  },
-  "computer": {
-    "definition": "An electronic device for processing data",
-    "part_of_speech": "noun",
-    "examples": ["I use my computer for work"]
-  },
-  "concern": {
-    "definition": "Worry; something important",
-    "part_of_speech": "noun",
-    "examples": ["Safety is our main concern"]
-  },
-  "condition": {
-    "definition": "The state of something",
-    "part_of_speech": "noun",
-    "examples": ["The car is in good condition"]
-  },
-  "conference": {
-    "definition": "A formal meeting",
-    "part_of_speech": "noun",
-    "examples": ["The conference starts tomorrow"]
-  },
-  "congress": {
-    "definition": "A legislative body",
-    "part_of_speech": "noun",
-    "examples": ["Congress passed the new law"]
-  },
-  "consider": {
-    "definition": "To think about carefully",
-    "part_of_speech": "verb",
-    "examples": ["Consider all your options"]
-  },
-  "consumer": {
-    "definition": "A person who buys goods",
-    "part_of_speech": "noun",
-    "examples": ["Consumer rights are protected"]
-  },
-  "contain": {
-    "definition": "To have inside; to hold",
-    "part_of_speech": "verb",
-    "examples": ["This box contains books"]
-  },
-  "continue": {
-    "definition": "To keep going",
-    "part_of_speech": "verb",
-    "examples": ["Continue reading the story"]
-  },
-  "control": {
-    "definition": "To direct or manage",
-    "part_of_speech": "verb",
-    "examples": ["Control your emotions"]
-  },
-  "cost": {
-    "definition": "The price of something",
-    "part_of_speech": "noun",
-    "examples": ["What's the cost of this item?"]
-  },
-  "could": {
-    "definition": "Past tense of can; might be able to",
-    "part_of_speech": "verb",
-    "examples": ["I could help you tomorrow"]
-  },
-  "country": {
-    "definition": "A nation; rural areas",
-    "part_of_speech": "noun",
-    "examples": ["France is a beautiful country"]
-  },
-  "couple": {
-    "definition": "Two people in a relationship",
-    "part_of_speech": "noun",
-    "examples": ["The couple got married"]
-  },
-  "course": {
-    "definition": "A series of lessons; a path",
-    "part_of_speech": "noun",
-    "examples": ["I'm taking a cooking course"]
-  },
-  "court": {
-    "definition": "A place where legal cases are heard",
-    "part_of_speech": "noun",
-    "examples": ["The case went to court"]
-  },
-  "cover": {
-    "definition": "To place something over",
-    "part_of_speech": "verb",
-    "examples": ["Cover the pot with a lid"]
-  },
-  "create": {
-    "definition": "To bring into existence",
-    "part_of_speech": "verb",
-    "examples": ["Create a beautiful painting"]
-  },
-  "crime": {
-    "definition": "An illegal act",
-    "part_of_speech": "noun",
-    "examples": ["Crime rates have decreased"]
-  },
-  "cultural": {
-    "definition": "Related to culture",
-    "part_of_speech": "adjective",
-    "examples": ["Cultural diversity is valuable"]
-  },
-  "culture": {
-    "definition": "The customs and beliefs of a group",
-    "part_of_speech": "noun",
-    "examples": ["Japanese culture is fascinating"]
-  },
-  "cup": {
-    "definition": "A small container for drinking",
-    "part_of_speech": "noun",
-    "examples": ["Pour tea into the cup"]
-  },
-  "current": {
-    "definition": "Happening now; a flow of water",
-    "part_of_speech": "adjective",
-    "examples": ["What's the current time?"]
-  },
-  "customer": {
-    "definition": "A person who buys goods or services",
-    "part_of_speech": "noun",
-    "examples": ["The customer is always right"]
-  },
-  "cut": {
-    "definition": "To divide with a sharp tool",
-    "part_of_speech": "verb",
-    "examples": ["Cut the paper with scissors"]
-  },
-  "data": {
-    "definition": "Facts and information",
-    "part_of_speech": "noun",
-    "examples": ["Analyze the data carefully"]
-  },
-  "daughter": {
-    "definition": "A female child",
-    "part_of_speech": "noun",
-    "examples": ["Their daughter is very smart"]
-  },
-  "day": {
-    "definition": "A 24-hour period",
-    "part_of_speech": "noun",
-    "examples": ["Have a great day!"]
-  },
-  "dead": {
-    "definition": "No longer alive",
-    "part_of_speech": "adjective",
-    "examples": ["The plant is dead"]
-  },
-  "deal": {
-    "definition": "An agreement; to handle",
-    "part_of_speech": "noun",
-    "examples": ["We made a good deal"]
-  },
-  "death": {
-    "definition": "The end of life",
-    "part_of_speech": "noun",
-    "examples": ["Death is part of life"]
-  },
-  "decide": {
-    "definition": "To make a choice",
-    "part_of_speech": "verb",
-    "examples": ["Decide what you want to eat"]
-  },
-  "deep": {
-    "definition": "Extending far down",
-    "part_of_speech": "adjective",
-    "examples": ["The ocean is very deep"]
-  },
-  "describe": {
-    "definition": "To give details about",
-    "part_of_speech": "verb",
-    "examples": ["Describe your hometown"]
-  },
-  "develop": {
-    "definition": "To grow or create gradually",
-    "part_of_speech": "verb",
-    "examples": ["Develop your skills"]
-  },
-  "different": {
-    "definition": "Not the same",
-    "part_of_speech": "adjective",
-    "examples": ["We have different opinions"]
-  },
-  "difficult": {
-    "definition": "Hard to do or understand",
-    "part_of_speech": "adjective",
-    "examples": ["This math problem is difficult"]
-  },
-  "discover": {
-    "definition": "To find something new",
-    "part_of_speech": "verb",
-    "examples": ["Scientists discover new species"]
-  },
-  "do": {
-    "definition": "To perform an action",
-    "part_of_speech": "verb",
-    "examples": ["Do your homework"]
-  },
-  "doctor": {
-    "definition": "A medical professional",
-    "part_of_speech": "noun",
-    "examples": ["See a doctor if you're sick"]
-  },
-  "dog": {
-    "definition": "A domesticated animal",
-    "part_of_speech": "noun",
-    "examples": ["The dog is man's best friend"]
-  },
-  "door": {
-    "definition": "An entrance to a room or building",
-    "part_of_speech": "noun",
-    "examples": ["Close the door behind you"]
-  },
-  "down": {
-    "definition": "In a lower position",
-    "part_of_speech": "adverb",
-    "examples": ["Look down at your feet"]
-  },
-  "draw": {
-    "definition": "To make a picture; to pull",
-    "part_of_speech": "verb",
-    "examples": ["Draw a circle on the paper"]
-  },
-  "dream": {
-    "definition": "Images in sleep; a hope",
-    "part_of_speech": "noun",
-    "examples": ["I had a strange dream"]
-  },
-  "drive": {
-    "definition": "To operate a vehicle",
-    "part_of_speech": "verb",
-    "examples": ["Drive carefully in the rain"]
-  },
-  "during": {
-    "definition": "Throughout the time of",
-    "part_of_speech": "preposition",
-    "examples": ["Stay quiet during the movie"]
-  },
-  "each": {
-    "definition": "Every one of two or more",
-    "part_of_speech": "determiner",
-    "examples": ["Each student has a book"]
-  },
-  "early": {
-    "definition": "Before the usual time",
-    "part_of_speech": "adjective",
-    "examples": ["I wake up early"]
-  },
-  "earth": {
-    "definition": "The planet we live on",
-    "part_of_speech": "noun",
-    "examples": ["Earth is our home"]
-  },
-  "easy": {
-    "definition": "Not difficult",
-    "part_of_speech": "adjective",
-    "examples": ["This puzzle is easy"]
-  },
-  "eat": {
-    "definition": "To consume food",
-    "part_of_speech": "verb",
-    "examples": ["Eat your vegetables"]
-  },
-  "education": {
-    "definition": "The process of learning",
-    "part_of_speech": "noun",
-    "examples": ["Education is very important"]
-  },
-  "eight": {
-    "definition": "The number 8",
-    "part_of_speech": "number",
-    "examples": ["I have eight apples"]
-  },
-  "end": {
-    "definition": "The final part",
-    "part_of_speech": "noun",
-    "examples": ["This is the end of the story"]
-  },
-  "enjoy": {
-    "definition": "To take pleasure in",
-    "part_of_speech": "verb",
-    "examples": ["I enjoy reading books"]
-  },
-  "enough": {
-    "definition": "As much as needed",
-    "part_of_speech": "determiner",
-    "examples": ["Do we have enough food?"]
-  },
-  "even": {
-    "definition": "Flat; including",
-    "part_of_speech": "adverb",
-    "examples": ["Even children can understand"]
-  },
-  "evening": {
-    "definition": "The time between afternoon and night",
-    "part_of_speech": "noun",
-    "examples": ["Good evening, everyone"]
-  },
-  "every": {
-    "definition": "Each one of a group",
-    "part_of_speech": "determiner",
-    "examples": ["Every student passed the test"]
-  },
-  "everyone": {
-    "definition": "All people",
-    "part_of_speech": "pronoun",
-    "examples": ["Everyone is welcome"]
-  },
-  "everything": {
-    "definition": "All things",
-    "part_of_speech": "pronoun",
-    "examples": ["Everything is ready"]
-  },
-  "example": {
-    "definition": "A sample or instance",
-    "part_of_speech": "noun",
-    "examples": ["Give me an example"]
-  },
-  "experience": {
-    "definition": "Knowledge gained from doing",
-    "part_of_speech": "noun",
-    "examples": ["Experience is the best teacher"]
-  },
-  "explain": {
-    "definition": "To make clear",
-    "part_of_speech": "verb",
-    "examples": ["Please explain the rules"]
-  },
-  "eye": {
-    "definition": "The organ of sight",
-    "part_of_speech": "noun",
-    "examples": ["Keep your eye on the ball"]
-  },
-  "face": {
-    "definition": "The front of the head",
-    "part_of_speech": "noun",
-    "examples": ["Wash your face"]
-  },
-  "fact": {
-    "definition": "Something that is true",
-    "part_of_speech": "noun",
-    "examples": ["That's an interesting fact"]
-  },
-  "family": {
-    "definition": "Parents and children",
-    "part_of_speech": "noun",
-    "examples": ["Family is important"]
-  },
-  "far": {
-    "definition": "At a great distance",
-    "part_of_speech": "adverb",
-    "examples": ["How far is the store?"]
-  },
-  "fast": {
-    "definition": "Moving quickly",
-    "part_of_speech": "adjective",
-    "examples": ["That car is very fast"]
-  },
-  "father": {
-    "definition": "A male parent",
-    "part_of_speech": "noun",
-    "examples": ["My father is a teacher"]
-  },
-  "feel": {
-    "definition": "To experience an emotion",
-    "part_of_speech": "verb",
-    "examples": ["I feel happy today"]
-  },
-  "few": {
-    "definition": "A small number",
-    "part_of_speech": "determiner",
-    "examples": ["Only a few people came"]
-  },
-  "field": {
-    "definition": "An open area of land",
-    "part_of_speech": "noun",
-    "examples": ["The cows are in the field"]
-  },
-  "find": {
-    "definition": "To discover",
-    "part_of_speech": "verb",
-    "examples": ["Find your keys"]
-  },
-  "fine": {
-    "definition": "Good; thin; a penalty",
-    "part_of_speech": "adjective",
-    "examples": ["The weather is fine today"]
-  },
-  "fire": {
-    "definition": "Burning flames",
-    "part_of_speech": "noun",
-    "examples": ["The fire is warm"]
-  },
-  "first": {
-    "definition": "Before all others",
-    "part_of_speech": "adjective",
-    "examples": ["This is my first time here"]
-  },
-  "fish": {
-    "definition": "An aquatic animal",
-    "part_of_speech": "noun",
-    "examples": ["Fish live in water"]
-  },
-  "five": {
-    "definition": "The number 5",
-    "part_of_speech": "number",
-    "examples": ["I have five fingers"]
-  },
-  "fly": {
-    "definition": "To move through air",
-    "part_of_speech": "verb",
-    "examples": ["Birds fly south in winter"]
-  },
-  "follow": {
-    "definition": "To go after",
-    "part_of_speech": "verb",
-    "examples": ["Follow the yellow brick road"]
-  },
-  "food": {
-    "definition": "Things we eat",
-    "part_of_speech": "noun",
-    "examples": ["Healthy food is important"]
-  },
-  "for": {
-    "definition": "Intended to belong to",
-    "part_of_speech": "preposition",
-    "examples": ["This gift is for you"]
-  },
-  "forget": {
-    "definition": "To not remember",
-    "part_of_speech": "verb",
-    "examples": ["Don't forget your keys"]
-  },
-  "four": {
-    "definition": "The number 4",
-    "part_of_speech": "number",
-    "examples": ["A table has four legs"]
-  },
-  "free": {
-    "definition": "Not costing money; not restricted",
-    "part_of_speech": "adjective",
-    "examples": ["The concert is free"]
-  },
-  "friend": {
-    "definition": "A person you like and know well",
-    "part_of_speech": "noun",
-    "examples": ["She's my best friend"]
-  },
-  "from": {
-    "definition": "Starting at; originating",
-    "part_of_speech": "preposition",
-    "examples": ["I'm from Canada"]
-  },
-  "full": {
-    "definition": "Containing as much as possible",
-    "part_of_speech": "adjective",
-    "examples": ["The glass is full"]
-  },
-  "future": {
-    "definition": "Time that is to come",
-    "part_of_speech": "noun",
-    "examples": ["The future looks bright"]
-  },
-  "game": {
-    "definition": "An activity with rules for fun",
-    "part_of_speech": "noun",
-    "examples": ["Let's play a game"]
-  },
-  "get": {
-    "definition": "To obtain or receive",
-    "part_of_speech": "verb",
-    "examples": ["Get some milk from the store"]
-  },
-  "girl": {
-    "definition": "A female child",
-    "part_of_speech": "noun",
-    "examples": ["The girl is playing"]
-  },
-  "give": {
-    "definition": "To hand over",
-    "part_of_speech": "verb",
-    "examples": ["Give me your hand"]
-  },
-  "go": {
-    "definition": "To move or travel",
-    "part_of_speech": "verb",
-    "examples": ["Let's go to the park"]
-  },
-  "good": {
-    "definition": "Of high quality; morally right",
-    "part_of_speech": "adjective",
-    "examples": ["That's a good idea"]
-  },
-  "great": {
-    "definition": "Very good; large",
-    "part_of_speech": "adjective",
-    "examples": ["That's a great movie"]
-  },
-  "green": {
-    "definition": "The color of grass",
-    "part_of_speech": "adjective",
-    "examples": ["The leaves are green"]
-  },
-  "group": {
-    "definition": "A number of people together",
-    "part_of_speech": "noun",
-    "examples": ["Our group has five members"]
-  },
-  "grow": {
-    "definition": "To increase in size",
-    "part_of_speech": "verb",
-    "examples": ["Plants grow in sunlight"]
-  },
-  "hand": {
-    "definition": "The body part at the end of the arm",
-    "part_of_speech": "noun",
-    "examples": ["Raise your hand"]
-  },
-  "happen": {
-    "definition": "To occur",
-    "part_of_speech": "verb",
-    "examples": ["What will happen next?"]
-  },
-  "happy": {
-    "definition": "Feeling joy",
-    "part_of_speech": "adjective",
-    "examples": ["I'm happy to see you"]
-  },
-  "hard": {
-    "definition": "Difficult; not soft",
-    "part_of_speech": "adjective",
-    "examples": ["This rock is very hard"]
-  },
-  "have": {
-    "definition": "To possess",
-    "part_of_speech": "verb",
-    "examples": ["I have a car"]
-  },
-  "he": {
-    "definition": "Male person",
-    "part_of_speech": "pronoun",
-    "examples": ["He is my brother"]
-  },
-  "head": {
-    "definition": "The top part of the body",
-    "part_of_speech": "noun",
-    "examples": ["Nod your head"]
-  },
-  "health": {
-    "definition": "The state of being well",
-    "part_of_speech": "noun",
-    "examples": ["Good health is important"]
-  },
-  "hear": {
-    "definition": "To perceive sound",
-    "part_of_speech": "verb",
-    "examples": ["I can hear music"]
-  },
-  "heart": {
-    "definition": "The organ that pumps blood",
-    "part_of_speech": "noun",
-    "examples": ["My heart is beating fast"]
-  },
-  "help": {
-    "definition": "To assist",
-    "part_of_speech": "verb",
-    "examples": ["Can you help me?"]
-  },
-  "her": {
-    "definition": "Belonging to a female",
-    "part_of_speech": "pronoun",
-    "examples": ["This is her book"]
-  },
-  "here": {
-    "definition": "In this place",
-    "part_of_speech": "adverb",
-    "examples": ["Come here"]
-  },
-  "high": {
-    "definition": "Far up; great in degree",
-    "part_of_speech": "adjective",
-    "examples": ["The mountain is high"]
-  },
-  "him": {
-    "definition": "Male person (object)",
-    "part_of_speech": "pronoun",
-    "examples": ["Give it to him"]
-  },
-  "his": {
-    "definition": "Belonging to a male",
-    "part_of_speech": "pronoun",
-    "examples": ["This is his car"]
-  },
-  "history": {
-    "definition": "Past events",
-    "part_of_speech": "noun",
-    "examples": ["I love studying history"]
-  },
-  "home": {
-    "definition": "The place where you live",
-    "part_of_speech": "noun",
-    "examples": ["I'm going home"]
-  },
-  "hope": {
-    "definition": "To wish for something",
-    "part_of_speech": "verb",
-    "examples": ["I hope you feel better"]
-  },
-  "hot": {
-    "definition": "Having high temperature",
-    "part_of_speech": "adjective",
-    "examples": ["The coffee is hot"]
-  },
-  "house": {
-    "definition": "A building where people live",
-    "part_of_speech": "noun",
-    "examples": ["They bought a new house"]
-  },
-  "how": {
-    "definition": "In what way",
-    "part_of_speech": "adverb",
-    "examples": ["How are you?"]
-  },
-  "human": {
-    "definition": "A person",
-    "part_of_speech": "noun",
-    "examples": ["Every human deserves respect"]
-  },
-  "hundred": {
-    "definition": "The number 100",
-    "part_of_speech": "number",
-    "examples": ["I have a hundred dollars"]
+    "definition": "The first letter of the English alphabet; indefinite article used before consonant sounds",
+    "part_of_speech": "letter/article",
+    "phonetic": "eɪ",
+    "synonyms": ["an", "one"],
+    "antonyms": ["the"],
+    "examples": ["A is the first letter", "A book", "A good idea"],
+    "frequency": 100,
+    "alphabet_position": 1,
+    "letter_type": "vowel",
+    "phonetic_sound": "ay sound as in day",
+    "spelling_importance": "Fundamental vowel for word formation and article usage"
+  },
+  "b": {
+    "definition": "The second letter of the English alphabet; a consonant",
+    "part_of_speech": "letter",
+    "phonetic": "biː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["B is the second letter", "Ball starts with B", "Big begins with B"],
+    "frequency": 95,
+    "alphabet_position": 2,
+    "letter_type": "consonant",
+    "phonetic_sound": "buh sound as in ball",
+    "spelling_importance": "Common initial consonant for many words"
+  },
+  "c": {
+    "definition": "The third letter of the English alphabet; a consonant with hard and soft sounds",
+    "part_of_speech": "letter",
+    "phonetic": "siː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["C is the third letter", "Cat starts with C", "City starts with soft C"],
+    "frequency": 90,
+    "alphabet_position": 3,
+    "letter_type": "consonant",
+    "phonetic_sound": "hard k sound or soft s sound",
+    "spelling_importance": "Versatile consonant with multiple pronunciations"
+  },
+  "d": {
+    "definition": "The fourth letter of the English alphabet; a voiced consonant",
+    "part_of_speech": "letter",
+    "phonetic": "diː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["D is the fourth letter", "Dog starts with D", "Day begins with D"],
+    "frequency": 88,
+    "alphabet_position": 4,
+    "letter_type": "consonant",
+    "phonetic_sound": "duh sound as in dog",
+    "spelling_importance": "Common consonant for word beginnings and endings"
+  },
+  "e": {
+    "definition": "The fifth letter of the English alphabet; the most common vowel in English",
+    "part_of_speech": "letter",
+    "phonetic": "iː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["E is the fifth letter", "Every starts with E", "The most used letter"],
+    "frequency": 100,
+    "alphabet_position": 5,
+    "letter_type": "vowel",
+    "phonetic_sound": "ee sound as in see, or eh sound as in bed",
+    "spelling_importance": "Most frequently used letter in English, essential for word formation"
+  },
+  "f": {
+    "definition": "The sixth letter of the English alphabet; a voiceless consonant",
+    "part_of_speech": "letter",
+    "phonetic": "ɛf",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["F is the sixth letter", "Fish starts with F", "Fun begins with F"],
+    "frequency": 85,
+    "alphabet_position": 6,
+    "letter_type": "consonant",
+    "phonetic_sound": "fuh sound as in fish",
+    "spelling_importance": "Common consonant for word formation"
+  },
+  "g": {
+    "definition": "The seventh letter of the English alphabet; a consonant with hard and soft sounds",
+    "part_of_speech": "letter",
+    "phonetic": "dʒiː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["G is the seventh letter", "Good starts with hard G", "Giant starts with soft G"],
+    "frequency": 82,
+    "alphabet_position": 7,
+    "letter_type": "consonant",
+    "phonetic_sound": "hard g sound as in go, or soft j sound as in giant",
+    "spelling_importance": "Versatile consonant with context-dependent pronunciation"
+  },
+  "h": {
+    "definition": "The eighth letter of the English alphabet; an aspirated consonant",
+    "part_of_speech": "letter",
+    "phonetic": "eɪtʃ",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["H is the eighth letter", "House starts with H", "Happy begins with H"],
+    "frequency": 80,
+    "alphabet_position": 8,
+    "letter_type": "consonant",
+    "phonetic_sound": "huh sound as in house, sometimes silent",
+    "spelling_importance": "Breath consonant, often silent in some words"
   },
   "i": {
-    "definition": "The person speaking",
-    "part_of_speech": "pronoun",
-    "examples": ["I am happy"]
+    "definition": "The ninth letter of the English alphabet; a vowel and first person pronoun",
+    "part_of_speech": "letter/pronoun",
+    "phonetic": "aɪ",
+    "synonyms": ["me", "myself"],
+    "antonyms": ["you", "they"],
+    "examples": ["I is the ninth letter", "I am happy", "Ice starts with I"],
+    "frequency": 100,
+    "alphabet_position": 9,
+    "letter_type": "vowel",
+    "phonetic_sound": "eye sound as in ice, or ih sound as in bit",
+    "spelling_importance": "Essential vowel and most important pronoun in English"
   },
-  "idea": {
-    "definition": "A thought or concept",
+  "j": {
+    "definition": "The tenth letter of the English alphabet; a voiced consonant",
+    "part_of_speech": "letter",
+    "phonetic": "dʒeɪ",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["J is the tenth letter", "Jump starts with J", "Joy begins with J"],
+    "frequency": 75,
+    "alphabet_position": 10,
+    "letter_type": "consonant",
+    "phonetic_sound": "juh sound as in jump",
+    "spelling_importance": "Distinctive consonant sound for word formation"
+  },
+  "k": {
+    "definition": "The eleventh letter of the English alphabet; a voiceless consonant",
+    "part_of_speech": "letter",
+    "phonetic": "keɪ",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["K is the eleventh letter", "King starts with K", "Keep begins with K"],
+    "frequency": 70,
+    "alphabet_position": 11,
+    "letter_type": "consonant",
+    "phonetic_sound": "kuh sound as in king, sometimes silent",
+    "spelling_importance": "Hard consonant, sometimes silent before n"
+  },
+  "l": {
+    "definition": "The twelfth letter of the English alphabet; a liquid consonant",
+    "part_of_speech": "letter",
+    "phonetic": "ɛl",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["L is the twelfth letter", "Love starts with L", "Light begins with L"],
+    "frequency": 85,
+    "alphabet_position": 12,
+    "letter_type": "consonant",
+    "phonetic_sound": "luh sound as in love",
+    "spelling_importance": "Liquid consonant essential for word flow"
+  },
+  "m": {
+    "definition": "The thirteenth letter of the English alphabet; a nasal consonant",
+    "part_of_speech": "letter",
+    "phonetic": "ɛm",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["M is the thirteenth letter", "Mother starts with M", "Make begins with M"],
+    "frequency": 88,
+    "alphabet_position": 13,
+    "letter_type": "consonant",
+    "phonetic_sound": "muh sound as in mother",
+    "spelling_importance": "Nasal consonant, fundamental for many words"
+  },
+  "n": {
+    "definition": "The fourteenth letter of the English alphabet; a nasal consonant",
+    "part_of_speech": "letter",
+    "phonetic": "ɛn",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["N is the fourteenth letter", "Name starts with N", "New begins with N"],
+    "frequency": 90,
+    "alphabet_position": 14,
+    "letter_type": "consonant",
+    "phonetic_sound": "nuh sound as in name",
+    "spelling_importance": "Essential nasal consonant for word endings and beginnings"
+  },
+  "o": {
+    "definition": "The fifteenth letter of the English alphabet; a round vowel",
+    "part_of_speech": "letter",
+    "phonetic": "oʊ",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["O is the fifteenth letter", "Open starts with O", "Old begins with O"],
+    "frequency": 95,
+    "alphabet_position": 15,
+    "letter_type": "vowel",
+    "phonetic_sound": "oh sound as in open, or aw sound as in dog",
+    "spelling_importance": "Important vowel with multiple pronunciations"
+  },
+  "p": {
+    "definition": "The sixteenth letter of the English alphabet; a voiceless plosive consonant",
+    "part_of_speech": "letter",
+    "phonetic": "piː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["P is the sixteenth letter", "People starts with P", "Play begins with P"],
+    "frequency": 83,
+    "alphabet_position": 16,
+    "letter_type": "consonant",
+    "phonetic_sound": "puh sound as in people, sometimes silent",
+    "spelling_importance": "Plosive consonant, sometimes silent before s"
+  },
+  "q": {
+    "definition": "The seventeenth letter of the English alphabet; always followed by u in English",
+    "part_of_speech": "letter",
+    "phonetic": "kjuː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["Q is the seventeenth letter", "Queen starts with Q", "Question begins with Q"],
+    "frequency": 60,
+    "alphabet_position": 17,
+    "letter_type": "consonant",
+    "phonetic_sound": "kw sound when followed by u",
+    "spelling_importance": "Unique consonant always paired with u in English"
+  },
+  "r": {
+    "definition": "The eighteenth letter of the English alphabet; a liquid consonant",
+    "part_of_speech": "letter",
+    "phonetic": "ɑːr",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["R is the eighteenth letter", "Red starts with R", "Run begins with R"],
+    "frequency": 87,
+    "alphabet_position": 18,
+    "letter_type": "consonant",
+    "phonetic_sound": "ruh sound as in red",
+    "spelling_importance": "Liquid consonant crucial for word pronunciation"
+  },
+  "s": {
+    "definition": "The nineteenth letter of the English alphabet; a sibilant consonant",
+    "part_of_speech": "letter",
+    "phonetic": "ɛs",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["S is the nineteenth letter", "Sun starts with S", "See begins with S"],
+    "frequency": 92,
+    "alphabet_position": 19,
+    "letter_type": "consonant",
+    "phonetic_sound": "suh sound as in sun, or z sound in some words",
+    "spelling_importance": "Sibilant consonant, essential for plurals and verb forms"
+  },
+  "t": {
+    "definition": "The twentieth letter of the English alphabet; a voiceless plosive consonant",
+    "part_of_speech": "letter",
+    "phonetic": "tiː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["T is the twentieth letter", "Time starts with T", "Take begins with T"],
+    "frequency": 94,
+    "alphabet_position": 20,
+    "letter_type": "consonant",
+    "phonetic_sound": "tuh sound as in time",
+    "spelling_importance": "Common plosive consonant for word formation"
+  },
+  "u": {
+    "definition": "The twenty-first letter of the English alphabet; a back vowel",
+    "part_of_speech": "letter",
+    "phonetic": "juː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["U is the twenty-first letter", "Under starts with U", "Use begins with U"],
+    "frequency": 85,
+    "alphabet_position": 21,
+    "letter_type": "vowel",
+    "phonetic_sound": "yoo sound as in use, or uh sound as in but",
+    "spelling_importance": "Back vowel with multiple pronunciations"
+  },
+  "v": {
+    "definition": "The twenty-second letter of the English alphabet; a voiced fricative consonant",
+    "part_of_speech": "letter",
+    "phonetic": "viː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["V is the twenty-second letter", "Very starts with V", "Voice begins with V"],
+    "frequency": 78,
+    "alphabet_position": 22,
+    "letter_type": "consonant",
+    "phonetic_sound": "vuh sound as in very",
+    "spelling_importance": "Voiced fricative consonant for word formation"
+  },
+  "w": {
+    "definition": "The twenty-third letter of the English alphabet; a semivowel consonant",
+    "part_of_speech": "letter",
+    "phonetic": "ˈdʌbəljuː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["W is the twenty-third letter", "Water starts with W", "We begins with W"],
+    "frequency": 80,
+    "alphabet_position": 23,
+    "letter_type": "consonant",
+    "phonetic_sound": "wuh sound as in water, sometimes silent",
+    "spelling_importance": "Semivowel consonant, sometimes silent before r"
+  },
+  "x": {
+    "definition": "The twenty-fourth letter of the English alphabet; represents multiple sounds",
+    "part_of_speech": "letter",
+    "phonetic": "ɛks",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["X is the twenty-fourth letter", "X-ray starts with X", "Box ends with X"],
+    "frequency": 65,
+    "alphabet_position": 24,
+    "letter_type": "consonant",
+    "phonetic_sound": "ks sound as in box, or z sound at word beginning",
+    "spelling_importance": "Complex consonant representing multiple sound combinations"
+  },
+  "y": {
+    "definition": "The twenty-fifth letter of the English alphabet; functions as vowel and consonant",
+    "part_of_speech": "letter",
+    "phonetic": "waɪ",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["Y is the twenty-fifth letter", "Yes starts with Y", "My ends with Y"],
+    "frequency": 75,
+    "alphabet_position": 25,
+    "letter_type": "vowel/consonant",
+    "phonetic_sound": "yuh sound as in yes, or ee/eye sound as vowel",
+    "spelling_importance": "Versatile letter functioning as both vowel and consonant"
+  },
+  "z": {
+    "definition": "The twenty-sixth letter of the English alphabet; the final letter",
+    "part_of_speech": "letter",
+    "phonetic": "ziː",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["Z is the twenty-sixth letter", "Zero starts with Z", "Amazing ends with Z"],
+    "frequency": 70,
+    "alphabet_position": 26,
+    "letter_type": "consonant",
+    "phonetic_sound": "zuh sound as in zero",
+    "spelling_importance": "Final letter of alphabet, voiced sibilant consonant"
+  },
+  "alphabet": {
+    "definition": "A set of letters or symbols in a fixed order used to represent the basic sounds of a language",
     "part_of_speech": "noun",
-    "examples": ["That's a great idea"]
+    "phonetic": "ˈælfəˌbɛt",
+    "synonyms": ["letters", "script", "writing system"],
+    "antonyms": [],
+    "examples": ["The English alphabet has 26 letters", "Learning the alphabet is fundamental", "Alphabetical order"],
+    "frequency": 85,
+    "spelling_importance": "Essential concept for literacy and language learning"
   },
-  "if": {
-    "definition": "On condition that",
-    "part_of_speech": "conjunction",
-    "examples": ["If it rains, we'll stay inside"]
+  "the": {
+    "definition": "Definite article used to specify a particular noun",
+    "part_of_speech": "article",
+    "phonetic": "ðə",
+    "synonyms": [],
+    "antonyms": ["a", "an"],
+    "examples": ["The book", "The answer", "The most common word"],
+    "frequency": 100
   },
-  "important": {
-    "definition": "Having great significance",
-    "part_of_speech": "adjective",
-    "examples": ["This is very important"]
+  "be": {
+    "definition": "To exist, occur, or have reality; auxiliary verb for continuous tenses",
+    "part_of_speech": "verb",
+    "phonetic": "biː",
+    "synonyms": ["exist", "live", "remain"],
+    "antonyms": ["cease", "die"],
+    "examples": ["To be or not to be", "I am happy", "They are here"],
+    "frequency": 100
   },
-  "in": {
-    "definition": "Inside; within",
+  "to": {
+    "definition": "Preposition expressing direction, place, or position; infinitive marker",
     "part_of_speech": "preposition",
-    "examples": ["The cat is in the box"]
-  },
-  "information": {
-    "definition": "Facts or knowledge",
-    "part_of_speech": "noun",
-    "examples": ["I need more information"]
-  },
-  "interesting": {
-    "definition": "Arousing curiosity",
-    "part_of_speech": "adjective",
-    "examples": ["That's an interesting story"]
-  },
-  "into": {
-    "definition": "To the inside of",
-    "part_of_speech": "preposition",
-    "examples": ["Walk into the room"]
-  },
-  "is": {
-    "definition": "Third person singular of 'be'",
-    "part_of_speech": "verb",
-    "examples": ["She is happy"]
-  },
-  "it": {
-    "definition": "The thing mentioned",
-    "part_of_speech": "pronoun",
-    "examples": ["Where is it?"]
-  },
-  "its": {
-    "definition": "Belonging to it",
-    "part_of_speech": "pronoun",
-    "examples": ["The dog wagged its tail"]
-  },
-  "job": {
-    "definition": "Work; employment",
-    "part_of_speech": "noun",
-    "examples": ["I love my job"]
-  },
-  "just": {
-    "definition": "Only; recently",
-    "part_of_speech": "adverb",
-    "examples": ["I just arrived"]
-  },
-  "keep": {
-    "definition": "To continue to have",
-    "part_of_speech": "verb",
-    "examples": ["Keep the change"]
-  },
-  "kind": {
-    "definition": "Type; caring",
-    "part_of_speech": "noun",
-    "examples": ["What kind of music do you like?"]
-  },
-  "know": {
-    "definition": "To be aware of",
-    "part_of_speech": "verb",
-    "examples": ["I know the answer"]
-  },
-  "knowledge": {
-    "definition": "Information and understanding",
-    "part_of_speech": "noun",
-    "examples": ["Knowledge is power"]
-  },
-  "language": {
-    "definition": "A system of communication",
-    "part_of_speech": "noun",
-    "examples": ["English is a global language"]
-  },
-  "large": {
-    "definition": "Big in size",
-    "part_of_speech": "adjective",
-    "examples": ["That's a large pizza"]
-  },
-  "last": {
-    "definition": "Final; most recent",
-    "part_of_speech": "adjective",
-    "examples": ["This is the last piece"]
-  },
-  "late": {
-    "definition": "After the expected time",
-    "part_of_speech": "adjective",
-    "examples": ["Sorry I'm late"]
-  },
-  "learn": {
-    "definition": "To gain knowledge",
-    "part_of_speech": "verb",
-    "examples": ["Learn something new every day"]
-  },
-  "leave": {
-    "definition": "To go away from",
-    "part_of_speech": "verb",
-    "examples": ["Leave your shoes at the door"]
-  },
-  "left": {
-    "definition": "The opposite of right",
-    "part_of_speech": "adjective",
-    "examples": ["Turn left at the corner"]
-  },
-  "let": {
-    "definition": "To allow",
-    "part_of_speech": "verb",
-    "examples": ["Let me help you"]
-  },
-  "life": {
-    "definition": "The state of being alive",
-    "part_of_speech": "noun",
-    "examples": ["Life is beautiful"]
-  },
-  "light": {
-    "definition": "Brightness; not heavy",
-    "part_of_speech": "noun",
-    "examples": ["Turn on the light"]
-  },
-  "like": {
-    "definition": "To enjoy; similar to",
-    "part_of_speech": "verb",
-    "examples": ["I like chocolate"]
-  },
-  "line": {
-    "definition": "A long mark; a queue",
-    "part_of_speech": "noun",
-    "examples": ["Draw a straight line"]
-  },
-  "listen": {
-    "definition": "To pay attention to sound",
-    "part_of_speech": "verb",
-    "examples": ["Listen to the music"]
-  },
-  "little": {
-    "definition": "Small in size",
-    "part_of_speech": "adjective",
-    "examples": ["A little bird"]
-  },
-  "live": {
-    "definition": "To be alive; to reside",
-    "part_of_speech": "verb",
-    "examples": ["I live in New York"]
-  },
-  "long": {
-    "definition": "Having great length",
-    "part_of_speech": "adjective",
-    "examples": ["That's a long road"]
-  },
-  "look": {
-    "definition": "To direct eyes toward",
-    "part_of_speech": "verb",
-    "examples": ["Look at the sunset"]
-  },
-  "love": {
-    "definition": "Deep affection",
-    "part_of_speech": "noun",
-    "examples": ["Love conquers all"]
-  },
-  "make": {
-    "definition": "To create or produce",
-    "part_of_speech": "verb",
-    "examples": ["Make a sandwich"]
-  },
-  "man": {
-    "definition": "An adult male human",
-    "part_of_speech": "noun",
-    "examples": ["The man is tall"]
-  },
-  "many": {
-    "definition": "A large number of",
-    "part_of_speech": "determiner",
-    "examples": ["Many people came"]
-  },
-  "may": {
-    "definition": "Might; expressing possibility",
-    "part_of_speech": "verb",
-    "examples": ["It may rain today"]
-  },
-  "me": {
-    "definition": "The person speaking (object)",
-    "part_of_speech": "pronoun",
-    "examples": ["Give it to me"]
-  },
-  "mean": {
-    "definition": "To intend; unkind",
-    "part_of_speech": "verb",
-    "examples": ["What do you mean?"]
-  },
-  "money": {
-    "definition": "Currency used for buying",
-    "part_of_speech": "noun",
-    "examples": ["Money can't buy happiness"]
-  },
-  "more": {
-    "definition": "A greater amount",
-    "part_of_speech": "determiner",
-    "examples": ["I need more time"]
-  },
-  "most": {
-    "definition": "The greatest amount",
-    "part_of_speech": "determiner",
-    "examples": ["Most people agree"]
-  },
-  "mother": {
-    "definition": "A female parent",
-    "part_of_speech": "noun",
-    "examples": ["My mother is kind"]
-  },
-  "move": {
-    "definition": "To change position",
-    "part_of_speech": "verb",
-    "examples": ["Move to the left"]
-  },
-  "much": {
-    "definition": "A large amount",
-    "part_of_speech": "determiner",
-    "examples": ["How much does it cost?"]
-  },
-  "music": {
-    "definition": "Organized sound",
-    "part_of_speech": "noun",
-    "examples": ["I love classical music"]
-  },
-  "must": {
-    "definition": "Expressing necessity",
-    "part_of_speech": "verb",
-    "examples": ["You must be careful"]
-  },
-  "my": {
-    "definition": "Belonging to me",
-    "part_of_speech": "pronoun",
-    "examples": ["This is my book"]
-  },
-  "name": {
-    "definition": "What someone is called",
-    "part_of_speech": "noun",
-    "examples": ["What's your name?"]
-  },
-  "need": {
-    "definition": "To require",
-    "part_of_speech": "verb",
-    "examples": ["I need help"]
-  },
-  "never": {
-    "definition": "Not ever",
-    "part_of_speech": "adverb",
-    "examples": ["Never give up"]
-  },
-  "new": {
-    "definition": "Recently made or discovered",
-    "part_of_speech": "adjective",
-    "examples": ["I bought a new car"]
-  },
-  "next": {
-    "definition": "Coming after",
-    "part_of_speech": "adjective",
-    "examples": ["Next week I'm busy"]
-  },
-  "nice": {
-    "definition": "Pleasant; good",
-    "part_of_speech": "adjective",
-    "examples": ["Have a nice day"]
-  },
-  "night": {
-    "definition": "The time when it's dark",
-    "part_of_speech": "noun",
-    "examples": ["Good night"]
-  },
-  "nine": {
-    "definition": "The number 9",
-    "part_of_speech": "number",
-    "examples": ["I have nine cats"]
-  },
-  "no": {
-    "definition": "Not any; refusal",
-    "part_of_speech": "determiner",
-    "examples": ["No problem"]
-  },
-  "not": {
-    "definition": "Used to make negative",
-    "part_of_speech": "adverb",
-    "examples": ["I am not ready"]
-  },
-  "nothing": {
-    "definition": "Not anything",
-    "part_of_speech": "pronoun",
-    "examples": ["Nothing is impossible"]
-  },
-  "now": {
-    "definition": "At this time",
-    "part_of_speech": "adverb",
-    "examples": ["I need it now"]
-  },
-  "number": {
-    "definition": "A mathematical value",
-    "part_of_speech": "noun",
-    "examples": ["What's your phone number?"]
+    "phonetic": "tuː",
+    "synonyms": ["toward", "into"],
+    "antonyms": ["from", "away"],
+    "examples": ["Go to school", "To be happy", "Listen to music"],
+    "frequency": 100
   },
   "of": {
-    "definition": "Belonging to; from",
+    "definition": "Expressing relationship between part and whole; belonging to",
     "part_of_speech": "preposition",
-    "examples": ["The color of the sky"]
+    "phonetic": "ʌv",
+    "synonyms": ["from", "belonging to"],
+    "antonyms": [],
+    "examples": ["Part of the team", "Book of poems", "City of lights"],
+    "frequency": 100
   },
-  "off": {
-    "definition": "Away from; not on",
+  "and": {
+    "definition": "Used to connect words, phrases, or clauses; conjunction meaning also",
+    "part_of_speech": "conjunction",
+    "phonetic": "ænd",
+    "synonyms": ["plus", "also", "furthermore"],
+    "antonyms": ["or", "but"],
+    "examples": ["Cats and dogs", "Read and write", "Fast and furious"],
+    "frequency": 100
+  },
+  "in": {
+    "definition": "Expressing location or position within limits; inside",
+    "part_of_speech": "preposition",
+    "phonetic": "ɪn",
+    "synonyms": ["inside", "within"],
+    "antonyms": ["out", "outside"],
+    "examples": ["In the house", "In love", "In time"],
+    "frequency": 99
+  },
+  "have": {
+    "definition": "To possess, own, or hold; auxiliary verb for perfect tenses",
+    "part_of_speech": "verb",
+    "phonetic": "hæv",
+    "synonyms": ["own", "possess", "hold"],
+    "antonyms": ["lack", "need"],
+    "examples": ["I have a car", "Have dinner", "Have been there"],
+    "frequency": 98
+  },
+  "it": {
+    "definition": "Pronoun referring to a thing previously mentioned or easily identified",
+    "part_of_speech": "pronoun",
+    "phonetic": "ɪt",
+    "synonyms": ["that"],
+    "antonyms": [],
+    "examples": ["It is raining", "I like it", "It works"],
+    "frequency": 97
+  },
+  "for": {
+    "definition": "In support of; intended to belong to; during the period of",
+    "part_of_speech": "preposition",
+    "phonetic": "fɔːr",
+    "synonyms": ["supporting", "in favor of"],
+    "antonyms": ["against", "opposed to"],
+    "examples": ["Vote for change", "Gift for you", "For a long time"],
+    "frequency": 96
+  },
+  "not": {
+    "definition": "Used to express negation, denial, refusal, or prohibition",
     "part_of_speech": "adverb",
-    "examples": ["Turn off the light"]
-  },
-  "often": {
-    "definition": "Frequently",
-    "part_of_speech": "adverb",
-    "examples": ["I often go there"]
-  },
-  "old": {
-    "definition": "Having lived for a long time",
-    "part_of_speech": "adjective",
-    "examples": ["Old man"]
+    "phonetic": "nɒt",
+    "synonyms": ["no", "never"],
+    "antonyms": ["yes", "indeed"],
+    "examples": ["I am not ready", "This is not correct", "Not today"],
+    "frequency": 95
   },
   "on": {
-    "definition": "Physically in contact with",
+    "definition": "Physically in contact with and supported by a surface",
     "part_of_speech": "preposition",
-    "examples": ["On the table"]
+    "phonetic": "ɒn",
+    "synonyms": ["upon", "above"],
+    "antonyms": ["off", "under"],
+    "examples": ["On the table", "Turn on the light", "On time"],
+    "frequency": 95
   },
-  "one": {
-    "definition": "The number 1",
-    "part_of_speech": "number",
-    "examples": ["One apple"]
+  "with": {
+    "definition": "Accompanied by; having; using as an instrument",
+    "part_of_speech": "preposition",
+    "phonetic": "wɪð",
+    "synonyms": ["alongside", "together with"],
+    "antonyms": ["without", "apart from"],
+    "examples": ["Come with me", "Coffee with milk", "Write with pen"],
+    "frequency": 94
   },
-  "only": {
-    "definition": "And no one or nothing more besides",
-    "part_of_speech": "adverb",
-    "examples": ["Only you"]
-  },
-  "open": {
-    "definition": "Not closed; to make accessible",
-    "part_of_speech": "adjective",
-    "examples": ["Open the door"]
-  },
-  "or": {
-    "definition": "Used to link alternatives",
-    "part_of_speech": "conjunction",
-    "examples": ["Tea or coffee"]
-  },
-  "other": {
-    "definition": "Used to refer to a different person or thing",
-    "part_of_speech": "determiner",
-    "examples": ["Other people"]
-  },
-  "our": {
-    "definition": "Belonging to us",
+  "he": {
+    "definition": "Third person singular masculine pronoun",
     "part_of_speech": "pronoun",
-    "examples": ["Our house"]
+    "phonetic": "hiː",
+    "synonyms": ["him"],
+    "antonyms": ["she", "her"],
+    "examples": ["He is tall", "Where is he?", "He said yes"],
+    "frequency": 93
   },
-  "out": {
-    "definition": "Moving away from the inside",
-    "part_of_speech": "adverb",
-    "examples": ["Go out"]
+  "as": {
+    "definition": "Used in comparisons; in the capacity of; while",
+    "part_of_speech": "adverb/conjunction",
+    "phonetic": "æz",
+    "synonyms": ["like", "similar to"],
+    "antonyms": ["unlike", "different from"],
+    "examples": ["As tall as", "Work as a teacher", "As time goes by"],
+    "frequency": 92
   },
-  "over": {
-    "definition": "Extending directly upward from",
+  "you": {
+    "definition": "Second person pronoun referring to the person being addressed",
+    "part_of_speech": "pronoun",
+    "phonetic": "juː",
+    "synonyms": ["yourself"],
+    "antonyms": ["I", "me"],
+    "examples": ["You are kind", "How are you?", "Thank you"],
+    "frequency": 92
+  },
+  "do": {
+    "definition": "To perform an action; auxiliary verb for questions and negatives",
+    "part_of_speech": "verb",
+    "phonetic": "duː",
+    "synonyms": ["perform", "execute", "carry out"],
+    "antonyms": ["undo", "stop"],
+    "examples": ["Do your homework", "What do you do?", "Do not worry"],
+    "frequency": 91
+  },
+  "at": {
+    "definition": "Expressing location or arrival in a particular place",
     "part_of_speech": "preposition",
-    "examples": ["Over the bridge"]
+    "phonetic": "æt",
+    "synonyms": ["in", "by"],
+    "antonyms": ["away from"],
+    "examples": ["At home", "Look at me", "At the store"],
+    "frequency": 90
   },
-  "own": {
-    "definition": "Belonging to oneself",
-    "part_of_speech": "adjective",
-    "examples": ["My own"]
+  "this": {
+    "definition": "Used to identify a specific person or thing close at hand",
+    "part_of_speech": "pronoun/determiner",
+    "phonetic": "ðɪs",
+    "synonyms": ["these"],
+    "antonyms": ["that", "those"],
+    "examples": ["This is good", "I like this book", "This way"],
+    "frequency": 90
   },
-  "part": {
-    "definition": "A piece or segment of something",
-    "part_of_speech": "noun",
-    "examples": ["Part of the team"]
+  "but": {
+    "definition": "Used to introduce something contrasting with what has been said",
+    "part_of_speech": "conjunction",
+    "phonetic": "bʌt",
+    "synonyms": ["however", "yet"],
+    "antonyms": ["and", "also"],
+    "examples": ["Small but strong", "I tried but failed", "But wait"],
+    "frequency": 89
   },
-  "people": {
-    "definition": "Human beings in general",
-    "part_of_speech": "noun",
-    "examples": ["Many people"]
+  "his": {
+    "definition": "Belonging to or associated with a male person previously mentioned",
+    "part_of_speech": "pronoun",
+    "phonetic": "hɪz",
+    "synonyms": [],
+    "antonyms": ["her", "hers"],
+    "examples": ["His book", "His idea", "His house"],
+    "frequency": 89
   },
-  "place": {
-    "definition": "A particular position or location",
-    "part_of_speech": "noun",
-    "examples": ["Nice place"]
+  "by": {
+    "definition": "Identifying the agent performing an action; near; through",
+    "part_of_speech": "preposition",
+    "phonetic": "baɪ",
+    "synonyms": ["through", "via"],
+    "antonyms": [],
+    "examples": ["Made by hand", "Travel by car", "By the river"],
+    "frequency": 88
   },
-  "play": {
-    "definition": "To engage in activity for enjoyment",
-    "part_of_speech": "verb",
-    "examples": ["Children love to play"]
+  "from": {
+    "definition": "Indicating the point in space or time at which something starts",
+    "part_of_speech": "preposition",
+    "phonetic": "frʌm",
+    "synonyms": ["out of", "away from"],
+    "antonyms": ["to", "toward"],
+    "examples": ["From home", "Letter from friend", "From now on"],
+    "frequency": 88
   },
-  "point": {
-    "definition": "A particular spot or position",
-    "part_of_speech": "noun",
-    "examples": ["Good point"]
+  "they": {
+    "definition": "Third person plural pronoun referring to people or things",
+    "part_of_speech": "pronoun",
+    "phonetic": "ðeɪ",
+    "synonyms": ["them"],
+    "antonyms": ["I", "we"],
+    "examples": ["They are here", "Where are they?", "They said so"],
+    "frequency": 87
   },
-  "problem": {
-    "definition": "A difficult situation requiring a solution",
-    "part_of_speech": "noun",
-    "examples": ["We have a problem to solve"]
-  },
-  "put": {
-    "definition": "To move to or place in a particular position",
-    "part_of_speech": "verb",
-    "examples": ["Put it down"]
-  },
-  "question": {
-    "definition": "A sentence asking for information",
-    "part_of_speech": "noun",
-    "examples": ["She asked a difficult question"]
-  },
-  "read": {
-    "definition": "To look at and understand written words",
-    "part_of_speech": "verb",
-    "examples": ["I read every day"]
-  },
-  "really": {
-    "definition": "In actual fact; very",
-    "part_of_speech": "adverb",
-    "examples": ["Really good"]
-  },
-  "right": {
-    "definition": "Morally good; correct; opposite of left",
-    "part_of_speech": "adjective",
-    "examples": ["Right answer"]
-  },
-  "run": {
-    "definition": "To move quickly on foot",
-    "part_of_speech": "verb",
-    "examples": ["I run every morning"]
-  },
-  "said": {
-    "definition": "Past tense of say",
-    "part_of_speech": "verb",
-    "examples": ["He said yes"]
-  },
-  "same": {
-    "definition": "Identical; not different",
-    "part_of_speech": "adjective",
-    "examples": ["Same time"]
+  "we": {
+    "definition": "First person plural pronoun including the speaker and others",
+    "part_of_speech": "pronoun",
+    "phonetic": "wiː",
+    "synonyms": ["us", "ourselves"],
+    "antonyms": ["they", "them"],
+    "examples": ["We are together", "We can do this", "We believe"],
+    "frequency": 87
   },
   "say": {
-    "definition": "To utter words",
+    "definition": "To utter words; to express in words",
     "part_of_speech": "verb",
-    "examples": ["Say hello"]
+    "phonetic": "seɪ",
+    "synonyms": ["speak", "tell", "utter"],
+    "antonyms": ["listen", "hear"],
+    "examples": ["Say hello", "What did you say?", "They say"],
+    "frequency": 86
   },
-  "school": {
-    "definition": "An institution for educating children",
-    "part_of_speech": "noun",
-    "examples": ["Go to school"]
-  },
-  "science": {
-    "definition": "The systematic study of the natural world",
-    "part_of_speech": "noun",
-    "examples": ["Science helps us understand the world"]
-  },
-  "see": {
-    "definition": "To perceive with the eyes",
-    "part_of_speech": "verb",
-    "examples": ["I see you"]
-  },
-  "seem": {
-    "definition": "To give the impression of being",
-    "part_of_speech": "verb",
-    "examples": ["Seem happy"]
-  },
-  "seven": {
-    "definition": "The number 7",
-    "part_of_speech": "number",
-    "examples": ["There are seven days in a week"]
+  "her": {
+    "definition": "Belonging to or associated with a female person; objective case of she",
+    "part_of_speech": "pronoun",
+    "phonetic": "hɜːr",
+    "synonyms": ["she"],
+    "antonyms": ["him", "his"],
+    "examples": ["I saw her", "Give it to her", "Her book"],
+    "frequency": 86
   },
   "she": {
     "definition": "Third person singular feminine pronoun",
     "part_of_speech": "pronoun",
-    "examples": ["She is smart"]
+    "phonetic": "ʃiː",
+    "synonyms": ["her"],
+    "antonyms": ["he", "him"],
+    "examples": ["She is smart", "Where is she?", "She said yes"],
+    "frequency": 85
   },
-  "should": {
-    "definition": "Used to indicate obligation or duty",
-    "part_of_speech": "verb",
-    "examples": ["You should try"]
-  },
-  "show": {
-    "definition": "To cause or allow to be visible",
-    "part_of_speech": "verb",
-    "examples": ["Show me the way"]
-  },
-  "six": {
-    "definition": "The number 6",
-    "part_of_speech": "number",
-    "examples": ["Six plus four equals ten"]
-  },
-  "small": {
-    "definition": "Of a size that is less than normal",
-    "part_of_speech": "adjective",
-    "examples": ["A small dog"]
-  },
-  "so": {
-    "definition": "To such a great extent",
-    "part_of_speech": "adverb",
-    "examples": ["So good"]
-  },
-  "some": {
-    "definition": "An unspecified amount or number",
-    "part_of_speech": "determiner",
-    "examples": ["Some people"]
-  },
-  "something": {
-    "definition": "A thing that is unspecified",
-    "part_of_speech": "pronoun",
-    "examples": ["Something good"]
-  },
-  "speak": {
-    "definition": "To say words; to talk",
-    "part_of_speech": "verb",
-    "examples": ["I speak three languages"]
-  },
-  "start": {
-    "definition": "To begin",
-    "part_of_speech": "verb",
-    "examples": ["Start the car"]
-  },
-  "still": {
-    "definition": "Up to and including the present time",
-    "part_of_speech": "adverb",
-    "examples": ["Still here"]
-  },
-  "stop": {
-    "definition": "To cease movement or operation",
-    "part_of_speech": "verb",
-    "examples": ["Stop the car"]
-  },
-  "study": {
-    "definition": "To learn about something",
-    "part_of_speech": "verb",
-    "examples": ["I study every evening"]
-  },
-  "system": {
-    "definition": "A set of connected things forming a complex whole",
-    "part_of_speech": "noun",
-    "examples": ["Computer system"]
-  },
-  "take": {
-    "definition": "To lay hold of; to carry",
-    "part_of_speech": "verb",
-    "examples": ["Take the book"]
-  },
-  "talk": {
-    "definition": "To speak in order to give information",
-    "part_of_speech": "verb",
-    "examples": ["Let's talk"]
-  },
-  "tell": {
-    "definition": "To communicate information to someone",
-    "part_of_speech": "verb",
-    "examples": ["Tell me a story"]
-  },
-  "ten": {
-    "definition": "The number 10",
-    "part_of_speech": "number",
-    "examples": ["I have ten dollars"]
-  },
-  "than": {
-    "definition": "Introducing the second element in a comparison",
+  "or": {
+    "definition": "Used to link alternatives; otherwise",
     "part_of_speech": "conjunction",
-    "examples": ["Better than"]
+    "phonetic": "ɔːr",
+    "synonyms": ["either", "alternatively"],
+    "antonyms": ["and", "both"],
+    "examples": ["Tea or coffee", "Now or never", "Yes or no"],
+    "frequency": 85
   },
-  "that": {
-    "definition": "Used to identify a specific person or thing",
-    "part_of_speech": "pronoun",
-    "examples": ["That is good"]
-  },
-  "the": {
-    "definition": "Definite article",
+  "an": {
+    "definition": "Indefinite article used before words beginning with vowel sounds",
     "part_of_speech": "article",
-    "examples": ["The book"]
+    "phonetic": "æn",
+    "synonyms": ["a"],
+    "antonyms": ["the"],
+    "examples": ["An apple", "An hour", "An idea"],
+    "frequency": 84
   },
-  "their": {
-    "definition": "Belonging to them",
+  "will": {
+    "definition": "Expressing future tense; determination or intention",
+    "part_of_speech": "modal verb",
+    "phonetic": "wɪl",
+    "synonyms": ["shall", "going to"],
+    "antonyms": ["won't", "refuse"],
+    "examples": ["I will go", "Will you help?", "Time will tell"],
+    "frequency": 84
+  },
+  "my": {
+    "definition": "Belonging to or associated with the speaker",
     "part_of_speech": "pronoun",
-    "examples": ["Their house"]
+    "phonetic": "maɪ",
+    "synonyms": ["mine"],
+    "antonyms": ["your", "their"],
+    "examples": ["My book", "My family", "My turn"],
+    "frequency": 83
   },
-  "them": {
-    "definition": "Used as the object referring to people or things",
-    "part_of_speech": "pronoun",
-    "examples": ["I saw them"]
+  "one": {
+    "definition": "The number 1; a single person or thing",
+    "part_of_speech": "number/pronoun",
+    "phonetic": "wʌn",
+    "synonyms": ["single", "individual"],
+    "antonyms": ["many", "multiple"],
+    "examples": ["One apple", "I have one question", "One day"],
+    "frequency": 83
   },
-  "then": {
-    "definition": "At that time; next",
-    "part_of_speech": "adverb",
-    "examples": ["Then what happened"]
+  "all": {
+    "definition": "Used to refer to the whole quantity or extent of something",
+    "part_of_speech": "determiner",
+    "phonetic": "ɔːl",
+    "synonyms": ["every", "entire", "whole"],
+    "antonyms": ["none", "some"],
+    "examples": ["All people are equal", "I ate all the food", "All day"],
+    "frequency": 82
+  },
+  "would": {
+    "definition": "Past tense of will; used to express conditional mood",
+    "part_of_speech": "modal verb",
+    "phonetic": "wʊd",
+    "synonyms": ["should", "could"],
+    "antonyms": ["wouldn't", "refuse"],
+    "examples": ["I would like", "Would you help?", "I would go"],
+    "frequency": 82
   },
   "there": {
-    "definition": "In, at, or to that place",
+    "definition": "In, at, or to that place or position",
     "part_of_speech": "adverb",
-    "examples": ["Go there"]
+    "phonetic": "ðer",
+    "synonyms": ["over there", "in that place"],
+    "antonyms": ["here", "nowhere"],
+    "examples": ["Go there", "There it is", "Over there"],
+    "frequency": 81
   },
-  "these": {
-    "definition": "Used to identify specific people or things close at hand",
+  "their": {
+    "definition": "Belonging to or associated with people or things previously mentioned",
     "part_of_speech": "pronoun",
-    "examples": ["These books"]
-  },
-  "they": {
-    "definition": "Third person plural pronoun",
-    "part_of_speech": "pronoun",
-    "examples": ["They are here"]
-  },
-  "thing": {
-    "definition": "An object that one need not name specifically",
-    "part_of_speech": "noun",
-    "examples": ["Good thing"]
-  },
-  "think": {
-    "definition": "To have a particular opinion or belief",
-    "part_of_speech": "verb",
-    "examples": ["I think so"]
-  },
-  "this": {
-    "definition": "Used to identify a specific person or thing close at hand",
-    "part_of_speech": "pronoun",
-    "examples": ["This is good"]
-  },
-  "those": {
-    "definition": "Used to identify specific people or things observed",
-    "part_of_speech": "pronoun",
-    "examples": ["Those people"]
-  },
-  "three": {
-    "definition": "The number 3",
-    "part_of_speech": "number",
-    "examples": ["I have three cats"]
-  },
-  "through": {
-    "definition": "Moving in one side and out of the other",
-    "part_of_speech": "preposition",
-    "examples": ["Through the door"]
-  },
-  "time": {
-    "definition": "The indefinite continued progress of existence",
-    "part_of_speech": "noun",
-    "examples": ["What time is it?"]
-  },
-  "to": {
-    "definition": "Expressing direction or position",
-    "part_of_speech": "preposition",
-    "examples": ["Go to school"]
-  },
-  "today": {
-    "definition": "On this present day",
-    "part_of_speech": "adverb",
-    "examples": ["I'm going shopping today"]
-  },
-  "together": {
-    "definition": "With each other",
-    "part_of_speech": "adverb",
-    "examples": ["Work together"]
-  },
-  "too": {
-    "definition": "To a higher degree than is desirable; also",
-    "part_of_speech": "adverb",
-    "examples": ["Too hot"]
-  },
-  "try": {
-    "definition": "To make an attempt or effort",
-    "part_of_speech": "verb",
-    "examples": ["Try again"]
-  },
-  "turn": {
-    "definition": "To move in a circular direction",
-    "part_of_speech": "verb",
-    "examples": ["Turn around"]
-  },
-  "two": {
-    "definition": "The number 2",
-    "part_of_speech": "number",
-    "examples": ["Two cats"]
-  },
-  "under": {
-    "definition": "Extending or directly below",
-    "part_of_speech": "preposition",
-    "examples": ["Under the table"]
-  },
-  "understand": {
-    "definition": "To comprehend the meaning of",
-    "part_of_speech": "verb",
-    "examples": ["I understand what you're saying"]
-  },
-  "until": {
-    "definition": "Up to the point in time or the event mentioned",
-    "part_of_speech": "preposition",
-    "examples": ["Wait until tomorrow"]
-  },
-  "up": {
-    "definition": "Towards a higher place or position",
-    "part_of_speech": "adverb",
-    "examples": ["Look up"]
-  },
-  "us": {
-    "definition": "Used by a speaker to refer to himself and others",
-    "part_of_speech": "pronoun",
-    "examples": ["Come with us"]
-  },
-  "use": {
-    "definition": "To take, hold, or deploy as a means of accomplishing something",
-    "part_of_speech": "verb",
-    "examples": ["Use the tool"]
-  },
-  "very": {
-    "definition": "Used for emphasis; to a high degree",
-    "part_of_speech": "adverb",
-    "examples": ["Very good"]
-  },
-  "want": {
-    "definition": "To have a desire to possess or do",
-    "part_of_speech": "verb",
-    "examples": ["I want ice cream"]
-  },
-  "water": {
-    "definition": "A colorless, transparent, odorless liquid",
-    "part_of_speech": "noun",
-    "examples": ["Drink water"]
-  },
-  "way": {
-    "definition": "A method, style, or manner of doing something",
-    "part_of_speech": "noun",
-    "examples": ["This way"]
-  },
-  "we": {
-    "definition": "First person plural pronoun",
-    "part_of_speech": "pronoun",
-    "examples": ["We are together"]
-  },
-  "well": {
-    "definition": "In a good or satisfactory way",
-    "part_of_speech": "adverb",
-    "examples": ["Well done"]
+    "phonetic": "ðer",
+    "synonyms": ["theirs"],
+    "antonyms": ["our", "my"],
+    "examples": ["Their house", "Their idea", "Their turn"],
+    "frequency": 81
   },
   "what": {
     "definition": "Asking for information specifying something",
     "part_of_speech": "pronoun",
-    "examples": ["What is this?"]
+    "phonetic": "wʌt",
+    "synonyms": ["which"],
+    "antonyms": [],
+    "examples": ["What is this?", "What do you want?", "What time"],
+    "frequency": 80
   },
-  "when": {
-    "definition": "At what time",
-    "part_of_speech": "adverb",
-    "examples": ["When will you come?"]
+  "up": {
+    "definition": "Towards a higher place or position; completely",
+    "part_of_speech": "adverb/preposition",
+    "phonetic": "ʌp",
+    "synonyms": ["upward", "above"],
+    "antonyms": ["down", "below"],
+    "examples": ["Look up", "Stand up", "Up there"],
+    "frequency": 80
   },
-  "where": {
-    "definition": "In or to what place or position",
-    "part_of_speech": "adverb",
-    "examples": ["Where are you?"]
+  "out": {
+    "definition": "Moving away from the inside; not at home or work",
+    "part_of_speech": "adverb/preposition",
+    "phonetic": "aʊt",
+    "synonyms": ["outside", "away"],
+    "antonyms": ["in", "inside"],
+    "examples": ["Go out", "Turn out", "Out there"],
+    "frequency": 79
   },
-  "which": {
-    "definition": "Used to introduce a defining clause",
-    "part_of_speech": "pronoun",
-    "examples": ["The book which I read"]
-  },
-  "while": {
-    "definition": "During the time that",
+  "if": {
+    "definition": "On the condition that; whether",
     "part_of_speech": "conjunction",
-    "examples": ["While you were sleeping"]
+    "phonetic": "ɪf",
+    "synonyms": ["whether", "supposing"],
+    "antonyms": ["definitely", "certainly"],
+    "examples": ["If it rains", "If you want", "What if"],
+    "frequency": 79
+  },
+  "about": {
+    "definition": "On the subject of; concerning; approximately",
+    "part_of_speech": "preposition",
+    "phonetic": "əˈbaʊt",
+    "synonyms": ["concerning", "regarding"],
+    "antonyms": [],
+    "examples": ["Talk about it", "About time", "About ten"],
+    "frequency": 78
   },
   "who": {
     "definition": "What or which person or people",
     "part_of_speech": "pronoun",
-    "examples": ["Who is there?"]
+    "phonetic": "huː",
+    "synonyms": ["whom"],
+    "antonyms": [],
+    "examples": ["Who is there?", "The person who called", "Who knows"],
+    "frequency": 78
+  },
+  "get": {
+    "definition": "Come to have or hold; receive; become",
+    "part_of_speech": "verb",
+    "phonetic": "ɡet",
+    "synonyms": ["obtain", "acquire", "receive"],
+    "antonyms": ["give", "lose"],
+    "examples": ["Get the book", "Get ready", "Get going"],
+    "frequency": 77
+  },
+  "which": {
+    "definition": "Used to introduce a defining or non-defining relative clause",
+    "part_of_speech": "pronoun",
+    "phonetic": "wɪtʃ",
+    "synonyms": ["that", "what"],
+    "antonyms": [],
+    "examples": ["The book which I read", "Which one?", "Which way"],
+    "frequency": 77
+  },
+  "go": {
+    "definition": "Move from one place to another; travel; leave",
+    "part_of_speech": "verb",
+    "phonetic": "ɡoʊ",
+    "synonyms": ["travel", "move", "proceed"],
+    "antonyms": ["stay", "remain"],
+    "examples": ["Go home", "Let's go", "Go away"],
+    "frequency": 76
+  },
+  "me": {
+    "definition": "Used by a speaker to refer to himself or herself as object",
+    "part_of_speech": "pronoun",
+    "phonetic": "miː",
+    "synonyms": ["myself"],
+    "antonyms": ["you"],
+    "examples": ["Give it to me", "Help me", "Me too"],
+    "frequency": 76
+  },
+  "when": {
+    "definition": "At what time; at the time that",
+    "part_of_speech": "adverb/conjunction",
+    "phonetic": "wen",
+    "synonyms": ["at what time"],
+    "antonyms": [],
+    "examples": ["When will you come?", "When I was young", "When ready"],
+    "frequency": 75
+  },
+  "make": {
+    "definition": "Form something by putting parts together; cause to happen",
+    "part_of_speech": "verb",
+    "phonetic": "meɪk",
+    "synonyms": ["create", "build", "produce"],
+    "antonyms": ["destroy", "break"],
+    "examples": ["Make dinner", "Make a decision", "Make it work"],
+    "frequency": 75
+  },
+  "can": {
+    "definition": "Be able to; have permission to",
+    "part_of_speech": "modal verb",
+    "phonetic": "kæn",
+    "synonyms": ["able", "capable"],
+    "antonyms": ["cannot", "unable"],
+    "examples": ["I can swim", "Can you help?", "Can do"],
+    "frequency": 74
+  },
+  "like": {
+    "definition": "Having similar characteristics; find agreeable or enjoyable",
+    "part_of_speech": "preposition/verb",
+    "phonetic": "laɪk",
+    "synonyms": ["similar to", "enjoy"],
+    "antonyms": ["unlike", "dislike"],
+    "examples": ["Like this", "I like it", "Looks like"],
+    "frequency": 74
+  },
+  "time": {
+    "definition": "The indefinite continued progress of existence and events",
+    "part_of_speech": "noun",
+    "phonetic": "taɪm",
+    "synonyms": ["period", "duration", "moment"],
+    "antonyms": ["timeless", "eternal"],
+    "examples": ["What time is it?", "Time flies", "Good time"],
+    "frequency": 73
+  },
+  "no": {
+    "definition": "Used to give a negative response; not any",
+    "part_of_speech": "exclamation/determiner",
+    "phonetic": "noʊ",
+    "synonyms": ["not", "none"],
+    "antonyms": ["yes", "some"],
+    "examples": ["No problem", "No way", "No time"],
+    "frequency": 73
+  },
+  "just": {
+    "definition": "Exactly; recently; only; fair and reasonable",
+    "part_of_speech": "adverb/adjective",
+    "phonetic": "dʒʌst",
+    "synonyms": ["only", "merely", "fair"],
+    "antonyms": ["unjust", "unfair"],
+    "examples": ["Just now", "Just right", "Just do it"],
+    "frequency": 72
+  },
+  "him": {
+    "definition": "Used as the object of a verb or preposition to refer to a male",
+    "part_of_speech": "pronoun",
+    "phonetic": "hɪm",
+    "synonyms": ["he"],
+    "antonyms": ["her"],
+    "examples": ["I saw him", "Give it to him", "Tell him"],
+    "frequency": 72
+  },
+  "know": {
+    "definition": "Be aware of through observation, inquiry, or information",
+    "part_of_speech": "verb",
+    "phonetic": "noʊ",
+    "synonyms": ["understand", "realize", "comprehend"],
+    "antonyms": ["ignore", "unknown"],
+    "examples": ["I know the answer", "Know yourself", "You know"],
+    "frequency": 71
+  },
+  "take": {
+    "definition": "Lay hold of; carry or bring with one; require",
+    "part_of_speech": "verb",
+    "phonetic": "teɪk",
+    "synonyms": ["grab", "seize", "pick up"],
+    "antonyms": ["give", "leave"],
+    "examples": ["Take the book", "Take your time", "Take care"],
+    "frequency": 71
+  },
+  "people": {
+    "definition": "Human beings in general or considered collectively",
+    "part_of_speech": "noun",
+    "phonetic": "piːpəl",
+    "synonyms": ["individuals", "persons", "humans"],
+    "antonyms": ["animals", "things"],
+    "examples": ["Many people", "Good people", "People say"],
+    "frequency": 70
+  },
+  "into": {
+    "definition": "Expressing movement or action with result of being enclosed",
+    "part_of_speech": "preposition",
+    "phonetic": "ˈɪntuː",
+    "synonyms": ["inside", "within"],
+    "antonyms": ["out of", "from"],
+    "examples": ["Go into the house", "Turn into", "Look into"],
+    "frequency": 70
+  },
+  "year": {
+    "definition": "A period of twelve months; age of a person",
+    "part_of_speech": "noun",
+    "phonetic": "jɪr",
+    "synonyms": ["annum", "twelve months"],
+    "antonyms": ["day", "month"],
+    "examples": ["This year", "New Year", "Ten years old"],
+    "frequency": 69
+  },
+  "your": {
+    "definition": "Belonging to or associated with the person being addressed",
+    "part_of_speech": "pronoun",
+    "phonetic": "jʊr",
+    "synonyms": ["yours"],
+    "antonyms": ["my", "our"],
+    "examples": ["Your book", "Your turn", "Your choice"],
+    "frequency": 69
+  },
+  "good": {
+    "definition": "To be desired or approved of; having required qualities",
+    "part_of_speech": "adjective",
+    "phonetic": "ɡʊd",
+    "synonyms": ["excellent", "fine", "great"],
+    "antonyms": ["bad", "poor"],
+    "examples": ["Good job", "Good morning", "Feel good"],
+    "frequency": 68
+  },
+  "some": {
+    "definition": "An unspecified amount or number of; at least one",
+    "part_of_speech": "determiner",
+    "phonetic": "sʌm",
+    "synonyms": ["a few", "several"],
+    "antonyms": ["none", "all"],
+    "examples": ["Some people", "Some time", "Give me some"],
+    "frequency": 68
+  },
+  "could": {
+    "definition": "Past tense of can; used to indicate possibility",
+    "part_of_speech": "modal verb",
+    "phonetic": "kʊd",
+    "synonyms": ["might", "would be able to"],
+    "antonyms": ["couldn't", "unable"],
+    "examples": ["I could help", "Could you please", "Could be"],
+    "frequency": 67
+  },
+  "them": {
+    "definition": "Used as the object of a verb or preposition to refer to people or things",
+    "part_of_speech": "pronoun",
+    "phonetic": "ðem",
+    "synonyms": ["they"],
+    "antonyms": ["us"],
+    "examples": ["I saw them", "Give it to them", "Tell them"],
+    "frequency": 67
+  },
+  "see": {
+    "definition": "Perceive with the eyes; discern visually; understand",
+    "part_of_speech": "verb",
+    "phonetic": "siː",
+    "synonyms": ["observe", "view", "watch"],
+    "antonyms": ["blind", "ignore"],
+    "examples": ["I see you", "See the movie", "I see what you mean"],
+    "frequency": 66
+  },
+  "other": {
+    "definition": "Used to refer to a different or distinct person or thing",
+    "part_of_speech": "determiner/pronoun",
+    "phonetic": "ˈʌðər",
+    "synonyms": ["different", "alternative"],
+    "antonyms": ["same", "identical"],
+    "examples": ["Other people", "The other day", "Each other"],
+    "frequency": 66
+  },
+  "than": {
+    "definition": "Introducing the second element in a comparison",
+    "part_of_speech": "conjunction",
+    "phonetic": "ðæn",
+    "synonyms": ["compared to", "rather than"],
+    "antonyms": [],
+    "examples": ["Better than", "More than", "Rather than"],
+    "frequency": 65
+  },
+  "then": {
+    "definition": "At that time; next; in that case",
+    "part_of_speech": "adverb",
+    "phonetic": "ðen",
+    "synonyms": ["next", "afterwards"],
+    "antonyms": ["now", "before"],
+    "examples": ["Then what happened", "See you then", "If then"],
+    "frequency": 65
+  },
+  "now": {
+    "definition": "At the present time or moment",
+    "part_of_speech": "adverb",
+    "phonetic": "naʊ",
+    "synonyms": ["currently", "presently", "at this moment"],
+    "antonyms": ["then", "later"],
+    "examples": ["Right now", "Now or never", "Now what"],
+    "frequency": 64
+  },
+  "look": {
+    "definition": "Direct one's gaze toward; have the appearance of",
+    "part_of_speech": "verb",
+    "phonetic": "lʊk",
+    "synonyms": ["see", "observe", "watch"],
+    "antonyms": ["ignore", "avoid"],
+    "examples": ["Look at me", "Look around", "Look good"],
+    "frequency": 64
+  },
+  "only": {
+    "definition": "And no one or nothing more besides; exclusively",
+    "part_of_speech": "adverb/adjective",
+    "phonetic": "ˈoʊnli",
+    "synonyms": ["just", "merely", "solely"],
+    "antonyms": ["also", "additionally"],
+    "examples": ["Only you", "Only time", "If only"],
+    "frequency": 63
+  },
+  "come": {
+    "definition": "Move or travel toward or into a place; arrive",
+    "part_of_speech": "verb",
+    "phonetic": "kʌm",
+    "synonyms": ["arrive", "approach"],
+    "antonyms": ["go", "leave"],
+    "examples": ["Come here", "Come home", "Come on"],
+    "frequency": 63
+  },
+  "its": {
+    "definition": "Belonging to or associated with a thing previously mentioned",
+    "part_of_speech": "pronoun",
+    "phonetic": "ɪts",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["The dog wagged its tail", "Its color", "On its own"],
+    "frequency": 62
+  },
+  "over": {
+    "definition": "Extending directly upward from; more than; finished",
+    "part_of_speech": "preposition/adverb",
+    "phonetic": "ˈoʊvər",
+    "synonyms": ["above", "across"],
+    "antonyms": ["under", "below"],
+    "examples": ["Over the bridge", "Over there", "Game over"],
+    "frequency": 62
+  },
+  "think": {
+    "definition": "Have a particular opinion, belief, or idea; use one's mind",
+    "part_of_speech": "verb",
+    "phonetic": "θɪŋk",
+    "synonyms": ["believe", "consider", "ponder"],
+    "antonyms": ["ignore", "dismiss"],
+    "examples": ["I think so", "Think about it", "Think hard"],
+    "frequency": 61
+  },
+  "also": {
+    "definition": "In addition; too; as well",
+    "part_of_speech": "adverb",
+    "phonetic": "ˈɔːlsoʊ",
+    "synonyms": ["too", "as well", "additionally"],
+    "antonyms": ["only", "exclusively"],
+    "examples": ["I also agree", "Also important", "Also known as"],
+    "frequency": 61
+  },
+  "work": {
+    "definition": "Activity involving mental or physical effort; be employed",
+    "part_of_speech": "noun/verb",
+    "phonetic": "wɜːrk",
+    "synonyms": ["job", "labor", "employment"],
+    "antonyms": ["rest", "leisure"],
+    "examples": ["Go to work", "Hard work", "Work together"],
+    "frequency": 60
+  },
+  "life": {
+    "definition": "The condition that distinguishes animals and plants from inorganic matter",
+    "part_of_speech": "noun",
+    "phonetic": "laɪf",
+    "synonyms": ["existence", "living"],
+    "antonyms": ["death"],
+    "examples": ["Life is good", "Real life", "Life story"],
+    "frequency": 59
+  },
+  "way": {
+    "definition": "A method, style, or manner of doing something; path or route",
+    "part_of_speech": "noun",
+    "phonetic": "weɪ",
+    "synonyms": ["method", "manner", "path"],
+    "antonyms": ["obstacle", "barrier"],
+    "examples": ["This way", "The right way", "Way to go"],
+    "frequency": 59
+  },
+  "may": {
+    "definition": "Expressing possibility; asking for or giving permission",
+    "part_of_speech": "modal verb",
+    "phonetic": "meɪ",
+    "synonyms": ["might", "could"],
+    "antonyms": ["cannot", "will not"],
+    "examples": ["It may rain", "May I help?", "May be"],
+    "frequency": 58
+  },
+  "back": {
+    "definition": "In the direction that is the reverse of forward; return",
+    "part_of_speech": "adverb/noun",
+    "phonetic": "bæk",
+    "synonyms": ["return", "behind"],
+    "antonyms": ["forward", "front"],
+    "examples": ["Come back", "Back home", "Back door"],
+    "frequency": 58
+  },
+  "through": {
+    "definition": "Moving in one side and out of the other; by way of",
+    "part_of_speech": "preposition",
+    "phonetic": "θruː",
+    "synonyms": ["via", "across"],
+    "antonyms": ["around", "avoiding"],
+    "examples": ["Through the door", "Through time", "Go through"],
+    "frequency": 57
+  },
+  "day": {
+    "definition": "A period of twenty-four hours; the time of light between sunrise and sunset",
+    "part_of_speech": "noun",
+    "phonetic": "deɪ",
+    "synonyms": ["date", "twenty-four hours"],
+    "antonyms": ["night", "evening"],
+    "examples": ["Good day", "Every day", "Day and night"],
+    "frequency": 57
+  },
+  "use": {
+    "definition": "Take, hold, or deploy as a means of accomplishing something",
+    "part_of_speech": "verb/noun",
+    "phonetic": "juːz",
+    "synonyms": ["employ", "utilize", "apply"],
+    "antonyms": ["disuse", "ignore"],
+    "examples": ["Use the tool", "Use your brain", "Good use"],
+    "frequency": 56
+  },
+  "man": {
+    "definition": "An adult male human being",
+    "part_of_speech": "noun",
+    "phonetic": "mæn",
+    "synonyms": ["male", "gentleman", "guy"],
+    "antonyms": ["woman", "female"],
+    "examples": ["The man walked", "He is a good man", "Old man"],
+    "frequency": 55
+  },
+  "new": {
+    "definition": "Not existing before; made, introduced, or discovered recently",
+    "part_of_speech": "adjective",
+    "phonetic": "nuː",
+    "synonyms": ["fresh", "recent", "modern"],
+    "antonyms": ["old", "ancient"],
+    "examples": ["New car", "New idea", "Brand new"],
+    "frequency": 55
+  },
+  "here": {
+    "definition": "In, at, or to this place or position",
+    "part_of_speech": "adverb",
+    "phonetic": "hɪr",
+    "synonyms": ["in this place"],
+    "antonyms": ["there", "elsewhere"],
+    "examples": ["Come here", "Here it is", "Right here"],
+    "frequency": 54
+  },
+  "old": {
+    "definition": "Having lived for a long time; no longer young; former",
+    "part_of_speech": "adjective",
+    "phonetic": "oʊld",
+    "synonyms": ["aged", "elderly", "ancient"],
+    "antonyms": ["young", "new", "fresh"],
+    "examples": ["Old man", "Old times", "How old"],
+    "frequency": 54
+  },
+  "two": {
+    "definition": "The number 2; equivalent to the sum of one and one",
+    "part_of_speech": "number",
+    "phonetic": "tuː",
+    "synonyms": ["pair", "couple"],
+    "antonyms": ["one", "single"],
+    "examples": ["Two cats", "I need two minutes", "Two by two"],
+    "frequency": 52
+  },
+  "how": {
+    "definition": "In what way or manner; by what means; to what extent",
+    "part_of_speech": "adverb",
+    "phonetic": "haʊ",
+    "synonyms": ["in what way"],
+    "antonyms": [],
+    "examples": ["How are you?", "How does it work?", "How much"],
+    "frequency": 52
+  },
+  "our": {
+    "definition": "Belonging to or associated with the speaker and one or more others",
+    "part_of_speech": "pronoun",
+    "phonetic": "aʊr",
+    "synonyms": ["ours"],
+    "antonyms": ["their", "your"],
+    "examples": ["Our house", "Our time", "Our turn"],
+    "frequency": 51
+  },
+  "has": {
+    "definition": "Third person singular present of have; possesses",
+    "part_of_speech": "verb",
+    "phonetic": "hæz",
+    "synonyms": ["owns", "possesses"],
+    "antonyms": ["lacks", "needs"],
+    "examples": ["He has a car", "She has time", "It has been"],
+    "frequency": 49
+  },
+  "had": {
+    "definition": "Past tense of have; possessed in the past",
+    "part_of_speech": "verb",
+    "phonetic": "hæd",
+    "synonyms": ["possessed", "owned"],
+    "antonyms": ["lacked", "needed"],
+    "examples": ["I had lunch", "She had a car", "Had been there"],
+    "frequency": 48
+  },
+  "let": {
+    "definition": "Allow to; not prevent or forbid; used to make suggestions",
+    "part_of_speech": "verb",
+    "phonetic": "let",
+    "synonyms": ["allow", "permit"],
+    "antonyms": ["prevent", "forbid"],
+    "examples": ["Let me help", "Let's go", "Let it be"],
+    "frequency": 48
+  },
+  "put": {
+    "definition": "Move to or place in a particular position",
+    "part_of_speech": "verb",
+    "phonetic": "pʊt",
+    "synonyms": ["place", "set", "position"],
+    "antonyms": ["remove", "take away"],
+    "examples": ["Put it down", "Put on clothes", "Put together"],
+    "frequency": 47
+  },
+  "too": {
+    "definition": "To a higher degree than is desirable; also; in addition",
+    "part_of_speech": "adverb",
+    "phonetic": "tuː",
+    "synonyms": ["also", "as well", "excessively"],
+    "antonyms": ["not enough", "insufficient"],
+    "examples": ["Too hot", "Me too", "Too much"],
+    "frequency": 47
   },
   "why": {
-    "definition": "For what reason or purpose",
+    "definition": "For what reason or purpose; the reason for which",
     "part_of_speech": "adverb",
-    "examples": ["Why did you do that?"]
+    "phonetic": "waɪ",
+    "synonyms": ["for what reason"],
+    "antonyms": [],
+    "examples": ["Why did you do that?", "That's why", "Why not"],
+    "frequency": 46
   },
-  "will": {
-    "definition": "Expressing future tense",
-    "part_of_speech": "verb",
-    "examples": ["I will go"]
+  "great": {
+    "definition": "Of ability, quality, or eminence considerably above average",
+    "part_of_speech": "adjective",
+    "phonetic": "ɡreɪt",
+    "synonyms": ["excellent", "wonderful", "fantastic"],
+    "antonyms": ["terrible", "awful", "poor"],
+    "examples": ["Great job", "Great idea", "Feel great"],
+    "frequency": 45
   },
-  "with": {
-    "definition": "Accompanied by; having",
-    "part_of_speech": "preposition",
-    "examples": ["Come with me"]
+  "same": {
+    "definition": "Identical; not different; unchanged",
+    "part_of_speech": "adjective/pronoun",
+    "phonetic": "seɪm",
+    "synonyms": ["identical", "equal"],
+    "antonyms": ["different", "other"],
+    "examples": ["Same time", "The same", "Same here"],
+    "frequency": 44
   },
-  "without": {
-    "definition": "In the absence of",
-    "part_of_speech": "preposition",
-    "examples": ["Without you"]
+  "big": {
+    "definition": "Of considerable size, extent, or intensity",
+    "part_of_speech": "adjective",
+    "phonetic": "bɪɡ",
+    "synonyms": ["large", "huge", "enormous", "massive"],
+    "antonyms": ["small", "tiny", "little"],
+    "examples": ["A big house", "This is a big problem", "Big deal"],
+    "frequency": 44
+  },
+  "group": {
+    "definition": "A number of people or things that are located, gathered, or classed together",
+    "part_of_speech": "noun",
+    "phonetic": "ɡruːp",
+    "synonyms": ["team", "collection", "set"],
+    "antonyms": ["individual", "single"],
+    "examples": ["Group of friends", "Work group", "Group together"],
+    "frequency": 43
   },
   "woman": {
     "definition": "An adult female human being",
     "part_of_speech": "noun",
-    "examples": ["The woman smiled"]
-  },
-  "word": {
-    "definition": "A single distinct meaningful element of speech",
-    "part_of_speech": "noun",
-    "examples": ["Good word"]
-  },
-  "work": {
-    "definition": "Activity involving mental or physical effort",
-    "part_of_speech": "noun",
-    "examples": ["Go to work"]
+    "phonetic": "ˈwʊmən",
+    "synonyms": ["female", "lady", "girl"],
+    "antonyms": ["man", "male"],
+    "examples": ["The woman smiled", "She is a strong woman", "Young woman"],
+    "frequency": 43
   },
   "world": {
-    "definition": "The earth, together with all of its countries",
+    "definition": "The earth, together with all of its countries and peoples",
     "part_of_speech": "noun",
-    "examples": ["Around the world"]
+    "phonetic": "wɜːrld",
+    "synonyms": ["earth", "globe", "planet"],
+    "antonyms": ["space", "universe"],
+    "examples": ["Around the world", "World peace", "Real world"],
+    "frequency": 42
   },
-  "would": {
-    "definition": "Past tense of will; expressing conditional mood",
+  "school": {
+    "definition": "An institution for educating children or adults",
+    "part_of_speech": "noun",
+    "phonetic": "skuːl",
+    "synonyms": ["academy", "institution", "college"],
+    "antonyms": ["home", "workplace"],
+    "examples": ["Go to school", "School day", "High school"],
+    "frequency": 42
+  },
+  "still": {
+    "definition": "Up to and including the present time; nevertheless",
+    "part_of_speech": "adverb",
+    "phonetic": "stɪl",
+    "synonyms": ["yet", "even now", "however"],
+    "antonyms": ["no longer", "moving"],
+    "examples": ["Still here", "Still working", "Still life"],
+    "frequency": 41
+  },
+  "try": {
+    "definition": "Make an attempt or effort to do something",
     "part_of_speech": "verb",
-    "examples": ["I would like"]
+    "phonetic": "traɪ",
+    "synonyms": ["attempt", "endeavor", "strive"],
+    "antonyms": ["quit", "give up"],
+    "examples": ["Try again", "Try your best", "Nice try"],
+    "frequency": 41
+  },
+  "last": {
+    "definition": "Coming after all others in time or order; most recent",
+    "part_of_speech": "adjective/adverb",
+    "phonetic": "læst",
+    "synonyms": ["final", "latest", "recent"],
+    "antonyms": ["first", "initial"],
+    "examples": ["Last time", "At last", "Last night"],
+    "frequency": 40
+  },
+  "ask": {
+    "definition": "Say something in order to obtain an answer or information",
+    "part_of_speech": "verb",
+    "phonetic": "æsk",
+    "synonyms": ["inquire", "question", "request"],
+    "antonyms": ["answer", "tell"],
+    "examples": ["Ask a question", "Ask for help", "Don't ask"],
+    "frequency": 40
+  },
+  "kind": {
+    "definition": "Having or showing a friendly, generous, or considerate nature",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "kaɪnd",
+    "synonyms": ["nice", "gentle", "caring"],
+    "antonyms": ["cruel", "mean", "harsh"],
+    "examples": ["Kind person", "What kind", "Be kind"],
+    "frequency": 39
+  },
+  "hand": {
+    "definition": "The end part of a person's arm beyond the wrist",
+    "part_of_speech": "noun",
+    "phonetic": "hænd",
+    "synonyms": ["palm", "fist"],
+    "antonyms": ["foot"],
+    "examples": ["Raise your hand", "Shake hands", "On hand"],
+    "frequency": 39
+  },
+  "high": {
+    "definition": "Of great vertical extent; far above ground or sea level",
+    "part_of_speech": "adjective",
+    "phonetic": "haɪ",
+    "synonyms": ["tall", "elevated", "lofty"],
+    "antonyms": ["low", "short"],
+    "examples": ["High mountain", "High school", "High quality"],
+    "frequency": 38
+  },
+  "country": {
+    "definition": "A nation with its own government, occupying a particular territory",
+    "part_of_speech": "noun",
+    "phonetic": "ˈkʌntri",
+    "synonyms": ["nation", "state", "land"],
+    "antonyms": ["city", "town"],
+    "examples": ["My country", "Country music", "Foreign country"],
+    "frequency": 38
+  },
+  "point": {
+    "definition": "A particular spot, place, or position; the tapered end of something",
+    "part_of_speech": "noun/verb",
+    "phonetic": "pɔɪnt",
+    "synonyms": ["spot", "location", "tip"],
+    "antonyms": ["blunt", "dull"],
+    "examples": ["Good point", "Point out", "Starting point"],
+    "frequency": 37
+  },
+  "small": {
+    "definition": "Of a size that is less than normal or usual",
+    "part_of_speech": "adjective",
+    "phonetic": "smɔːl",
+    "synonyms": ["little", "tiny", "minute"],
+    "antonyms": ["big", "large", "huge"],
+    "examples": ["A small dog", "Small details matter", "Small world"],
+    "frequency": 37
+  },
+  "turn": {
+    "definition": "Move in a circular direction; change direction",
+    "part_of_speech": "verb/noun",
+    "phonetic": "tɜːrn",
+    "synonyms": ["rotate", "spin", "change"],
+    "antonyms": ["straight", "continue"],
+    "examples": ["Turn around", "Your turn", "Turn on"],
+    "frequency": 36
+  },
+  "right": {
+    "definition": "Morally good; correct; the opposite of left",
+    "part_of_speech": "adjective/adverb/noun",
+    "phonetic": "raɪt",
+    "synonyms": ["correct", "proper", "good"],
+    "antonyms": ["wrong", "left", "bad"],
+    "examples": ["Right answer", "Turn right", "Human rights"],
+    "frequency": 36
+  },
+  "move": {
+    "definition": "Go in a specified direction; change position",
+    "part_of_speech": "verb/noun",
+    "phonetic": "muːv",
+    "synonyms": ["go", "shift", "relocate"],
+    "antonyms": ["stay", "remain", "stop"],
+    "examples": ["Move forward", "Good move", "Move house"],
+    "frequency": 35
+  },
+  "thing": {
+    "definition": "An object that one need not, cannot, or does not wish to give a specific name to",
+    "part_of_speech": "noun",
+    "phonetic": "θɪŋ",
+    "synonyms": ["object", "item", "matter"],
+    "antonyms": ["person", "being"],
+    "examples": ["Good thing", "The thing is", "Many things"],
+    "frequency": 35
+  },
+  "place": {
+    "definition": "A particular position, point, or area in space; a location",
+    "part_of_speech": "noun/verb",
+    "phonetic": "pleɪs",
+    "synonyms": ["location", "spot", "position"],
+    "antonyms": ["nowhere", "remove"],
+    "examples": ["Nice place", "Take place", "In place"],
+    "frequency": 34
+  },
+  "own": {
+    "definition": "Belonging to oneself; possess as property",
+    "part_of_speech": "adjective/verb",
+    "phonetic": "oʊn",
+    "synonyms": ["possess", "have", "personal"],
+    "antonyms": ["rent", "borrow", "shared"],
+    "examples": ["My own", "Own a house", "On your own"],
+    "frequency": 34
+  },
+  "where": {
+    "definition": "In or to what place or position",
+    "part_of_speech": "adverb",
+    "phonetic": "wer",
+    "synonyms": ["in which place"],
+    "antonyms": [],
+    "examples": ["Where are you?", "Where to go", "Know where"],
+    "frequency": 33
+  },
+  "much": {
+    "definition": "A large amount of; to a great extent",
+    "part_of_speech": "determiner/adverb",
+    "phonetic": "mʌtʃ",
+    "synonyms": ["a lot", "many", "greatly"],
+    "antonyms": ["little", "few", "slightly"],
+    "examples": ["How much", "Too much", "Much better"],
+    "frequency": 32
+  },
+  "every": {
+    "definition": "Used to refer to all the individual members of a set",
+    "part_of_speech": "determiner",
+    "phonetic": "ˈevri",
+    "synonyms": ["each", "all"],
+    "antonyms": ["no", "none"],
+    "examples": ["Every day", "Every person", "Every time"],
+    "frequency": 32
+  },
+  "those": {
+    "definition": "Used to identify specific people or things observed or heard",
+    "part_of_speech": "pronoun/determiner",
+    "phonetic": "ðoʊz",
+    "synonyms": ["these"],
+    "antonyms": ["this", "that"],
+    "examples": ["Those people", "One of those", "Those days"],
+    "frequency": 31
+  },
+  "water": {
+    "definition": "A colorless, transparent, odorless liquid that forms seas, lakes, rivers",
+    "part_of_speech": "noun",
+    "phonetic": "ˈwɔːtər",
+    "synonyms": ["liquid", "H2O"],
+    "antonyms": ["fire", "dry"],
+    "examples": ["Drink water", "Water flows", "Hot water"],
+    "frequency": 30
+  },
+  "long": {
+    "definition": "Measuring a great distance from end to end; for a long time",
+    "part_of_speech": "adjective/adverb",
+    "phonetic": "lɔːŋ",
+    "synonyms": ["lengthy", "extended", "far"],
+    "antonyms": ["short", "brief"],
+    "examples": ["Long road", "Long time", "How long"],
+    "frequency": 30
+  },
+  "little": {
+    "definition": "Small in size, amount, or degree; young",
+    "part_of_speech": "adjective/adverb",
+    "phonetic": "ˈlɪtəl",
+    "synonyms": ["small", "tiny", "young"],
+    "antonyms": ["big", "large", "much"],
+    "examples": ["Little house", "A little", "Little bit"],
+    "frequency": 29
+  },
+  "very": {
+    "definition": "Used for emphasis; to a high degree",
+    "part_of_speech": "adverb",
+    "phonetic": "ˈveri",
+    "synonyms": ["extremely", "really", "quite"],
+    "antonyms": ["slightly", "barely"],
+    "examples": ["Very good", "Very much", "Very well"],
+    "frequency": 29
+  },
+  "after": {
+    "definition": "In the time following an event; behind in place",
+    "part_of_speech": "preposition/adverb",
+    "phonetic": "ˈæftər",
+    "synonyms": ["following", "subsequent to"],
+    "antonyms": ["before", "prior to"],
+    "examples": ["After dinner", "After school", "Day after"],
+    "frequency": 28
+  },
+  "word": {
+    "definition": "A single distinct meaningful element of speech or writing",
+    "part_of_speech": "noun",
+    "phonetic": "wɜːrd",
+    "synonyms": ["term", "expression", "vocabulary"],
+    "antonyms": ["silence"],
+    "examples": ["Good word", "Word of mouth", "Last word"],
+    "frequency": 28
+  },
+  "house": {
+    "definition": "A building for human habitation; a family or dynasty",
+    "part_of_speech": "noun",
+    "phonetic": "haʊs",
+    "synonyms": ["home", "residence", "dwelling"],
+    "antonyms": ["outdoors", "street"],
+    "examples": ["My house", "House party", "White House"],
+    "frequency": 27
+  },
+  "never": {
+    "definition": "At no time in the past or future; not ever",
+    "part_of_speech": "adverb",
+    "phonetic": "ˈnevər",
+    "synonyms": ["not ever", "at no time"],
+    "antonyms": ["always", "ever"],
+    "examples": ["Never again", "Never mind", "Never say never"],
+    "frequency": 26
+  },
+  "another": {
+    "definition": "Used to refer to an additional person or thing of the same type",
+    "part_of_speech": "determiner/pronoun",
+    "phonetic": "əˈnʌðər",
+    "synonyms": ["additional", "different", "other"],
+    "antonyms": ["same", "identical"],
+    "examples": ["Another day", "One another", "Another time"],
+    "frequency": 26
+  },
+  "seem": {
+    "definition": "Give the impression of being something or having a quality",
+    "part_of_speech": "verb",
+    "phonetic": "siːm",
+    "synonyms": ["appear", "look", "sound"],
+    "antonyms": ["be", "actually"],
+    "examples": ["Seem happy", "It seems right", "Seem like"],
+    "frequency": 25
+  },
+  "something": {
+    "definition": "A thing that is unspecified or unknown",
+    "part_of_speech": "pronoun",
+    "phonetic": "ˈsʌmθɪŋ",
+    "synonyms": ["anything", "some thing"],
+    "antonyms": ["nothing"],
+    "examples": ["Something good", "Something else", "Do something"],
+    "frequency": 25
+  },
+  "need": {
+    "definition": "Require something because it is essential or very important",
+    "part_of_speech": "verb/noun",
+    "phonetic": "niːd",
+    "synonyms": ["require", "want", "necessity"],
+    "antonyms": ["have", "possess"],
+    "examples": ["Need help", "In need", "Need to go"],
+    "frequency": 24
+  },
+  "well": {
+    "definition": "In a good or satisfactory way; in good health",
+    "part_of_speech": "adverb/adjective",
+    "phonetic": "wel",
+    "synonyms": ["good", "fine", "healthy"],
+    "antonyms": ["badly", "poorly", "sick"],
+    "examples": ["Well done", "Feel well", "Very well"],
+    "frequency": 24
+  },
+  "large": {
+    "definition": "Of considerable or relatively great size, extent, or capacity",
+    "part_of_speech": "adjective",
+    "phonetic": "lɑːrdʒ",
+    "synonyms": ["big", "huge", "enormous"],
+    "antonyms": ["small", "tiny", "little"],
+    "examples": ["Large house", "Large number", "By and large"],
+    "frequency": 23
+  },
+  "must": {
+    "definition": "Used to indicate obligation, duty, or correctness",
+    "part_of_speech": "modal verb",
+    "phonetic": "mʌst",
+    "synonyms": ["have to", "should", "ought to"],
+    "antonyms": ["mustn't", "needn't"],
+    "examples": ["Must go", "Must be", "Must have"],
+    "frequency": 23
+  },
+  "even": {
+    "definition": "Used to emphasize something surprising; flat and smooth",
+    "part_of_speech": "adverb/adjective",
+    "phonetic": "ˈiːvən",
+    "synonyms": ["also", "flat", "level"],
+    "antonyms": ["odd", "uneven"],
+    "examples": ["Even better", "Even number", "Even so"],
+    "frequency": 22
+  },
+  "such": {
+    "definition": "Of the type previously mentioned; to so high a degree",
+    "part_of_speech": "determiner/pronoun",
+    "phonetic": "sʌtʃ",
+    "synonyms": ["like that", "so much"],
+    "antonyms": ["different", "unlike"],
+    "examples": ["Such a day", "Such as", "No such thing"],
+    "frequency": 21
+  },
+  "because": {
+    "definition": "For the reason that; since",
+    "part_of_speech": "conjunction",
+    "phonetic": "bɪˈkɔːz",
+    "synonyms": ["since", "as", "due to"],
+    "antonyms": ["despite", "although"],
+    "examples": ["Because of you", "Just because", "Because I said so"],
+    "frequency": 21
+  },
+  "three": {
+    "definition": "The number 3",
+    "part_of_speech": "number",
+    "phonetic": "θri",
+    "synonyms": ["trio", "triple"],
+    "antonyms": [],
+    "examples": ["I have three cats", "Count to three"],
+    "frequency": 80
+  },
+  "four": {
+    "definition": "The number 4",
+    "part_of_speech": "number",
+    "phonetic": "fɔr",
+    "synonyms": ["quartet"],
+    "antonyms": [],
+    "examples": ["There are four seasons", "I need four apples"],
+    "frequency": 75
+  },
+  "five": {
+    "definition": "The number 5",
+    "part_of_speech": "number",
+    "phonetic": "faɪv",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["I have five fingers", "Give me five minutes"],
+    "frequency": 75
+  },
+  "six": {
+    "definition": "The number 6",
+    "part_of_speech": "number",
+    "phonetic": "sɪks",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["Six plus four equals ten", "I wake up at six"],
+    "frequency": 70
+  },
+  "seven": {
+    "definition": "The number 7",
+    "part_of_speech": "number",
+    "phonetic": "ˈsɛvən",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["There are seven days in a week", "Lucky number seven"],
+    "frequency": 70
+  },
+  "eight": {
+    "definition": "The number 8",
+    "part_of_speech": "number",
+    "phonetic": "eɪt",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["I have eight books", "Eight is an even number"],
+    "frequency": 70
+  },
+  "nine": {
+    "definition": "The number 9",
+    "part_of_speech": "number",
+    "phonetic": "naɪn",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["Nine plus one equals ten", "I work nine hours"],
+    "frequency": 70
+  },
+  "ten": {
+    "definition": "The number 10",
+    "part_of_speech": "number",
+    "phonetic": "tɛn",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["I have ten dollars", "Count to ten"],
+    "frequency": 75
+  },
+  "hundred": {
+    "definition": "The number 100",
+    "part_of_speech": "number",
+    "phonetic": "ˈhʌndrəd",
+    "synonyms": ["century"],
+    "antonyms": [],
+    "examples": ["One hundred people came", "I have a hundred books"],
+    "frequency": 70
+  },
+  "thousand": {
+    "definition": "The number 1000",
+    "part_of_speech": "number",
+    "phonetic": "ˈθaʊzənd",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["A thousand stars shine", "I saved a thousand dollars"],
+    "frequency": 65
+  },
+  "million": {
+    "definition": "The number 1,000,000",
+    "part_of_speech": "number",
+    "phonetic": "ˈmɪljən",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["A million people live here", "I wish I had a million dollars"],
+    "frequency": 65
+  },
+  "hello": {
+    "definition": "A greeting used when meeting someone",
+    "part_of_speech": "interjection",
+    "phonetic": "həˈloʊ",
+    "synonyms": ["hi", "hey", "greetings", "salutations"],
+    "antonyms": ["goodbye", "farewell"],
+    "examples": ["Hello, how are you today?", "She gave a warm hello to everyone"],
+    "frequency": 100
+  },
+  "conversation": {
+    "definition": "An informal talk between two or more people",
+    "part_of_speech": "noun",
+    "phonetic": "ˌkɑnvərˈseɪʃən",
+    "synonyms": ["discussion", "dialogue", "chat", "talk"],
+    "antonyms": ["silence", "monologue"],
+    "examples": ["We had a long conversation about books", "The art of conversation is dying"],
+    "frequency": 85
+  },
+  "understand": {
+    "definition": "To comprehend the meaning of something",
+    "part_of_speech": "verb",
+    "phonetic": "ˌʌndərˈstænd",
+    "synonyms": ["comprehend", "grasp", "perceive", "realize"],
+    "antonyms": ["misunderstand", "confuse"],
+    "examples": ["I understand what you're saying", "She understands French very well"],
+    "frequency": 95
+  },
+  "artificial": {
+    "definition": "Made by humans rather than occurring naturally",
+    "part_of_speech": "adjective",
+    "phonetic": "ˌɑrtəˈfɪʃəl",
+    "synonyms": ["synthetic", "man-made", "manufactured", "fake"],
+    "antonyms": ["natural", "genuine", "authentic"],
+    "examples": ["Artificial intelligence is advancing rapidly", "The flowers looked artificial"],
+    "frequency": 70
+  },
+  "intelligence": {
+    "definition": "The ability to learn, understand, and think",
+    "part_of_speech": "noun",
+    "phonetic": "ɪnˈtɛlədʒəns",
+    "synonyms": ["intellect", "wisdom", "knowledge", "understanding"],
+    "antonyms": ["ignorance", "stupidity"],
+    "examples": ["Human intelligence is remarkable", "Military intelligence reports"],
+    "frequency": 80
+  },
+  "learn": {
+    "definition": "To acquire knowledge or skill",
+    "part_of_speech": "verb",
+    "phonetic": "lɜrn",
+    "synonyms": ["study", "master", "acquire", "absorb"],
+    "antonyms": ["forget", "unlearn"],
+    "examples": ["Children learn quickly", "I learned about the meeting yesterday"],
+    "frequency": 95
+  },
+  "knowledge": {
+    "definition": "Information and understanding gained through experience",
+    "part_of_speech": "noun",
+    "phonetic": "ˈnɑlɪdʒ",
+    "synonyms": ["information", "understanding", "wisdom", "learning"],
+    "antonyms": ["ignorance", "unawareness"],
+    "examples": ["She has extensive knowledge of history", "To my knowledge, he's never been here"],
+    "frequency": 85
+  },
+  "question": {
+    "definition": "A sentence asking for information",
+    "part_of_speech": "noun",
+    "phonetic": "ˈkwɛstʃən",
+    "synonyms": ["inquiry", "query", "interrogation"],
+    "antonyms": ["answer", "response"],
+    "examples": ["She asked a difficult question", "I question his motives"],
+    "frequency": 90
+  },
+  "answer": {
+    "definition": "A response to a question",
+    "part_of_speech": "noun",
+    "phonetic": "ˈænsər",
+    "synonyms": ["response", "reply", "solution"],
+    "antonyms": ["question", "inquiry"],
+    "examples": ["The answer is correct", "Please answer the phone"],
+    "frequency": 90
+  },
+  "explain": {
+    "definition": "To make something clear by describing it",
+    "part_of_speech": "verb",
+    "phonetic": "ɪkˈspleɪn",
+    "synonyms": ["clarify", "describe", "elucidate", "interpret"],
+    "antonyms": ["confuse", "obscure"],
+    "examples": ["Can you explain how this works?", "He explained his absence"],
+    "frequency": 85
+  },
+  "interesting": {
+    "definition": "Arousing curiosity or attention",
+    "part_of_speech": "adjective",
+    "phonetic": "ˈɪntrəstɪŋ",
+    "synonyms": ["fascinating", "engaging", "intriguing", "captivating"],
+    "antonyms": ["boring", "dull", "uninteresting"],
+    "examples": ["That's an interesting idea", "She's a very interesting person"],
+    "frequency": 85
+  },
+  "important": {
+    "definition": "Having great significance or value",
+    "part_of_speech": "adjective",
+    "phonetic": "ɪmˈpɔrtənt",
+    "synonyms": ["significant", "crucial", "vital", "essential"],
+    "antonyms": ["unimportant", "trivial", "insignificant"],
+    "examples": ["This is an important decision", "She's an important person in the company"],
+    "frequency": 90
+  },
+  "help": {
+    "definition": "To assist or aid someone",
+    "part_of_speech": "verb",
+    "phonetic": "hɛlp",
+    "synonyms": ["assist", "aid", "support", "facilitate"],
+    "antonyms": ["hinder", "obstruct", "harm"],
+    "examples": ["Can you help me with this?", "I need help with my homework"],
+    "frequency": 95
+  },
+  "problem": {
+    "definition": "A difficult situation requiring a solution",
+    "part_of_speech": "noun",
+    "phonetic": "ˈprɑbləm",
+    "synonyms": ["issue", "difficulty", "challenge", "dilemma"],
+    "antonyms": ["solution", "answer"],
+    "examples": ["We have a problem to solve", "Math problems can be challenging"],
+    "frequency": 90
+  },
+  "solution": {
+    "definition": "An answer to a problem",
+    "part_of_speech": "noun",
+    "phonetic": "səˈluʃən",
+    "synonyms": ["answer", "resolution", "remedy", "fix"],
+    "antonyms": ["problem", "issue"],
+    "examples": ["We found a solution to the issue", "A salt solution in water"],
+    "frequency": 80
+  },
+  "experience": {
+    "definition": "Knowledge gained through practice",
+    "part_of_speech": "noun",
+    "phonetic": "ɪkˈspɪriəns",
+    "synonyms": ["knowledge", "expertise", "background", "encounter"],
+    "antonyms": ["inexperience", "naivety"],
+    "examples": ["She has years of experience", "I experienced great joy"],
+    "frequency": 85
+  },
+  "different": {
+    "definition": "Not the same as another",
+    "part_of_speech": "adjective",
+    "phonetic": "ˈdɪfərənt",
+    "synonyms": ["distinct", "separate", "unlike", "varied"],
+    "antonyms": ["same", "identical", "similar"],
+    "examples": ["These two books are different", "We have different opinions"],
+    "frequency": 90
+  },
+  "similar": {
+    "definition": "Having a resemblance without being identical",
+    "part_of_speech": "adjective",
+    "phonetic": "ˈsɪmələr",
+    "synonyms": ["alike", "comparable", "resembling", "parallel"],
+    "antonyms": ["different", "distinct", "unlike"],
+    "examples": ["Our ideas are similar", "They have similar backgrounds"],
+    "frequency": 85
+  },
+  "example": {
+    "definition": "A thing that illustrates a general rule",
+    "part_of_speech": "noun",
+    "phonetic": "ɪgˈzæmpəl",
+    "synonyms": ["instance", "illustration", "sample", "case"],
+    "antonyms": [],
+    "examples": ["Can you give me an example?", "She's a good example to follow"],
+    "frequency": 85
+  },
+  "information": {
+    "definition": "Facts or details about something",
+    "part_of_speech": "noun",
+    "phonetic": "ˌɪnfərˈmeɪʃən",
+    "synonyms": ["data", "facts", "details", "knowledge"],
+    "antonyms": ["misinformation", "ignorance"],
+    "examples": ["I need more information about this topic", "The computer processes information quickly"],
+    "frequency": 90
+  },
+  "happy": {
+    "definition": "Feeling joy or pleasure",
+    "part_of_speech": "adjective",
+    "phonetic": "ˈhæpi",
+    "synonyms": ["joyful", "glad", "cheerful", "content"],
+    "antonyms": ["sad", "unhappy", "miserable"],
+    "examples": ["I'm happy to see you", "She's happy with her job"],
+    "frequency": 90
+  },
+  "sad": {
+    "definition": "Feeling sorrow or unhappiness",
+    "part_of_speech": "adjective",
+    "phonetic": "sæd",
+    "synonyms": ["unhappy", "sorrowful", "melancholy", "dejected"],
+    "antonyms": ["happy", "joyful", "cheerful"],
+    "examples": ["She felt sad about leaving", "It's a sad story"],
+    "frequency": 85
+  },
+  "excited": {
+    "definition": "Feeling enthusiastic and eager",
+    "part_of_speech": "adjective",
+    "phonetic": "ɪkˈsaɪtəd",
+    "synonyms": ["enthusiastic", "thrilled", "eager", "animated"],
+    "antonyms": ["calm", "bored", "indifferent"],
+    "examples": ["I'm excited about the trip", "The excited crowd cheered loudly"],
+    "frequency": 80
+  },
+  "today": {
+    "definition": "On this present day",
+    "part_of_speech": "adverb",
+    "phonetic": "təˈdeɪ",
+    "synonyms": ["now", "presently"],
+    "antonyms": ["yesterday", "tomorrow"],
+    "examples": ["I'm going shopping today", "Today is a beautiful day"],
+    "frequency": 95
+  },
+  "tomorrow": {
+    "definition": "On the day after today",
+    "part_of_speech": "adverb",
+    "phonetic": "təˈmɔroʊ",
+    "synonyms": ["next day"],
+    "antonyms": ["yesterday", "today"],
+    "examples": ["I'll see you tomorrow", "Tomorrow will be better"],
+    "frequency": 90
+  },
+  "yesterday": {
+    "definition": "On the day before today",
+    "part_of_speech": "adverb",
+    "phonetic": "ˈjɛstərdeɪ",
+    "synonyms": ["previous day"],
+    "antonyms": ["tomorrow", "today"],
+    "examples": ["I saw him yesterday", "Yesterday seems so long ago"],
+    "frequency": 85
+  },
+  "science": {
+    "definition": "The systematic study of the natural world through observation and experiment",
+    "part_of_speech": "noun",
+    "phonetic": "ˈsaɪəns",
+    "synonyms": ["knowledge", "research", "study", "investigation"],
+    "antonyms": ["ignorance", "superstition"],
+    "examples": ["Science helps us understand the world", "She studies computer science"],
+    "frequency": 85
+  },
+  "mathematics": {
+    "definition": "The study of numbers, quantities, and shapes",
+    "part_of_speech": "noun",
+    "phonetic": "ˌmæθəˈmætɪks",
+    "synonyms": ["math", "arithmetic", "calculation", "numbers"],
+    "antonyms": [],
+    "examples": ["Mathematics is essential for engineering", "I enjoy solving mathematics problems"],
+    "frequency": 80
+  },
+  "calculate": {
+    "definition": "To determine by mathematical computation",
+    "part_of_speech": "verb",
+    "phonetic": "ˈkælkjəˌleɪt",
+    "synonyms": ["compute", "figure", "determine", "work out"],
+    "antonyms": ["estimate", "guess"],
+    "examples": ["Calculate the total cost", "I need to calculate the distance"],
+    "frequency": 75
+  },
+  "computer": {
+    "definition": "An electronic device for processing and storing data",
+    "part_of_speech": "noun",
+    "phonetic": "kəmˈpjutər",
+    "synonyms": ["machine", "device", "processor", "system"],
+    "antonyms": [],
+    "examples": ["I use my computer for work", "The computer is very fast"],
+    "frequency": 90
+  },
+  "technology": {
+    "definition": "The application of scientific knowledge for practical purposes",
+    "part_of_speech": "noun",
+    "phonetic": "tɛkˈnɑlədʒi",
+    "synonyms": ["innovation", "advancement", "engineering", "science"],
+    "antonyms": ["tradition", "primitive"],
+    "examples": ["Technology changes rapidly", "New technology improves our lives"],
+    "frequency": 85
+  },
+  "remember": {
+    "definition": "To recall or bring back to mind",
+    "part_of_speech": "verb",
+    "phonetic": "rɪˈmɛmbər",
+    "synonyms": ["recall", "recollect", "reminisce", "retain"],
+    "antonyms": ["forget", "ignore"],
+    "examples": ["I remember our first meeting", "Please remember to call me"],
+    "frequency": 90
+  },
+  "forget": {
+    "definition": "To fail to remember",
+    "part_of_speech": "verb",
+    "phonetic": "fərˈɡɛt",
+    "synonyms": ["overlook", "omit", "neglect"],
+    "antonyms": ["remember", "recall"],
+    "examples": ["Don't forget your keys", "I forgot his name"],
+    "frequency": 85
+  },
+  "friend": {
+    "definition": "A person you know well and like",
+    "part_of_speech": "noun",
+    "phonetic": "frɛnd",
+    "synonyms": ["companion", "buddy", "pal", "mate"],
+    "antonyms": ["enemy", "foe", "stranger"],
+    "examples": ["She is my best friend", "I made a new friend today"],
+    "frequency": 90
+  },
+  "family": {
+    "definition": "A group of people related by blood or marriage",
+    "part_of_speech": "noun",
+    "phonetic": "ˈfæməli",
+    "synonyms": ["relatives", "kin", "household", "clan"],
+    "antonyms": ["strangers", "outsiders"],
+    "examples": ["My family is very supportive", "We're having a family dinner"],
+    "frequency": 95
+  },
+  "love": {
+    "definition": "A strong feeling of affection",
+    "part_of_speech": "noun/verb",
+    "phonetic": "lʌv",
+    "synonyms": ["affection", "adoration", "care", "devotion"],
+    "antonyms": ["hate", "dislike", "loathe"],
+    "examples": ["I love my family", "Love conquers all"],
+    "frequency": 95
+  },
+  "music": {
+    "definition": "Sounds arranged in a pleasing way",
+    "part_of_speech": "noun",
+    "phonetic": "ˈmjuzɪk",
+    "synonyms": ["melody", "harmony", "song", "tune"],
+    "antonyms": ["noise", "silence"],
+    "examples": ["I enjoy listening to music", "She plays beautiful music"],
+    "frequency": 85
+  },
+  "book": {
+    "definition": "A written work published in printed or electronic form",
+    "part_of_speech": "noun",
+    "phonetic": "bʊk",
+    "synonyms": ["volume", "text", "publication", "novel"],
+    "antonyms": [],
+    "examples": ["I'm reading a good book", "This book is very interesting"],
+    "frequency": 90
+  },
+  "read": {
+    "definition": "To look at and understand written words",
+    "part_of_speech": "verb",
+    "phonetic": "rid",
+    "synonyms": ["study", "peruse", "scan", "examine"],
+    "antonyms": ["write", "ignore"],
+    "examples": ["I read every day", "Can you read this?"],
+    "frequency": 95
   },
   "write": {
     "definition": "To form letters or words on a surface",
     "part_of_speech": "verb",
-    "examples": ["I write in my journal"]
+    "phonetic": "raɪt",
+    "synonyms": ["compose", "author", "pen", "script"],
+    "antonyms": ["read", "erase"],
+    "examples": ["I write in my journal", "Please write your name"],
+    "frequency": 90
   },
-  "year": {
-    "definition": "A period of twelve months",
+  "speak": {
+    "definition": "To say words; to talk",
+    "part_of_speech": "verb",
+    "phonetic": "spik",
+    "synonyms": ["talk", "say", "utter", "voice"],
+    "antonyms": ["listen", "silence"],
+    "examples": ["I speak three languages", "Please speak clearly"],
+    "frequency": 90
+  },
+  "listen": {
+    "definition": "To pay attention to sound",
+    "part_of_speech": "verb",
+    "phonetic": "ˈlɪsən",
+    "synonyms": ["hear", "attend", "heed"],
+    "antonyms": ["ignore", "speak"],
+    "examples": ["Listen to the music", "I listen carefully"],
+    "frequency": 85
+  },
+  "watch": {
+    "definition": "To look at something for a period of time",
+    "part_of_speech": "verb/noun",
+    "phonetic": "wɑtʃ",
+    "synonyms": ["observe", "view", "see", "monitor"],
+    "antonyms": ["ignore", "overlook"],
+    "examples": ["Watch the movie", "I watch TV every evening"],
+    "frequency": 85
+  },
+  "eat": {
+    "definition": "To consume food",
+    "part_of_speech": "verb",
+    "phonetic": "it",
+    "synonyms": ["consume", "devour", "dine"],
+    "antonyms": ["fast", "starve"],
+    "examples": ["I eat breakfast every morning", "Let's eat dinner together"],
+    "frequency": 95
+  },
+  "drink": {
+    "definition": "To consume liquid",
+    "part_of_speech": "verb/noun",
+    "phonetic": "drɪŋk",
+    "synonyms": ["sip", "consume", "imbibe"],
+    "antonyms": ["abstain"],
+    "examples": ["Drink plenty of water", "I need a drink"],
+    "frequency": 90
+  },
+  "sleep": {
+    "definition": "To rest with eyes closed and mind inactive",
+    "part_of_speech": "verb/noun",
+    "phonetic": "slip",
+    "synonyms": ["rest", "slumber", "doze"],
+    "antonyms": ["wake", "awaken"],
+    "examples": ["I sleep eight hours a night", "Good sleep is important"],
+    "frequency": 90
+  },
+  "walk": {
+    "definition": "To move on foot at a regular pace",
+    "part_of_speech": "verb/noun",
+    "phonetic": "wɔk",
+    "synonyms": ["stroll", "stride", "step"],
+    "antonyms": ["run", "sit"],
+    "examples": ["I walk to work", "Let's take a walk"],
+    "frequency": 85
+  },
+  "run": {
+    "definition": "To move quickly on foot",
+    "part_of_speech": "verb/noun",
+    "phonetic": "rʌn",
+    "synonyms": ["sprint", "jog", "dash"],
+    "antonyms": ["walk", "stop"],
+    "examples": ["I run every morning", "He can run very fast"],
+    "frequency": 85
+  },
+  "play": {
+    "definition": "To engage in activity for enjoyment",
+    "part_of_speech": "verb/noun",
+    "phonetic": "pleɪ",
+    "synonyms": ["game", "sport", "fun"],
+    "antonyms": ["work", "study"],
+    "examples": ["Children love to play", "Let's play a game"],
+    "frequency": 90
+  },
+  "study": {
+    "definition": "To learn about something",
+    "part_of_speech": "verb/noun",
+    "phonetic": "ˈstʌdi",
+    "synonyms": ["learn", "research", "examine"],
+    "antonyms": ["ignore", "neglect"],
+    "examples": ["I study every evening", "This is an interesting study"],
+    "frequency": 85
+  },
+  "teach": {
+    "definition": "To give knowledge or instruction",
+    "part_of_speech": "verb",
+    "phonetic": "titʃ",
+    "synonyms": ["instruct", "educate", "train"],
+    "antonyms": ["learn", "study"],
+    "examples": ["I teach mathematics", "She teaches children"],
+    "frequency": 80
+  },
+  "student": {
+    "definition": "A person who is learning",
     "part_of_speech": "noun",
-    "examples": ["This year"]
+    "phonetic": "ˈstudənt",
+    "synonyms": ["pupil", "learner", "scholar"],
+    "antonyms": ["teacher", "instructor"],
+    "examples": ["I am a student", "The student asked a question"],
+    "frequency": 85
   },
-  "yes": {
-    "definition": "Used to give an affirmative response",
-    "part_of_speech": "exclamation",
-    "examples": ["Yes, I agree"]
+  "teacher": {
+    "definition": "A person who teaches",
+    "part_of_speech": "noun",
+    "phonetic": "ˈtitʃər",
+    "synonyms": ["instructor", "educator", "professor"],
+    "antonyms": ["student", "pupil"],
+    "examples": ["My teacher is very kind", "The teacher explained the lesson"],
+    "frequency": 85
   },
-  "yet": {
-    "definition": "Up until now or then",
-    "part_of_speech": "adverb",
-    "examples": ["Not yet"]
+  "doctor": {
+    "definition": "A person qualified to practice medicine",
+    "part_of_speech": "noun",
+    "phonetic": "ˈdɑktər",
+    "synonyms": ["physician", "medic", "practitioner"],
+    "antonyms": ["patient"],
+    "examples": ["I need to see a doctor", "The doctor examined the patient"],
+    "frequency": 80
   },
-  "you": {
-    "definition": "Second person pronoun",
-    "part_of_speech": "pronoun",
-    "examples": ["You are kind"]
+  "hospital": {
+    "definition": "A place where sick people receive medical treatment",
+    "part_of_speech": "noun",
+    "phonetic": "ˈhɑspɪtəl",
+    "synonyms": ["clinic", "medical center", "infirmary"],
+    "antonyms": [],
+    "examples": ["He was taken to the hospital", "The hospital has good doctors"],
+    "frequency": 75
   },
-  "young": {
-    "definition": "Having lived for a relatively short time",
+  "car": {
+    "definition": "A motor vehicle with four wheels",
+    "part_of_speech": "noun",
+    "phonetic": "kɑr",
+    "synonyms": ["automobile", "vehicle", "auto"],
+    "antonyms": [],
+    "examples": ["I drive my car to work", "That's a nice car"],
+    "frequency": 90
+  },
+  "train": {
+    "definition": "A series of connected railway cars",
+    "part_of_speech": "noun/verb",
+    "phonetic": "treɪn",
+    "synonyms": ["locomotive", "railway"],
+    "antonyms": [],
+    "examples": ["I take the train to work", "The train arrived on time"],
+    "frequency": 80
+  },
+  "plane": {
+    "definition": "An aircraft with wings and engines",
+    "part_of_speech": "noun",
+    "phonetic": "pleɪn",
+    "synonyms": ["airplane", "aircraft", "jet"],
+    "antonyms": [],
+    "examples": ["The plane took off", "I'm flying on a plane"],
+    "frequency": 75
+  },
+  "travel": {
+    "definition": "To go from one place to another",
+    "part_of_speech": "verb/noun",
+    "phonetic": "ˈtrævəl",
+    "synonyms": ["journey", "trip", "voyage"],
+    "antonyms": ["stay", "remain"],
+    "examples": ["I love to travel", "Travel broadens the mind"],
+    "frequency": 80
+  },
+  "city": {
+    "definition": "A large town with many people",
+    "part_of_speech": "noun",
+    "phonetic": "ˈsɪti",
+    "synonyms": ["town", "metropolis", "urban area"],
+    "antonyms": ["countryside", "village"],
+    "examples": ["I live in the city", "The city is very busy"],
+    "frequency": 85
+  },
+  "beautiful": {
+    "definition": "Pleasing to look at; attractive",
     "part_of_speech": "adjective",
-    "examples": ["Young person"]
+    "phonetic": "ˈbjutəfəl",
+    "synonyms": ["lovely", "gorgeous", "stunning"],
+    "antonyms": ["ugly", "hideous"],
+    "examples": ["She is beautiful", "What a beautiful day!"],
+    "frequency": 85
   },
-  "your": {
-    "definition": "Belonging to you",
-    "part_of_speech": "pronoun",
-    "examples": ["Your book"]
+  "ugly": {
+    "definition": "Unpleasant to look at",
+    "part_of_speech": "adjective",
+    "phonetic": "ˈʌɡli",
+    "synonyms": ["hideous", "unattractive"],
+    "antonyms": ["beautiful", "pretty"],
+    "examples": ["That's an ugly building", "Don't be ugly to others"],
+    "frequency": 70
+  },
+  "smart": {
+    "definition": "Having intelligence; clever",
+    "part_of_speech": "adjective",
+    "phonetic": "smɑrt",
+    "synonyms": ["intelligent", "clever", "bright"],
+    "antonyms": ["stupid", "dumb"],
+    "examples": ["She is very smart", "That was a smart decision"],
+    "frequency": 80
+  },
+  "stupid": {
+    "definition": "Lacking intelligence",
+    "part_of_speech": "adjective",
+    "phonetic": "ˈstupəd",
+    "synonyms": ["dumb", "foolish", "ignorant"],
+    "antonyms": ["smart", "intelligent"],
+    "examples": ["That was a stupid mistake", "Don't be stupid"],
+    "frequency": 70
+  },
+  "fast": {
+    "definition": "Moving or happening quickly",
+    "part_of_speech": "adjective/adverb",
+    "phonetic": "fæst",
+    "synonyms": ["quick", "rapid", "speedy"],
+    "antonyms": ["slow", "sluggish"],
+    "examples": ["He runs fast", "That's a fast car"],
+    "frequency": 80
+  },
+  "slow": {
+    "definition": "Not moving or happening quickly",
+    "part_of_speech": "adjective/adverb",
+    "phonetic": "sloʊ",
+    "synonyms": ["sluggish", "gradual"],
+    "antonyms": ["fast", "quick"],
+    "examples": ["The turtle is slow", "Please drive slow"],
+    "frequency": 75
+  },
+  "hot": {
+    "definition": "Having a high temperature",
+    "part_of_speech": "adjective",
+    "phonetic": "hɑt",
+    "synonyms": ["warm", "heated", "burning"],
+    "antonyms": ["cold", "cool"],
+    "examples": ["It's hot today", "The coffee is hot"],
+    "frequency": 85
+  },
+  "cold": {
+    "definition": "Having a low temperature",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "koʊld",
+    "synonyms": ["cool", "chilly", "freezing"],
+    "antonyms": ["hot", "warm"],
+    "examples": ["It's cold outside", "I have a cold"],
+    "frequency": 85
+  },
+  "weather": {
+    "definition": "The atmospheric conditions",
+    "part_of_speech": "noun",
+    "phonetic": "ˈwɛðər",
+    "synonyms": ["climate", "conditions"],
+    "antonyms": [],
+    "examples": ["The weather is nice today", "What's the weather like?"],
+    "frequency": 80
+  },
+  "sun": {
+    "definition": "The star that gives Earth light and heat",
+    "part_of_speech": "noun",
+    "phonetic": "sʌn",
+    "synonyms": ["sunshine", "daylight"],
+    "antonyms": ["moon", "darkness"],
+    "examples": ["The sun is shining", "I love sunny days"],
+    "frequency": 80
+  },
+  "moon": {
+    "definition": "The natural satellite of Earth",
+    "part_of_speech": "noun",
+    "phonetic": "mun",
+    "synonyms": ["lunar"],
+    "antonyms": ["sun"],
+    "examples": ["The moon is full tonight", "I can see the moon"],
+    "frequency": 75
+  },
+  "star": {
+    "definition": "A luminous celestial body",
+    "part_of_speech": "noun",
+    "phonetic": "stɑr",
+    "synonyms": ["celestial body"],
+    "antonyms": [],
+    "examples": ["I wish upon a star", "The stars are bright tonight"],
+    "frequency": 75
+  },
+  "earth": {
+    "definition": "The planet we live on",
+    "part_of_speech": "noun",
+    "phonetic": "ɜrθ",
+    "synonyms": ["world", "planet", "globe"],
+    "antonyms": ["space", "heaven"],
+    "examples": ["Earth is our home", "We must protect the Earth"],
+    "frequency": 80
+  },
+  "ocean": {
+    "definition": "A large body of salt water",
+    "part_of_speech": "noun",
+    "phonetic": "ˈoʊʃən",
+    "synonyms": ["sea", "waters"],
+    "antonyms": ["land", "desert"],
+    "examples": ["The ocean is vast", "I love swimming in the ocean"],
+    "frequency": 75
+  },
+  "mountain": {
+    "definition": "A large natural elevation of land",
+    "part_of_speech": "noun",
+    "phonetic": "ˈmaʊntən",
+    "synonyms": ["peak", "hill"],
+    "antonyms": ["valley", "plain"],
+    "examples": ["The mountain is tall", "We climbed the mountain"],
+    "frequency": 70
+  },
+  "river": {
+    "definition": "A large flowing body of water",
+    "part_of_speech": "noun",
+    "phonetic": "ˈrɪvər",
+    "synonyms": ["stream", "waterway"],
+    "antonyms": ["desert", "land"],
+    "examples": ["The river flows to the sea", "We crossed the river"],
+    "frequency": 70
+  },
+  "tree": {
+    "definition": "A large plant with a trunk and branches",
+    "part_of_speech": "noun",
+    "phonetic": "tri",
+    "synonyms": ["plant", "timber"],
+    "antonyms": [],
+    "examples": ["The tree is tall", "Birds live in trees"],
+    "frequency": 75
+  },
+  "flower": {
+    "definition": "The colorful part of a plant",
+    "part_of_speech": "noun",
+    "phonetic": "ˈflaʊər",
+    "synonyms": ["blossom", "bloom"],
+    "antonyms": [],
+    "examples": ["The flower is beautiful", "I picked a flower"],
+    "frequency": 70
+  },
+  "animal": {
+    "definition": "A living creature that can move",
+    "part_of_speech": "noun",
+    "phonetic": "ˈænəməl",
+    "synonyms": ["creature", "beast"],
+    "antonyms": ["plant", "human"],
+    "examples": ["The animal is wild", "I love animals"],
+    "frequency": 80
+  },
+  "dog": {
+    "definition": "A domesticated carnivorous mammal",
+    "part_of_speech": "noun",
+    "phonetic": "dɔɡ",
+    "synonyms": ["canine", "hound", "puppy"],
+    "antonyms": ["cat"],
+    "examples": ["My dog is friendly", "The dog barked loudly"],
+    "frequency": 85
+  },
+  "cat": {
+    "definition": "A small domesticated carnivorous mammal",
+    "part_of_speech": "noun",
+    "phonetic": "kæt",
+    "synonyms": ["feline", "kitten"],
+    "antonyms": ["dog"],
+    "examples": ["The cat is sleeping", "I have a pet cat"],
+    "frequency": 80
+  },
+  "bird": {
+    "definition": "A warm-blooded animal with feathers and wings",
+    "part_of_speech": "noun",
+    "phonetic": "bɜrd",
+    "synonyms": ["fowl", "avian"],
+    "antonyms": [],
+    "examples": ["The bird can fly", "I heard a bird singing"],
+    "frequency": 75
+  },
+  "fish": {
+    "definition": "A cold-blooded aquatic animal with gills",
+    "part_of_speech": "noun/verb",
+    "phonetic": "fɪʃ",
+    "synonyms": ["seafood"],
+    "antonyms": [],
+    "examples": ["The fish swims in water", "I like to fish"],
+    "frequency": 75
+  },
+  "food": {
+    "definition": "Substances consumed for nutrition",
+    "part_of_speech": "noun",
+    "phonetic": "fud",
+    "synonyms": ["nourishment", "meal", "cuisine"],
+    "antonyms": ["poison"],
+    "examples": ["I love Italian food", "Food is essential for life"],
+    "frequency": 90
+  },
+  "bread": {
+    "definition": "A baked food made from flour and water",
+    "part_of_speech": "noun",
+    "phonetic": "brɛd",
+    "synonyms": ["loaf"],
+    "antonyms": [],
+    "examples": ["I eat bread for breakfast", "Fresh bread smells good"],
+    "frequency": 75
+  },
+  "milk": {
+    "definition": "A white liquid produced by mammals",
+    "part_of_speech": "noun",
+    "phonetic": "mɪlk",
+    "synonyms": ["dairy"],
+    "antonyms": [],
+    "examples": ["I drink milk every day", "Milk is good for bones"],
+    "frequency": 80
+  },
+  "coffee": {
+    "definition": "A hot drink made from roasted beans",
+    "part_of_speech": "noun",
+    "phonetic": "ˈkɔfi",
+    "synonyms": ["java", "brew"],
+    "antonyms": ["tea"],
+    "examples": ["I drink coffee in the morning", "This coffee is strong"],
+    "frequency": 80
+  },
+  "tea": {
+    "definition": "A hot drink made from dried leaves",
+    "part_of_speech": "noun",
+    "phonetic": "ti",
+    "synonyms": ["brew"],
+    "antonyms": ["coffee"],
+    "examples": ["I prefer tea over coffee", "Green tea is healthy"],
+    "frequency": 75
+  },
+  "money": {
+    "definition": "A medium of exchange; currency",
+    "part_of_speech": "noun",
+    "phonetic": "ˈmʌni",
+    "synonyms": ["cash", "currency", "funds"],
+    "antonyms": ["debt"],
+    "examples": ["I need money to buy food", "Money can't buy happiness"],
+    "frequency": 90
+  },
+  "buy": {
+    "definition": "To purchase something with money",
+    "part_of_speech": "verb",
+    "phonetic": "baɪ",
+    "synonyms": ["purchase", "acquire"],
+    "antonyms": ["sell", "return"],
+    "examples": ["I want to buy a car", "Let's buy some groceries"],
+    "frequency": 85
+  },
+  "sell": {
+    "definition": "To give something in exchange for money",
+    "part_of_speech": "verb",
+    "phonetic": "sɛl",
+    "synonyms": ["trade", "market"],
+    "antonyms": ["buy", "purchase"],
+    "examples": ["I want to sell my bike", "They sell fresh fruit"],
+    "frequency": 80
+  },
+  "store": {
+    "definition": "A place where goods are sold",
+    "part_of_speech": "noun/verb",
+    "phonetic": "stɔr",
+    "synonyms": ["shop", "market"],
+    "antonyms": [],
+    "examples": ["I'm going to the store", "Store the food in the fridge"],
+    "frequency": 85
+  },
+  "shop": {
+    "definition": "A small store; to buy things",
+    "part_of_speech": "noun/verb",
+    "phonetic": "ʃɑp",
+    "synonyms": ["store", "market"],
+    "antonyms": [],
+    "examples": ["I need to shop for clothes", "The shop is closed"],
+    "frequency": 80
+  },
+  "clothes": {
+    "definition": "Items worn to cover the body",
+    "part_of_speech": "noun",
+    "phonetic": "kloʊz",
+    "synonyms": ["clothing", "garments", "attire"],
+    "antonyms": ["naked"],
+    "examples": ["I need new clothes", "Wash your clothes"],
+    "frequency": 85
+  },
+  "shirt": {
+    "definition": "A garment for the upper body",
+    "part_of_speech": "noun",
+    "phonetic": "ʃɜrt",
+    "synonyms": ["top", "blouse"],
+    "antonyms": [],
+    "examples": ["I'm wearing a blue shirt", "This shirt is comfortable"],
+    "frequency": 75
+  },
+  "shoes": {
+    "definition": "Footwear that covers the feet",
+    "part_of_speech": "noun",
+    "phonetic": "ʃuz",
+    "synonyms": ["footwear", "boots"],
+    "antonyms": ["barefoot"],
+    "examples": ["I need new shoes", "Take off your shoes"],
+    "frequency": 80
+  },
+  "color": {
+    "definition": "The appearance of things in light",
+    "part_of_speech": "noun",
+    "phonetic": "ˈkʌlər",
+    "synonyms": ["hue", "shade", "tint"],
+    "antonyms": ["colorless"],
+    "examples": ["What color do you like?", "The color is beautiful"],
+    "frequency": 80
+  },
+  "red": {
+    "definition": "The color of blood or fire",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "rɛd",
+    "synonyms": ["crimson", "scarlet"],
+    "antonyms": ["green", "blue"],
+    "examples": ["I like red roses", "Red is a warm color"],
+    "frequency": 75
+  },
+  "blue": {
+    "definition": "The color of the sky or sea",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "blu",
+    "synonyms": ["azure", "navy"],
+    "antonyms": ["red", "orange"],
+    "examples": ["The sky is blue", "Blue is my favorite color"],
+    "frequency": 75
+  },
+  "green": {
+    "definition": "The color of grass or leaves",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "ɡrin",
+    "synonyms": ["emerald", "lime"],
+    "antonyms": ["red"],
+    "examples": ["The grass is green", "Green vegetables are healthy"],
+    "frequency": 75
+  },
+  "yellow": {
+    "definition": "The color of the sun or lemons",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "ˈjɛloʊ",
+    "synonyms": ["golden", "amber"],
+    "antonyms": ["purple"],
+    "examples": ["The sun is yellow", "I have a yellow car"],
+    "frequency": 70
+  },
+  "black": {
+    "definition": "The darkest color; absence of light",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "blæk",
+    "synonyms": ["dark", "ebony"],
+    "antonyms": ["white", "light"],
+    "examples": ["I wear black clothes", "The night is black"],
+    "frequency": 80
+  },
+  "white": {
+    "definition": "The lightest color; presence of all colors",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "waɪt",
+    "synonyms": ["pale", "ivory"],
+    "antonyms": ["black", "dark"],
+    "examples": ["Snow is white", "I have a white shirt"],
+    "frequency": 80
+  },
+  "number": {
+    "definition": "A mathematical value expressing quantity",
+    "part_of_speech": "noun",
+    "phonetic": "ˈnʌmbər",
+    "synonyms": ["digit", "figure", "numeral"],
+    "antonyms": [],
+    "examples": ["What's your phone number?", "Pick a number"],
+    "frequency": 85
   }
 }
