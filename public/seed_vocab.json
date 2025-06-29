@@ -1012,4 +1012,1867 @@
   "day": {
     "definition": "A 24-hour period",
     "part_of_speech": "noun",
-    "examples": ["Have a\
+    "examples": ["Have a great day!"]
+  },
+  "dead": {
+    "definition": "No longer alive",
+    "part_of_speech": "adjective",
+    "examples": ["The plant is dead"]
+  },
+  "deal": {
+    "definition": "An agreement; to handle",
+    "part_of_speech": "noun",
+    "examples": ["We made a good deal"]
+  },
+  "death": {
+    "definition": "The end of life",
+    "part_of_speech": "noun",
+    "examples": ["Death is part of life"]
+  },
+  "debate": {
+    "definition": "A formal discussion",
+    "part_of_speech": "noun",
+    "examples": ["The debate was very heated"]
+  },
+  "decade": {
+    "definition": "A period of ten years",
+    "part_of_speech": "noun",
+    "examples": ["The last decade was eventful"]
+  },
+  "decide": {
+    "definition": "To make a choice",
+    "part_of_speech": "verb",
+    "examples": ["Decide what you want to eat"]
+  },
+  "decision": {
+    "definition": "A choice made after consideration",
+    "part_of_speech": "noun",
+    "examples": ["That was a wise decision"]
+  },
+  "deep": {
+    "definition": "Extending far down",
+    "part_of_speech": "adjective",
+    "examples": ["The ocean is very deep"]
+  },
+  "defense": {
+    "definition": "Protection against attack",
+    "part_of_speech": "noun",
+    "examples": ["The team's defense was strong"]
+  },
+  "degree": {
+    "definition": "A unit of measurement; an academic qualification",
+    "part_of_speech": "noun",
+    "examples": ["She has a degree in biology"]
+  },
+  "democratic": {
+    "definition": "Related to democracy",
+    "part_of_speech": "adjective",
+    "examples": ["Democratic values are important"]
+  },
+  "describe": {
+    "definition": "To give details about",
+    "part_of_speech": "verb",
+    "examples": ["Describe your hometown"]
+  },
+  "design": {
+    "definition": "To plan and create",
+    "part_of_speech": "verb",
+    "examples": ["Design a new logo"]
+  },
+  "despite": {
+    "definition": "In spite of",
+    "part_of_speech": "preposition",
+    "examples": ["Despite the rain, we went out"]
+  },
+  "detail": {
+    "definition": "A small part of something larger",
+    "part_of_speech": "noun",
+    "examples": ["Pay attention to every detail"]
+  },
+  "determine": {
+    "definition": "To find out or decide",
+    "part_of_speech": "verb",
+    "examples": ["Determine the cause of the problem"]
+  },
+  "develop": {
+    "definition": "To grow or create gradually",
+    "part_of_speech": "verb",
+    "examples": ["Develop your skills"]
+  },
+  "development": {
+    "definition": "The process of growing",
+    "part_of_speech": "noun",
+    "examples": ["Child development is important"]
+  },
+  "die": {
+    "definition": "To stop living",
+    "part_of_speech": "verb",
+    "examples": ["Plants die without water"]
+  },
+  "difference": {
+    "definition": "The way things are not the same",
+    "part_of_speech": "noun",
+    "examples": ["What's the difference between them?"]
+  },
+  "different": {
+    "definition": "Not the same",
+    "part_of_speech": "adjective",
+    "examples": ["We have different opinions"]
+  },
+  "difficult": {
+    "definition": "Hard to do or understand",
+    "part_of_speech": "adjective",
+    "examples": ["This math problem is difficult"]
+  },
+  "dinner": {
+    "definition": "The main meal of the day",
+    "part_of_speech": "noun",
+    "examples": ["What's for dinner tonight?"]
+  },
+  "direction": {
+    "definition": "The way to go",
+    "part_of_speech": "noun",
+    "examples": ["Which direction is north?"]
+  },
+  "director": {
+    "definition": "A person who manages or leads",
+    "part_of_speech": "noun",
+    "examples": ["The movie director is famous"]
+  },
+  "discover": {
+    "definition": "To find something new",
+    "part_of_speech": "verb",
+    "examples": ["Scientists discover new species"]
+  },
+  "discuss": {
+    "definition": "To talk about",
+    "part_of_speech": "verb",
+    "examples": ["Let's discuss the plan"]
+  },
+  "discussion": {
+    "definition": "A conversation about a topic",
+    "part_of_speech": "noun",
+    "examples": ["We had a good discussion"]
+  },
+  "disease": {
+    "definition": "An illness",
+    "part_of_speech": "noun",
+    "examples": ["Prevention is better than cure for disease"]
+  },
+  "do": {
+    "definition": "To perform an action",
+    "part_of_speech": "verb",
+    "examples": ["Do your homework"]
+  },
+  "doctor": {
+    "definition": "A medical professional",
+    "part_of_speech": "noun",
+    "examples": ["See a doctor if you're sick"]
+  },
+  "dog": {
+    "definition": "A domesticated animal",
+    "part_of_speech": "noun",
+    "examples": ["The dog is man's best friend"]
+  },
+  "door": {
+    "definition": "An entrance to a room or building",
+    "part_of_speech": "noun",
+    "examples": ["Close the door behind you"]
+  },
+  "down": {
+    "definition": "In a lower position",
+    "part_of_speech": "adverb",
+    "examples": ["Look down at your feet"]
+  },
+  "draw": {
+    "definition": "To make a picture; to pull",
+    "part_of_speech": "verb",
+    "examples": ["Draw a circle on the paper"]
+  },
+  "dream": {
+    "definition": "Images in sleep; a hope",
+    "part_of_speech": "noun",
+    "examples": ["I had a strange dream"]
+  },
+  "drive": {
+    "definition": "To operate a vehicle",
+    "part_of_speech": "verb",
+    "examples": ["Drive carefully in the rain"]
+  },
+  "drop": {
+    "definition": "To let fall",
+    "part_of_speech": "verb",
+    "examples": ["Don't drop the glass"]
+  },
+  "drug": {
+    "definition": "A medicine or illegal substance",
+    "part_of_speech": "noun",
+    "examples": ["This drug helps with pain"]
+  },
+  "during": {
+    "definition": "Throughout the time of",
+    "part_of_speech": "preposition",
+    "examples": ["Stay quiet during the movie"]
+  },
+  "each": {
+    "definition": "Every one of two or more",
+    "part_of_speech": "determiner",
+    "examples": ["Each student has a book"]
+  },
+  "early": {
+    "definition": "Before the usual time",
+    "part_of_speech": "adjective",
+    "examples": ["I wake up early"]
+  },
+  "east": {
+    "definition": "The direction of sunrise",
+    "part_of_speech": "noun",
+    "examples": ["The sun rises in the east"]
+  },
+  "easy": {
+    "definition": "Not difficult",
+    "part_of_speech": "adjective",
+    "examples": ["This puzzle is easy"]
+  },
+  "eat": {
+    "definition": "To consume food",
+    "part_of_speech": "verb",
+    "examples": ["Eat your vegetables"]
+  },
+  "economic": {
+    "definition": "Related to the economy",
+    "part_of_speech": "adjective",
+    "examples": ["Economic growth is important"]
+  },
+  "economy": {
+    "definition": "The system of trade and money",
+    "part_of_speech": "noun",
+    "examples": ["The economy is improving"]
+  },
+  "edge": {
+    "definition": "The border or boundary",
+    "part_of_speech": "noun",
+    "examples": ["Stand at the edge of the cliff"]
+  },
+  "education": {
+    "definition": "The process of learning",
+    "part_of_speech": "noun",
+    "examples": ["Education is very important"]
+  },
+  "effect": {
+    "definition": "A result or consequence",
+    "part_of_speech": "noun",
+    "examples": ["The medicine had a good effect"]
+  },
+  "effort": {
+    "definition": "Physical or mental energy",
+    "part_of_speech": "noun",
+    "examples": ["Put more effort into your work"]
+  },
+  "eight": {
+    "definition": "The number 8",
+    "part_of_speech": "number",
+    "examples": ["I have eight apples"]
+  },
+  "either": {
+    "definition": "One or the other",
+    "part_of_speech": "determiner",
+    "examples": ["Choose either option"]
+  },
+  "election": {
+    "definition": "The process of voting",
+    "part_of_speech": "noun",
+    "examples": ["The election is next month"]
+  },
+  "else": {
+    "definition": "Other; different",
+    "part_of_speech": "adverb",
+    "examples": ["What else do you need?"]
+  },
+  "employee": {
+    "definition": "A person who works for someone",
+    "part_of_speech": "noun",
+    "examples": ["She's a good employee"]
+  },
+  "end": {
+    "definition": "The final part",
+    "part_of_speech": "noun",
+    "examples": ["This is the end of the story"]
+  },
+  "energy": {
+    "definition": "Power or strength",
+    "part_of_speech": "noun",
+    "examples": ["Solar energy is renewable"]
+  },
+  "enjoy": {
+    "definition": "To take pleasure in",
+    "part_of_speech": "verb",
+    "examples": ["I enjoy reading books"]
+  },
+  "enough": {
+    "definition": "As much as needed",
+    "part_of_speech": "determiner",
+    "examples": ["Do we have enough food?"]
+  },
+  "enter": {
+    "definition": "To go into",
+    "part_of_speech": "verb",
+    "examples": ["Enter the building quietly"]
+  },
+  "entire": {
+    "definition": "Whole; complete",
+    "part_of_speech": "adjective",
+    "examples": ["I read the entire book"]
+  },
+  "environment": {
+    "definition": "The natural world around us",
+    "part_of_speech": "noun",
+    "examples": ["Protect the environment"]
+  },
+  "especially": {
+    "definition": "Particularly; more than usual",
+    "part_of_speech": "adverb",
+    "examples": ["I love music, especially jazz"]
+  },
+  "establish": {
+    "definition": "To set up or create",
+    "part_of_speech": "verb",
+    "examples": ["Establish new rules"]
+  },
+  "even": {
+    "definition": "Flat; including",
+    "part_of_speech": "adverb",
+    "examples": ["Even children can understand"]
+  },
+  "evening": {
+    "definition": "The time between afternoon and night",
+    "part_of_speech": "noun",
+    "examples": ["Good evening, everyone"]
+  },
+  "event": {
+    "definition": "Something that happens",
+    "part_of_speech": "noun",
+    "examples": ["The wedding was a happy event"]
+  },
+  "ever": {
+    "definition": "At any time",
+    "part_of_speech": "adverb",
+    "examples": ["Have you ever been to Paris?"]
+  },
+  "every": {
+    "definition": "Each one of a group",
+    "part_of_speech": "determiner",
+    "examples": ["Every student passed the test"]
+  },
+  "everyone": {
+    "definition": "All people",
+    "part_of_speech": "pronoun",
+    "examples": ["Everyone is welcome"]
+  },
+  "everything": {
+    "definition": "All things",
+    "part_of_speech": "pronoun",
+    "examples": ["Everything is ready"]
+  },
+  "evidence": {
+    "definition": "Proof or facts",
+    "part_of_speech": "noun",
+    "examples": ["The evidence supports the theory"]
+  },
+  "exactly": {
+    "definition": "Precisely; completely accurate",
+    "part_of_speech": "adverb",
+    "examples": ["That's exactly what I meant"]
+  },
+  "example": {
+    "definition": "A sample or instance",
+    "part_of_speech": "noun",
+    "examples": ["Give me an example"]
+  },
+  "executive": {
+    "definition": "A senior manager",
+    "part_of_speech": "noun",
+    "examples": ["The executive made the decision"]
+  },
+  "exist": {
+    "definition": "To be real; to live",
+    "part_of_speech": "verb",
+    "examples": ["Do aliens exist?"]
+  },
+  "expect": {
+    "definition": "To think something will happen",
+    "part_of_speech": "verb",
+    "examples": ["I expect good results"]
+  },
+  "experience": {
+    "definition": "Knowledge gained from doing",
+    "part_of_speech": "noun",
+    "examples": ["Experience is the best teacher"]
+  },
+  "expert": {
+    "definition": "A person with special knowledge",
+    "part_of_speech": "noun",
+    "examples": ["She's an expert in computers"]
+  },
+  "explain": {
+    "definition": "To make clear",
+    "part_of_speech": "verb",
+    "examples": ["Please explain the rules"]
+  },
+  "eye": {
+    "definition": "The organ of sight",
+    "part_of_speech": "noun",
+    "examples": ["Keep your eye on the ball"]
+  },
+  "face": {
+    "definition": "The front of the head",
+    "part_of_speech": "noun",
+    "examples": ["Wash your face"]
+  },
+  "fact": {
+    "definition": "Something that is true",
+    "part_of_speech": "noun",
+    "examples": ["That's an interesting fact"]
+  },
+  "factor": {
+    "definition": "An element that contributes",
+    "part_of_speech": "noun",
+    "examples": ["Weather is an important factor"]
+  },
+  "fail": {
+    "definition": "To not succeed",
+    "part_of_speech": "verb",
+    "examples": ["Don't fail to call me"]
+  },
+  "fall": {
+    "definition": "To drop down; autumn",
+    "part_of_speech": "verb",
+    "examples": ["Leaves fall in autumn"]
+  },
+  "family": {
+    "definition": "Parents and children",
+    "part_of_speech": "noun",
+    "examples": ["Family is important"]
+  },
+  "far": {
+    "definition": "At a great distance",
+    "part_of_speech": "adverb",
+    "examples": ["How far is the store?"]
+  },
+  "fast": {
+    "definition": "Moving quickly",
+    "part_of_speech": "adjective",
+    "examples": ["That car is very fast"]
+  },
+  "father": {
+    "definition": "A male parent",
+    "part_of_speech": "noun",
+    "examples": ["My father is a teacher"]
+  },
+  "fear": {
+    "definition": "The feeling of being afraid",
+    "part_of_speech": "noun",
+    "examples": ["Fear can be overcome"]
+  },
+  "federal": {
+    "definition": "Related to national government",
+    "part_of_speech": "adjective",
+    "examples": ["Federal laws apply everywhere"]
+  },
+  "feel": {
+    "definition": "To experience an emotion",
+    "part_of_speech": "verb",
+    "examples": ["I feel happy today"]
+  },
+  "feeling": {
+    "definition": "An emotion",
+    "part_of_speech": "noun",
+    "examples": ["What's your feeling about this?"]
+  },
+  "few": {
+    "definition": "A small number",
+    "part_of_speech": "determiner",
+    "examples": ["Only a few people came"]
+  },
+  "field": {
+    "definition": "An open area of land",
+    "part_of_speech": "noun",
+    "examples": ["The cows are in the field"]
+  },
+  "fight": {
+    "definition": "To struggle against",
+    "part_of_speech": "verb",
+    "examples": ["Fight for your rights"]
+  },
+  "figure": {
+    "definition": "A number; to understand",
+    "part_of_speech": "noun",
+    "examples": ["What's the exact figure?"]
+  },
+  "fill": {
+    "definition": "To make full",
+    "part_of_speech": "verb",
+    "examples": ["Fill the glass with water"]
+  },
+  "film": {
+    "definition": "A movie",
+    "part_of_speech": "noun",
+    "examples": ["That was a great film"]
+  },
+  "final": {
+    "definition": "Last; conclusive",
+    "part_of_speech": "adjective",
+    "examples": ["This is my final answer"]
+  },
+  "finally": {
+    "definition": "At last",
+    "part_of_speech": "adverb",
+    "examples": ["Finally, we arrived home"]
+  },
+  "financial": {
+    "definition": "Related to money",
+    "part_of_speech": "adjective",
+    "examples": ["Financial planning is important"]
+  },
+  "find": {
+    "definition": "To discover",
+    "part_of_speech": "verb",
+    "examples": ["Find your keys"]
+  },
+  "fine": {
+    "definition": "Good; thin; a penalty",
+    "part_of_speech": "adjective",
+    "examples": ["The weather is fine today"]
+  },
+  "finger": {
+    "definition": "A digit on the hand",
+    "part_of_speech": "noun",
+    "examples": ["Point with your finger"]
+  },
+  "finish": {
+    "definition": "To complete",
+    "part_of_speech": "verb",
+    "examples": ["Finish your homework"]
+  },
+  "fire": {
+    "definition": "Burning flames",
+    "part_of_speech": "noun",
+    "examples": ["The fire is warm"]
+  },
+  "firm": {
+    "definition": "Solid; a business",
+    "part_of_speech": "adjective",
+    "examples": ["Hold the rope firm"]
+  },
+  "first": {
+    "definition": "Before all others",
+    "part_of_speech": "adjective",
+    "examples": ["This is my first time here"]
+  },
+  "fish": {
+    "definition": "An aquatic animal",
+    "part_of_speech": "noun",
+    "examples": ["Fish live in water"]
+  },
+  "five": {
+    "definition": "The number 5",
+    "part_of_speech": "number",
+    "examples": ["I have five fingers"]
+  },
+  "floor": {
+    "definition": "The bottom surface of a room",
+    "part_of_speech": "noun",
+    "examples": ["Sweep the floor"]
+  },
+  "fly": {
+    "definition": "To move through air",
+    "part_of_speech": "verb",
+    "examples": ["Birds fly south in winter"]
+  },
+  "focus": {
+    "definition": "To concentrate attention",
+    "part_of_speech": "verb",
+    "examples": ["Focus on your studies"]
+  },
+  "follow": {
+    "definition": "To go after",
+    "part_of_speech": "verb",
+    "examples": ["Follow the yellow brick road"]
+  },
+  "food": {
+    "definition": "Things we eat",
+    "part_of_speech": "noun",
+    "examples": ["Healthy food is important"]
+  },
+  "foot": {
+    "definition": "The body part at the end of the leg",
+    "part_of_speech": "noun",
+    "examples": ["My foot hurts"]
+  },
+  "for": {
+    "definition": "Intended to belong to",
+    "part_of_speech": "preposition",
+    "examples": ["This gift is for you"]
+  },
+  "force": {
+    "definition": "Strength or power",
+    "part_of_speech": "noun",
+    "examples": ["Use force to open the jar"]
+  },
+  "foreign": {
+    "definition": "From another country",
+    "part_of_speech": "adjective",
+    "examples": ["She speaks a foreign language"]
+  },
+  "forget": {
+    "definition": "To not remember",
+    "part_of_speech": "verb",
+    "examples": ["Don't forget your keys"]
+  },
+  "form": {
+    "definition": "Shape; to create",
+    "part_of_speech": "noun",
+    "examples": ["Fill out this form"]
+  },
+  "former": {
+    "definition": "Previous; earlier",
+    "part_of_speech": "adjective",
+    "examples": ["The former president visited"]
+  },
+  "forward": {
+    "definition": "Toward the front",
+    "part_of_speech": "adverb",
+    "examples": ["Move forward slowly"]
+  },
+  "four": {
+    "definition": "The number 4",
+    "part_of_speech": "number",
+    "examples": ["A table has four legs"]
+  },
+  "free": {
+    "definition": "Not costing money; not restricted",
+    "part_of_speech": "adjective",
+    "examples": ["The concert is free"]
+  },
+  "friend": {
+    "definition": "A person you like and know well",
+    "part_of_speech": "noun",
+    "examples": ["She's my best friend"]
+  },
+  "from": {
+    "definition": "Starting at; originating",
+    "part_of_speech": "preposition",
+    "examples": ["I'm from Canada"]
+  },
+  "front": {
+    "definition": "The forward part",
+    "part_of_speech": "noun",
+    "examples": ["Sit in the front row"]
+  },
+  "full": {
+    "definition": "Containing as much as possible",
+    "part_of_speech": "adjective",
+    "examples": ["The glass is full"]
+  },
+  "fund": {
+    "definition": "Money set aside for a purpose",
+    "part_of_speech": "noun",
+    "examples": ["The scholarship fund helps students"]
+  },
+  "future": {
+    "definition": "Time that is to come",
+    "part_of_speech": "noun",
+    "examples": ["The future looks bright"]
+  },
+  "game": {
+    "definition": "An activity with rules for fun",
+    "part_of_speech": "noun",
+    "examples": ["Let's play a game"]
+  },
+  "garden": {
+    "definition": "An area for growing plants",
+    "part_of_speech": "noun",
+    "examples": ["The garden has beautiful flowers"]
+  },
+  "gas": {
+    "definition": "A substance like air",
+    "part_of_speech": "noun",
+    "examples": ["The car needs gas"]
+  },
+  "general": {
+    "definition": "Overall; not specific",
+    "part_of_speech": "adjective",
+    "examples": ["In general, I like movies"]
+  },
+  "get": {
+    "definition": "To obtain or receive",
+    "part_of_speech": "verb",
+    "examples": ["Get some milk from the store"]
+  },
+  "girl": {
+    "definition": "A female child",
+    "part_of_speech": "noun",
+    "examples": ["The girl is playing"]
+  },
+  "give": {
+    "definition": "To hand over",
+    "part_of_speech": "verb",
+    "examples": ["Give me your hand"]
+  },
+  "glass": {
+    "definition": "A transparent material",
+    "part_of_speech": "noun",
+    "examples": ["The window is made of glass"]
+  },
+  "go": {
+    "definition": "To move or travel",
+    "part_of_speech": "verb",
+    "examples": ["Let's go to the park"]
+  },
+  "goal": {
+    "definition": "An aim or objective",
+    "part_of_speech": "noun",
+    "examples": ["My goal is to learn Spanish"]
+  },
+  "god": {
+    "definition": "A supreme being",
+    "part_of_speech": "noun",
+    "examples": ["Many people believe in God"]
+  },
+  "good": {
+    "definition": "Of high quality; morally right",
+    "part_of_speech": "adjective",
+    "examples": ["That's a good idea"]
+  },
+  "government": {
+    "definition": "The system that rules a country",
+    "part_of_speech": "noun",
+    "examples": ["The government makes laws"]
+  },
+  "great": {
+    "definition": "Very good; large",
+    "part_of_speech": "adjective",
+    "examples": ["That's a great movie"]
+  },
+  "green": {
+    "definition": "The color of grass",
+    "part_of_speech": "adjective",
+    "examples": ["The leaves are green"]
+  },
+  "ground": {
+    "definition": "The surface of the earth",
+    "part_of_speech": "noun",
+    "examples": ["Sit on the ground"]
+  },
+  "group": {
+    "definition": "A number of people together",
+    "part_of_speech": "noun",
+    "examples": ["Our group has five members"]
+  },
+  "grow": {
+    "definition": "To increase in size",
+    "part_of_speech": "verb",
+    "examples": ["Plants grow in sunlight"]
+  },
+  "growth": {
+    "definition": "The process of growing",
+    "part_of_speech": "noun",
+    "examples": ["Economic growth is important"]
+  },
+  "guess": {
+    "definition": "To estimate without knowing",
+    "part_of_speech": "verb",
+    "examples": ["Can you guess my age?"]
+  },
+  "gun": {
+    "definition": "A weapon that fires bullets",
+    "part_of_speech": "noun",
+    "examples": ["Police carry guns"]
+  },
+  "guy": {
+    "definition": "A man or boy",
+    "part_of_speech": "noun",
+    "examples": ["He's a nice guy"]
+  },
+  "hair": {
+    "definition": "Strands growing from the head",
+    "part_of_speech": "noun",
+    "examples": ["She has beautiful hair"]
+  },
+  "half": {
+    "definition": "One of two equal parts",
+    "part_of_speech": "noun",
+    "examples": ["Give me half of the apple"]
+  },
+  "hand": {
+    "definition": "The body part at the end of the arm",
+    "part_of_speech": "noun",
+    "examples": ["Raise your hand"]
+  },
+  "hang": {
+    "definition": "To suspend from above",
+    "part_of_speech": "verb",
+    "examples": ["Hang your coat on the hook"]
+  },
+  "happen": {
+    "definition": "To occur",
+    "part_of_speech": "verb",
+    "examples": ["What will happen next?"]
+  },
+  "happy": {
+    "definition": "Feeling joy",
+    "part_of_speech": "adjective",
+    "examples": ["I'm happy to see you"]
+  },
+  "hard": {
+    "definition": "Difficult; not soft",
+    "part_of_speech": "adjective",
+    "examples": ["This rock is very hard"]
+  },
+  "have": {
+    "definition": "To possess",
+    "part_of_speech": "verb",
+    "examples": ["I have a car"]
+  },
+  "he": {
+    "definition": "Male person",
+    "part_of_speech": "pronoun",
+    "examples": ["He is my brother"]
+  },
+  "head": {
+    "definition": "The top part of the body",
+    "part_of_speech": "noun",
+    "examples": ["Nod your head"]
+  },
+  "health": {
+    "definition": "The state of being well",
+    "part_of_speech": "noun",
+    "examples": ["Good health is important"]
+  },
+  "hear": {
+    "definition": "To perceive sound",
+    "part_of_speech": "verb",
+    "examples": ["I can hear music"]
+  },
+  "heart": {
+    "definition": "The organ that pumps blood",
+    "part_of_speech": "noun",
+    "examples": ["My heart is beating fast"]
+  },
+  "heat": {
+    "definition": "Warmth; high temperature",
+    "part_of_speech": "noun",
+    "examples": ["The heat is unbearable"]
+  },
+  "heavy": {
+    "definition": "Having great weight",
+    "part_of_speech": "adjective",
+    "examples": ["This box is heavy"]
+  },
+  "help": {
+    "definition": "To assist",
+    "part_of_speech": "verb",
+    "examples": ["Can you help me?"]
+  },
+  "her": {
+    "definition": "Belonging to a female",
+    "part_of_speech": "pronoun",
+    "examples": ["This is her book"]
+  },
+  "here": {
+    "definition": "In this place",
+    "part_of_speech": "adverb",
+    "examples": ["Come here"]
+  },
+  "herself": {
+    "definition": "The female person alone",
+    "part_of_speech": "pronoun",
+    "examples": ["She did it herself"]
+  },
+  "high": {
+    "definition": "Far up; great in degree",
+    "part_of_speech": "adjective",
+    "examples": ["The mountain is high"]
+  },
+  "him": {
+    "definition": "Male person (object)",
+    "part_of_speech": "pronoun",
+    "examples": ["Give it to him"]
+  },
+  "himself": {
+    "definition": "The male person alone",
+    "part_of_speech": "pronoun",
+    "examples": ["He did it himself"]
+  },
+  "his": {
+    "definition": "Belonging to a male",
+    "part_of_speech": "pronoun",
+    "examples": ["This is his car"]
+  },
+  "history": {
+    "definition": "Past events",
+    "part_of_speech": "noun",
+    "examples": ["I love studying history"]
+  },
+  "hit": {
+    "definition": "To strike",
+    "part_of_speech": "verb",
+    "examples": ["Hit the ball with the bat"]
+  },
+  "hold": {
+    "definition": "To grasp",
+    "part_of_speech": "verb",
+    "examples": ["Hold my hand"]
+  },
+  "home": {
+    "definition": "The place where you live",
+    "part_of_speech": "noun",
+    "examples": ["I'm going home"]
+  },
+  "hope": {
+    "definition": "To wish for something",
+    "part_of_speech": "verb",
+    "examples": ["I hope you feel better"]
+  },
+  "hospital": {
+    "definition": "A place for medical treatment",
+    "part_of_speech": "noun",
+    "examples": ["She works at the hospital"]
+  },
+  "hot": {
+    "definition": "Having high temperature",
+    "part_of_speech": "adjective",
+    "examples": ["The coffee is hot"]
+  },
+  "hotel": {
+    "definition": "A place for travelers to stay",
+    "part_of_speech": "noun",
+    "examples": ["We stayed at a nice hotel"]
+  },
+  "hour": {
+    "definition": "60 minutes",
+    "part_of_speech": "noun",
+    "examples": ["I'll be back in an hour"]
+  },
+  "house": {
+    "definition": "A building where people live",
+    "part_of_speech": "noun",
+    "examples": ["They bought a new house"]
+  },
+  "how": {
+    "definition": "In what way",
+    "part_of_speech": "adverb",
+    "examples": ["How are you?"]
+  },
+  "however": {
+    "definition": "Nevertheless",
+    "part_of_speech": "adverb",
+    "examples": ["However, I disagree"]
+  },
+  "huge": {
+    "definition": "Very large",
+    "part_of_speech": "adjective",
+    "examples": ["That's a huge elephant"]
+  },
+  "human": {
+    "definition": "A person",
+    "part_of_speech": "noun",
+    "examples": ["Every human deserves respect"]
+  },
+  "hundred": {
+    "definition": "The number 100",
+    "part_of_speech": "number",
+    "examples": ["I have a hundred dollars"]
+  },
+  "husband": {
+    "definition": "A married man",
+    "part_of_speech": "noun",
+    "examples": ["Her husband is a doctor"]
+  },
+  "i": {
+    "definition": "The person speaking",
+    "part_of_speech": "pronoun",
+    "examples": ["I am happy"]
+  },
+  "idea": {
+    "definition": "A thought or concept",
+    "part_of_speech": "noun",
+    "examples": ["That's a great idea"]
+  },
+  "identify": {
+    "definition": "To recognize",
+    "part_of_speech": "verb",
+    "examples": ["Can you identify this plant?"]
+  },
+  "if": {
+    "definition": "On condition that",
+    "part_of_speech": "conjunction",
+    "examples": ["If it rains, we'll stay inside"]
+  },
+  "image": {
+    "definition": "A picture",
+    "part_of_speech": "noun",
+    "examples": ["The image is beautiful"]
+  },
+  "imagine": {
+    "definition": "To form a mental picture",
+    "part_of_speech": "verb",
+    "examples": ["Imagine you can fly"]
+  },
+  "impact": {
+    "definition": "A strong effect",
+    "part_of_speech": "noun",
+    "examples": ["The impact was huge"]
+  },
+  "important": {
+    "definition": "Having great significance",
+    "part_of_speech": "adjective",
+    "examples": ["This is very important"]
+  },
+  "improve": {
+    "definition": "To make better",
+    "part_of_speech": "verb",
+    "examples": ["Practice will improve your skills"]
+  },
+  "in": {
+    "definition": "Inside; within",
+    "part_of_speech": "preposition",
+    "examples": ["The cat is in the box"]
+  },
+  "include": {
+    "definition": "To contain as part of",
+    "part_of_speech": "verb",
+    "examples": ["The price includes tax"]
+  },
+  "including": {
+    "definition": "Having as part of",
+    "part_of_speech": "preposition",
+    "examples": ["Everyone came, including John"]
+  },
+  "increase": {
+    "definition": "To make larger",
+    "part_of_speech": "verb",
+    "examples": ["Increase the volume"]
+  },
+  "indeed": {
+    "definition": "In fact; truly",
+    "part_of_speech": "adverb",
+    "examples": ["Indeed, you are right"]
+  },
+  "indicate": {
+    "definition": "To point out or show",
+    "part_of_speech": "verb",
+    "examples": ["The sign indicates the direction"]
+  },
+  "individual": {
+    "definition": "A single person",
+    "part_of_speech": "noun",
+    "examples": ["Each individual is unique"]
+  },
+  "industry": {
+    "definition": "Economic activity",
+    "part_of_speech": "noun",
+    "examples": ["The car industry is important"]
+  },
+  "information": {
+    "definition": "Facts or knowledge",
+    "part_of_speech": "noun",
+    "examples": ["I need more information"]
+  },
+  "inside": {
+    "definition": "Within; interior",
+    "part_of_speech": "preposition",
+    "examples": ["Look inside the box"]
+  },
+  "instead": {
+    "definition": "In place of",
+    "part_of_speech": "adverb",
+    "examples": ["Use this instead"]
+  },
+  "institution": {
+    "definition": "An established organization",
+    "part_of_speech": "noun",
+    "examples": ["The university is a great institution"]
+  },
+  "interest": {
+    "definition": "Curiosity; money charged for loans",
+    "part_of_speech": "noun",
+    "examples": ["I have an interest in music"]
+  },
+  "interesting": {
+    "definition": "Arousing curiosity",
+    "part_of_speech": "adjective",
+    "examples": ["That's an interesting story"]
+  },
+  "international": {
+    "definition": "Between nations",
+    "part_of_speech": "adjective",
+    "examples": ["International trade is important"]
+  },
+  "interview": {
+    "definition": "A formal meeting for questions",
+    "part_of_speech": "noun",
+    "examples": ["I have a job interview tomorrow"]
+  },
+  "into": {
+    "definition": "To the inside of",
+    "part_of_speech": "preposition",
+    "examples": ["Walk into the room"]
+  },
+  "investment": {
+    "definition": "Money put into something for profit",
+    "part_of_speech": "noun",
+    "examples": ["Real estate is a good investment"]
+  },
+  "involve": {
+    "definition": "To include as a part",
+    "part_of_speech": "verb",
+    "examples": ["This job involves travel"]
+  },
+  "issue": {
+    "definition": "A problem or topic",
+    "part_of_speech": "noun",
+    "examples": ["Climate change is an important issue"]
+  },
+  "it": {
+    "definition": "The thing mentioned",
+    "part_of_speech": "pronoun",
+    "examples": ["Where is it?"]
+  },
+  "item": {
+    "definition": "A single thing",
+    "part_of_speech": "noun",
+    "examples": ["This item is expensive"]
+  },
+  "its": {
+    "definition": "Belonging to it",
+    "part_of_speech": "pronoun",
+    "examples": ["The dog wagged its tail"]
+  },
+  "itself": {
+    "definition": "The thing alone",
+    "part_of_speech": "pronoun",
+    "examples": ["The problem solved itself"]
+  },
+  "job": {
+    "definition": "Work; employment",
+    "part_of_speech": "noun",
+    "examples": ["I love my job"]
+  },
+  "join": {
+    "definition": "To become part of",
+    "part_of_speech": "verb",
+    "examples": ["Join our team"]
+  },
+  "just": {
+    "definition": "Only; recently",
+    "part_of_speech": "adverb",
+    "examples": ["I just arrived"]
+  },
+  "keep": {
+    "definition": "To continue to have",
+    "part_of_speech": "verb",
+    "examples": ["Keep the change"]
+  },
+  "key": {
+    "definition": "An object that opens locks",
+    "part_of_speech": "noun",
+    "examples": ["Where is my key?"]
+  },
+  "kid": {
+    "definition": "A child",
+    "part_of_speech": "noun",
+    "examples": ["The kid is playing"]
+  },
+  "kill": {
+    "definition": "To cause death",
+    "part_of_speech": "verb",
+    "examples": ["Don't kill the spider"]
+  },
+  "kind": {
+    "definition": "Type; caring",
+    "part_of_speech": "noun",
+    "examples": ["What kind of music do you like?"]
+  },
+  "kitchen": {
+    "definition": "A room for cooking",
+    "part_of_speech": "noun",
+    "examples": ["Cook dinner in the kitchen"]
+  },
+  "know": {
+    "definition": "To be aware of",
+    "part_of_speech": "verb",
+    "examples": ["I know the answer"]
+  },
+  "knowledge": {
+    "definition": "Information and understanding",
+    "part_of_speech": "noun",
+    "examples": ["Knowledge is power"]
+  },
+  "land": {
+    "definition": "Ground; to come down",
+    "part_of_speech": "noun",
+    "examples": ["The plane will land soon"]
+  },
+  "language": {
+    "definition": "A system of communication",
+    "part_of_speech": "noun",
+    "examples": ["English is a global language"]
+  },
+  "large": {
+    "definition": "Big in size",
+    "part_of_speech": "adjective",
+    "examples": ["That's a large pizza"]
+  },
+  "last": {
+    "definition": "Final; most recent",
+    "part_of_speech": "adjective",
+    "examples": ["This is the last piece"]
+  },
+  "late": {
+    "definition": "After the expected time",
+    "part_of_speech": "adjective",
+    "examples": ["Sorry I'm late"]
+  },
+  "later": {
+    "definition": "At a time after now",
+    "part_of_speech": "adverb",
+    "examples": ["See you later"]
+  },
+  "laugh": {
+    "definition": "To make sounds of amusement",
+    "part_of_speech": "verb",
+    "examples": ["That joke made me laugh"]
+  },
+  "law": {
+    "definition": "A rule made by government",
+    "part_of_speech": "noun",
+    "examples": ["Obey the law"]
+  },
+  "lawyer": {
+    "definition": "A person who practices law",
+    "part_of_speech": "noun",
+    "examples": ["The lawyer defended his client"]
+  },
+  "lay": {
+    "definition": "To put down",
+    "part_of_speech": "verb",
+    "examples": ["Lay the book on the table"]
+  },
+  "lead": {
+    "definition": "To guide; a metal",
+    "part_of_speech": "verb",
+    "examples": ["Lead the way"]
+  },
+  "leader": {
+    "definition": "A person who leads",
+    "part_of_speech": "noun",
+    "examples": ["She's a great leader"]
+  },
+  "learn": {
+    "definition": "To gain knowledge",
+    "part_of_speech": "verb",
+    "examples": ["Learn something new every day"]
+  },
+  "least": {
+    "definition": "Smallest amount",
+    "part_of_speech": "determiner",
+    "examples": ["At least try"]
+  },
+  "leave": {
+    "definition": "To go away from",
+    "part_of_speech": "verb",
+    "examples": ["Leave your shoes at the door"]
+  },
+  "left": {
+    "definition": "The opposite of right",
+    "part_of_speech": "adjective",
+    "examples": ["Turn left at the corner"]
+  },
+  "leg": {
+    "definition": "The limb used for walking",
+    "part_of_speech": "noun",
+    "examples": ["My leg hurts"]
+  },
+  "legal": {
+    "definition": "Allowed by law",
+    "part_of_speech": "adjective",
+    "examples": ["Is this legal?"]
+  },
+  "less": {
+    "definition": "A smaller amount",
+    "part_of_speech": "determiner",
+    "examples": ["I want less sugar"]
+  },
+  "let": {
+    "definition": "To allow",
+    "part_of_speech": "verb",
+    "examples": ["Let me help you"]
+  },
+  "letter": {
+    "definition": "A written message",
+    "part_of_speech": "noun",
+    "examples": ["I received a letter"]
+  },
+  "level": {
+    "definition": "A position on a scale",
+    "part_of_speech": "noun",
+    "examples": ["What level are you?"]
+  },
+  "lie": {
+    "definition": "To not tell the truth",
+    "part_of_speech": "verb",
+    "examples": ["Don't lie to me"]
+  },
+  "life": {
+    "definition": "The state of being alive",
+    "part_of_speech": "noun",
+    "examples": ["Life is beautiful"]
+  },
+  "light": {
+    "definition": "Brightness; not heavy",
+    "part_of_speech": "noun",
+    "examples": ["Turn on the light"]
+  },
+  "like": {
+    "definition": "To enjoy; similar to",
+    "part_of_speech": "verb",
+    "examples": ["I like chocolate"]
+  },
+  "likely": {
+    "definition": "Probable",
+    "part_of_speech": "adjective",
+    "examples": ["It's likely to rain"]
+  },
+  "line": {
+    "definition": "A long mark; a queue",
+    "part_of_speech": "noun",
+    "examples": ["Draw a straight line"]
+  },
+  "list": {
+    "definition": "Items written in order",
+    "part_of_speech": "noun",
+    "examples": ["Make a shopping list"]
+  },
+  "listen": {
+    "definition": "To pay attention to sound",
+    "part_of_speech": "verb",
+    "examples": ["Listen to the music"]
+  },
+  "little": {
+    "definition": "Small in size",
+    "part_of_speech": "adjective",
+    "examples": ["A little bird"]
+  },
+  "live": {
+    "definition": "To be alive; to reside",
+    "part_of_speech": "verb",
+    "examples": ["I live in New York"]
+  },
+  "local": {
+    "definition": "Relating to a particular area",
+    "part_of_speech": "adjective",
+    "examples": ["Shop at local stores"]
+  },
+  "long": {
+    "definition": "Having great length",
+    "part_of_speech": "adjective",
+    "examples": ["That's a long road"]
+  },
+  "look": {
+    "definition": "To direct eyes toward",
+    "part_of_speech": "verb",
+    "examples": ["Look at the sunset"]
+  },
+  "lose": {
+    "definition": "To no longer have",
+    "part_of_speech": "verb",
+    "examples": ["Don't lose your keys"]
+  },
+  "loss": {
+    "definition": "The fact of losing",
+    "part_of_speech": "noun",
+    "examples": ["The loss was devastating"]
+  },
+  "lot": {
+    "definition": "A large amount",
+    "part_of_speech": "noun",
+    "examples": ["I have a lot of work"]
+  },
+  "love": {
+    "definition": "Deep affection",
+    "part_of_speech": "noun",
+    "examples": ["Love conquers all"]
+  },
+  "low": {
+    "definition": "Not high",
+    "part_of_speech": "adjective",
+    "examples": ["The table is low"]
+  },
+  "machine": {
+    "definition": "A device with moving parts",
+    "part_of_speech": "noun",
+    "examples": ["The washing machine is broken"]
+  },
+  "magazine": {
+    "definition": "A periodical publication",
+    "part_of_speech": "noun",
+    "examples": ["I read a fashion magazine"]
+  },
+  "main": {
+    "definition": "Most important",
+    "part_of_speech": "adjective",
+    "examples": ["The main reason is cost"]
+  },
+  "maintain": {
+    "definition": "To keep in good condition",
+    "part_of_speech": "verb",
+    "examples": ["Maintain your car regularly"]
+  },
+  "major": {
+    "definition": "Important; large",
+    "part_of_speech": "adjective",
+    "examples": ["This is a major problem"]
+  },
+  "make": {
+    "definition": "To create or produce",
+    "part_of_speech": "verb",
+    "examples": ["Make a sandwich"]
+  },
+  "man": {
+    "definition": "An adult male human",
+    "part_of_speech": "noun",
+    "examples": ["The man is tall"]
+  },
+  "manage": {
+    "definition": "To control or organize",
+    "part_of_speech": "verb",
+    "examples": ["Manage your time well"]
+  },
+  "management": {
+    "definition": "The process of managing",
+    "part_of_speech": "noun",
+    "examples": ["Good management is essential"]
+  },
+  "manager": {
+    "definition": "A person who manages",
+    "part_of_speech": "noun",
+    "examples": ["The manager called a meeting"]
+  },
+  "many": {
+    "definition": "A large number of",
+    "part_of_speech": "determiner",
+    "examples": ["Many people came"]
+  },
+  "market": {
+    "definition": "A place to buy and sell",
+    "part_of_speech": "noun",
+    "examples": ["Go to the market"]
+  },
+  "marriage": {
+    "definition": "The union of two people",
+    "part_of_speech": "noun",
+    "examples": ["Marriage is a commitment"]
+  },
+  "material": {
+    "definition": "Substance; fabric",
+    "part_of_speech": "noun",
+    "examples": ["This material is soft"]
+  },
+  "matter": {
+    "definition": "To be important",
+    "part_of_speech": "verb",
+    "examples": ["Your opinion matters"]
+  },
+  "may": {
+    "definition": "Might; expressing possibility",
+    "part_of_speech": "verb",
+    "examples": ["It may rain today"]
+  },
+  "maybe": {
+    "definition": "Perhaps",
+    "part_of_speech": "adverb",
+    "examples": ["Maybe we should go"]
+  },
+  "me": {
+    "definition": "The person speaking (object)",
+    "part_of_speech": "pronoun",
+    "examples": ["Give it to me"]
+  },
+  "mean": {
+    "definition": "To intend; unkind",
+    "part_of_speech": "verb",
+    "examples": ["What do you mean?"]
+  },
+  "measure": {
+    "definition": "To find the size of",
+    "part_of_speech": "verb",
+    "examples": ["Measure the room"]
+  },
+  "media": {
+    "definition": "Means of communication",
+    "part_of_speech": "noun",
+    "examples": ["Social media is popular"]
+  },
+  "medical": {
+    "definition": "Related to medicine",
+    "part_of_speech": "adjective",
+    "examples": ["Medical care is important"]
+  },
+  "meet": {
+    "definition": "To encounter",
+    "part_of_speech": "verb",
+    "examples": ["Nice to meet you"]
+  },
+  "meeting": {
+    "definition": "A gathering of people",
+    "part_of_speech": "noun",
+    "examples": ["The meeting starts at 2 PM"]
+  },
+  "member": {
+    "definition": "A person belonging to a group",
+    "part_of_speech": "noun",
+    "examples": ["She's a team member"]
+  },
+  "memory": {
+    "definition": "The ability to remember",
+    "part_of_speech": "noun",
+    "examples": ["I have a good memory"]
+  },
+  "mention": {
+    "definition": "To refer to briefly",
+    "part_of_speech": "verb",
+    "examples": ["Don't mention it"]
+  },
+  "message": {
+    "definition": "A communication",
+    "part_of_speech": "noun",
+    "examples": ["I got your message"]
+  },
+  "method": {
+    "definition": "A way of doing something",
+    "part_of_speech": "noun",
+    "examples": ["This method works well"]
+  },
+  "middle": {
+    "definition": "The center",
+    "part_of_speech": "noun",
+    "examples": ["Stand in the middle"]
+  },
+  "might": {
+    "definition": "Expressing possibility",
+    "part_of_speech": "verb",
+    "examples": ["I might go later"]
+  },
+  "military": {
+    "definition": "Related to armed forces",
+    "part_of_speech": "adjective",
+    "examples": ["Military service is required"]
+  },
+  "million": {
+    "definition": "One thousand thousand",
+    "part_of_speech": "number",
+    "examples": ["A million dollars"]
+  },
+  "mind": {
+    "definition": "The thinking part of a person",
+    "part_of_speech": "noun",
+    "examples": ["Use your mind"]
+  },
+  "minute": {
+    "definition": "60 seconds",
+    "part_of_speech": "noun",
+    "examples": ["Wait a minute"]
+  },
+  "miss": {
+    "definition": "To fail to hit; to feel sad about absence",
+    "part_of_speech": "verb",
+    "examples": ["I miss my family"]
+  },
+  "mission": {
+    "definition": "An important task",
+    "part_of_speech": "noun",
+    "examples": ["Our mission is to help"]
+  },
+  "mistake": {
+    "definition": "An error",
+    "part_of_speech": "noun",
+    "examples": ["Everyone makes mistakes"]
+  },
+  "model": {
+    "definition": "A representation; a person who poses",
+    "part_of_speech": "noun",
+    "examples": ["This is a model airplane"]
+  },
+  "modern": {
+    "definition": "Current; up-to-date",
+    "part_of_speech": "adjective",
+    "examples": ["Modern technology is amazing"]
+  },
+  "moment": {
+    "definition": "A brief period of time",
+    "part_of_speech": "noun",
+    "examples": ["Wait a moment"]
+  },
+  "money": {
+    "definition": "Currency used for buying",
+    "part_of_speech": "noun",
+    "examples": ["Money can't buy happiness"]
+  },
+  "month": {
+    "definition": "One of twelve divisions of a year",
+    "part_of_speech": "noun",
+    "examples": ["January is the first month"]
+  },
+  "more": {
+    "definition": "A greater amount",
+    "part_of_speech": "determiner",
+    "examples": ["I need more time"]
+  },
+  "morning": {
+    "definition": "The early part of the day",
+    "part_of_speech": "noun",
+    "examples": ["Good morning!"]
+  },
+  "most": {
+    "definition": "The greatest amount",
+    "part_of_speech": "determiner",
+    "examples": ["Most people agree"]
+  },
+  "mother": {
+    "definition": "A female parent",
+    "part_of_speech": "noun",
+    "examples": ["My mother is kind"]
+  },
+  "move": {
+    "definition": "To change position",
+    "part_of_speech": "verb",
+    "examples": ["Move to the left"]
+  },
+  "movement": {
+    "definition": "The act of moving",
+    "part_of_speech": "noun",
+    "examples": ["The movement was graceful"]
+  },
+  "movie": {
+    "definition": "A film",
+    "part_of_speech": "noun",
+    "examples": ["Let's watch a movie"]
+  },
+  "mr": {
+    "definition": "Title for a man",
+    "part_of_speech": "noun",
+    "examples": ["Mr. Smith is here"]
+  },
+  "mrs": {
+    "definition": "Title for a married woman",
+    "part_of_speech": "noun",
+    "examples": ["Mrs. Johnson called"]
+  },
+  "much": {
+    "definition": "A large amount",
+    "part_of_speech": "determiner",
+    "examples": ["How much does it cost?"]
+  },
+  "music": {
+    "definition": "Organized sound",
+    "part_of_speech": "noun",
+    "examples": ["I love classical music"]
+  },
+  "must": {
+    "definition": "Expressing necessity",
+    "part_of_speech": "verb",
+    "examples": ["You must be careful"]
+  },
+  "my": {
+    "definition": "Belonging to me",
+    "part_of_speech": "pronoun",
+    "examples": ["This is my book"]
+  },
+  "myself": {
+    "definition": "I, personally",
+    "part_of_speech": "pronoun",
+    "examples": ["I did it myself"]
+  },
+  "name": {
+    "definition": "What someone is called",
+    "part_of_speech": "noun",
+    "examples": ["What's your name?"]
+  },
+  "nation": {
+    "definition": "A country",
+    "part_of_speech": "noun",
+    "examples": ["Our nation is strong"]
+  },
+  "national": {
+    "definition": "Related to a nation",
+    "part_of_speech": "adjective",
+    "examples": ["National security is important"]
+  },
+  "natural": {
+    "definition": "From nature; normal",
+    "part_of_speech": "adjective",
+    "examples": ["Natural beauty is amazing"]
+  },
+  "nature": {
+    "definition": "The natural world",
+    "part_of_speech": "noun",
+    "examples": ["I love spending time in nature"]
+  },
+  "near": {
+    "definition": "Close to",
+    "part_of_speech": "preposition",
+    "examples": ["The store is near my house"]
+  },
+  "nearly": {
+    "definition": "Almost",
+    "part_of_speech": "adverb",
+    "examples": ["I'm nearly finished"]
+  },
+  "necessary": {
+    "definition": "Required; essential",
+    "part_of_speech": "adjective",
+    "examples": ["Sleep is necessary for health"]
+  },
+  "need": {
+    "definition": "To require",
+    "part_of_speech": "verb",
+    "examples": ["I need help"]
+  },
+  "network": {
+    "definition": "A system of connections",
+    "part_of_speech": "noun",
+    "examples": ["The computer network is down"]
+  },
+  "never": {
+    "definition": "Not ever",
+    "part_of_speech": "adverb",
+    "examples": ["Never give up"]
+  },
+  "new": {
+    "definition": "Recently made or discovered",
+    "part_of_speech": "adjective",
+    "examples": ["I bought a new car"]
+  },
+  "news": {
+    "definition": "Recent information",
+    "part_of_speech": "noun",
+    "examples": ["Did you hear the news?"]
+  },
+  "newspaper": {
+    "definition": "A daily publication",
+    "part_of_speech": "noun",
+    "examples": ["I read the newspaper"]
+  },
+  "next": {
+    "definition": "Coming after",
+    "part_of_speech": "adjective",
+    "examples": ["Next week I'm busy"]
+  },
+  "nice": {
+    "definition": "Pleasant; good",
+    "part_of_speech": "adjective",
+    "examples": ["Have a nice day"]
+  },
+  "night": {
+    "definition": "The time when it's dark",
+    "part_of_speech": "noun",
+    "examples": ["Good night"]
+  },
+  "nine": {
+    "definition": "The number 9",
+    "part_of_speech": "number",
+    "examples": ["I have nine cats"]
+  },
+  "no": {
+    "definition": "Not any; refusal",
+    "part_of_speech": "determiner",
+    "examples": ["No problem"]
+  },
+  "none": {
+    "definition": "Not one",
+    "part_of_speech": "pronoun",
+    "examples": ["None of them came"]
+  },
+  "nor": {
+    "definition": "And not",
+    "part_of_speech": "conjunction",
+    "examples": ["Neither here nor there"]
+  },
+  "north": {
+    "definition": "The direction opposite to south",
+    "part_of_speech": "noun",
+    "examples": ["Go north for two miles"]
+  },
+  "not": {
+    "definition": "Used to make negative",
+    "part_of_speech": "adverb",
+    "examples": ["I am not ready"]
+  },
+  "note": {
+    "definition": "A short message",
+    "part_of_speech": "noun",
+    "examples": ["Leave a note"]
+  },
+  "nothing": {
+    "definition": "Not anything",
+    "part_of_speech": "pronoun",
+    "examples": ["Nothing is impossible"]
+  },
+  "notice": {
+    "definition": "To become aware of",
+    "part_of_speech": "verb",
+    "examples": ["Did you notice the change?"]
+  },
+  "now": {
+    "definition": "At this time",
+    "part_of_speech": "adverb",
+    "examples": ["I need it now"]
+  },
+  "number": {
+    "definition": "A mathematical value",
+    "part_of_speech": "noun",
+    "examples": ["What's your phone number?"]
+  },
+  "occur": {
+    "definition": "To happen",
+    "part_of_speech": "verb",
+    "examples": ["When did this occur?"]
+  },
+  "of": {
+    "definition": "Belonging to; from",
+    "part_of_speech": "preposition",
+    "examples": ["The color of the sky"]
+  },
+  "off": {
+    "definition": "Away from; not on",
+    "part_of_speech": "adverb",
+    "examples": ["Turn off the light"]
+  },
+  "offer": {
+    "definition": "To present for acceptance",
+    "part_of_speech": "verb",
+    "examples": ["I offer my help"]
+  },
+  "office": {
+    "definition": "A place of work",
+    "part_of_speech": "noun",
+    "examples": ["I work in an office"]
+  },
+  "officer": {
+    "definition": "A person in authority",
+    "part_of_speech": "noun",
+    "examples": ["The police officer helped"]
+  },
+  "official": {
+    "definition": "Authorized; formal",
+    "part_of_speech": "adjective",
+    "examples": ["This is official business"]
+  },
+  "often": {
+    "definition": "Frequently",
+    "part_of_speech": "adverb",
+    "examples": ["I often go there"]
+  },
+  "oh": {
+    "
