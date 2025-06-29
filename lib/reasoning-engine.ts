@@ -44,7 +44,8 @@ export class ReasoningEngine {
   private systemIdentity: SystemIdentity = {
     name: "ZacAI",
     version: "5.0.0",
-    purpose: "Master AI reasoning engine with neural learning, Tesla mathematics, comprehensive knowledge management, and advanced cognitive processing",
+    purpose:
+      "Master AI reasoning engine with neural learning, Tesla mathematics, comprehensive knowledge management, and advanced cognitive processing",
   }
 
   // Learning Stats (from enhanced systems)
@@ -132,16 +133,16 @@ export class ReasoningEngine {
   // CORE INITIALIZATION METHODS (merged from all systems)
   private async initializeCoreComponents(): Promise<void> {
     console.log("🔧 Initializing core components...")
-    
+
     // Load system identity (from unified-ai-system.ts)
     await this.loadSystemIdentity()
-    
+
     // Initialize vocabulary loader (from enhanced systems)
     await this.vocabularyLoader.loadVocabulary()
-    
+
     // Initialize tokenizer (from enhanced systems)
     await this.tokenizer.initialize()
-    
+
     console.log("✅ Core components initialized")
   }
 
@@ -181,7 +182,7 @@ export class ReasoningEngine {
     try {
       console.log("🔍 Loading comprehensive seed vocabulary...")
       const response = await fetch("/seed_vocab.json")
-      
+
       if (response.ok) {
         const data = await response.json()
         console.log("📊 Raw vocabulary data keys count:", Object.keys(data).length)
@@ -328,7 +329,7 @@ export class ReasoningEngine {
 
         this.mathematics.set("vortex_cycle", {
           concept: "Vortex Mathematics Cycle",
-          type: "tesla_math", 
+          type: "tesla_math",
           formula: "1-2-4-8-7-5 infinite cycle pattern",
           category: "tesla_mathematics",
           source: "seed",
@@ -563,7 +564,7 @@ export class ReasoningEngine {
       new Array(64).fill(0).map(() => Math.random() - 0.5),
     )
     this.neuralWeights.set(
-      "hidden_layer_2", 
+      "hidden_layer_2",
       new Array(32).fill(0).map(() => Math.random() - 0.5),
     )
     this.neuralWeights.set(
@@ -717,7 +718,11 @@ export class ReasoningEngine {
     const teslaNumbers = [
       { number: 3, meaning: "Creation and manifestation", properties: ["Creative force", "Trinity", "Growth"] },
       { number: 6, meaning: "Harmony and balance", properties: ["Perfect harmony", "Balance", "Stability"] },
-      { number: 9, meaning: "Completion and universal wisdom", properties: ["Universal completion", "Wisdom", "Finality"] },
+      {
+        number: 9,
+        meaning: "Completion and universal wisdom",
+        properties: ["Universal completion", "Wisdom", "Finality"],
+      },
     ]
 
     teslaNumbers.forEach(({ number, meaning, properties }) => {
@@ -741,7 +746,7 @@ export class ReasoningEngine {
 
     // Initialize performance monitoring
     this.performanceLog = []
-    
+
     // Initialize connection monitoring
     this.monitorConnection()
 
@@ -784,7 +789,7 @@ export class ReasoningEngine {
     try {
       // Try multiple storage methods (from reliable-ai-system.ts)
       let conversations = await this.storageManager.loadConversations()
-      
+
       // Fallback to localStorage (from simple systems)
       if (!conversations || conversations.length === 0) {
         const stored = localStorage.getItem("reasoning_engine_conversations")
@@ -794,9 +799,8 @@ export class ReasoningEngine {
       }
 
       // Filter and validate conversations (from diagnostic systems)
-      this.conversationHistory = conversations.filter((msg) => 
-        msg && msg.id && msg.role && msg.content && 
-        (msg.role === "user" || msg.role === "assistant")
+      this.conversationHistory = conversations.filter(
+        (msg) => msg && msg.id && msg.role && msg.content && (msg.role === "user" || msg.role === "assistant"),
       )
 
       console.log(`✅ Loaded ${this.conversationHistory.length} conversation messages`)
@@ -811,32 +815,113 @@ export class ReasoningEngine {
     // Essential words for basic conversation (from all chat systems)
     const basicWords = [
       // Greetings and social
-      "hello", "hi", "hey", "goodbye", "bye", "thanks", "thank", "please", 
-      "yes", "no", "maybe", "sure", "okay", "ok", "good", "bad", "great",
-      
+      "hello",
+      "hi",
+      "hey",
+      "goodbye",
+      "bye",
+      "thanks",
+      "thank",
+      "please",
+      "yes",
+      "no",
+      "maybe",
+      "sure",
+      "okay",
+      "ok",
+      "good",
+      "bad",
+      "great",
+
       // Question words
-      "what", "who", "where", "when", "why", "how", "can", "could", "would",
-      
+      "what",
+      "who",
+      "where",
+      "when",
+      "why",
+      "how",
+      "can",
+      "could",
+      "would",
+
       // Common verbs
-      "like", "love", "want", "need", "know", "think", "remember", "forget",
-      "help", "sorry", "excuse", "understand", "explain", "tell", "say",
-      
+      "like",
+      "love",
+      "want",
+      "need",
+      "know",
+      "think",
+      "remember",
+      "forget",
+      "help",
+      "sorry",
+      "excuse",
+      "understand",
+      "explain",
+      "tell",
+      "say",
+
       // Math and numbers
-      "calculate", "math", "number", "add", "subtract", "multiply", "divide",
-      "times", "plus", "minus", "equals", "result", "answer", "sum", 
-      "difference", "product", "quotient",
-      
+      "calculate",
+      "math",
+      "number",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "times",
+      "plus",
+      "minus",
+      "equals",
+      "result",
+      "answer",
+      "sum",
+      "difference",
+      "product",
+      "quotient",
+
       // Tesla mathematics
-      "tesla", "vortex", "digital", "root", "pattern", "sacred", "energy",
-      "frequency", "vibration", "universe", "infinity",
-      
+      "tesla",
+      "vortex",
+      "digital",
+      "root",
+      "pattern",
+      "sacred",
+      "energy",
+      "frequency",
+      "vibration",
+      "universe",
+      "infinity",
+
       // AI and learning
-      "learn", "teach", "study", "practice", "try", "attempt", "succeed",
-      "fail", "improve", "better", "best", "worst", "smart", "intelligent",
-      
+      "learn",
+      "teach",
+      "study",
+      "practice",
+      "try",
+      "attempt",
+      "succeed",
+      "fail",
+      "improve",
+      "better",
+      "best",
+      "worst",
+      "smart",
+      "intelligent",
+
       // System words
-      "system", "diagnostic", "status", "health", "performance", "memory",
-      "brain", "neural", "network", "process", "analyze", "compute",
+      "system",
+      "diagnostic",
+      "status",
+      "health",
+      "performance",
+      "memory",
+      "brain",
+      "neural",
+      "network",
+      "process",
+      "analyze",
+      "compute",
     ]
 
     basicWords.forEach((word) => {
@@ -919,9 +1004,9 @@ export class ReasoningEngine {
       // Stage 2: Iterative Thinking Process (from cognitive-processor.ts)
       let processingResult
       if (this.iterativeThinking && patternMatch.confidence < 0.9) {
-        processingResult = await this.iterativeThinking ? 
-          await this.performIterativeThinking(userMessage, patternMatch) :
-          await this.processInputByIntent(userMessage, patternMatch)
+        processingResult = (await this.iterativeThinking)
+          ? await this.performIterativeThinking(userMessage, patternMatch)
+          : await this.processInputByIntent(userMessage, patternMatch)
       } else {
         processingResult = await this.processInputByIntent(userMessage, patternMatch)
       }
@@ -971,7 +1056,8 @@ export class ReasoningEngine {
       const processingTime = performance.now() - startTime
 
       return {
-        content: "I encountered an error processing your message. My diagnostic systems are analyzing the issue. Please try again.",
+        content:
+          "I encountered an error processing your message. My diagnostic systems are analyzing the issue. Please try again.",
         confidence: 0.3,
         reasoning: [`❌ Error: ${error}`],
         knowledgeUsed: ["error_handling"],
@@ -1038,11 +1124,7 @@ export class ReasoningEngine {
         "Do I know this word already?",
         "Should I look it up online?",
       ],
-      personal_info: [
-        "What personal information was shared?",
-        "How should I store this?",
-        "What should I remember?",
-      ],
+      personal_info: ["What personal information was shared?", "How should I store this?", "What should I remember?"],
     }
 
     const intentPrompts = prompts[intent as keyof typeof prompts] || [
@@ -1613,3 +1695,695 @@ export class ReasoningEngine {
     }
     return { used: 0, total: 0, limit: 0 }
   }
+
+  // CAPABILITY INQUIRY PROCESSING (from enhanced systems)
+  private async processCapabilityInquiry(input: string): Promise<any> {
+    this.addThought("🤖 Processing capability inquiry...", "system", 0.9)
+
+    const capabilities = {
+      mathematics: "Advanced mathematical calculations including Tesla/Vortex mathematics",
+      vocabulary: "Comprehensive vocabulary with learning capabilities",
+      memory: "Personal information storage and recall",
+      learning: "Continuous learning from conversations and external sources",
+      neural: "Neural network processing with iterative thinking",
+      diagnostic: "System health monitoring and performance analysis",
+      conversation: "Natural conversation with context awareness",
+      pattern: "Advanced pattern recognition and matching",
+    }
+
+    return {
+      type: "capability_inquiry",
+      confidence: 0.9,
+      capabilities,
+    }
+  }
+
+  // EXPLANATION REQUEST PROCESSING (from all systems)
+  private async processExplanationRequest(input: string): Promise<any> {
+    this.addThought("📚 Processing explanation request...", "knowledge", 0.8)
+
+    // Extract topic from input
+    const topicMatch = input.match(/(?:tell me about|explain)\s+(.+)/i)
+    if (!topicMatch) {
+      return { type: "explanation", confidence: 0.3, error: "Could not extract topic" }
+    }
+
+    const topic = topicMatch[1].toLowerCase().trim()
+
+    // Search knowledge bases
+    const knowledgeResults = this.searchKnowledge(topic)
+
+    return {
+      type: "explanation",
+      topic: topic,
+      knowledgeResults: knowledgeResults,
+      confidence: knowledgeResults.length > 0 ? 0.8 : 0.4,
+    }
+  }
+
+  // GENERAL CONVERSATION PROCESSING (from all systems)
+  private async processGeneralConversation(input: string): Promise<any> {
+    this.addThought("💬 Processing general conversation...", "conversation", 0.7)
+
+    // Use pattern matching to find relevant responses
+    const tokens = this.tokenizer.tokenize(input)
+    const relevantKnowledge = this.findRelevantKnowledge(tokens)
+
+    return {
+      type: "general_conversation",
+      tokens: tokens,
+      relevantKnowledge: relevantKnowledge,
+      confidence: 0.7,
+    }
+  }
+
+  private async processGeneralIteration(thought: string): Promise<any> {
+    this.addThought("💬 Processing general iteration...", "conversation", 0.7)
+
+    const tokens = this.tokenizer.tokenize(thought)
+    const relevantKnowledge = this.findRelevantKnowledge(tokens)
+
+    return {
+      type: "general_conversation",
+      tokens: tokens,
+      relevantKnowledge: relevantKnowledge,
+      confidence: 0.7,
+      nextThought: "General conversation processed",
+    }
+  }
+
+  // KNOWLEDGE ACTIVATION (from all systems)
+  private async activateKnowledge(input: string, processingResult: any): Promise<any> {
+    this.addThought("📚 Activating relevant knowledge...", "knowledge", 0.8)
+
+    const tokens = this.tokenizer.tokenize(input)
+    const relevantKnowledge = this.findRelevantKnowledge(tokens)
+
+    // Combine with processing result knowledge
+    const combinedKnowledge = {
+      vocabulary: relevantKnowledge.vocabulary,
+      mathematics: relevantKnowledge.mathematics,
+      facts: relevantKnowledge.facts,
+      coding: relevantKnowledge.coding,
+      personal: relevantKnowledge.personal,
+      processingSpecific: processingResult.knowledgeUsed || [],
+    }
+
+    this.addThought(`📚 Activated knowledge: ${Object.values(combinedKnowledge).flat().length} items`, "knowledge", 0.8)
+
+    return combinedKnowledge
+  }
+
+  private findRelevantKnowledge(tokens: string[]): any {
+    const relevantKnowledge = {
+      vocabulary: [] as VocabularyEntry[],
+      mathematics: [] as MathEntry[],
+      facts: [] as FactEntry[],
+      coding: [] as CodingEntry[],
+      personal: [] as PersonalInfoEntry[],
+    }
+
+    // Find relevant vocabulary
+    tokens.forEach((token) => {
+      const vocabEntry = this.vocabulary.get(token.toLowerCase())
+      if (vocabEntry) {
+        relevantKnowledge.vocabulary.push(vocabEntry)
+      }
+    })
+
+    // Find relevant mathematics
+    this.mathematics.forEach((entry, key) => {
+      if (tokens.some((token) => entry.concept.toLowerCase().includes(token.toLowerCase()))) {
+        relevantKnowledge.mathematics.push(entry)
+      }
+    })
+
+    // Find relevant facts
+    this.facts.forEach((entry, key) => {
+      if (tokens.some((token) => entry.topic.toLowerCase().includes(token.toLowerCase()))) {
+        relevantKnowledge.facts.push(entry)
+      }
+    })
+
+    // Find relevant coding
+    this.coding.forEach((entry, key) => {
+      if (tokens.some((token) => entry.concept.toLowerCase().includes(token.toLowerCase()))) {
+        relevantKnowledge.coding.push(entry)
+      }
+    })
+
+    // Find relevant personal info
+    this.personalInfo.forEach((entry, key) => {
+      if (tokens.some((token) => entry.value.toLowerCase().includes(token.toLowerCase()))) {
+        relevantKnowledge.personal.push(entry)
+      }
+    })
+
+    return relevantKnowledge
+  }
+
+  private searchKnowledge(query: string): any[] {
+    const results: any[] = []
+    const queryLower = query.toLowerCase()
+
+    // Search vocabulary
+    this.vocabulary.forEach((entry, key) => {
+      if (entry.word.includes(queryLower) || entry.definition.toLowerCase().includes(queryLower)) {
+        results.push({ type: "vocabulary", entry })
+      }
+    })
+
+    // Search mathematics
+    this.mathematics.forEach((entry, key) => {
+      if (entry.concept.toLowerCase().includes(queryLower) || entry.formula.toLowerCase().includes(queryLower)) {
+        results.push({ type: "mathematics", entry })
+      }
+    })
+
+    // Search facts
+    this.facts.forEach((entry, key) => {
+      if (entry.topic.toLowerCase().includes(queryLower) || entry.content.toLowerCase().includes(queryLower)) {
+        results.push({ type: "facts", entry })
+      }
+    })
+
+    // Search coding
+    this.coding.forEach((entry, key) => {
+      if (entry.concept.toLowerCase().includes(queryLower) || entry.description.toLowerCase().includes(queryLower)) {
+        results.push({ type: "coding", entry })
+      }
+    })
+
+    return results
+  }
+
+  // NEURAL PROCESSING (from enhanced systems)
+  private async neuralProcessing(input: string, knowledgeResult: any): Promise<any> {
+    this.addThought("🧠 Performing neural processing...", "neural", 0.85)
+
+    // Convert input to neural vector
+    const inputVector = this.textToVector(input)
+
+    // Process through neural layers
+    let currentVector = inputVector
+    const layerNames = ["input_layer", "hidden_layer_1", "hidden_layer_2", "output_layer"]
+
+    for (const layerName of layerNames) {
+      const weights = this.neuralWeights.get(layerName)
+      if (weights) {
+        currentVector = this.processNeuralLayer(currentVector, weights)
+        this.addThought(`🧠 Processed ${layerName}`, "neural", 0.8)
+      }
+    }
+
+    // Update neural weights based on feedback (simple learning)
+    this.updateNeuralWeights(inputVector, currentVector)
+
+    this.learningStats.neuralUpdates++
+
+    return {
+      inputVector,
+      outputVector: currentVector,
+      confidence: this.calculateNeuralConfidence(currentVector),
+    }
+  }
+
+  private textToVector(text: string): number[] {
+    // Simple text to vector conversion
+    const vector = new Array(128).fill(0)
+    const chars = text.toLowerCase().split("")
+
+    chars.forEach((char, index) => {
+      const charCode = char.charCodeAt(0)
+      const vectorIndex = charCode % 128
+      vector[vectorIndex] += 1 / (index + 1) // Weight by position
+    })
+
+    // Normalize vector
+    const magnitude = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0))
+    return magnitude > 0 ? vector.map((val) => val / magnitude) : vector
+  }
+
+  private processNeuralLayer(input: number[], weights: number[]): number[] {
+    const output = new Array(weights.length).fill(0)
+
+    for (let i = 0; i < output.length; i++) {
+      let sum = 0
+      for (let j = 0; j < input.length && j < weights.length; j++) {
+        sum += input[j] * weights[j]
+      }
+      // Apply activation function (sigmoid)
+      output[i] = 1 / (1 + Math.exp(-sum))
+    }
+
+    return output
+  }
+
+  private updateNeuralWeights(input: number[], output: number[]): void {
+    // Simple weight update based on input-output correlation
+    this.neuralWeights.forEach((weights, layerName) => {
+      for (let i = 0; i < weights.length; i++) {
+        const inputIndex = i % input.length
+        const outputIndex = i % output.length
+        const delta = this.learningRate * (output[outputIndex] - 0.5) * input[inputIndex]
+        weights[i] += delta
+      }
+    })
+  }
+
+  private calculateNeuralConfidence(output: number[]): number {
+    // Calculate confidence based on output vector characteristics
+    const mean = output.reduce((sum, val) => sum + val, 0) / output.length
+    const variance = output.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / output.length
+    return Math.min(0.95, 0.5 + variance) // Higher variance = higher confidence
+  }
+
+  // RESPONSE GENERATION (from all systems)
+  private async generateResponse(input: string, processingData: any): Promise<any> {
+    this.addThought("📝 Generating comprehensive response...", "response", 0.9)
+
+    const { processingResult, knowledgeResult, neuralResult, patternMatch } = processingData
+
+    let content = ""
+    let confidence = 0.7
+    const knowledgeUsed: string[] = []
+    let mathAnalysis: any = null
+    let teslaAnalysis: any = null
+
+    // Generate response based on processing result type
+    switch (processingResult.type) {
+      case "mathematical":
+        if (processingResult.answer !== undefined) {
+          content = `The answer is ${processingResult.answer}.`
+          if (processingResult.operation && processingResult.numbers) {
+            content += ` I calculated ${processingResult.numbers.join(` ${processingResult.operation} `)} = ${processingResult.answer}.`
+          }
+          confidence = processingResult.confidence
+          mathAnalysis = processingResult.mathAnalysis
+          knowledgeUsed.push("mathematical_processing")
+        } else {
+          content = "I had trouble processing that mathematical expression. Could you rephrase it?"
+          confidence = 0.3
+        }
+        break
+
+      case "tesla_math":
+        if (processingResult.digitalRoot !== undefined) {
+          const { number, digitalRoot, vortexData } = processingResult
+          content = `Tesla/Vortex analysis of ${number}:\n\n`
+          content += `🔢 Digital Root: ${digitalRoot}\n`
+          content += `⚡ Type: ${vortexData.type}\n`
+          content += `📊 Analysis: ${vortexData.analysis}\n`
+
+          if (vortexData.isTeslaNumber) {
+            content += `\n🌟 This is a Tesla number! ${vortexData.meaning}`
+          } else if (vortexData.isVortexNumber) {
+            content += `\n🌀 This number is part of the vortex cycle at position ${vortexData.position}`
+          }
+
+          confidence = 0.95
+          teslaAnalysis = processingResult.teslaAnalysis
+          knowledgeUsed.push("tesla_mathematics", "vortex_mathematics")
+        } else {
+          content = "I need a number to perform Tesla/Vortex mathematics analysis."
+          confidence = 0.3
+        }
+        break
+
+      case "definition":
+        if (processingResult.definition) {
+          const def = processingResult.definition
+          content = `**${def.word}** (${def.partOfSpeech}): ${def.definition}`
+          if (def.examples && def.examples.length > 0) {
+            content += `\n\nExample: ${def.examples[0]}`
+          }
+          if (def.synonyms && def.synonyms.length > 0) {
+            content += `\n\nSynonyms: ${def.synonyms.join(", ")}`
+          }
+          confidence = def.confidence
+          knowledgeUsed.push("vocabulary", def.source)
+        } else {
+          content = `I don't know that word yet, but I'm always learning! Could you tell me what it means?`
+          confidence = 0.4
+        }
+        break
+
+      case "personal_info":
+        if (processingResult.personalInfo) {
+          const infoKeys = Object.keys(processingResult.personalInfo)
+          content = `I've remembered that information about you: ${infoKeys.join(", ")}.`
+          confidence = 0.9
+          knowledgeUsed.push("personal_memory")
+        } else {
+          content = "I'll remember that for you!"
+          confidence = 0.8
+        }
+        break
+
+      case "memory_storage":
+        content = `I've stored that memory: "${processingResult.memoryContent}"`
+        confidence = 0.9
+        knowledgeUsed.push("explicit_memory")
+        break
+
+      case "greeting":
+        const greetings = [
+          "Hello! I'm ZacAI, your advanced reasoning companion. How can I help you today?",
+          "Hi there! I'm ready to assist with mathematics, definitions, learning, and conversation.",
+          "Hey! I'm ZacAI with Tesla mathematics, neural processing, and comprehensive knowledge. What would you like to explore?",
+        ]
+        content = greetings[Math.floor(Math.random() * greetings.length)]
+        confidence = 0.9
+        knowledgeUsed.push("greeting_patterns")
+        break
+
+      case "system_diagnostic":
+        const diag = processingResult.diagnosticData
+        content = `🔧 **System Diagnostic Report**\n\n`
+        content += `📊 **Status**: ${diag.systemStatus}\n`
+        content += `🌐 **Connection**: ${diag.connectionStatus}\n`
+        content += `📚 **Knowledge**: ${diag.vocabularySize} words, ${diag.mathSize} math concepts, ${diag.factsSize} facts\n`
+        content += `🧠 **Neural**: ${diag.neuralWeightsLoaded ? "Active" : "Inactive"}\n`
+        content += `💬 **Conversations**: ${diag.conversationCount} messages\n`
+        content += `📈 **Learning**: ${diag.learningStats.wordsLearned} words learned, ${diag.learningStats.teslaCalculations} Tesla calculations\n`
+        content += `💾 **Memory**: ${diag.memoryUsage.used}MB used of ${diag.memoryUsage.total}MB\n`
+        confidence = 0.95
+        knowledgeUsed.push("system_diagnostics")
+        break
+
+      case "capability_inquiry":
+        content = `🤖 **My Capabilities**\n\n`
+        Object.entries(processingResult.capabilities).forEach(([key, desc]) => {
+          content += `• **${key.charAt(0).toUpperCase() + key.slice(1)}**: ${desc}\n`
+        })
+        content += `\nI'm continuously learning and improving! What would you like to try?`
+        confidence = 0.9
+        knowledgeUsed.push("capability_description")
+        break
+
+      case "explanation":
+        if (processingResult.knowledgeResults && processingResult.knowledgeResults.length > 0) {
+          content = `Here's what I know about ${processingResult.topic}:\n\n`
+          processingResult.knowledgeResults.slice(0, 3).forEach((result: any, index: number) => {
+            content += `${index + 1}. **${result.entry.concept || result.entry.word || result.entry.topic}**: `
+            content += `${result.entry.definition || result.entry.formula || result.entry.content}\n\n`
+          })
+          confidence = processingResult.confidence
+          knowledgeUsed.push("knowledge_search")
+        } else {
+          content = `I don't have specific information about ${processingResult.topic} yet, but I'm always learning! Could you tell me more about it?`
+          confidence = 0.4
+        }
+        break
+
+      default:
+        // General conversation
+        if (knowledgeResult.vocabulary.length > 0 || knowledgeResult.facts.length > 0) {
+          content = "I understand what you're saying. "
+          if (knowledgeResult.vocabulary.length > 0) {
+            content += `I recognize words like: ${knowledgeResult.vocabulary
+              .slice(0, 3)
+              .map((v: any) => v.word)
+              .join(", ")}. `
+          }
+          if (knowledgeResult.facts.length > 0) {
+            content += `This relates to topics I know about: ${knowledgeResult.facts
+              .slice(0, 2)
+              .map((f: any) => f.category)
+              .join(", ")}. `
+          }
+          content += "Could you be more specific about what you'd like to know?"
+          confidence = 0.7
+        } else {
+          content =
+            "I'm processing what you said. Could you rephrase or ask me something specific? I can help with math, definitions, Tesla mathematics, or general conversation."
+          confidence = 0.5
+        }
+        knowledgeUsed.push("general_conversation")
+        break
+    }
+
+    // Add knowledge used from neural processing
+    if (neuralResult.confidence > 0.7) {
+      knowledgeUsed.push("neural_processing")
+    }
+
+    // Add relevant knowledge to response
+    const totalKnowledgeItems = Object.values(knowledgeResult).flat().length
+    if (totalKnowledgeItems > 0) {
+      knowledgeUsed.push(`${totalKnowledgeItems}_knowledge_items`)
+    }
+
+    this.addThought(`📝 Generated response (${Math.round(confidence * 100)}% confidence)`, "response", confidence)
+
+    return {
+      content,
+      confidence,
+      knowledgeUsed,
+      mathAnalysis,
+      teslaAnalysis,
+    }
+  }
+
+  // LEARNING FROM INTERACTION (from all systems)
+  private async learnFromInteraction(userMessage: string, response: any): Promise<void> {
+    this.addThought("📝 Learning from interaction...", "learning", 0.8)
+
+    // Store conversation
+    const userMsg: ChatMessage = {
+      id: `user_${Date.now()}`,
+      role: "user",
+      content: userMessage,
+      timestamp: Date.now(),
+    }
+
+    const assistantMsg: ChatMessage = {
+      id: `assistant_${Date.now()}`,
+      role: "assistant",
+      content: response.content,
+      timestamp: Date.now(),
+    }
+
+    this.conversationHistory.push(userMsg, assistantMsg)
+
+    // Keep only last 100 conversations
+    if (this.conversationHistory.length > 100) {
+      this.conversationHistory = this.conversationHistory.slice(-100)
+    }
+
+    // Save to storage
+    await this.storageManager.saveConversations(this.conversationHistory)
+
+    // Update pattern matching confidence
+    this.learningStats.patternsMatched++
+
+    // Save neural weights
+    try {
+      localStorage.setItem("reasoning_engine_neural_weights", JSON.stringify(Object.fromEntries(this.neuralWeights)))
+    } catch (error) {
+      console.warn("Could not save neural weights:", error)
+    }
+
+    this.addThought("📝 Learning complete", "learning", 0.9)
+  }
+
+  // UTILITY METHODS (from all systems)
+  public getSystemStatus(): any {
+    return {
+      isInitialized: this.isInitialized,
+      systemStatus: this.systemStatus,
+      vocabularySize: this.vocabulary.size,
+      mathematicsSize: this.mathematics.size,
+      factsSize: this.facts.size,
+      codingSize: this.coding.size,
+      personalInfoSize: this.personalInfo.size,
+      conversationCount: this.conversationHistory.length,
+      neuralLayersCount: this.neuralWeights.size,
+      learningStats: this.learningStats,
+      connectionStatus: this.connectionStatus,
+      thoughtStreamSize: this.thoughtStream.length,
+      systemIdentity: this.systemIdentity,
+    }
+  }
+
+  public getPerformanceStats(): any {
+    return this.performanceMonitor.getStats()
+  }
+
+  public getThoughtStream(): ThoughtNode[] {
+    return this.thoughtStream
+  }
+
+  public clearThoughtStream(): void {
+    this.thoughtStream = []
+  }
+
+  public exportLearningData(): any {
+    return {
+      vocabulary: Object.fromEntries(
+        Array.from(this.vocabulary.entries()).filter(([_, entry]) => entry.source === "learned_api"),
+      ),
+      mathematics: Object.fromEntries(
+        Array.from(this.mathematics.entries()).filter(([_, entry]) => entry.source === "learned"),
+      ),
+      personalInfo: Object.fromEntries(this.personalInfo.entries()),
+      conversationHistory: this.conversationHistory,
+      learningStats: this.learningStats,
+      neuralWeights: Object.fromEntries(this.neuralWeights.entries()),
+    }
+  }
+
+  public async resetSystem(): Promise<void> {
+    this.isInitialized = false
+    this.systemStatus = "resetting"
+    this.vocabulary.clear()
+    this.mathematics.clear()
+    this.facts.clear()
+    this.coding.clear()
+    this.personalInfo.clear()
+    this.conversationHistory = []
+    this.thoughtStream = []
+    this.neuralWeights.clear()
+    this.learningStats = {
+      wordsLearned: 0,
+      conversationsHad: 0,
+      feedbackReceived: 0,
+      patternsMatched: 0,
+      teslaCalculations: 0,
+      neuralUpdates: 0,
+    }
+
+    await this.initialize()
+  }
+}
+
+// PERFORMANCE MONITOR CLASS (from diagnostic systems)
+class PerformanceMonitor {
+  private operations: Array<{ operation: string; duration: number; timestamp: number }> = []
+
+  logOperation(operation: string, duration: number): void {
+    this.operations.push({
+      operation,
+      duration,
+      timestamp: Date.now(),
+    })
+
+    // Keep only last 100 operations
+    if (this.operations.length > 100) {
+      this.operations = this.operations.slice(-100)
+    }
+  }
+
+  getStats(): any {
+    if (this.operations.length === 0) {
+      return { averageDuration: 0, totalOperations: 0, recentOperations: [] }
+    }
+
+    const totalDuration = this.operations.reduce((sum, op) => sum + op.duration, 0)
+    const averageDuration = totalDuration / this.operations.length
+
+    return {
+      averageDuration: Math.round(averageDuration * 100) / 100,
+      totalOperations: this.operations.length,
+      recentOperations: this.operations.slice(-10),
+      fastestOperation: Math.min(...this.operations.map((op) => op.duration)),
+      slowestOperation: Math.max(...this.operations.map((op) => op.duration)),
+    }
+  }
+}
+
+// TYPE DEFINITIONS (from all systems)
+export interface ReasoningEngineResponse {
+  content: string
+  confidence: number
+  reasoning: string[]
+  knowledgeUsed: string[]
+  mathAnalysis?: any
+  teslaAnalysis?: any
+  processingTime: number
+  thinking: ThoughtNode[]
+  systemStatus: string
+  connectionStatus: string
+}
+
+interface ThoughtNode {
+  id: number
+  content: string
+  type: string
+  confidence: number
+  timestamp: number
+  emoji: string
+}
+
+interface VocabularyEntry {
+  word: string
+  definition: string
+  partOfSpeech: string
+  examples: string[]
+  source: string
+  confidence: number
+  phonetic: string
+  synonyms: string[]
+  antonyms: string[]
+  frequency: number
+  timestamp: number
+  category: string
+}
+
+interface MathEntry {
+  concept: string
+  type: string
+  formula: string
+  category: string
+  source: string
+  confidence: number
+  timestamp: number
+  difficulty: number
+  examples: string[]
+}
+
+interface FactEntry {
+  topic: string
+  content: string
+  category: string
+  source: string
+  confidence: number
+  timestamp: number
+  importance: number
+  verified: boolean
+}
+
+interface CodingEntry {
+  concept: string
+  language: string
+  description: string
+  examples: string[]
+  source: string
+  confidence: number
+  timestamp: number
+  difficulty: number
+  category: string
+}
+
+interface PersonalInfoEntry {
+  key: string
+  value: string
+  timestamp: number
+  importance: number
+  type: string
+  source: string
+  category: string
+}
+
+interface ChatMessage {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: number
+}
+
+interface SystemIdentity {
+  name: string
+  version: string
+  purpose: string
+}
