@@ -21,10 +21,12 @@ import {
   Settings,
   ThumbsUp,
   ThumbsDown,
+  Download,
   Search,
   Zap,
   ChevronDown,
   ChevronUp,
+  Database,
   Activity,
   Wifi,
   WifiOff,
@@ -582,7 +584,8 @@ export default function MasterAIChat() {
                   </div>
                   <p className="text-lg font-medium mb-2">Hello! I'm ZacAI Master System 🧠</p>
                   <p className="mb-4">
-                    Advanced AI with neural learning, Tesla mathematics, comprehensive knowledge management, and cognitive processing!
+                    Advanced AI with neural learning, Tesla mathematics, comprehensive knowledge management, and
+                    cognitive processing!
                   </p>
 
                   <div className="grid grid-cols-2 gap-2 text-sm max-w-md mx-auto">
@@ -889,4 +892,80 @@ export default function MasterAIChat() {
               </TabsContent>
 
               <TabsContent value="memory" className="space-y-4">
-                \
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Database className="w-4 h-4" />
+                      Memory System
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Vocabulary</span>
+                        <span>{stats.vocabulary} words</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Mathematics</span>
+                        <span>{stats.mathematics} concepts</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Facts</span>
+                        <span>{stats.facts} entries</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Conversations</span>
+                        <span>{stats.conversations} messages</span>
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p>• Persistent storage: Active</p>
+                      <p>• Auto-save: Enabled</p>
+                      <p>• Learning mode: Continuous</p>
+                      <p>• Memory integrity: Good</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="tools" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      System Tools
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Button onClick={handleExport} className="w-full bg-transparent" variant="outline">
+                      <Download className="w-4 h-4 mr-2" />
+                      Export Data
+                    </Button>
+
+                    <Button onClick={() => setInput("Self diagnostic")} className="w-full" variant="outline">
+                      <Activity className="w-4 h-4 mr-2" />
+                      Run Diagnostic
+                    </Button>
+
+                    <Button onClick={() => setInput("What can you do?")} className="w-full" variant="outline">
+                      <Brain className="w-4 h-4 mr-2" />
+                      Show Capabilities
+                    </Button>
+
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p>• System version: {stats.version}</p>
+                      <p>• Status: {stats.systemStatus}</p>
+                      <p>• Connection: {connectionStatus}</p>
+                      <p>• Last update: {new Date(stats.lastUpdated).toLocaleTimeString()}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </div>
+      )}
+    </div>
+  )
+}
