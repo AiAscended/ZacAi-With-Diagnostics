@@ -50,9 +50,17 @@ export class UnifiedAISystem {
 
   private async loadSeedVocabulary(): Promise<void> {
     try {
+      console.log("🔍 Attempting to load seed vocabulary from /seed_vocab.json...")
       const response = await fetch("/seed_vocab.json")
+      console.log("📡 Fetch response status:", response.status, response.ok)
+
       if (response.ok) {
         const data = await response.json()
+        console.log("📊 Raw vocabulary data keys count:", Object.keys(data).length)
+        console.log("📝 First 10 vocabulary keys:", Object.keys(data).slice(0, 10))
+        console.log("📝 Last 10 vocabulary keys:", Object.keys(data).slice(-10))
+
+        let loadedCount = 0
         Object.entries(data).forEach(([word, entry]: [string, any]) => {
           this.vocabulary.set(word.toLowerCase(), {
             word: word.toLowerCase(),
@@ -66,11 +74,15 @@ export class UnifiedAISystem {
             antonyms: entry.antonyms || [],
             frequency: entry.frequency || 1,
           })
+          loadedCount++
         })
-        console.log(`✅ Loaded ${Object.keys(data).length} seed vocabulary words`)
+        console.log(`✅ Successfully loaded ${loadedCount} seed vocabulary words`)
+        console.log(`📚 Total vocabulary size after loading: ${this.vocabulary.size}`)
+      } else {
+        console.error("❌ Failed to fetch seed vocabulary, status:", response.status)
       }
     } catch (error) {
-      console.warn("Failed to load seed vocabulary:", error)
+      console.error("❌ Error loading seed vocabulary:", error)
     }
   }
 
