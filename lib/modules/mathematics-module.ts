@@ -1,70 +1,84 @@
-import type { IKnowledgeModule, MathConcept, MathEvaluationResult } from "../types"
-import { StorageManager } from "../storage-manager"
+// lib/modules/mathematics-module.ts
+import type { IKnowledgeModule, MathEntry, MathResult } from "@/lib/types"
+import { StorageManager } from "@/lib/storage-manager"
 
 interface SeedMathsFile {
-  concepts: MathConcept[]
+  concepts: MathEntry[]
 }
 
 export class MathematicsModule implements IKnowledgeModule {
   public name = "Mathematics"
-  private knowledge: Map<string, MathConcept> = new Map()
   private storage = new StorageManager()
+  private seedMath: Map<string, MathEntry> = new Map()
+  private learnedMath: Map<string, MathEntry> = new Map()
 
   async initialize(): Promise<void> {
-    console.log("Initializing Mathematics Module...")
     const seedData = await this.storage.loadSeedData<SeedMathsFile>("seed_maths.json")
-    if (seedData && seedData.concepts) {
-      seedData.concepts.forEach((concept) => {
-        this.knowledge.set(concept.name.toLowerCase(), concept)
+    if (seedData && Array.isArray(seedData.concepts)) {
+      seedData.concepts.forEach((entry) => {
+        this.seedMath.set(entry.concept.toLowerCase(), { ...entry, source: "seed" })
       })
     }
-    console.log(`Mathematics Module initialized with ${this.knowledge.size} concepts.`)
-  }
 
-  getKnowledge(): Map<string, any> {
-    return this.knowledge
-  }
-
-  private calculateDigitalRoot(n: number): number {
-    let sum = n
-    while (sum > 9) {
-      sum = String(sum)
-        .split("")
-        .reduce((acc, digit) => acc + Number.parseInt(digit, 10), 0)
+    // Load learned data (robustly)
+    const learnedData = this.storage.loadLearnedData<any>("learnt_maths.json")
+    if (learnedData) {
+      const learnedArray = Array.isArray(learnedData) ? learnedData : Object.values(learnedData)
+      learnedArray.forEach((entry: MathEntry) => {
+        if (entry && entry.concept) {
+          this.learnedMath.set(entry.concept.toLowerCase(), entry)
+        }
+      })
     }
-    return sum
+    console.log(
+      `🧮 Mathematics Module initialized with ${this.seedMath.size} seed concepts and ${this.learnedMath.size} learned concepts.`,
+    )
   }
 
-  public evaluateExpression(expression: string): MathEvaluationResult {
-    const reasoning: string[] = [`Evaluating expression: "${expression}"`]
+  getKnowledge(): Map<string, MathEntry> {
+    return new Map([...this.seedMath, ...this.learnedMath])
+  }
+
+  async findTerm(term: string): Promise<MathEntry | null> {
+    const lowerTerm = term.toLowerCase()
+    return this.getKnowledge().get(lowerTerm) ?? null
+  }
+
+  private getDigitalRoot(n: number): number {
+    let root = n
+    while (root > 9) {
+      root = String(root)
+        .split("")
+        .reduce((sum, digit) => sum + Number.parseInt(digit, 10), 0)
+    }
+    return root
+  }
+
+  public evaluateExpression(expression: string): MathResult {
+    const reasoning: string[] = []
     try {
-      // Sanitize expression: allow numbers, basic operators, parentheses, and spaces.
-      const sanitizedExpression = expression.replace(/[^0-9.+\-*/()\s]/g, "")
-      if (sanitizedExpression !== expression) {
-        reasoning.push("Sanitized expression for safety.")
+      const sanitized = expression.replace(/[^0-9.+\-*/()\s.e]/gi, "")
+      reasoning.push(`Sanitized expression: "${sanitized}"`)
+
+      if (!sanitized) {
+        throw new Error("Expression is empty after sanitization.")
       }
 
-      // Use Function constructor for safe evaluation in this sandboxed environment.
-      // In a real-world app, a proper math parser (like math.js) is safer.
-      const result = new Function(`return ${sanitizedExpression}`)()
+      const result = new Function(`return ${sanitized}`)()
+      reasoning.push(`Calculated result: ${result}`)
 
-      if (typeof result !== "number") {
-        throw new Error("Evaluation did not result in a number.")
-      }
-
-      reasoning.push(`Standard calculation result: ${result}`)
-      const digitalRoot = this.calculateDigitalRoot(result)
-      reasoning.push(`Vortex math analysis (digital root): ${digitalRoot}`)
+      const digitalRoot = this.getDigitalRoot(result)
+      reasoning.push(`Vortex/Tesla analysis: Digital root is ${digitalRoot}.`)
 
       return {
-        answer: `The result is **${result}**. The digital root (Vortex) is **${digitalRoot}**.`,
+        answer: `The result is **${result}**. The digital root (Tesla/Vortex) is **${digitalRoot}**.`,
         confidence: 0.98,
         reasoning,
       }
     } catch (error) {
-      reasoning.push(`Error during evaluation: ${error instanceof Error ? error.message : "Unknown error"}`)
+      reasoning.push(`Error during calculation: ${error instanceof Error ? error.message : "Unknown error"}`)
       return {
-        answer: "I couldn't solve that mathematical expression. Please check the format.",
+        answer: "I'm sorry, I couldn't calculate that. Please use standard mathematical notation.",
         confidence: 0.2,
         reasoning,
       }

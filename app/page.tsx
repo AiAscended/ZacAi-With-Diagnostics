@@ -20,7 +20,7 @@ export default function Home() {
         setProgress(30)
         setInitializationMessage("Loading knowledge modules...")
 
-        // Simulate progress
+        // Simulate progress for better UX
         setTimeout(() => setProgress(60), 500)
 
         await cognitiveEngine.initialize()
@@ -31,7 +31,8 @@ export default function Home() {
         setTimeout(() => setEngine(cognitiveEngine), 500) // Short delay to show completion
       } catch (error) {
         console.error("Failed to initialize AI Engine:", error)
-        setInitializationMessage(`Error: ${error instanceof Error ? error.message : "Unknown error"}. Check console.`)
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred."
+        setInitializationMessage(`Error: ${errorMessage}. Check console for details.`)
         setProgress(100) // Show full progress bar on error to stop animation
       }
     }
@@ -40,23 +41,23 @@ export default function Home() {
 
   if (!engine) {
     return (
-      <main className="flex h-screen w-screen flex-col items-center justify-center p-4 bg-slate-900 text-white">
+      <main className="flex h-screen w-screen flex-col items-center justify-center p-4 bg-background text-foreground">
         <div className="w-full max-w-md text-center">
-          <div className="inline-block p-4 bg-slate-800/50 rounded-full border border-slate-700 mb-6">
-            <Brain className="h-12 w-12 text-cyan-400 animate-pulse" />
+          <div className="inline-block p-4 bg-secondary/50 rounded-full border border-border mb-6">
+            <Brain className="h-12 w-12 text-primary animate-pulse" />
           </div>
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-slate-200 to-cyan-400 text-transparent bg-clip-text">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-slate-200 to-primary text-transparent bg-clip-text">
             ZacAI is Waking Up
           </h1>
-          <p className="text-slate-400 mb-6">{initializationMessage}</p>
-          <Progress value={progress} className="w-full [&>div]:bg-cyan-400" />
+          <p className="text-muted-foreground mb-6">{initializationMessage}</p>
+          <Progress value={progress} className="w-full" />
         </div>
       </main>
     )
   }
 
   return (
-    <main className="flex h-screen w-screen flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-900">
+    <main className="flex h-screen w-screen flex-col items-center justify-center p-2 sm:p-4 bg-secondary/40">
       <AIControlPanel engine={engine} />
     </main>
   )
