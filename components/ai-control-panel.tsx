@@ -1,8 +1,9 @@
 // components/ai-control-panel.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { CognitiveEngine } from "@/lib/cognitive-engine"
+import type { KnowledgeEntry } from "@/lib/types"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BrainCircuit, BookOpen, MessageSquare, Settings, Calculator } from "lucide-react"
@@ -15,6 +16,21 @@ interface AIControlPanelProps {
 
 export default function AIControlPanel({ engine }: AIControlPanelProps) {
   const [activeTab, setActiveTab] = useState("chat")
+  const [vocabData, setVocabData] = useState<Map<string, KnowledgeEntry>>(new Map())
+  const [mathData, setMathData] = useState<Map<string, KnowledgeEntry>>(new Map())
+
+  useEffect(() => {
+    if (engine) {
+      const vocabModule = engine.getModule("Vocabulary")
+      if (vocabModule) {
+        setVocabData(vocabModule.getKnowledge())
+      }
+      const mathModule = engine.getModule("Mathematics")
+      if (mathModule) {
+        setMathData(mathModule.getKnowledge())
+      }
+    }
+  }, [engine])
 
   return (
     <Card className="w-full max-w-7xl h-[95vh] flex flex-col bg-card shadow-2xl rounded-lg border">
@@ -52,10 +68,10 @@ export default function AIControlPanel({ engine }: AIControlPanelProps) {
             <ChatTab engine={engine} />
           </TabsContent>
           <TabsContent value="vocab" className="m-0 h-full">
-            <KnowledgeViewerTab module={engine.getModule("Vocabulary")} />
+            <KnowledgeViewerTab knowledgeData={vocabData} moduleName="Vocabulary" />
           </TabsContent>
           <TabsContent value="math" className="m-0 h-full">
-            <KnowledgeViewerTab module={engine.getModule("Mathematics")} />
+            <KnowledgeViewerTab knowledgeData={mathData} moduleName="Mathematics" />
           </TabsContent>
           <TabsContent value="settings" className="m-0 p-6">
             <h2 className="text-xl font-semibold">System Settings</h2>

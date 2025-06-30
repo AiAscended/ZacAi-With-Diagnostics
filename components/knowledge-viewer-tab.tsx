@@ -2,23 +2,23 @@
 
 // components/knowledge-viewer-tab.tsx
 import { useState, useMemo } from "react"
-import type { IKnowledgeModule } from "@/lib/types"
+import type { KnowledgeEntry } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface KnowledgeViewerTabProps {
-  module: IKnowledgeModule | undefined
+  knowledgeData: Map<string, KnowledgeEntry>
+  moduleName: string
 }
 
-export default function KnowledgeViewerTab({ module }: KnowledgeViewerTabProps) {
+export default function KnowledgeViewerTab({ knowledgeData, moduleName }: KnowledgeViewerTabProps) {
   const [searchTerm, setSearchTerm] = useState("")
 
   const knowledgeArray = useMemo(() => {
-    if (!module) return []
-    return Array.from(module.getKnowledge().entries())
-  }, [module])
+    return Array.from(knowledgeData.entries())
+  }, [knowledgeData])
 
   const filteredKnowledge = useMemo(() => {
     if (!searchTerm) return knowledgeArray
@@ -28,10 +28,10 @@ export default function KnowledgeViewerTab({ module }: KnowledgeViewerTabProps) 
     })
   }, [knowledgeArray, searchTerm])
 
-  if (!module) {
+  if (!knowledgeData) {
     return (
       <div className="p-6 text-center text-muted-foreground">
-        <p>This module is not available or failed to load.</p>
+        <p>This module's data is not available.</p>
       </div>
     )
   }
@@ -43,12 +43,12 @@ export default function KnowledgeViewerTab({ module }: KnowledgeViewerTabProps) 
     <div className="p-4 sm:p-6 h-full flex flex-col">
       <Card className="flex-grow flex flex-col border-0 shadow-none">
         <CardHeader>
-          <CardTitle className="text-2xl">{module.name} Knowledge Base</CardTitle>
+          <CardTitle className="text-2xl">{moduleName} Knowledge Base</CardTitle>
           <CardDescription>
             Contains {knowledgeArray.length} total entries. Search through the loaded knowledge.
           </CardDescription>
           <Input
-            placeholder={`Search in ${module.name}...`}
+            placeholder={`Search in ${moduleName}...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-sm mt-2"
@@ -67,17 +67,25 @@ export default function KnowledgeViewerTab({ module }: KnowledgeViewerTabProps) 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredKnowledge.map(([key, value]) => (
-                  <TableRow key={key}>
-                    {headers.map((header) => (
-                      <TableCell key={header} className="align-top">
-                        <div className="max-w-xs truncate" title={String(value[header] ?? "")}>
-                          {Array.isArray(value[header]) ? value[header].join(", ") : String(value[header] ?? "")}
-                        </div>
-                      </TableCell>
-                    ))}
+                {filteredKnowledge.length > 0 ? (
+                  filteredKnowledge.map(([key, value]) => (
+                    <TableRow key={key}>
+                      {headers.map((header) => (
+                        <TableCell key={header} className="align-top">
+                          <div className="max-w-xs truncate" title={String(value[header] ?? "")}>
+                            {Array.isArray(value[header]) ? value[header].join(", ") : String(value[header] ?? "")}
+                          </div>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={headers.length} className="h-24 text-center">
+                      No results found.
+                    </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </ScrollArea>
