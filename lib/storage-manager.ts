@@ -10,11 +10,11 @@ export class StorageManager {
    * @param key The key to retrieve from localStorage.
    * @returns The parsed JSON data, or null if not found or invalid.
    */
-  public loadData(key: string): any | null {
+  public loadData<T>(key: string): T | null {
     try {
       if (typeof window === "undefined") return null
       const data = window.localStorage.getItem(key)
-      return data ? JSON.parse(data) : null
+      return data ? (JSON.parse(data) as T) : null
     } catch (error) {
       console.error(`[StorageManager] Error loading data for key "${key}":`, error)
       return null
@@ -29,7 +29,7 @@ export class StorageManager {
   public saveData(key: string, data: any): void {
     try {
       if (typeof window === "undefined") return
-      window.localStorage.setItem(key, JSON.stringify(data))
+      window.localStorage.setItem(key, JSON.stringify(data, null, 2))
     } catch (error) {
       console.error(`[StorageManager] Error saving data for key "${key}":`, error)
     }
@@ -40,13 +40,13 @@ export class StorageManager {
    * @param path The path to the JSON file within the /public directory (e.g., "/seed_vocab.json").
    * @returns The parsed JSON data, or null if fetching fails.
    */
-  public async loadJSON(path: string): Promise<any | null> {
+  public async loadJSON<T>(path: string): Promise<T | null> {
     try {
       const response = await fetch(path)
       if (!response.ok) {
         throw new Error(`Failed to fetch ${path}: ${response.statusText}`)
       }
-      return await response.json()
+      return (await response.json()) as T
     } catch (error) {
       console.error(`[StorageManager] Error loading JSON from "${path}":`, error)
       return null

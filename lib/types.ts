@@ -3,15 +3,15 @@
 // Generic entry for any knowledge type
 export interface KnowledgeEntry {
   [key: string]: any
-  timestamp: number
   source: "seed" | "learned"
+  timestamp?: number
 }
 
 export interface VocabularyEntry extends KnowledgeEntry {
   word: string
   definition: string
   part_of_speech: string
-  examples: string[]
+  examples?: string[]
   phonetic?: string
   synonyms?: string[]
   antonyms?: string[]
@@ -27,16 +27,10 @@ export interface WordEntry {
   antonyms?: string[]
 }
 
-export interface MathEntry {
+export interface MathEntry extends KnowledgeEntry {
   concept: string
-  type: string
-  formula: string
-  category: string
-  source: string
-  confidence: number
-  timestamp: number
-  difficulty: number
-  examples: string[]
+  explanation: string
+  formula?: string
 }
 
 export interface PersonalInfoEntry {
@@ -74,10 +68,10 @@ export interface CodingEntry {
 
 export interface ChatMessage {
   id: string
-  role: "user" | "assistant" | "system"
+  role: "user" | "assistant"
   content: string
   timestamp: number
-  thinkingProcess?: string[]
+  reasoning?: string[]
   confidence?: number
 }
 
@@ -183,12 +177,13 @@ export interface IKnowledgeModule {
   name: string
   initialize(): Promise<void>
   getKnowledge(): Map<string, KnowledgeEntry>
-  findTerm(term: string): Promise<KnowledgeEntry | null>
 }
 
 // Response from the main engine
 export interface EngineResponse {
-  content: string
+  answer: string
   confidence: number
-  thinkingProcess: string[]
+  reasoning: string[]
 }
+
+export interface MathResponse extends EngineResponse {}

@@ -21,7 +21,6 @@ export default function Home() {
         setProgress(30)
         setInitializationMessage("Loading knowledge modules...")
 
-        // Simulate progress for better UX
         await new Promise((resolve) => setTimeout(resolve, 500))
         setProgress(60)
 
@@ -30,13 +29,13 @@ export default function Home() {
         setProgress(100)
         setInitializationMessage("Initialization complete!")
 
-        await new Promise((resolve) => setTimeout(resolve, 500)) // Short delay to show completion
+        await new Promise((resolve) => setTimeout(resolve, 500))
         setEngine(cognitiveEngine)
       } catch (error) {
         console.error("Failed to initialize AI Engine:", error)
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred."
         setInitializationMessage(`Error: ${errorMessage}. Check console for details.`)
-        setProgress(100) // Show full progress bar on error to stop animation
+        setProgress(100)
       }
     }
     initialize()

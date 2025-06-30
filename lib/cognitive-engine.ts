@@ -1,7 +1,7 @@
 // lib/cognitive-engine.ts
 "use client"
 
-import type { ChatMessage, EngineResponse, IKnowledgeModule, MathResponse } from "./types"
+import type { ChatMessage, EngineResponse, IKnowledgeModule, MathResponse, VocabularyEntry } from "./types"
 import { VocabularyModule } from "./modules/vocabulary-module"
 import { MathematicsModule } from "./modules/mathematics-module"
 
@@ -34,12 +34,6 @@ export class CognitiveEngine {
 
   async processQuery(userInput: string): Promise<EngineResponse> {
     const reasoning: string[] = []
-    this.conversationHistory.push({
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: userInput,
-      timestamp: Date.now(),
-    })
     reasoning.push("Received and logged user input.")
 
     // Simple Intent Recognition
@@ -61,7 +55,7 @@ export class CognitiveEngine {
       const vocabModule = this.modules.get("Vocabulary") as VocabularyModule
       const term = userInput.replace(/^(define|what is|what's the meaning of)\s*/i, "").replace(/[?]/g, "")
       reasoning.push(`Searching for term: "${term}"`)
-      const result = await vocabModule.findTerm(term)
+      const result: VocabularyEntry | null = await vocabModule.findTerm(term)
       if (result) {
         answer = `**${result.word}** (${result.part_of_speech}): ${result.definition}`
         confidence = 0.95

@@ -20,7 +20,7 @@ export default function AIControlPanel({ engine }: AIControlPanelProps) {
   const [mathData, setMathData] = useState<Map<string, KnowledgeEntry>>(new Map())
 
   useEffect(() => {
-    if (engine) {
+    if (engine && engine.isInitialized) {
       const vocabModule = engine.getModule("Vocabulary")
       if (vocabModule) {
         setVocabData(vocabModule.getKnowledge())
@@ -30,7 +30,7 @@ export default function AIControlPanel({ engine }: AIControlPanelProps) {
         setMathData(mathModule.getKnowledge())
       }
     }
-  }, [engine])
+  }, [engine, engine.isInitialized])
 
   return (
     <Card className="w-full max-w-7xl h-[95vh] flex flex-col bg-card shadow-2xl rounded-lg border">

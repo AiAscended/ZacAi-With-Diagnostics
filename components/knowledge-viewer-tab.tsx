@@ -1,6 +1,6 @@
+// components/knowledge-viewer-tab.tsx
 "use client"
 
-// components/knowledge-viewer-tab.tsx
 import { useState, useMemo } from "react"
 import type { KnowledgeEntry } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"

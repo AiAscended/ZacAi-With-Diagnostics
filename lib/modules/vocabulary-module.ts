@@ -1,101 +1,77 @@
 // lib/modules/vocabulary-module.ts
-import type { IKnowledgeModule, KnowledgeEntry, QueryResult } from "@/lib/types"
+import type { IKnowledgeModule, VocabularyEntry } from "@/lib/types"
 import { StorageManager } from "@/lib/storage-manager"
+
+interface SeedVocabFile {
+  words: VocabularyEntry[]
+}
 
 export class VocabularyModule implements IKnowledgeModule {
   public name = "Vocabulary"
-  private knowledge = new Map<string, KnowledgeEntry>()
-  private storageManager = new StorageManager()
+  private storage = new StorageManager()
+  private knowledge: Map<string, VocabularyEntry> = new Map()
 
   async initialize(): Promise<void> {
-    const seedData = await this.storageManager.loadJSON("/seed_vocab.json")
-    const rawLearnedData = this.storageManager.loadData("learnt_vocabulary")
-
-    // Handle both old object format and new array format
-    const words = seedData?.words || []
-    if (Array.isArray(words)) {
-      words.forEach((item: any) => {
-        this.knowledge.set(item.word, { ...item, source: "seed" })
+    const seedData = await this.storage.loadJSON<SeedVocabFile>("/seed_vocab.json")
+    if (seedData && Array.isArray(seedData.words)) {
+      seedData.words.forEach((entry) => {
+        this.knowledge.set(entry.word.toLowerCase(), { ...entry, source: "seed", timestamp: Date.now() })
       })
     }
 
-    const learnedData = Array.isArray(rawLearnedData) ? rawLearnedData : rawLearnedData?.words || []
+    const learnedData = this.storage.loadData<VocabularyEntry[]>("learnt_vocab.json")
     if (Array.isArray(learnedData)) {
-      learnedData.forEach((item: any) => {
-        this.knowledge.set(item.word, { ...item, source: "learned" })
+      learnedData.forEach((entry) => {
+        if (entry && entry.word) {
+          this.knowledge.set(entry.word.toLowerCase(), entry)
+        }
       })
     }
+    console.log(`📚 Vocabulary Module initialized with ${this.knowledge.size} total words.`)
   }
 
-  getKnowledge(): Map<string, KnowledgeEntry> {
+  getKnowledge(): Map<string, VocabularyEntry> {
     return this.knowledge
   }
 
-  private async fetchWordDefinition(word: string): Promise<any | null> {
+  async findTerm(term: string): Promise<VocabularyEntry | null> {
+    const lowerTerm = term.toLowerCase()
+    if (this.knowledge.has(lowerTerm)) {
+      return this.knowledge.get(lowerTerm) ?? null
+    }
+    return this.lookupAndLearn(term)
+  }
+
+  private async lookupAndLearn(term: string): Promise<VocabularyEntry | null> {
+    console.log(`🌐 Looking up new word: ${term}`)
     try {
-      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${term}`)
       if (!response.ok) return null
+
       const data = await response.json()
-      return data[0] // Return the first result
+      const entry = data[0]
+      if (!entry) return null
+
+      const newEntry: VocabularyEntry = {
+        word: entry.word,
+        definition: entry.meanings[0]?.definitions[0]?.definition || "No definition found.",
+        part_of_speech: entry.meanings[0]?.partOfSpeech || "N/A",
+        examples: entry.meanings[0]?.definitions[0]?.example ? [entry.meanings[0]?.definitions[0]?.example] : [],
+        phonetic: entry.phonetic || entry.phonetics?.find((p: any) => p.text)?.text,
+        synonyms: entry.meanings[0]?.synonyms || [],
+        antonyms: entry.meanings[0]?.antonyms || [],
+        source: "learned",
+        timestamp: Date.now(),
+      }
+
+      this.knowledge.set(term.toLowerCase(), newEntry)
+      const allLearnedWords = Array.from(this.knowledge.values()).filter((v) => v.source === "learned")
+      this.storage.saveData("learnt_vocab.json", allLearnedWords)
+      console.log(`✅ Learned and saved new word: ${term}`)
+      return newEntry
     } catch (error) {
-      console.error("Failed to fetch word definition:", error)
+      console.error(`Failed to look up word ${term}:`, error)
       return null
     }
-  }
-
-  private saveLearnedWord(word: string, definitionData: any) {
-    const newEntry: KnowledgeEntry = {
-      word: word,
-      definition: definitionData.meanings[0]?.definitions[0]?.definition || "No definition found.",
-      phonetic: definitionData.phonetic || "N/A",
-      partOfSpeech: definitionData.meanings[0]?.partOfSpeech || "N/A",
-      source: "learned",
-      timestamp: Date.now(),
-    }
-    this.knowledge.set(word, newEntry)
-
-    const currentLearned = Array.from(this.knowledge.values()).filter((v) => v.source === "learned")
-    this.storageManager.saveData("learnt_vocabulary", currentLearned)
-  }
-
-  async query(input: string): Promise<QueryResult | null> {
-    const reasoning: string[] = []
-    reasoning.push(`[Vocab] Analyzing input: "${input}"`)
-
-    const defineRegex = /^(define|what is the meaning of)\s+(.*)/i
-    const match = input.match(defineRegex)
-    const wordToDefine = (match ? match[2] : input)
-      .trim()
-      .toLowerCase()
-      .replace(/[?.!]$/, "")
-
-    reasoning.push(`[Vocab] Identified word to define: "${wordToDefine}"`)
-
-    if (this.knowledge.has(wordToDefine)) {
-      const entry = this.knowledge.get(wordToDefine)!
-      reasoning.push(`[Vocab] Found "${wordToDefine}" in existing knowledge base (source: ${entry.source}).`)
-      return {
-        answer: `**${entry.word}** (${entry.partOfSpeech}): ${entry.definition}`,
-        confidence: 0.99,
-        reasoning,
-      }
-    }
-
-    reasoning.push(`[Vocab] Word not in local knowledge. Querying online dictionary...`)
-    const onlineDefinition = await this.fetchWordDefinition(wordToDefine)
-
-    if (onlineDefinition) {
-      reasoning.push(`[Vocab] Successfully fetched definition online. Saving to learned knowledge.`)
-      this.saveLearnedWord(wordToDefine, onlineDefinition)
-      const newEntry = this.knowledge.get(wordToDefine)!
-      return {
-        answer: `I've just learned this word!\n\n**${newEntry.word}** (${newEntry.partOfSpeech}): ${newEntry.definition}`,
-        confidence: 0.9,
-        reasoning,
-      }
-    }
-
-    reasoning.push(`[Vocab] Could not find a definition locally or online.`)
-    return null
   }
 }

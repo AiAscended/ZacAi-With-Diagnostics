@@ -1,93 +1,77 @@
 // lib/modules/mathematics-module.ts
-import type { IKnowledgeModule, KnowledgeEntry, QueryResult } from "@/lib/types"
+import type { IKnowledgeModule, MathEntry, MathResponse } from "@/lib/types"
 import { StorageManager } from "@/lib/storage-manager"
+
+interface SeedMathsFile {
+  concepts: MathEntry[]
+}
 
 export class MathematicsModule implements IKnowledgeModule {
   public name = "Mathematics"
-  private knowledge = new Map<string, KnowledgeEntry>()
-  private storageManager = new StorageManager()
+  private storage = new StorageManager()
+  private knowledge: Map<string, MathEntry> = new Map()
 
   async initialize(): Promise<void> {
-    const seedData = await this.storageManager.loadJSON("/seed_maths.json")
-    const rawLearnedData = this.storageManager.loadData("learnt_mathematics")
-
-    const concepts = seedData?.concepts || []
-    if (Array.isArray(concepts)) {
-      concepts.forEach((item: any) => {
-        this.knowledge.set(item.concept, { ...item, source: "seed" })
+    const seedData = await this.storage.loadJSON<SeedMathsFile>("/seed_maths.json")
+    if (seedData && Array.isArray(seedData.concepts)) {
+      seedData.concepts.forEach((entry) => {
+        this.knowledge.set(entry.concept.toLowerCase(), { ...entry, source: "seed" })
       })
     }
 
-    const learnedData = Array.isArray(rawLearnedData) ? rawLearnedData : rawLearnedData?.concepts || []
+    const learnedData = this.storage.loadData<MathEntry[]>("learnt_maths.json")
     if (Array.isArray(learnedData)) {
-      learnedData.forEach((item: any) => {
-        this.knowledge.set(item.concept, { ...item, source: "learned" })
+      learnedData.forEach((entry) => {
+        if (entry && entry.concept) {
+          this.knowledge.set(entry.concept.toLowerCase(), entry)
+        }
       })
     }
+    console.log(`🧮 Mathematics Module initialized with ${this.knowledge.size} total concepts.`)
   }
 
-  getKnowledge(): Map<string, KnowledgeEntry> {
+  getKnowledge(): Map<string, MathEntry> {
     return this.knowledge
   }
 
-  private calculateDigitalRoot(n: number): number {
-    let sum = n
-    while (sum > 9) {
-      sum = String(sum)
+  private getDigitalRoot(n: number): number {
+    let root = n
+    while (root > 9) {
+      root = String(root)
         .split("")
-        .reduce((acc, digit) => acc + Number.parseInt(digit, 10), 0)
+        .reduce((sum, digit) => sum + Number.parseInt(digit, 10), 0)
     }
-    return sum
+    return root
   }
 
-  private evaluateExpression(expression: string): number | string {
-    try {
-      // Basic safety check
-      if (/[^0-9+\-*/().\s]/.test(expression)) {
-        throw new Error("Invalid characters in expression")
-      }
-      // Using Function constructor is safer than eval in some contexts
-      const result = new Function(`return ${expression}`)()
-      return result
-    } catch (error) {
-      return "Error: Invalid mathematical expression."
-    }
-  }
-
-  async query(input: string): Promise<QueryResult | null> {
+  public evaluateExpression(expression: string): MathResponse {
     const reasoning: string[] = []
-    reasoning.push(`[Math] Analyzing input: "${input}"`)
+    try {
+      const sanitized = expression.replace(/^(calculate|compute|solve|what is|what's)\s*/i, "").replace(/[?]/g, "")
+      reasoning.push(`Sanitized expression: "${sanitized}"`)
 
-    const calculationRegex = /^(calculate|what is|compute)\s+(.*)/i
-    const calculationMatch = input.match(calculationRegex)
-
-    if (calculationMatch) {
-      const expression = calculationMatch[2].trim()
-      reasoning.push(`[Math] Identified calculation task for expression: "${expression}"`)
-      const result = this.evaluateExpression(expression)
-      reasoning.push(`[Math] Evaluated expression, result: ${result}`)
-
-      if (typeof result === "number") {
-        const digitalRoot = this.calculateDigitalRoot(result)
-        reasoning.push(`[Math] Calculated digital root (Tesla/Vortex Math): ${digitalRoot}`)
-        const answer = `The result of ${expression} is **${result}**. The digital root of this number is **${digitalRoot}**.`
-        return { answer, confidence: 0.98, reasoning }
-      } else {
-        return { answer: result, confidence: 0.9, reasoning }
+      if (!sanitized) {
+        throw new Error("Expression is empty after sanitization.")
       }
-    }
 
-    const concept = this.knowledge.get(input.toLowerCase())
-    if (concept) {
-      reasoning.push(`[Math] Found matching concept in knowledge base: "${input}"`)
+      const result = new Function(`return ${sanitized}`)()
+      reasoning.push(`Calculated result: ${result}`)
+
+      const digitalRoot = this.getDigitalRoot(result)
+      reasoning.push(`Vortex/Tesla analysis: Digital root is ${digitalRoot}.`)
+
       return {
-        answer: concept.explanation as string,
-        confidence: 0.95,
+        answer: `The result is **${result}**. The digital root (Tesla/Vortex) is **${digitalRoot}**.`,
+        confidence: 0.98,
+        reasoning,
+      }
+    } catch (error) {
+      reasoning.push(`Error during calculation: ${error instanceof Error ? error.message : "Unknown error"}`)
+      return {
+        answer: "I'm sorry, I couldn't calculate that. Please use standard mathematical notation.",
+        confidence: 0.2,
         reasoning,
       }
     }
-
-    reasoning.push("[Math] No specific math task or concept found.")
-    return null
   }
 }
