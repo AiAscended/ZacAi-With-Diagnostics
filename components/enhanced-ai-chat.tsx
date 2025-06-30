@@ -227,8 +227,8 @@ export default function EnhancedAIChat() {
     const userInput = input.trim()
     setInput("")
     setIsLoading(true)
-    setIsThinking(true)
-    setCurrentThinking("Analyzing...") // Generic thinking message
+    setIsThinking(true) // We still use this to show a generic "processing" state initially
+    setCurrentThinking("Processing your request...")
     setError(null)
 
     try {
@@ -243,7 +243,7 @@ export default function EnhancedAIChat() {
 
       console.log("🤖 Processing message with ZacAI System:", userInput)
 
-      // The AI system now generates the real thinking steps
+      // The AI system now generates the real thinking steps internally
       const response = await aiSystem.processMessage(userInput)
       console.log("✅ ZacAI Response:", response)
 
@@ -258,16 +258,17 @@ export default function EnhancedAIChat() {
         confidence: response.confidence,
         knowledgeUsed: response.knowledgeUsed || [],
         suggestions: generateSuggestions(userInput, response.content),
-        thinking: response.reasoning || [], // Using the real steps from the engine
+        thinking: response.reasoning || [], // Using the REAL steps from the engine
         mathAnalysis: response.mathAnalysis,
       }
 
       setMessages((prev) => [...prev, aiMessage])
 
+      // Defer stat updates to ensure UI is responsive
       setTimeout(() => {
         updateStats()
         loadKnowledgeData()
-      }, 500)
+      }, 100)
     } catch (error) {
       console.error("Error processing message:", error)
       setError("Failed to process message. Please try again.")
@@ -776,38 +777,38 @@ export default function EnhancedAIChat() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("calculate 2+2")}
+                        onClick={() => setInput("2x2=")}
                         className="text-left justify-start"
                       >
                         <Calculator className="w-4 h-4 mr-2" />
-                        calculate 2+2
+                        2x2=
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("define science")}
+                        onClick={() => setInput("What is science")}
                         className="text-left justify-start"
                       >
                         <BookOpen className="w-4 h-4 mr-2" />
-                        define science
+                        What is science
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("my name is Ron")}
+                        onClick={() => setInput("My name is Ron")}
                         className="text-left justify-start"
                       >
                         <User className="w-4 h-4 mr-2" />
-                        my name is Ron
+                        My name is Ron
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("self diagnostic")}
+                        onClick={() => setInput("Self diagnostic")}
                         className="text-left justify-start"
                       >
                         <Settings className="w-4 h-4 mr-2" />
-                        self diagnostic
+                        Self diagnostic
                       </Button>
                     </div>
                   </div>
@@ -845,7 +846,7 @@ export default function EnhancedAIChat() {
                                   {message.thinking.map((step, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
                                       <div className="w-1 h-1 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
-                                      <span>{step}</span>
+                                      <span className="whitespace-pre-wrap">{step}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -953,13 +954,25 @@ export default function EnhancedAIChat() {
                   </div>
                 ))}
 
-                {isThinking && (
+                {isThinking && currentThinking && (
                   <div className="flex justify-start">
                     <div className="bg-gray-100 border shadow-sm rounded-lg p-4 max-w-[80%]">
                       <div className="flex items-center gap-2">
                         <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
                         <Brain className="w-4 h-4 text-blue-500 animate-pulse" />
                         <span className="text-sm text-gray-600 italic">{currentThinking}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {isLoading && !isThinking && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border shadow-sm rounded-lg p-4 max-w-[80%]">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
+                        <span className="text-sm text-gray-500">{systemInfo.name || "ZacAI"} is processing...</span>
+                        <Cloud className="w-4 h-4 text-gray-400 animate-pulse" />
                       </div>
                     </div>
                   </div>
