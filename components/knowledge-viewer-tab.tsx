@@ -22,13 +22,16 @@ export default function KnowledgeViewerTab({ module }: KnowledgeViewerTabProps) 
 
   const filteredKnowledge = useMemo(() => {
     if (!searchTerm) return knowledgeArray
-    return knowledgeArray.filter(([key]) => key.toLowerCase().includes(searchTerm.toLowerCase()))
+    return knowledgeArray.filter(([key, value]) => {
+      const searchableValue = Object.values(value).join(" ").toLowerCase()
+      return key.toLowerCase().includes(searchTerm.toLowerCase()) || searchableValue.includes(searchTerm.toLowerCase())
+    })
   }, [knowledgeArray, searchTerm])
 
   if (!module) {
     return (
       <div className="p-6 text-center text-muted-foreground">
-        <p>This module is not available.</p>
+        <p>This module is not available or failed to load.</p>
       </div>
     )
   }
@@ -38,7 +41,7 @@ export default function KnowledgeViewerTab({ module }: KnowledgeViewerTabProps) 
 
   return (
     <div className="p-4 sm:p-6 h-full flex flex-col">
-      <Card className="flex-grow flex flex-col border-0">
+      <Card className="flex-grow flex flex-col border-0 shadow-none">
         <CardHeader>
           <CardTitle className="text-2xl">{module.name} Knowledge Base</CardTitle>
           <CardDescription>
@@ -52,7 +55,7 @@ export default function KnowledgeViewerTab({ module }: KnowledgeViewerTabProps) 
           />
         </CardHeader>
         <CardContent className="flex-grow p-0 overflow-hidden">
-          <ScrollArea className="h-[calc(80vh-220px)]">
+          <ScrollArea className="h-[calc(95vh - 240px)]">
             <Table>
               <TableHeader className="sticky top-0 bg-card z-10">
                 <TableRow>

@@ -6,6 +6,7 @@ import { CognitiveEngine } from "@/lib/cognitive-engine"
 import AIControlPanel from "@/components/ai-control-panel"
 import { Progress } from "@/components/ui/progress"
 import { Brain } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 export default function Home() {
   const [engine, setEngine] = useState<CognitiveEngine | null>(null)
@@ -21,14 +22,16 @@ export default function Home() {
         setInitializationMessage("Loading knowledge modules...")
 
         // Simulate progress for better UX
-        setTimeout(() => setProgress(60), 500)
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        setProgress(60)
 
         await cognitiveEngine.initialize()
 
         setProgress(100)
         setInitializationMessage("Initialization complete!")
 
-        setTimeout(() => setEngine(cognitiveEngine), 500) // Short delay to show completion
+        await new Promise((resolve) => setTimeout(resolve, 500)) // Short delay to show completion
+        setEngine(cognitiveEngine)
       } catch (error) {
         console.error("Failed to initialize AI Engine:", error)
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred."
@@ -41,15 +44,19 @@ export default function Home() {
 
   if (!engine) {
     return (
-      <main className="flex h-screen w-screen flex-col items-center justify-center p-4 bg-background text-foreground">
-        <div className="w-full max-w-md text-center">
-          <div className="inline-block p-4 bg-secondary rounded-full border border-border mb-6">
-            <Brain className="h-12 w-12 text-primary animate-pulse" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2 text-primary">ZacAI is Waking Up</h1>
-          <p className="text-muted-foreground mb-6">{initializationMessage}</p>
-          <Progress value={progress} className="w-full" />
-        </div>
+      <main className="flex h-screen w-screen flex-col items-center justify-center p-4 bg-secondary">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <Brain className="h-8 w-8 text-primary" />
+              ZacAI is Waking Up
+            </CardTitle>
+            <CardDescription>{initializationMessage}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Progress value={progress} className="w-full" />
+          </CardContent>
+        </Card>
       </main>
     )
   }

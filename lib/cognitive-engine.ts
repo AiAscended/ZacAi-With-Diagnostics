@@ -1,7 +1,7 @@
 // lib/cognitive-engine.ts
 "use client"
 
-import type { ChatMessage, EngineResponse, IKnowledgeModule } from "./types"
+import type { ChatMessage, EngineResponse, IKnowledgeModule, MathResponse } from "./types"
 import { VocabularyModule } from "./modules/vocabulary-module"
 import { MathematicsModule } from "./modules/mathematics-module"
 
@@ -11,7 +11,6 @@ export class CognitiveEngine {
   public isInitialized = false
 
   constructor() {
-    // Register all modules here
     this.registerModule(new VocabularyModule())
     this.registerModule(new MathematicsModule())
   }
@@ -29,81 +28,68 @@ export class CognitiveEngine {
     console.log("✅ Cognitive Engine and all modules initialized.")
   }
 
-  async processMessage(userInput: string): Promise<EngineResponse> {
-    const thinkingProcess: string[] = []
+  public getModule(moduleName: string): IKnowledgeModule | undefined {
+    return this.modules.get(moduleName)
+  }
 
+  async processQuery(userInput: string): Promise<EngineResponse> {
+    const reasoning: string[] = []
     this.conversationHistory.push({
-      id: Date.now().toString(),
+      id: `user-${Date.now()}`,
       role: "user",
       content: userInput,
       timestamp: Date.now(),
     })
-    thinkingProcess.push("Received user input.")
+    reasoning.push("Received and logged user input.")
 
-    // Intent Recognition
-    const definitionIntent = userInput.toLowerCase().match(/^(?:define|what is|what's the meaning of)\s(.+)/)
-    const mathIntent = userInput.toLowerCase().match(/^(?:calculate|compute|what is|solve)\s+(.+)/)
+    // Simple Intent Recognition
+    const isMathQuery = /calculate|compute|solve|what is|what's/i.test(userInput) && /[0-9]/.test(userInput)
+    const isDefinitionQuery = /define|what is|what's the meaning of/i.test(userInput) && !isMathQuery
 
-    let responseContent = ""
+    let answer = ""
     let confidence = 0.5
 
-    if (definitionIntent) {
-      const term = definitionIntent[1].replace(/[?.!]/g, "")
-      thinkingProcess.push(`Recognized 'definition' intent for term: "${term}".`)
-      const vocabModule = this.modules.get("Vocabulary") as VocabularyModule
-      if (vocabModule) {
-        thinkingProcess.push("Querying Vocabulary Module...")
-        const result = await vocabModule.findTerm(term)
-        if (result) {
-          responseContent = `**${result.word}** (${result.part_of_speech}): ${result.definition}`
-          confidence = 0.95
-          thinkingProcess.push(`Found definition. Source: ${result.source}.`)
-        } else {
-          responseContent = `I couldn't find a definition for "${term}".`
-          confidence = 0.4
-          thinkingProcess.push("Vocabulary Module returned no result.")
-        }
-      }
-    } else if (mathIntent) {
-      const expression = mathIntent[1]
-      thinkingProcess.push(`Recognized 'math' intent for expression: "${expression}".`)
+    if (isMathQuery) {
+      reasoning.push("Math intent detected. Delegating to Mathematics Module.")
       const mathModule = this.modules.get("Mathematics") as MathematicsModule
-      if (mathModule) {
-        thinkingProcess.push("Delegating to Mathematics Module...")
-        const result = mathModule.evaluateExpression(expression)
-        responseContent = result.answer
-        confidence = result.confidence
-        thinkingProcess.push(...result.reasoning)
+      const result: MathResponse = mathModule.evaluateExpression(userInput)
+      answer = result.answer
+      confidence = result.confidence
+      reasoning.push(...result.reasoning)
+    } else if (isDefinitionQuery) {
+      reasoning.push("Definition intent detected. Delegating to Vocabulary Module.")
+      const vocabModule = this.modules.get("Vocabulary") as VocabularyModule
+      const term = userInput.replace(/^(define|what is|what's the meaning of)\s*/i, "").replace(/[?]/g, "")
+      reasoning.push(`Searching for term: "${term}"`)
+      const result = await vocabModule.findTerm(term)
+      if (result) {
+        answer = `**${result.word}** (${result.part_of_speech}): ${result.definition}`
+        confidence = 0.95
+        reasoning.push(`Found definition for "${term}" in ${result.source} knowledge base.`)
+      } else {
+        answer = `I'm sorry, I could not find a definition for "${term}".`
+        confidence = 0.4
+        reasoning.push(`Term "${term}" not found in any knowledge base.`)
       }
     } else {
-      // Default conversational response
-      thinkingProcess.push("No specific intent recognized. Generating conversational response.")
-      responseContent = `I'm processing your message: "${userInput}". My modular system is online. Try asking me to define a word or calculate something (e.g., "calculate 12 * 3").`
-      confidence = 0.7
+      reasoning.push("No specific intent recognized. Generating default response.")
+      answer =
+        "I'm not sure how to answer that yet. My capabilities are currently focused on vocabulary definitions and mathematical calculations. Try asking 'define synergy' or 'calculate 12 * 5'."
+      confidence = 0.3
     }
 
-    const response: EngineResponse = {
-      content: responseContent,
-      confidence,
-      thinkingProcess,
-    }
+    const response: EngineResponse = { answer, confidence, reasoning }
 
     this.conversationHistory.push({
-      id: (Date.now() + 1).toString(),
+      id: `assistant-${Date.now()}`,
       role: "assistant",
-      content: response.content,
+      content: response.answer,
       timestamp: Date.now(),
-      thinkingProcess: response.thinkingProcess,
+      reasoning: response.reasoning,
       confidence: response.confidence,
     })
 
     return response
-  }
-
-  // Method to get data from a specific module for the UI
-  public getModuleData(moduleName: string): Map<string, any> | null {
-    const module = this.modules.get(moduleName)
-    return module ? module.getKnowledge() : null
   }
 
   public getConversationHistory(): ChatMessage[] {
