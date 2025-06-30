@@ -1,12 +1,9 @@
-import EnhancedAIChat from "@/components/enhanced-ai-chat"
-import ErrorBoundary from "@/components/error-boundary"
+import ChatWindow from "@/ui/chat/chat-window"
 
 export default function Home() {
   return (
-    <ErrorBoundary>
-      <main className="h-screen">
-        <EnhancedAIChat />
-      </main>
-    </ErrorBoundary>
+    <main className="h-screen p-4">
+      <ChatWindow />
+    </main>
   )
 }

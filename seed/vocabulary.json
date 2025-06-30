@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-01-01T00:00:00Z",
+    "totalWords": 1000,
+    "sources": ["Oxford Dictionary", "Merriam-Webster", "Cambridge Dictionary"]
+  },
+  "words": {
+    "algorithm": {
+      "definition": "A process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer",
+      "partOfSpeech": "noun",
+      "examples": [
+        "The search algorithm quickly found the relevant results",
+        "Machine learning algorithms can identify patterns in data"
+      ],
+      "etymology": "From Arabic al-Khwarizmi, named after the 9th-century mathematician",
+      "difficulty": 4,
+      "frequency": 3,
+      "synonyms": ["procedure", "method", "process"],
+      "antonyms": [],
+      "categories": ["technology", "mathematics"]
+    },
+    "serendipity": {
+      "definition": "The occurrence and development of events by chance in a happy or beneficial way",
+      "partOfSpeech": "noun",
+      "examples": [
+        "A fortunate stroke of serendipity brought the two inventors together",
+        "The discovery was pure serendipity"
+      ],
+      "etymology": "Coined by Horace Walpole in 1754, from the Persian fairy tale 'The Three Princes of Serendip'",
+      "difficulty": 3,
+      "frequency": 2,
+      "synonyms": ["chance", "fortune", "luck"],
+      "antonyms": ["misfortune", "bad luck"],
+      "categories": ["general", "philosophy"]
+    },
+    "ephemeral": {
+      "definition": "Lasting for a very short time",
+      "partOfSpeech": "adjective",
+      "examples": ["The beauty of cherry blossoms is ephemeral", "Social media trends are often ephemeral"],
+      "etymology": "From Greek ephemeros, meaning 'lasting only a day'",
+      "difficulty": 4,
+      "frequency": 2,
+      "synonyms": ["temporary", "fleeting", "transient"],
+      "antonyms": ["permanent", "lasting", "enduring"],
+      "categories": ["general", "literature"]
+    }
+  }
+}

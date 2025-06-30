@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-01-01T00:00:00Z",
+    "totalFacts": 2000,
+    "sources": ["Wikipedia", "Encyclopedia Britannica", "National Geographic"]
+  },
+  "facts": [
+    {
+      "id": "earth_age",
+      "topic": "Earth",
+      "fact": "Earth is approximately 4.54 billion years old, determined through radiometric dating of meteorites and the oldest Earth rocks.",
+      "category": "science",
+      "sources": ["https://en.wikipedia.org/wiki/Age_of_Earth"],
+      "reliability": 0.95,
+      "lastVerified": 1704067200000,
+      "relatedFacts": ["solar_system_formation", "geological_time_scale"]
+    },
+    {
+      "id": "human_brain_neurons",
+      "topic": "Human Brain",
+      "fact": "The human brain contains approximately 86 billion neurons, each connected to thousands of other neurons through synapses.",
+      "category": "biology",
+      "sources": ["https://en.wikipedia.org/wiki/Neuron"],
+      "reliability": 0.9,
+      "lastVerified": 1704067200000,
+      "relatedFacts": ["neural_networks", "consciousness", "memory"]
+    },
+    {
+      "id": "speed_of_light",
+      "topic": "Physics",
+      "fact": "The speed of light in a vacuum is exactly 299,792,458 meters per second, making it a fundamental constant of nature.",
+      "category": "physics",
+      "sources": ["https://en.wikipedia.org/wiki/Speed_of_light"],
+      "reliability": 1.0,
+      "lastVerified": 1704067200000,
+      "relatedFacts": ["relativity", "electromagnetic_radiation", "photons"]
+    }
+  ]
+}

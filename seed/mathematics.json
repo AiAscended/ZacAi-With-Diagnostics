@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-01-01T00:00:00Z",
+    "totalConcepts": 500,
+    "sources": ["Khan Academy", "MIT OpenCourseWare", "Wolfram MathWorld"]
+  },
+  "concepts": {
+    "pythagorean_theorem": {
+      "name": "Pythagorean Theorem",
+      "formula": "a² + b² = c²",
+      "description": "In a right triangle, the square of the hypotenuse equals the sum of squares of the other two sides",
+      "category": "geometry",
+      "difficulty": 2,
+      "prerequisites": ["basic_algebra", "right_triangles"],
+      "applications": ["construction", "navigation", "computer_graphics"],
+      "examples": [
+        {
+          "problem": "Find the hypotenuse of a right triangle with sides 3 and 4",
+          "solution": "5",
+          "steps": [
+            "Apply the Pythagorean theorem: a² + b² = c²",
+            "Substitute values: 3² + 4² = c²",
+            "Calculate: 9 + 16 = c²",
+            "Simplify: 25 = c²",
+            "Take square root: c = 5"
+          ],
+          "explanation": "The hypotenuse is 5 units long"
+        }
+      ]
+    },
+    "golden_ratio": {
+      "name": "Golden Ratio",
+      "formula": "φ = (1 + √5) / 2 ≈ 1.618",
+      "description": "A special mathematical ratio that appears frequently in nature and art",
+      "category": "number_theory",
+      "difficulty": 3,
+      "prerequisites": ["basic_algebra", "irrational_numbers"],
+      "applications": ["art", "architecture", "nature", "fibonacci_sequence"],
+      "examples": [
+        {
+          "problem": "Calculate the golden ratio to 5 decimal places",
+          "solution": "1.61803",
+          "steps": [
+            "Start with the formula: φ = (1 + √5) / 2",
+            "Calculate √5 ≈ 2.23607",
+            "Add 1: 1 + 2.23607 = 3.23607",
+            "Divide by 2: 3.23607 / 2 = 1.61803"
+          ],
+          "explanation": "The golden ratio is approximately 1.61803"
+        }
+      ]
+    }
+  },
+  "operations": {
+    "addition": {
+      "name": "Addition",
+      "symbol": "+",
+      "function": "sum",
+      "precedence": 1,
+      "associativity": "left"
+    },
+    "multiplication": {
+      "name": "Multiplication",
+      "symbol": "*",
+      "function": "product",
+      "precedence": 2,
+      "associativity": "left"
+    }
+  }
+}
