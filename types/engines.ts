@@ -1,10 +1,19 @@
-import type { LearningPattern } from "./learningPatterns" // Assuming LearningPattern is declared in another file
+// Engine-specific type definitions
+export interface IntentAnalysis {
+  intent: string
+  confidence: number
+  entities: string[]
+  context: any
+  suggestedModules: string[]
+}
 
-export interface CognitiveEngineConfig {
-  maxContextLength: number
-  confidenceThreshold: number
-  reasoningDepth: number
-  learningRate: number
+export interface ReasoningStep {
+  id: string
+  description: string
+  input: any
+  output: any
+  confidence: number
+  reasoning: string
 }
 
 export interface ReasoningChain {
@@ -15,26 +24,25 @@ export interface ReasoningChain {
   sources: string[]
 }
 
-export interface ReasoningStep {
-  id: string
-  type: "premise" | "inference" | "conclusion"
-  content: string
-  confidence: number
-  dependencies: string[]
-}
-
-export interface LearningEvent {
+export interface LearningPattern {
   id: string
   type: string
-  data: any
-  timestamp: number
-  source: string
+  pattern: string
   confidence: number
-  verified: boolean
+  occurrences: number
+  examples: string[]
+  metadata: {
+    firstSeen: number
+    lastSeen: number
+    source: string
+  }
 }
 
-export interface PatternRecognition {
-  patterns: LearningPattern[]
-  confidence: number
-  recommendations: string[]
+export interface CognitiveEngineStats {
+  initialized: boolean
+  registeredModules: string[]
+  contextStats: {
+    messageCount: number
+    duration: number
+  }
 }

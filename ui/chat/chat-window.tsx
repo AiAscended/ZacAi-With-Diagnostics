@@ -1,14 +1,13 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Loader2, Send, Brain, Lightbulb } from "lucide-react"
+import { Loader2, Send, Brain, Lightbulb, Settings, User } from "lucide-react"
 import { systemManager } from "@/core/system/manager"
 import { formatRelativeTime, formatConfidence } from "@/utils/formatters"
 
@@ -22,7 +21,11 @@ interface Message {
   reasoning?: string[]
 }
 
-export default function ChatWindow() {
+interface ChatWindowProps {
+  onToggleAdmin?: () => void
+}
+
+export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -49,7 +52,7 @@ export default function ChatWindow() {
         id: "welcome",
         role: "assistant",
         content:
-          "👋 Hello! I'm ZacAI, your advanced AI assistant. I can help you with vocabulary, mathematics, facts, and much more. What would you like to explore today?",
+          "👋 Hello! I'm ZacAI, your advanced AI assistant. I can help you with vocabulary, mathematics (including Tesla/Vortex math), facts, coding, philosophy, and much more. What would you like to explore today?",
         timestamp: Date.now(),
         confidence: 1.0,
         sources: ["system"],
@@ -58,6 +61,18 @@ export default function ChatWindow() {
       setMessages([welcomeMessage])
     } catch (error) {
       console.error("Failed to initialize system:", error)
+
+      const errorMessage: Message = {
+        id: "error",
+        role: "assistant",
+        content:
+          "⚠️ System initialization failed. Some features may not work properly. Please refresh the page to try again.",
+        timestamp: Date.now(),
+        confidence: 0,
+        sources: ["system"],
+      }
+
+      setMessages([errorMessage])
     }
   }
 
@@ -83,18 +98,18 @@ export default function ChatWindow() {
     setThinkingSteps([])
 
     try {
-      // Simulate thinking process
-      const thinkingSteps = [
-        "Analyzing your input...",
-        "Determining intent and context...",
-        "Selecting relevant knowledge modules...",
-        "Processing with specialized engines...",
-        "Synthesizing response...",
+      // Simulate thinking process with realistic steps
+      const thinkingStepsArray = [
+        "🔍 Analyzing your input for intent and context...",
+        "🧠 Determining which knowledge modules to consult...",
+        "⚡ Processing with vocabulary, math, facts, and other engines...",
+        "🔗 Cross-referencing information and building connections...",
+        "✨ Synthesizing the best response with confidence scoring...",
       ]
 
-      for (let i = 0; i < thinkingSteps.length; i++) {
-        setThinkingSteps((prev) => [...prev, thinkingSteps[i]])
-        await new Promise((resolve) => setTimeout(resolve, 500))
+      for (let i = 0; i < thinkingStepsArray.length; i++) {
+        setThinkingSteps((prev) => [...prev, thinkingStepsArray[i]])
+        await new Promise((resolve) => setTimeout(resolve, 600))
       }
 
       const response = await systemManager.processInput(userMessage.content)
@@ -116,7 +131,8 @@ export default function ChatWindow() {
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         role: "assistant",
-        content: "I apologize, but I encountered an error processing your request. Please try again.",
+        content:
+          "I apologize, but I encountered an error processing your request. Please try again or rephrase your question.",
         timestamp: Date.now(),
         confidence: 0,
       }
@@ -130,27 +146,34 @@ export default function ChatWindow() {
   }
 
   const renderMessage = (message: Message) => (
-    <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-4`}>
+    <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-6`}>
       <div
-        className={`max-w-[80%] rounded-lg p-4 ${
-          message.role === "user" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900 border"
+        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+          message.role === "user"
+            ? "bg-blue-600 text-white shadow-lg"
+            : "bg-white text-gray-900 border border-gray-200 shadow-sm"
         }`}
       >
-        <div className="whitespace-pre-wrap">{message.content}</div>
+        <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
 
-        <div className="flex items-center justify-between mt-2 text-xs opacity-70">
+        <div className="flex items-center justify-between mt-3 text-xs opacity-70">
           <span>{formatRelativeTime(message.timestamp)}</span>
 
           {message.role === "assistant" && (
             <div className="flex items-center gap-2">
               {message.confidence !== undefined && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge
+                  variant={
+                    message.confidence > 0.7 ? "default" : message.confidence > 0.4 ? "secondary" : "destructive"
+                  }
+                  className="text-xs px-2 py-1"
+                >
                   {formatConfidence(message.confidence)}
                 </Badge>
               )}
 
               {message.sources && message.sources.length > 0 && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs px-2 py-1">
                   {message.sources.length} source{message.sources.length > 1 ? "s" : ""}
                 </Badge>
               )}
@@ -159,15 +182,16 @@ export default function ChatWindow() {
         </div>
 
         {message.reasoning && message.reasoning.length > 0 && (
-          <details className="mt-2">
-            <summary className="text-xs cursor-pointer opacity-70 hover:opacity-100">
-              <Lightbulb className="inline w-3 h-3 mr-1" />
+          <details className="mt-3">
+            <summary className="text-xs cursor-pointer opacity-70 hover:opacity-100 flex items-center gap-1">
+              <Lightbulb className="inline w-3 h-3" />
               View reasoning steps
             </summary>
-            <div className="mt-1 text-xs opacity-80">
+            <div className="mt-2 text-xs opacity-80 space-y-1">
               {message.reasoning.map((step, index) => (
-                <div key={index} className="ml-4">
-                  {index + 1}. {step}
+                <div key={index} className="ml-4 flex items-start gap-2">
+                  <span className="text-blue-500 font-mono">{index + 1}.</span>
+                  <span>{step}</span>
                 </div>
               ))}
             </div>
@@ -178,39 +202,49 @@ export default function ChatWindow() {
   )
 
   const renderThinkingProcess = () => (
-    <div className="flex justify-start mb-4">
-      <div className="max-w-[80%] rounded-lg p-4 bg-yellow-50 border border-yellow-200">
-        <div className="flex items-center gap-2 mb-2">
-          <Brain className="w-4 h-4 text-yellow-600" />
-          <span className="text-sm font-medium text-yellow-800">Thinking...</span>
+    <div className="flex justify-start mb-6">
+      <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-yellow-50 border border-yellow-200">
+        <div className="flex items-center gap-2 mb-3">
+          <Brain className="w-4 h-4 text-yellow-600 animate-pulse" />
+          <span className="text-sm font-medium text-yellow-800">ZacAI is thinking...</span>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-2">
           {thinkingSteps.map((step, index) => (
-            <div key={index} className="text-xs text-yellow-700 flex items-center gap-2">
-              <div className="w-1 h-1 bg-yellow-500 rounded-full" />
+            <div key={index} className="text-xs text-yellow-700 flex items-center gap-2 animate-fade-in">
+              <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
               {step}
             </div>
           ))}
         </div>
 
         {isLoading && (
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-3 pt-2 border-t border-yellow-200">
             <Loader2 className="w-3 h-3 animate-spin text-yellow-600" />
-            <span className="text-xs text-yellow-600">Processing...</span>
+            <span className="text-xs text-yellow-600">Processing your request...</span>
           </div>
         )}
       </div>
     </div>
   )
 
-  if (!isInitialized) {
+  if (!isInitialized && messages.length === 0) {
     return (
-      <Card className="h-full flex items-center justify-center">
+      <Card className="h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <CardContent>
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 animate-spin" />
-            <p>Initializing ZacAI System...</p>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="relative">
+              <Brain className="w-12 h-12 text-blue-600 animate-pulse" />
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full animate-ping" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Initializing ZacAI System</h3>
+              <p className="text-sm text-gray-600">Loading knowledge modules and AI engines...</p>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span>This may take a few moments</span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -218,33 +252,72 @@ export default function ChatWindow() {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Brain className="w-5 h-5" />
-          ZacAI Chat
-        </CardTitle>
+    <Card className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-white">
+      <CardHeader className="border-b bg-white/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-3">
+            <div className="relative">
+              <Brain className="w-6 h-6 text-blue-600" />
+              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full" />
+            </div>
+            <div>
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                ZacAI
+              </span>
+              <div className="text-xs text-gray-500 font-normal">Advanced AI Assistant</div>
+            </div>
+          </CardTitle>
+
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-xs">
+              {isInitialized ? "Online" : "Initializing"}
+            </Badge>
+            {onToggleAdmin && (
+              <Button variant="ghost" size="sm" onClick={onToggleAdmin} className="text-gray-500 hover:text-gray-700">
+                <Settings className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col">
-        <ScrollArea className="flex-1 pr-4">
-          {messages.map(renderMessage)}
-          {showThinking && renderThinkingProcess()}
+      <CardContent className="flex-1 flex flex-col p-0">
+        <ScrollArea className="flex-1 px-6 py-4">
+          <div className="space-y-1">
+            {messages.map(renderMessage)}
+            {showThinking && renderThinkingProcess()}
+          </div>
           <div ref={messagesEndRef} />
         </ScrollArea>
 
-        <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything..."
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </Button>
-        </form>
+        <div className="border-t bg-white/80 backdrop-blur-sm p-4">
+          <form onSubmit={handleSubmit} className="flex gap-3">
+            <div className="flex-1 relative">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask me about vocabulary, math, facts, coding, philosophy..."
+                disabled={isLoading}
+                className="pr-12 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <User className="w-4 h-4 text-gray-400" />
+              </div>
+            </div>
+            <Button
+              type="submit"
+              disabled={isLoading || !input.trim() || !isInitialized}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
+          </form>
+
+          <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+            <span>Powered by modular AI architecture</span>
+            <span>{messages.filter((m) => m.role === "user").length} messages sent</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

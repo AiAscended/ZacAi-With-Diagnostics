@@ -1,3 +1,4 @@
+// Module-specific type definitions
 export interface VocabularyEntry {
   word: string
   definition: string
@@ -12,8 +13,9 @@ export interface VocabularyEntry {
 }
 
 export interface MathConcept {
+  id: string
   name: string
-  formula?: string
+  formula: string
   description: string
   category: string
   difficulty: number
@@ -40,48 +42,30 @@ export interface FactEntry {
   relatedFacts: string[]
 }
 
-export interface CodeSnippet {
+export interface CodingConcept {
   id: string
-  title: string
   language: string
-  code: string
+  concept: string
   description: string
-  tags: string[]
-  difficulty: number
-  examples: string[]
-  documentation?: string
+  examples: CodeExample[]
+  bestPractices: string[]
+  commonMistakes: string[]
+}
+
+export interface CodeExample {
+  title: string
+  code: string
+  explanation: string
+  output?: string
 }
 
 export interface PhilosophicalConcept {
   id: string
   name: string
   description: string
-  philosopher?: string
+  philosopher: string
   school: string
   relatedConcepts: string[]
   arguments: string[]
   counterArguments: string[]
-  modernRelevance: string
-}
-
-export interface UserProfile {
-  id: string
-  preferences: {
-    learningStyle: string
-    difficultyLevel: number
-    interests: string[]
-    goals: string[]
-  }
-  history: {
-    totalInteractions: number
-    favoriteTopics: string[]
-    learningProgress: { [key: string]: number }
-    achievements: string[]
-  }
-  settings: {
-    responseStyle: string
-    verbosity: number
-    showSources: boolean
-    showReasoning: boolean
-  }
 }

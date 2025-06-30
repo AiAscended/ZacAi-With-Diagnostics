@@ -1,56 +1,57 @@
-export function formatRelativeTime(timestamp: number): string {
-  const now = Date.now()
-  const diff = now - timestamp
-
-  const seconds = Math.floor(diff / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-
-  if (seconds < 60) return "just now"
-  if (minutes < 60) return `${minutes}m ago`
-  if (hours < 24) return `${hours}h ago`
-  if (days < 7) return `${days}d ago`
-
-  return new Date(timestamp).toLocaleDateString()
-}
-
-export function formatConfidence(confidence: number): string {
-  const percentage = Math.round(confidence * 100)
-  if (percentage >= 90) return `${percentage}% High`
-  if (percentage >= 70) return `${percentage}% Good`
-  if (percentage >= 50) return `${percentage}% Fair`
-  return `${percentage}% Low`
-}
-
+// Formatting utility functions
 export function formatNumber(num: number): string {
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + "M"
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + "K"
+  }
   return num.toString()
 }
 
 export function formatPercentage(value: number): string {
-  return `${Math.round(value * 100)}%`
+  return (value * 100).toFixed(1) + "%"
 }
 
-export function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
-  if (ms < 3600000) return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
-  return `${Math.floor(ms / 3600000)}h ${Math.floor((ms % 3600000) / 60000)}m`
+export function formatDuration(milliseconds: number): string {
+  if (milliseconds < 1000) {
+    return milliseconds.toFixed(0) + "ms"
+  } else if (milliseconds < 60000) {
+    return (milliseconds / 1000).toFixed(1) + "s"
+  } else if (milliseconds < 3600000) {
+    return (milliseconds / 60000).toFixed(1) + "m"
+  } else {
+    return (milliseconds / 3600000).toFixed(1) + "h"
+  }
+}
+
+export function formatRelativeTime(timestamp: number): string {
+  const now = Date.now()
+  const diff = now - timestamp
+
+  if (diff < 60000) {
+    return "Just now"
+  } else if (diff < 3600000) {
+    return Math.floor(diff / 60000) + "m ago"
+  } else if (diff < 86400000) {
+    return Math.floor(diff / 3600000) + "h ago"
+  } else {
+    return Math.floor(diff / 86400000) + "d ago"
+  }
+}
+
+export function formatConfidence(confidence: number): string {
+  if (confidence >= 0.9) return "Very High"
+  if (confidence >= 0.7) return "High"
+  if (confidence >= 0.5) return "Medium"
+  if (confidence >= 0.3) return "Low"
+  return "Very Low"
 }
 
 export function formatFileSize(bytes: number): string {
-  const units = ["B", "KB", "MB", "GB"]
-  let size = bytes
-  let unitIndex = 0
-
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024
-    unitIndex++
-  }
-
-  return `${size.toFixed(1)} ${units[unitIndex]}`
+  const sizes = ["Bytes", "KB", "MB", "GB"]
+  if (bytes === 0) return "0 Bytes"
+  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+  return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + " " + sizes[i]
 }
 
 export function formatCurrency(amount: number, currency = "USD"): string {

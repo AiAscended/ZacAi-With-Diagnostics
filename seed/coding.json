@@ -2,57 +2,63 @@
   "metadata": {
     "version": "1.0.0",
     "lastUpdated": "2024-01-01T00:00:00Z",
-    "totalSnippets": 200,
-    "sources": ["GitHub", "Stack Overflow", "MDN", "W3Schools"]
+    "totalConcepts": 300,
+    "sources": ["MDN Web Docs", "Stack Overflow", "GitHub", "Programming Books"]
   },
-  "snippets": [
+  "concepts": [
     {
-      "id": "js_array_methods",
-      "title": "JavaScript Array Methods",
-      "language": "javascript",
-      "code": "// Common array methods\nconst numbers = [1, 2, 3, 4, 5];\n\n// Map - transform each element\nconst doubled = numbers.map(n => n * 2);\n\n// Filter - select elements\nconst evens = numbers.filter(n => n % 2 === 0);\n\n// Reduce - combine elements\nconst sum = numbers.reduce((acc, n) => acc + n, 0);\n\n// Find - locate element\nconst found = numbers.find(n => n > 3);",
-      "description": "Essential JavaScript array manipulation methods",
-      "tags": ["javascript", "arrays", "functional-programming"],
-      "difficulty": 2,
-      "examples": ["Transform data with map()", "Filter arrays with filter()", "Aggregate with reduce()"]
-    },
-    {
-      "id": "react_component",
-      "title": "React Functional Component",
-      "language": "typescript",
-      "code": "import React, { useState, useEffect } from 'react';\n\ninterface Props {\n  title: string;\n  initialCount?: number;\n}\n\nconst Counter: React.FC<Props> = ({ title, initialCount = 0 }) => {\n  const [count, setCount] = useState(initialCount);\n\n  useEffect(() => {\n    document.title = `${title}: ${count}`;\n  }, [title, count]);\n\n  return (\n    <div>\n      <h2>{title}</h2>\n      <p>Count: {count}</p>\n      <button onClick={() => setCount(count + 1)}>\n        Increment\n      </button>\n    </div>\n  );\n};\n\nexport default Counter;",
-      "description": "Modern React functional component with hooks and TypeScript",
-      "tags": ["react", "typescript", "hooks", "components"],
-      "difficulty": 3,
-      "examples": ["useState for state management", "useEffect for side effects", "TypeScript interfaces for props"]
-    },
-    {
-      "id": "python_class",
-      "title": "Python Class with Methods",
-      "language": "python",
-      "code": "class Calculator:\n    def __init__(self):\n        self.history = []\n    \n    def add(self, a, b):\n        result = a + b\n        self.history.append(f\"{a} + {b} = {result}\")\n        return result\n    \n    def subtract(self, a, b):\n        result = a - b\n        self.history.append(f\"{a} - {b} = {result}\")\n        return result\n    \n    def get_history(self):\n        return self.history.copy()\n    \n    def clear_history(self):\n        self.history.clear()\n\n# Usage\ncalc = Calculator()\nresult = calc.add(5, 3)\nprint(calc.get_history())",
-      "description": "Python class demonstrating OOP principles with methods and state",
-      "tags": ["python", "oop", "classes", "methods"],
-      "difficulty": 2,
+      "id": "javascript_functions",
+      "language": "JavaScript",
+      "concept": "Functions",
+      "description": "Functions are reusable blocks of code that perform specific tasks. They can accept parameters and return values.",
       "examples": [
-        "Class initialization with __init__",
-        "Instance methods and state",
-        "Method chaining and history tracking"
-      ]
-    }
-  ],
-  "patterns": {
-    "singleton": {
-      "name": "Singleton Pattern",
-      "description": "Ensures a class has only one instance",
-      "languages": ["javascript", "python", "java"],
-      "useCase": "Database connections, logging, configuration"
+        {
+          "title": "Basic Function",
+          "code": "function greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet('World'));",
+          "explanation": "This function takes a name parameter and returns a greeting string.",
+          "output": "Hello, World!"
+        },
+        {
+          "title": "Arrow Function",
+          "code": "const add = (a, b) => a + b;\n\nconsole.log(add(5, 3));",
+          "explanation": "Arrow functions provide a shorter syntax for writing functions.",
+          "output": "8"
+        }
+      ],
+      "bestPractices": [
+        "Use descriptive function names",
+        "Keep functions small and focused",
+        "Use arrow functions for simple operations",
+        "Always return a value when expected"
+      ],
+      "commonMistakes": ["Forgetting to return a value", "Not handling edge cases", "Making functions too complex"]
     },
-    "observer": {
-      "name": "Observer Pattern",
-      "description": "Defines a one-to-many dependency between objects",
-      "languages": ["javascript", "python", "java"],
-      "useCase": "Event handling, model-view architectures"
+    {
+      "id": "python_loops",
+      "language": "Python",
+      "concept": "Loops",
+      "description": "Loops allow you to execute code repeatedly. Python has for loops and while loops.",
+      "examples": [
+        {
+          "title": "For Loop",
+          "code": "for i in range(5):\n    print(f\"Count: {i}\")",
+          "explanation": "This loop prints numbers from 0 to 4.",
+          "output": "Count: 0\nCount: 1\nCount: 2\nCount: 3\nCount: 4"
+        },
+        {
+          "title": "While Loop",
+          "code": "count = 0\nwhile count < 3:\n    print(f\"Count: {count}\")\n    count += 1",
+          "explanation": "This while loop continues until count reaches 3.",
+          "output": "Count: 0\nCount: 1\nCount: 2"
+        }
+      ],
+      "bestPractices": [
+        "Always ensure loop termination conditions",
+        "Use for loops for known iterations",
+        "Use while loops for conditional iterations",
+        "Avoid infinite loops"
+      ],
+      "commonMistakes": ["Creating infinite loops", "Not updating loop variables", "Off-by-one errors"]
     }
-  }
+  ]
 }

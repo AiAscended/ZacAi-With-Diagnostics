@@ -1,198 +1,319 @@
-import type { LearningEvent, LearningPattern, PatternRecognition } from "@/types/engines"
+import type { LearningPattern } from "@/types/engines"
+import type { LearntDataEntry } from "@/types/global"
+import { storageManager } from "@/core/storage/manager"
 import { generateId } from "@/utils/helpers"
 
 export class LearningEngine {
-  private events: LearningEvent[] = []
   private patterns: Map<string, LearningPattern> = new Map()
-  private learningQueue: LearningEvent[] = []
-  private initialized = false
+  private learningQueue: any[] = []
 
   async initialize(): Promise<void> {
-    if (this.initialized) return
     console.log("Initializing Learning Engine...")
-    this.initialized = true
-    console.log("Learning Engine initialized successfully")
+
+    // Load existing patterns
+    await this.loadExistingPatterns()
+
+    // Start background learning process
+    this.startBackgroundLearning()
+
+    console.log("Learning Engine initialized")
   }
 
-  async recordEvent(event: Omit<LearningEvent, "id">): Promise<void> {
-    const learningEvent: LearningEvent = {
-      ...event,
+  async learnFromInteraction(
+    input: string,
+    response: string,
+    confidence: number,
+    source: string,
+    context: any,
+  ): Promise<void> {
+    // Create learning entry
+    const learningEntry = {
+      input,
+      response,
+      confidence,
+      source,
+      context,
+      timestamp: Date.now(),
+    }
+
+    // Add to learning queue
+    this.learningQueue.push(learningEntry)
+
+    // Extract patterns
+    await this.extractPatterns(learningEntry)
+
+    // Update module-specific learning
+    await this.updateModuleLearning(source, learningEntry)
+  }
+
+  private async extractPatterns(entry: any): Promise<void> {
+    // Pattern 1: Input-Response patterns
+    const inputPattern = this.analyzeInputPattern(entry.input)
+    if (inputPattern) {
+      await this.updatePattern("input_pattern", inputPattern, entry)
+    }
+
+    // Pattern 2: Confidence patterns
+    const confidencePattern = this.analyzeConfidencePattern(entry)
+    if (confidencePattern) {
+      await this.updatePattern("confidence_pattern", confidencePattern, entry)
+    }
+
+    // Pattern 3: Context patterns
+    const contextPattern = this.analyzeContextPattern(entry.context)
+    if (contextPattern) {
+      await this.updatePattern("context_pattern", contextPattern, entry)
+    }
+  }
+
+  private analyzeInputPattern(input: string): string | null {
+    const lowercaseInput = input.toLowerCase()
+
+    if (lowercaseInput.startsWith("what is") || lowercaseInput.startsWith("define")) {
+      return "definition_request"
+    } else if (lowercaseInput.includes("calculate") || /\d+[+\-*/]\d+/.test(input)) {
+      return "calculation_request"
+    } else if (lowercaseInput.includes("how to") || lowercaseInput.includes("explain")) {
+      return "explanation_request"
+    } else if (lowercaseInput.includes("code") || lowercaseInput.includes("function")) {
+      return "coding_request"
+    }
+
+    return null
+  }
+
+  private analyzeConfidencePattern(entry: any): string | null {
+    if (entry.confidence > 0.8) {
+      return "high_confidence"
+    } else if (entry.confidence > 0.6) {
+      return "medium_confidence"
+    } else if (entry.confidence > 0.3) {
+      return "low_confidence"
+    }
+
+    return "very_low_confidence"
+  }
+
+  private analyzeContextPattern(context: any): string | null {
+    if (!context) return null
+
+    if (context.conversationLength > 10) {
+      return "extended_conversation"
+    } else if (context.keywords && context.keywords.length > 5) {
+      return "keyword_rich"
+    } else if (context.recentMessages && context.recentMessages.length > 3) {
+      return "active_conversation"
+    }
+
+    return "simple_interaction"
+  }
+
+  private async updatePattern(type: string, pattern: string, entry: any): Promise<void> {
+    const patternId = `${type}_${pattern}`
+    const existingPattern = this.patterns.get(patternId)
+
+    if (existingPattern) {
+      existingPattern.occurrences++
+      existingPattern.confidence = (existingPattern.confidence + entry.confidence) / 2
+      existingPattern.examples.push(entry.input)
+
+      // Keep only last 10 examples
+      if (existingPattern.examples.length > 10) {
+        existingPattern.examples = existingPattern.examples.slice(-10)
+      }
+    } else {
+      const newPattern: LearningPattern = {
+        id: patternId,
+        type,
+        pattern,
+        confidence: entry.confidence,
+        occurrences: 1,
+        examples: [entry.input],
+        metadata: {
+          firstSeen: Date.now(),
+          lastSeen: Date.now(),
+          source: entry.source,
+        },
+      }
+
+      this.patterns.set(patternId, newPattern)
+    }
+  }
+
+  private async updateModuleLearning(source: string, entry: any): Promise<void> {
+    // Create learnt data entry
+    const learntEntry: LearntDataEntry = {
       id: generateId(),
+      content: {
+        input: entry.input,
+        response: entry.response,
+        pattern: this.analyzeInputPattern(entry.input),
+      },
+      confidence: entry.confidence,
+      source,
+      context: JSON.stringify(entry.context),
+      timestamp: Date.now(),
+      usageCount: 1,
+      lastUsed: Date.now(),
+      verified: entry.confidence > 0.8,
+      tags: this.generateTags(entry),
+      relationships: [],
     }
 
-    this.events.push(learningEvent)
-    this.learningQueue.push(learningEvent)
-
-    // Process learning queue periodically
-    if (this.learningQueue.length >= 10) {
-      await this.processLearningQueue()
+    // Save to appropriate module's learnt data
+    const moduleName = this.mapSourceToModule(source)
+    if (moduleName) {
+      await storageManager.addLearntEntry(`/learnt/${moduleName}.json`, learntEntry)
     }
+  }
+
+  private generateTags(entry: any): string[] {
+    const tags: string[] = []
+
+    if (entry.confidence > 0.8) tags.push("high-confidence")
+    if (entry.confidence < 0.5) tags.push("low-confidence")
+
+    const pattern = this.analyzeInputPattern(entry.input)
+    if (pattern) tags.push(pattern)
+
+    if (entry.source) tags.push(`source-${entry.source}`)
+
+    return tags
+  }
+
+  private mapSourceToModule(source: string): string | null {
+    const sourceModuleMap: { [key: string]: string } = {
+      vocabulary: "vocabulary",
+      mathematics: "mathematics",
+      coding: "coding",
+      facts: "facts",
+      philosophy: "philosophy",
+      "user-info": "user-info",
+    }
+
+    return sourceModuleMap[source] || null
+  }
+
+  private async loadExistingPatterns(): Promise<void> {
+    try {
+      const patternsData = await storageManager.loadLearntData("/learnt/patterns.json")
+      if (patternsData && patternsData.patterns) {
+        for (const [id, pattern] of Object.entries(patternsData.patterns)) {
+          this.patterns.set(id, pattern as LearningPattern)
+        }
+      }
+    } catch (error) {
+      console.error("Error loading existing patterns:", error)
+    }
+  }
+
+  private startBackgroundLearning(): void {
+    // Process learning queue every 30 seconds
+    setInterval(async () => {
+      if (this.learningQueue.length > 0) {
+        await this.processLearningQueue()
+      }
+    }, 30000)
   }
 
   private async processLearningQueue(): Promise<void> {
-    const eventsToProcess = [...this.learningQueue]
-    this.learningQueue = []
+    const batchSize = Math.min(10, this.learningQueue.length)
+    const batch = this.learningQueue.splice(0, batchSize)
 
-    for (const event of eventsToProcess) {
-      await this.analyzeEvent(event)
+    for (const entry of batch) {
+      try {
+        // Additional pattern analysis
+        await this.deepPatternAnalysis(entry)
+      } catch (error) {
+        console.error("Error in background learning:", error)
+      }
     }
 
-    await this.updatePatterns()
+    // Save patterns periodically
+    await this.savePatterns()
   }
 
-  private async analyzeEvent(event: LearningEvent): Promise<void> {
-    // Analyze event for patterns
-    const eventSignature = this.createEventSignature(event)
+  private async deepPatternAnalysis(entry: any): Promise<void> {
+    // Analyze relationships between entries
+    const similarEntries = this.findSimilarEntries(entry)
+    if (similarEntries.length > 0) {
+      await this.updatePattern("similarity", "related_queries", entry)
+    }
 
-    // Check for existing similar patterns
-    const similarPatterns = this.findSimilarPatterns(eventSignature)
+    // Analyze temporal patterns
+    const timePattern = this.analyzeTimePattern(entry)
+    if (timePattern) {
+      await this.updatePattern("temporal", timePattern, entry)
+    }
+  }
 
-    if (similarPatterns.length > 0) {
-      // Update existing pattern
-      const mostSimilar = similarPatterns[0]
-      mostSimilar.occurrences++
-      mostSimilar.lastSeen = Date.now()
-      mostSimilar.confidence = Math.min(0.95, mostSimilar.confidence + 0.05)
+  private findSimilarEntries(entry: any): any[] {
+    // Simple similarity check based on keywords
+    const entryKeywords = entry.input.toLowerCase().split(/\W+/)
+    const similarEntries = []
+
+    for (const queueEntry of this.learningQueue) {
+      const queueKeywords = queueEntry.input.toLowerCase().split(/\W+/)
+      const commonKeywords = entryKeywords.filter((word) => queueKeywords.includes(word))
+
+      if (commonKeywords.length > 2) {
+        similarEntries.push(queueEntry)
+      }
+    }
+
+    return similarEntries
+  }
+
+  private analyzeTimePattern(entry: any): string | null {
+    const hour = new Date(entry.timestamp).getHours()
+
+    if (hour >= 9 && hour <= 17) {
+      return "business_hours"
+    } else if (hour >= 18 && hour <= 22) {
+      return "evening"
+    } else if (hour >= 23 || hour <= 6) {
+      return "late_night"
     } else {
-      // Create new pattern
-      const newPattern: LearningPattern = {
-        id: generateId(),
-        type: event.type,
-        pattern: eventSignature,
-        confidence: event.confidence,
-        occurrences: 1,
-        lastSeen: Date.now(),
-        effectiveness: 0.5, // Initial effectiveness
-      }
-
-      this.patterns.set(newPattern.id, newPattern)
+      return "morning"
     }
   }
 
-  private createEventSignature(event: LearningEvent): any {
+  private async savePatterns(): Promise<void> {
+    const patternsData = {
+      metadata: {
+        version: "1.0.0",
+        lastUpdated: Date.now(),
+        totalPatterns: this.patterns.size,
+      },
+      patterns: Object.fromEntries(this.patterns),
+    }
+
+    await storageManager.saveLearntData("/learnt/patterns.json", patternsData)
+  }
+
+  getPatterns(): LearningPattern[] {
+    return Array.from(this.patterns.values())
+  }
+
+  getPatternsByType(type: string): LearningPattern[] {
+    return Array.from(this.patterns.values()).filter((p) => p.type === type)
+  }
+
+  getLearningStats(): any {
     return {
-      type: event.type,
-      source: event.source,
-      dataType: typeof event.data,
-      confidence: Math.round(event.confidence * 10) / 10, // Round to 1 decimal
-      verified: event.verified,
-    }
-  }
-
-  private findSimilarPatterns(signature: any): LearningPattern[] {
-    const similar: Array<{ pattern: LearningPattern; similarity: number }> = []
-
-    for (const pattern of this.patterns.values()) {
-      const similarity = this.calculatePatternSimilarity(signature, pattern.pattern)
-      if (similarity > 0.7) {
-        similar.push({ pattern, similarity })
-      }
-    }
-
-    return similar.sort((a, b) => b.similarity - a.similarity).map((item) => item.pattern)
-  }
-
-  private calculatePatternSimilarity(sig1: any, sig2: any): number {
-    let matches = 0
-    let total = 0
-
-    const keys = new Set([...Object.keys(sig1), ...Object.keys(sig2)])
-
-    for (const key of keys) {
-      total++
-      if (sig1[key] === sig2[key]) {
-        matches++
-      } else if (typeof sig1[key] === "number" && typeof sig2[key] === "number") {
-        // For numbers, consider close values as similar
-        const diff = Math.abs(sig1[key] - sig2[key])
-        if (diff < 0.2) matches += 0.8
-      }
-    }
-
-    return total > 0 ? matches / total : 0
-  }
-
-  private async updatePatterns(): Promise<void> {
-    // Remove old, ineffective patterns
-    const cutoffTime = Date.now() - 30 * 24 * 60 * 60 * 1000 // 30 days
-
-    for (const [id, pattern] of this.patterns.entries()) {
-      if (pattern.lastSeen < cutoffTime && pattern.effectiveness < 0.3) {
-        this.patterns.delete(id)
-      }
-    }
-
-    // Update pattern effectiveness based on recent usage
-    for (const pattern of this.patterns.values()) {
-      const recentEvents = this.events.filter(
-        (e) =>
-          e.timestamp > Date.now() - 7 * 24 * 60 * 60 * 1000 && // Last 7 days
-          e.type === pattern.type,
-      )
-
-      if (recentEvents.length > 0) {
-        const avgConfidence = recentEvents.reduce((sum, e) => sum + e.confidence, 0) / recentEvents.length
-        pattern.effectiveness = (pattern.effectiveness + avgConfidence) / 2
-      }
-    }
-  }
-
-  async recognizePatterns(input: string, context?: any): Promise<PatternRecognition> {
-    const relevantPatterns = Array.from(this.patterns.values())
-      .filter((p) => p.effectiveness > 0.5)
-      .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 10)
-
-    const confidence =
-      relevantPatterns.length > 0
-        ? relevantPatterns.reduce((sum, p) => sum + p.confidence, 0) / relevantPatterns.length
-        : 0
-
-    const recommendations = this.generateRecommendations(relevantPatterns, input, context)
-
-    return {
-      patterns: relevantPatterns,
-      confidence,
-      recommendations,
-    }
-  }
-
-  private generateRecommendations(patterns: LearningPattern[], input: string, context?: any): string[] {
-    const recommendations: string[] = []
-
-    // Analyze patterns for recommendations
-    const highConfidencePatterns = patterns.filter((p) => p.confidence > 0.8)
-    if (highConfidencePatterns.length > 0) {
-      recommendations.push("High confidence patterns detected - responses likely to be accurate")
-    }
-
-    const recentPatterns = patterns.filter(
-      (p) => Date.now() - p.lastSeen < 24 * 60 * 60 * 1000, // Last 24 hours
-    )
-    if (recentPatterns.length > 0) {
-      recommendations.push("Recent similar queries found - leveraging recent learning")
-    }
-
-    const frequentPatterns = patterns.filter((p) => p.occurrences > 5)
-    if (frequentPatterns.length > 0) {
-      recommendations.push("Frequently encountered patterns - well-established knowledge")
-    }
-
-    return recommendations
-  }
-
-  getStats(): any {
-    return {
-      initialized: this.initialized,
-      totalEvents: this.events.length,
       totalPatterns: this.patterns.size,
       queueSize: this.learningQueue.length,
       patternTypes: [...new Set(Array.from(this.patterns.values()).map((p) => p.type))],
-      averageConfidence:
-        this.patterns.size > 0
-          ? Array.from(this.patterns.values()).reduce((sum, p) => sum + p.confidence, 0) / this.patterns.size
-          : 0,
+      averageConfidence: this.calculateAverageConfidence(),
     }
+  }
+
+  private calculateAverageConfidence(): number {
+    const patterns = Array.from(this.patterns.values())
+    if (patterns.length === 0) return 0
+
+    const totalConfidence = patterns.reduce((sum, pattern) => sum + pattern.confidence, 0)
+    return totalConfidence / patterns.length
   }
 }
 

@@ -1,7 +1,6 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
-import type { CodeSnippet } from "@/types/modules"
+import type { CodingConcept } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
-import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
 
 export class CodingModule implements ModuleInterface {
@@ -25,8 +24,8 @@ export class CodingModule implements ModuleInterface {
     console.log("Initializing Coding Module...")
 
     try {
-      this.seedData = await storageManager.loadSeedData(MODULE_CONFIG.coding.seedFile)
-      this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.coding.learntFile)
+      this.seedData = await storageManager.loadSeedData("/seed/coding.json")
+      this.learntData = await storageManager.loadLearntData("/learnt/coding.json")
 
       this.initialized = true
       console.log("Coding Module initialized successfully")
@@ -41,9 +40,10 @@ export class CodingModule implements ModuleInterface {
     this.stats.totalQueries++
 
     try {
-      const codingRequests = this.extractCodingRequests(input)
+      // Check if input is coding-related
+      const codingTopics = this.extractCodingTopics(input)
 
-      if (codingRequests.length === 0) {
+      if (codingTopics.length === 0) {
         return {
           success: false,
           data: null,
@@ -53,16 +53,16 @@ export class CodingModule implements ModuleInterface {
         }
       }
 
-      const results: any[] = []
+      const concepts: CodingConcept[] = []
 
-      for (const request of codingRequests) {
-        const result = await this.processCodingRequest(request)
-        if (result) {
-          results.push(result)
+      for (const topic of codingTopics) {
+        const concept = await this.getCodingConcept(topic)
+        if (concept) {
+          concepts.push(concept)
         }
       }
 
-      if (results.length === 0) {
+      if (concepts.length === 0) {
         return {
           success: false,
           data: null,
@@ -72,12 +72,13 @@ export class CodingModule implements ModuleInterface {
         }
       }
 
-      const response = this.buildCodingResponse(results)
-      const confidence = this.calculateCodingConfidence(results)
+      const response = this.buildCodingResponse(concepts)
+      const confidence = this.calculateCodingConfidence(concepts)
 
+      // Learn from this interaction
       await this.learn({
         input,
-        results,
+        concepts,
         context,
         timestamp: Date.now(),
       })
@@ -91,8 +92,8 @@ export class CodingModule implements ModuleInterface {
         source: this.name,
         timestamp: Date.now(),
         metadata: {
-          requestsProcessed: codingRequests.length,
-          resultsFound: results.length,
+          topicsProcessed: codingTopics.length,
+          conceptsFound: concepts.length,
         },
       }
     } catch (error) {
@@ -109,239 +110,57 @@ export class CodingModule implements ModuleInterface {
     }
   }
 
-  private extractCodingRequests(input: string): string[] {
-    const requests: string[] = []
+  private extractCodingTopics(input: string): string[] {
+    const topics: string[] = []
+    const lowercaseInput = input.toLowerCase()
 
-    // Look for function/method requests
-    const functionMatch = input.match(
-      /(?:write|create|make)\s+(?:a\s+)?(?:function|method)\s+(?:to\s+|that\s+)?(.+?)(?:\.|$)/i,
-    )
-    if (functionMatch) {
-      requests.push(`function: ${functionMatch[1].trim()}`)
-    }
-
-    // Look for algorithm requests
-    const algorithmMatch = input.match(/(?:algorithm|solution)\s+(?:for\s+|to\s+)?(.+?)(?:\.|$)/i)
-    if (algorithmMatch) {
-      requests.push(`algorithm: ${algorithmMatch[1].trim()}`)
-    }
-
-    // Look for code explanation requests
-    const explainMatch = input.match(/(?:explain|what\s+does)\s+(?:this\s+)?(?:code|function|method)(.+?)(?:\.|$)/i)
-    if (explainMatch) {
-      requests.push(`explain: ${explainMatch[1].trim()}`)
-    }
-
-    // Look for debugging requests
-    const debugMatch = input.match(/(?:debug|fix|error)\s+(.+?)(?:\.|$)/i)
-    if (debugMatch) {
-      requests.push(`debug: ${debugMatch[1].trim()}`)
-    }
-
-    // Look for specific programming languages
-    const languages = ["javascript", "python", "java", "c++", "typescript", "react", "node"]
-    for (const lang of languages) {
-      if (input.toLowerCase().includes(lang)) {
-        requests.push(`language: ${lang}`)
-        break
+    // Programming languages
+    const languages = ["javascript", "python", "java", "c++", "c#", "go", "rust", "typescript", "php", "ruby"]
+    languages.forEach((lang) => {
+      if (lowercaseInput.includes(lang)) {
+        topics.push(lang)
       }
+    })
+
+    // Programming concepts
+    const concepts = ["function", "variable", "loop", "array", "object", "class", "method", "algorithm", "recursion"]
+    concepts.forEach((concept) => {
+      if (lowercaseInput.includes(concept)) {
+        topics.push(concept)
+      }
+    })
+
+    // Code-related keywords
+    if (lowercaseInput.includes("code") || lowercaseInput.includes("program") || lowercaseInput.includes("develop")) {
+      topics.push("programming")
     }
 
-    return requests.length > 0 ? requests : [input]
+    return [...new Set(topics)]
   }
 
-  private async processCodingRequest(request: string): Promise<any> {
-    const [type, content] = request.includes(":") ? request.split(":", 2) : ["general", request]
-
-    switch (type.toLowerCase()) {
-      case "function":
-        return await this.generateFunction(content.trim())
-      case "algorithm":
-        return await this.generateAlgorithm(content.trim())
-      case "explain":
-        return await this.explainCode(content.trim())
-      case "debug":
-        return await this.debugCode(content.trim())
-      case "language":
-        return await this.getLanguageInfo(content.trim())
-      default:
-        return await this.searchCodeSnippets(content.trim())
-    }
-  }
-
-  private async generateFunction(description: string): Promise<any> {
+  private async getCodingConcept(topic: string): Promise<CodingConcept | null> {
     // Check learnt data first
-    const learntFunction = this.searchLearntCode(description)
-    if (learntFunction) {
-      return learntFunction
+    const learntConcept = this.searchLearntData(topic)
+    if (learntConcept) {
+      return learntConcept
     }
 
     // Check seed data
-    const seedFunction = this.searchSeedCode(description)
-    if (seedFunction) {
-      return seedFunction
+    const seedConcept = this.searchSeedData(topic)
+    if (seedConcept) {
+      return seedConcept
     }
 
-    // Generate basic function template
-    return this.generateBasicFunction(description)
+    // Generate basic concept if not found
+    return this.generateBasicConcept(topic)
   }
 
-  private async generateAlgorithm(description: string): Promise<any> {
-    const commonAlgorithms = {
-      sort: {
-        name: "Bubble Sort",
-        language: "javascript",
-        code: `function bubbleSort(arr) {
-  const n = arr.length;
-  for (let i = 0; i < n - 1; i++) {
-    for (let j = 0; j < n - i - 1; j++) {
-      if (arr[j] > arr[j + 1]) {
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-      }
-    }
-  }
-  return arr;
-}`,
-        description: "Simple sorting algorithm that repeatedly steps through the list",
-        complexity: "O(n²)",
-      },
-      search: {
-        name: "Binary Search",
-        language: "javascript",
-        code: `function binarySearch(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
-  
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-    if (arr[mid] === target) return mid;
-    if (arr[mid] < target) left = mid + 1;
-    else right = mid - 1;
-  }
-  
-  return -1;
-}`,
-        description: "Efficient search algorithm for sorted arrays",
-        complexity: "O(log n)",
-      },
-      fibonacci: {
-        name: "Fibonacci Sequence",
-        language: "javascript",
-        code: `function fibonacci(n) {
-  if (n <= 1) return n;
-  
-  let a = 0, b = 1;
-  for (let i = 2; i <= n; i++) {
-    [a, b] = [b, a + b];
-  }
-  
-  return b;
-}`,
-        description: "Generate the nth Fibonacci number",
-        complexity: "O(n)",
-      },
-    }
-
-    for (const [key, algorithm] of Object.entries(commonAlgorithms)) {
-      if (description.toLowerCase().includes(key)) {
-        return {
-          type: "algorithm",
-          ...algorithm,
-          tags: [key, "algorithm", algorithm.language],
-        }
-      }
-    }
-
-    return null
-  }
-
-  private async explainCode(code: string): Promise<any> {
-    // Simple code explanation based on patterns
-    const explanations = []
-
-    if (code.includes("function")) {
-      explanations.push("This appears to be a function definition")
-    }
-    if (code.includes("for") || code.includes("while")) {
-      explanations.push("Contains loop structures for iteration")
-    }
-    if (code.includes("if")) {
-      explanations.push("Uses conditional statements for decision making")
-    }
-    if (code.includes("return")) {
-      explanations.push("Returns a value to the caller")
-    }
-
-    return {
-      type: "explanation",
-      code: code.trim(),
-      explanations,
-      language: this.detectLanguage(code),
-    }
-  }
-
-  private async debugCode(code: string): Promise<any> {
-    const issues = []
-
-    // Common syntax issues
-    if (code.includes("=") && !code.includes("==") && !code.includes("===")) {
-      issues.push("Consider using == or === for comparison instead of assignment")
-    }
-    if (code.includes("function") && !code.includes("{")) {
-      issues.push("Function definition may be missing opening brace")
-    }
-    if ((code.match(/\{/g) || []).length !== (code.match(/\}/g) || []).length) {
-      issues.push("Mismatched braces - check opening and closing braces")
-    }
-
-    return {
-      type: "debug",
-      code: code.trim(),
-      issues: issues.length > 0 ? issues : ["No obvious syntax issues detected"],
-      suggestions: ["Check variable names for typos", "Verify function parameters", "Test with sample inputs"],
-    }
-  }
-
-  private async getLanguageInfo(language: string): Promise<any> {
-    const languageInfo = {
-      javascript: {
-        name: "JavaScript",
-        type: "Interpreted",
-        paradigm: "Multi-paradigm",
-        uses: ["Web development", "Server-side", "Mobile apps"],
-        features: ["Dynamic typing", "First-class functions", "Prototype-based OOP"],
-      },
-      python: {
-        name: "Python",
-        type: "Interpreted",
-        paradigm: "Multi-paradigm",
-        uses: ["Data science", "Web development", "Automation"],
-        features: ["Simple syntax", "Dynamic typing", "Extensive libraries"],
-      },
-      typescript: {
-        name: "TypeScript",
-        type: "Compiled to JavaScript",
-        paradigm: "Multi-paradigm",
-        uses: ["Large-scale JavaScript", "Web development", "Node.js"],
-        features: ["Static typing", "Type inference", "Modern ES features"],
-      },
-    }
-
-    return (
-      languageInfo[language.toLowerCase()] || {
-        name: language,
-        type: "Unknown",
-        note: "Language information not available in current database",
-      }
-    )
-  }
-
-  private searchLearntCode(query: string): CodeSnippet | null {
+  private searchLearntData(topic: string): CodingConcept | null {
     if (!this.learntData || !this.learntData.entries) return null
 
     for (const entry of Object.values(this.learntData.entries)) {
       const entryData = entry as any
-      if (entryData.content && entryData.content.title?.toLowerCase().includes(query.toLowerCase())) {
+      if (entryData.content && entryData.content.concept.toLowerCase().includes(topic.toLowerCase())) {
         return entryData.content
       }
     }
@@ -349,119 +168,125 @@ export class CodingModule implements ModuleInterface {
     return null
   }
 
-  private searchSeedCode(query: string): CodeSnippet | null {
-    if (!this.seedData || !this.seedData.snippets) return null
+  private searchSeedData(topic: string): CodingConcept | null {
+    if (!this.seedData || !this.seedData.concepts) return null
 
-    for (const snippet of this.seedData.snippets) {
+    for (const concept of this.seedData.concepts) {
       if (
-        snippet.title.toLowerCase().includes(query.toLowerCase()) ||
-        snippet.description.toLowerCase().includes(query.toLowerCase())
+        concept.concept.toLowerCase().includes(topic.toLowerCase()) ||
+        concept.language.toLowerCase().includes(topic.toLowerCase())
       ) {
-        return snippet
+        return concept
       }
     }
 
     return null
   }
 
-  private async searchCodeSnippets(query: string): Promise<any> {
-    // Search both learnt and seed data
-    const learntResult = this.searchLearntCode(query)
-    if (learntResult) return learntResult
+  private generateBasicConcept(topic: string): CodingConcept | null {
+    const basicConcepts: { [key: string]: Partial<CodingConcept> } = {
+      javascript: {
+        language: "JavaScript",
+        concept: "JavaScript Programming",
+        description: "A versatile programming language used for web development, both frontend and backend.",
+        examples: [
+          {
+            title: "Hello World",
+            code: 'console.log("Hello, World!");',
+            explanation: 'This prints "Hello, World!" to the console.',
+          },
+        ],
+      },
+      python: {
+        language: "Python",
+        concept: "Python Programming",
+        description: "A high-level programming language known for its simplicity and readability.",
+        examples: [
+          {
+            title: "Hello World",
+            code: 'print("Hello, World!")',
+            explanation: 'This prints "Hello, World!" to the console.',
+          },
+        ],
+      },
+      function: {
+        language: "General",
+        concept: "Functions",
+        description: "A reusable block of code that performs a specific task.",
+        examples: [
+          {
+            title: "Basic Function",
+            code: 'function greet(name) {\n  return "Hello, " + name;\n}',
+            explanation: "This function takes a name parameter and returns a greeting.",
+          },
+        ],
+      },
+    }
 
-    const seedResult = this.searchSeedCode(query)
-    if (seedResult) return seedResult
+    const conceptData = basicConcepts[topic.toLowerCase()]
+    if (conceptData) {
+      return {
+        id: generateId(),
+        language: conceptData.language || "General",
+        concept: conceptData.concept || topic,
+        description: conceptData.description || `Information about ${topic}`,
+        examples: conceptData.examples || [],
+        bestPractices: [],
+        commonMistakes: [],
+      }
+    }
 
     return null
   }
 
-  private generateBasicFunction(description: string): any {
-    const functionName = description
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, "")
-      .split(" ")
-      .map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
-      .join("")
+  private buildCodingResponse(concepts: CodingConcept[]): string {
+    if (concepts.length === 1) {
+      const concept = concepts[0]
+      let response = `**${concept.concept}** (${concept.language})\n\n${concept.description}`
 
-    return {
-      type: "function",
-      title: `Generated Function: ${functionName}`,
-      language: "javascript",
-      code: `function ${functionName}() {
-  // TODO: Implement ${description}
-  console.log('Function ${functionName} called');
-  return null;
-}`,
-      description: `Auto-generated function template for: ${description}`,
-      tags: ["generated", "template", "javascript"],
-      difficulty: 1,
-    }
-  }
-
-  private detectLanguage(code: string): string {
-    if (code.includes("def ") || code.includes("import ")) return "python"
-    if (code.includes("function ") || code.includes("const ") || code.includes("let ")) return "javascript"
-    if (code.includes("public class") || code.includes("System.out")) return "java"
-    if (code.includes("#include") || code.includes("std::")) return "cpp"
-    if (code.includes("interface ") || code.includes(": string")) return "typescript"
-    return "unknown"
-  }
-
-  private buildCodingResponse(results: any[]): string {
-    if (results.length === 1) {
-      const result = results[0]
-
-      if (result.type === "function" || result.type === "algorithm") {
-        let response = `**${result.title || result.name}**\n\n`
-        if (result.description) {
-          response += `${result.description}\n\n`
-        }
-        response += `\`\`\`${result.language}\n${result.code}\n\`\`\``
-        if (result.complexity) {
-          response += `\n\n**Time Complexity:** ${result.complexity}`
-        }
-        return response
-      } else if (result.type === "explanation") {
-        return `**Code Explanation:**\n\n${result.explanations.join("\n")}\n\n**Language:** ${result.language}`
-      } else if (result.type === "debug") {
-        return `**Debug Analysis:**\n\n**Issues Found:**\n${result.issues.join("\n")}\n\n**Suggestions:**\n${result.suggestions.join("\n")}`
-      } else if (result.name) {
-        return `**${result.name}**\n\n**Type:** ${result.type}\n**Uses:** ${result.uses?.join(", ")}\n**Features:** ${result.features?.join(", ")}`
+      if (concept.examples && concept.examples.length > 0) {
+        response += `\n\n**Example:**\n\`\`\`${concept.language.toLowerCase()}\n${concept.examples[0].code}\n\`\`\``
+        response += `\n\n${concept.examples[0].explanation}`
       }
-    }
 
-    let response = "Here are the coding results:\n\n"
-    results.forEach((result, index) => {
-      response += `${index + 1}. **${result.title || result.name}**: ${result.description || "Code snippet"}\n`
-    })
-    return response
+      if (concept.bestPractices && concept.bestPractices.length > 0) {
+        response += `\n\n**Best Practices:**\n${concept.bestPractices.map((practice) => `• ${practice}`).join("\n")}`
+      }
+
+      return response
+    } else {
+      let response = "Here are the coding concepts:\n\n"
+      concepts.forEach((concept, index) => {
+        response += `${index + 1}. **${concept.concept}** (${concept.language}): ${concept.description}\n\n`
+      })
+      return response
+    }
   }
 
-  private calculateCodingConfidence(results: any[]): number {
-    if (results.length === 0) return 0
+  private calculateCodingConfidence(concepts: CodingConcept[]): number {
+    if (concepts.length === 0) return 0
 
+    // Higher confidence for concepts with examples and best practices
     let totalConfidence = 0
-    for (const result of results) {
-      if (result.type === "algorithm") {
-        totalConfidence += 0.9 // High confidence for known algorithms
-      } else if (result.type === "function") {
-        totalConfidence += 0.8 // Good confidence for functions
-      } else if (result.type === "explanation") {
-        totalConfidence += 0.7 // Fair confidence for explanations
-      } else {
-        totalConfidence += 0.6 // Medium confidence for other results
-      }
+    for (const concept of concepts) {
+      let confidence = 0.6 // Base confidence
+
+      if (concept.examples && concept.examples.length > 0) confidence += 0.2
+      if (concept.bestPractices && concept.bestPractices.length > 0) confidence += 0.1
+      if (concept.description && concept.description.length > 50) confidence += 0.1
+
+      totalConfidence += Math.min(1, confidence)
     }
 
-    return Math.min(1, totalConfidence / results.length)
+    return totalConfidence / concepts.length
   }
 
   async learn(data: any): Promise<void> {
-    if (data.results && data.results.length > 0) {
-      for (const result of data.results) {
+    if (data.concepts && data.concepts.length > 0) {
+      for (const concept of data.concepts) {
         const learntEntry = {
           id: generateId(),
-          content: result,
+          content: concept,
           confidence: 0.8,
           source: "coding-module",
           context: data.input,
@@ -469,11 +294,11 @@ export class CodingModule implements ModuleInterface {
           usageCount: 1,
           lastUsed: Date.now(),
           verified: true,
-          tags: result.tags || ["coding"],
+          tags: [concept.language.toLowerCase(), "coding"],
           relationships: [],
         }
 
-        await storageManager.addLearntEntry(MODULE_CONFIG.coding.learntFile, learntEntry)
+        await storageManager.addLearntEntry("/learnt/coding.json", learntEntry)
         this.stats.learntEntries++
       }
     }

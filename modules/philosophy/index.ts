@@ -1,7 +1,6 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
 import type { PhilosophicalConcept } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
-import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
 
 export class PhilosophyModule implements ModuleInterface {
@@ -25,8 +24,8 @@ export class PhilosophyModule implements ModuleInterface {
     console.log("Initializing Philosophy Module...")
 
     try {
-      this.seedData = await storageManager.loadSeedData(MODULE_CONFIG.philosophy.seedFile)
-      this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.philosophy.learntFile)
+      this.seedData = await storageManager.loadSeedData("/seed/philosophy.json")
+      this.learntData = await storageManager.loadLearntData("/learnt/philosophy.json")
 
       this.initialized = true
       console.log("Philosophy Module initialized successfully")
@@ -41,9 +40,9 @@ export class PhilosophyModule implements ModuleInterface {
     this.stats.totalQueries++
 
     try {
-      const philosophicalQueries = this.extractPhilosophicalQueries(input)
+      const philosophicalTopics = this.extractPhilosophicalTopics(input)
 
-      if (philosophicalQueries.length === 0) {
+      if (philosophicalTopics.length === 0) {
         return {
           success: false,
           data: null,
@@ -53,16 +52,16 @@ export class PhilosophyModule implements ModuleInterface {
         }
       }
 
-      const results: any[] = []
+      const concepts: PhilosophicalConcept[] = []
 
-      for (const query of philosophicalQueries) {
-        const result = await this.processPhilosophicalQuery(query)
-        if (result) {
-          results.push(result)
+      for (const topic of philosophicalTopics) {
+        const concept = await this.getPhilosophicalConcept(topic)
+        if (concept) {
+          concepts.push(concept)
         }
       }
 
-      if (results.length === 0) {
+      if (concepts.length === 0) {
         return {
           success: false,
           data: null,
@@ -72,12 +71,12 @@ export class PhilosophyModule implements ModuleInterface {
         }
       }
 
-      const response = this.buildPhilosophicalResponse(results)
-      const confidence = this.calculatePhilosophicalConfidence(results)
+      const response = this.buildPhilosophyResponse(concepts)
+      const confidence = this.calculatePhilosophyConfidence(concepts)
 
       await this.learn({
         input,
-        results,
+        concepts,
         context,
         timestamp: Date.now(),
       })
@@ -91,8 +90,8 @@ export class PhilosophyModule implements ModuleInterface {
         source: this.name,
         timestamp: Date.now(),
         metadata: {
-          queriesProcessed: philosophicalQueries.length,
-          resultsFound: results.length,
+          topicsProcessed: philosophicalTopics.length,
+          conceptsFound: concepts.length,
         },
       }
     } catch (error) {
@@ -109,87 +108,97 @@ export class PhilosophyModule implements ModuleInterface {
     }
   }
 
-  private extractPhilosophicalQueries(input: string): string[] {
-    const queries: string[] = []
+  private extractPhilosophicalTopics(input: string): string[] {
+    const topics: string[] = []
+    const lowercaseInput = input.toLowerCase()
 
-    // Philosophical question patterns
-    const patterns = [
-      /what\s+is\s+the\s+meaning\s+of\s+(.+?)(?:\?|$)/i,
-      /why\s+do\s+we\s+(.+?)(?:\?|$)/i,
-      /what\s+is\s+(.+?)\s+philosophy(?:\?|$)/i,
-      /ethics?\s+of\s+(.+?)(?:\?|$)/i,
-      /moral\s+(.+?)(?:\?|$)/i,
-      /philosophy\s+of\s+(.+?)(?:\?|$)/i,
-      /existential\s+(.+?)(?:\?|$)/i,
-      /consciousness\s+(.+?)(?:\?|$)/i,
-      /free\s+will\s+(.+?)(?:\?|$)/i,
-      /determinism\s+(.+?)(?:\?|$)/i,
-    ]
-
-    for (const pattern of patterns) {
-      const match = input.match(pattern)
-      if (match) {
-        queries.push(match[1].trim())
-      }
-    }
-
-    // Check for philosophical keywords
-    const philosophicalKeywords = [
+    // Philosophical concepts
+    const concepts = [
       "ethics",
       "morality",
       "consciousness",
-      "existence",
-      "reality",
-      "truth",
-      "knowledge",
-      "wisdom",
-      "justice",
-      "freedom",
+      "free will",
       "determinism",
-      "nihilism",
       "existentialism",
+      "nihilism",
       "stoicism",
       "utilitarianism",
-      "deontology",
-      "virtue",
+      "virtue ethics",
+      "metaphysics",
+      "epistemology",
+      "ontology",
+      "phenomenology",
+      "logic",
+      "truth",
+      "reality",
+      "knowledge",
+      "belief",
+      "justice",
+      "beauty",
+      "good",
+      "evil",
     ]
 
-    for (const keyword of philosophicalKeywords) {
-      if (input.toLowerCase().includes(keyword)) {
-        queries.push(keyword)
+    concepts.forEach((concept) => {
+      if (lowercaseInput.includes(concept)) {
+        topics.push(concept)
       }
+    })
+
+    // Philosophers
+    const philosophers = [
+      "socrates",
+      "plato",
+      "aristotle",
+      "kant",
+      "nietzsche",
+      "descartes",
+      "hume",
+      "locke",
+      "mill",
+      "bentham",
+      "rawls",
+      "sartre",
+      "camus",
+    ]
+
+    philosophers.forEach((philosopher) => {
+      if (lowercaseInput.includes(philosopher)) {
+        topics.push(philosopher)
+      }
+    })
+
+    // Philosophical questions
+    if (lowercaseInput.includes("meaning of life") || lowercaseInput.includes("purpose")) {
+      topics.push("meaning of life")
     }
 
-    return queries.length > 0 ? queries : [input]
+    return [...new Set(topics)]
   }
 
-  private async processPhilosophicalQuery(query: string): Promise<any> {
+  private async getPhilosophicalConcept(topic: string): Promise<PhilosophicalConcept | null> {
     // Check learnt data first
-    const learntConcept = this.searchLearntConcepts(query)
+    const learntConcept = this.searchLearntData(topic)
     if (learntConcept) {
       return learntConcept
     }
 
     // Check seed data
-    const seedConcept = this.searchSeedConcepts(query)
+    const seedConcept = this.searchSeedData(topic)
     if (seedConcept) {
       return seedConcept
     }
 
-    // Generate philosophical response
-    return this.generatePhilosophicalResponse(query)
+    // Generate basic concept
+    return this.generateBasicConcept(topic)
   }
 
-  private searchLearntConcepts(query: string): PhilosophicalConcept | null {
+  private searchLearntData(topic: string): PhilosophicalConcept | null {
     if (!this.learntData || !this.learntData.entries) return null
 
     for (const entry of Object.values(this.learntData.entries)) {
       const entryData = entry as any
-      if (
-        entryData.content &&
-        (entryData.content.name?.toLowerCase().includes(query.toLowerCase()) ||
-          entryData.content.description?.toLowerCase().includes(query.toLowerCase()))
-      ) {
+      if (entryData.content && entryData.content.name.toLowerCase().includes(topic.toLowerCase())) {
         return entryData.content
       }
     }
@@ -197,14 +206,13 @@ export class PhilosophyModule implements ModuleInterface {
     return null
   }
 
-  private searchSeedConcepts(query: string): PhilosophicalConcept | null {
+  private searchSeedData(topic: string): PhilosophicalConcept | null {
     if (!this.seedData || !this.seedData.concepts) return null
 
     for (const concept of this.seedData.concepts) {
       if (
-        concept.name.toLowerCase().includes(query.toLowerCase()) ||
-        concept.description.toLowerCase().includes(query.toLowerCase()) ||
-        concept.school.toLowerCase().includes(query.toLowerCase())
+        concept.name.toLowerCase().includes(topic.toLowerCase()) ||
+        concept.philosopher.toLowerCase().includes(topic.toLowerCase())
       ) {
         return concept
       }
@@ -213,184 +221,120 @@ export class PhilosophyModule implements ModuleInterface {
     return null
   }
 
-  private generatePhilosophicalResponse(query: string): any {
-    const commonConcepts = {
+  private generateBasicConcept(topic: string): PhilosophicalConcept | null {
+    const basicConcepts: { [key: string]: Partial<PhilosophicalConcept> } = {
       ethics: {
         name: "Ethics",
-        description:
-          "The branch of philosophy that deals with moral principles and values, examining what is right and wrong, good and bad.",
-        school: "Various",
-        arguments: [
-          "Moral actions should maximize happiness (Utilitarianism)",
-          "Actions are right if they follow moral duties (Deontology)",
-          "Virtue and character are central to moral behavior (Virtue Ethics)",
-        ],
+        description: "The branch of philosophy that deals with moral principles and values.",
+        philosopher: "Various",
+        school: "Moral Philosophy",
+        arguments: ["Actions should be judged by their consequences", "Moral duties are universal"],
         counterArguments: [
-          "Moral relativism suggests ethics vary by culture",
-          "Moral nihilism questions the existence of objective moral truths",
-          "Evolutionary ethics argues morality is just survival instinct",
+          "Cultural relativism challenges universal ethics",
+          "Emotions play a role in moral decisions",
         ],
-        relatedConcepts: ["morality", "justice", "virtue", "duty"],
-        modernRelevance:
-          "Essential for addressing contemporary issues like AI ethics, bioethics, and environmental responsibility",
-      },
-      consciousness: {
-        name: "Consciousness",
-        description:
-          "The state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings.",
-        school: "Philosophy of Mind",
-        arguments: [
-          "Consciousness is fundamental to reality (Panpsychism)",
-          "Consciousness emerges from complex brain activity (Emergentism)",
-          "Consciousness is an illusion created by information processing (Illusionism)",
-        ],
-        counterArguments: [
-          "The hard problem of consciousness remains unsolved",
-          "Qualia cannot be reduced to physical processes",
-          "Zombie argument suggests consciousness is non-physical",
-        ],
-        relatedConcepts: ["mind", "qualia", "awareness", "perception"],
-        modernRelevance: "Critical for understanding AI consciousness and machine sentience",
       },
       "free will": {
         name: "Free Will",
-        description:
-          "The ability to make choices that are genuinely one's own, not determined by prior causes or divine decree.",
+        description: "The ability to make choices that are genuinely one's own, not determined by prior causes.",
+        philosopher: "Various",
         school: "Metaphysics",
-        arguments: [
-          "Libertarian free will exists despite determinism",
-          "Compatibilist free will is consistent with determinism",
-          "We experience making free choices in daily life",
-        ],
+        arguments: ["We experience making choices", "Moral responsibility requires free will"],
         counterArguments: [
-          "Hard determinism denies the existence of free will",
-          "Neuroscience shows decisions are made before conscious awareness",
-          "Quantum indeterminacy doesn't create meaningful freedom",
+          "Determinism suggests all events are caused",
+          "Neuroscience shows decisions occur before awareness",
         ],
-        relatedConcepts: ["determinism", "responsibility", "choice", "causation"],
-        modernRelevance: "Impacts legal responsibility, moral accountability, and AI decision-making",
       },
-      existence: {
-        name: "Existence",
-        description:
-          "The state or fact of being; the fundamental question of why there is something rather than nothing.",
-        school: "Existentialism/Metaphysics",
-        arguments: [
-          "Existence precedes essence (Sartre)",
-          "Being-in-the-world defines human existence (Heidegger)",
-          "Existence is absurd but must be embraced (Camus)",
-        ],
-        counterArguments: [
-          "Essence precedes existence in traditional metaphysics",
-          "Existence may be illusory (Eastern philosophy)",
-          "The question of existence may be meaningless",
-        ],
-        relatedConcepts: ["being", "nothingness", "essence", "reality"],
-        modernRelevance: "Relevant to questions of meaning, purpose, and authenticity in modern life",
+      consciousness: {
+        name: "Consciousness",
+        description: "The state of being aware of and able to think about one's existence, sensations, and thoughts.",
+        philosopher: "Various",
+        school: "Philosophy of Mind",
+        arguments: ["Consciousness is fundamental to experience", "It cannot be reduced to physical processes"],
+        counterArguments: ["Consciousness emerges from brain activity", "It can be explained by neural processes"],
       },
     }
 
-    const concept = commonConcepts[query.toLowerCase()]
-    if (concept) {
+    const conceptData = basicConcepts[topic.toLowerCase()]
+    if (conceptData) {
       return {
         id: generateId(),
-        type: "philosophical_concept",
-        ...concept,
+        name: conceptData.name || topic,
+        description: conceptData.description || `A philosophical concept related to ${topic}`,
+        philosopher: conceptData.philosopher || "Various",
+        school: conceptData.school || "General Philosophy",
+        relatedConcepts: [],
+        arguments: conceptData.arguments || [],
+        counterArguments: conceptData.counterArguments || [],
       }
     }
 
-    // Generate a general philosophical reflection
-    return {
-      id: generateId(),
-      type: "philosophical_reflection",
-      name: `Philosophical Inquiry: ${query}`,
-      description: `This question touches on fundamental philosophical concerns about ${query}. Philosophy approaches such questions through rigorous analysis, logical reasoning, and consideration of multiple perspectives.`,
-      school: "General Philosophy",
-      arguments: [
-        "Multiple philosophical traditions offer different perspectives on this question",
-        "Critical thinking and logical analysis can illuminate various aspects",
-        "Historical philosophical thought provides valuable insights",
-      ],
-      counterArguments: [
-        "Some questions may be beyond human comprehension",
-        "Cultural and historical context influences philosophical perspectives",
-        "Empirical evidence may be limited for purely philosophical questions",
-      ],
-      relatedConcepts: [query],
-      modernRelevance: "Philosophical inquiry remains relevant for understanding complex modern issues",
-    }
+    return null
   }
 
-  private buildPhilosophicalResponse(results: any[]): string {
-    if (results.length === 1) {
-      const result = results[0]
-      let response = `**${result.name}**\n\n${result.description}\n\n`
+  private buildPhilosophyResponse(concepts: PhilosophicalConcept[]): string {
+    if (concepts.length === 1) {
+      const concept = concepts[0]
+      let response = `**${concept.name}**\n\n${concept.description}`
 
-      if (result.philosopher) {
-        response += `**Key Philosopher:** ${result.philosopher}\n\n`
+      if (concept.philosopher !== "Various") {
+        response += `\n\n*Associated with: ${concept.philosopher} (${concept.school})*`
       }
 
-      if (result.school) {
-        response += `**Philosophical School:** ${result.school}\n\n`
+      if (concept.arguments && concept.arguments.length > 0) {
+        response += `\n\n**Key Arguments:**\n${concept.arguments.map((arg) => `• ${arg}`).join("\n")}`
       }
 
-      if (result.arguments && result.arguments.length > 0) {
-        response += `**Key Arguments:**\n${result.arguments.map((arg) => `• ${arg}`).join("\n")}\n\n`
-      }
-
-      if (result.counterArguments && result.counterArguments.length > 0) {
-        response += `**Counter-Arguments:**\n${result.counterArguments.map((arg) => `• ${arg}`).join("\n")}\n\n`
-      }
-
-      if (result.modernRelevance) {
-        response += `**Modern Relevance:** ${result.modernRelevance}`
+      if (concept.counterArguments && concept.counterArguments.length > 0) {
+        response += `\n\n**Counter-Arguments:**\n${concept.counterArguments.map((arg) => `• ${arg}`).join("\n")}`
       }
 
       return response
     } else {
-      let response = "Here are the philosophical insights:\n\n"
-      results.forEach((result, index) => {
-        response += `${index + 1}. **${result.name}**: ${result.description.substring(0, 150)}${result.description.length > 150 ? "..." : ""}\n\n`
+      let response = "Here are the philosophical concepts:\n\n"
+      concepts.forEach((concept, index) => {
+        response += `${index + 1}. **${concept.name}**: ${concept.description}\n\n`
       })
       return response
     }
   }
 
-  private calculatePhilosophicalConfidence(results: any[]): number {
-    if (results.length === 0) return 0
+  private calculatePhilosophyConfidence(concepts: PhilosophicalConcept[]): number {
+    if (concepts.length === 0) return 0
 
+    // Philosophy is inherently subjective, so confidence is moderate
     let totalConfidence = 0
-    for (const result of results) {
-      if (result.type === "philosophical_concept") {
-        totalConfidence += 0.85 // High confidence for established concepts
-      } else if (result.type === "philosophical_reflection") {
-        totalConfidence += 0.7 // Good confidence for general reflections
-      } else {
-        totalConfidence += 0.6 // Medium confidence for other results
-      }
+    for (const concept of concepts) {
+      let confidence = 0.6 // Base confidence for philosophical concepts
+
+      if (concept.arguments && concept.arguments.length > 0) confidence += 0.1
+      if (concept.counterArguments && concept.counterArguments.length > 0) confidence += 0.1
+      if (concept.philosopher !== "Various") confidence += 0.1
+
+      totalConfidence += Math.min(0.8, confidence) // Cap at 0.8 for philosophy
     }
 
-    return Math.min(1, totalConfidence / results.length)
+    return totalConfidence / concepts.length
   }
 
   async learn(data: any): Promise<void> {
-    if (data.results && data.results.length > 0) {
-      for (const result of data.results) {
+    if (data.concepts && data.concepts.length > 0) {
+      for (const concept of data.concepts) {
         const learntEntry = {
           id: generateId(),
-          content: result,
-          confidence: 0.8,
+          content: concept,
+          confidence: 0.7,
           source: "philosophy-module",
           context: data.input,
           timestamp: Date.now(),
           usageCount: 1,
           lastUsed: Date.now(),
-          verified: true,
-          tags: ["philosophy", result.school?.toLowerCase() || "general"],
-          relationships: result.relatedConcepts || [],
+          verified: false, // Philosophy is subjective
+          tags: ["philosophy", concept.school.toLowerCase()],
+          relationships: [],
         }
 
-        await storageManager.addLearntEntry(MODULE_CONFIG.philosophy.learntFile, learntEntry)
+        await storageManager.addLearntEntry("/learnt/philosophy.json", learntEntry)
         this.stats.learntEntries++
       }
     }

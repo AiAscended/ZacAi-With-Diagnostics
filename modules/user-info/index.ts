@@ -1,7 +1,19 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
-import type { UserProfile } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
-import { generateId } from "@/utils/helpers"
+
+interface UserProfile {
+  name?: string
+  preferences: {
+    responseStyle: "brief" | "detailed" | "technical"
+    topics: string[]
+    learningLevel: "beginner" | "intermediate" | "advanced"
+  }
+  history: {
+    commonQuestions: string[]
+    learningProgress: { [topic: string]: number }
+    lastActive: number
+  }
+}
 
 export class UserInfoModule implements ModuleInterface {
   name = "user-info"
@@ -37,9 +49,13 @@ export class UserInfoModule implements ModuleInterface {
     this.stats.totalQueries++
 
     try {
-      const userQueries = this.extractUserQueries(input)
+      // Check if input is asking for user info or preferences
+      const isUserInfoQuery = this.isUserInfoQuery(input)
 
-      if (userQueries.length === 0) {
+      if (!isUserInfoQuery) {
+        // Update user profile based on interaction
+        await this.updateUserProfile(input, context)
+
         return {
           success: false,
           data: null,
@@ -49,46 +65,19 @@ export class UserInfoModule implements ModuleInterface {
         }
       }
 
-      const results: any[] = []
-
-      for (const query of userQueries) {
-        const result = await this.processUserQuery(query, context)
-        if (result) {
-          results.push(result)
-        }
-      }
-
-      if (results.length === 0) {
-        return {
-          success: false,
-          data: null,
-          confidence: 0,
-          source: this.name,
-          timestamp: Date.now(),
-        }
-      }
-
-      const response = this.buildUserResponse(results)
-      const confidence = 0.9 // High confidence for user data
-
-      await this.learn({
-        input,
-        results,
-        context,
-        timestamp: Date.now(),
-      })
+      // Handle user info queries
+      const response = await this.handleUserInfoQuery(input)
 
       this.updateStats(Date.now() - startTime, true)
 
       return {
         success: true,
         data: response,
-        confidence,
+        confidence: 0.9,
         source: this.name,
         timestamp: Date.now(),
         metadata: {
-          queriesProcessed: userQueries.length,
-          resultsFound: results.length,
+          profileExists: !!this.userProfile,
         },
       }
     } catch (error) {
@@ -105,55 +94,181 @@ export class UserInfoModule implements ModuleInterface {
     }
   }
 
-  private extractUserQueries(input: string): string[] {
-    const queries: string[] = []
+  private isUserInfoQuery(input: string): boolean {
+    const lowercaseInput = input.toLowerCase()
 
-    // User preference queries
-    if (input.toLowerCase().includes("my preference") || input.toLowerCase().includes("i prefer")) {
-      queries.push("preferences")
-    }
+    const userInfoKeywords = [
+      "my name",
+      "my preferences",
+      "remember me",
+      "about me",
+      "my profile",
+      "my settings",
+      "what do you know about me",
+      "my learning",
+      "my progress",
+      "my history",
+    ]
 
-    // Learning style queries
-    if (input.toLowerCase().includes("learning style") || input.toLowerCase().includes("how i learn")) {
-      queries.push("learning_style")
-    }
-
-    // Progress queries
-    if (input.toLowerCase().includes("my progress") || input.toLowerCase().includes("how am i doing")) {
-      queries.push("progress")
-    }
-
-    // Settings queries
-    if (input.toLowerCase().includes("settings") || input.toLowerCase().includes("configuration")) {
-      queries.push("settings")
-    }
-
-    // History queries
-    if (input.toLowerCase().includes("history") || input.toLowerCase().includes("what have we discussed")) {
-      queries.push("history")
-    }
-
-    return queries
+    return userInfoKeywords.some((keyword) => lowercaseInput.includes(keyword))
   }
 
-  private async processUserQuery(query: string, context?: any): Promise<any> {
+  private async handleUserInfoQuery(input: string): Promise<string> {
     if (!this.userProfile) {
-      await this.createDefaultProfile()
+      return "I don't have any information about you yet. As we interact more, I'll learn about your preferences and interests to provide better assistance."
     }
 
-    switch (query) {
-      case "preferences":
-        return this.getUserPreferences()
-      case "learning_style":
-        return this.getLearningStyle()
-      case "progress":
-        return this.getProgress()
-      case "settings":
-        return this.getSettings()
-      case "history":
-        return this.getHistory(context)
-      default:
-        return null
+    const lowercaseInput = input.toLowerCase()
+
+    if (lowercaseInput.includes("name")) {
+      return this.userProfile.name
+        ? `Your name is ${this.userProfile.name}.`
+        : "I don't know your name yet. Feel free to tell me!"
+    }
+
+    if (lowercaseInput.includes("preferences")) {
+      return this.formatPreferences()
+    }
+
+    if (lowercaseInput.includes("progress") || lowercaseInput.includes("learning")) {
+      return this.formatLearningProgress()
+    }
+
+    // General profile summary
+    return this.formatProfileSummary()
+  }
+
+  private formatPreferences(): string {
+    if (!this.userProfile) return "No preferences set yet."
+
+    const prefs = this.userProfile.preferences
+    let response = "**Your Preferences:**\n\n"
+
+    response += `• Response Style: ${prefs.responseStyle}\n`
+    response += `• Learning Level: ${prefs.learningLevel}\n`
+
+    if (prefs.topics.length > 0) {
+      response += `• Interested Topics: ${prefs.topics.join(", ")}\n`
+    }
+
+    return response
+  }
+
+  private formatLearningProgress(): string {
+    if (!this.userProfile || Object.keys(this.userProfile.history.learningProgress).length === 0) {
+      return "No learning progress tracked yet. Keep asking questions to build your learning profile!"
+    }
+
+    let response = "**Your Learning Progress:**\n\n"
+
+    Object.entries(this.userProfile.history.learningProgress).forEach(([topic, progress]) => {
+      const percentage = Math.round(progress * 100)
+      response += `• ${topic}: ${percentage}% mastery\n`
+    })
+
+    return response
+  }
+
+  private formatProfileSummary(): string {
+    if (!this.userProfile) return "No profile information available yet."
+
+    let response = "**Your Profile Summary:**\n\n"
+
+    if (this.userProfile.name) {
+      response += `Name: ${this.userProfile.name}\n`
+    }
+
+    response += `Learning Level: ${this.userProfile.preferences.learningLevel}\n`
+    response += `Response Style: ${this.userProfile.preferences.responseStyle}\n`
+
+    if (this.userProfile.preferences.topics.length > 0) {
+      response += `Interests: ${this.userProfile.preferences.topics.slice(0, 5).join(", ")}\n`
+    }
+
+    response += `Questions Asked: ${this.userProfile.history.commonQuestions.length}\n`
+    response += `Last Active: ${new Date(this.userProfile.history.lastActive).toLocaleDateString()}`
+
+    return response
+  }
+
+  private async updateUserProfile(input: string, context: any): Promise<void> {
+    if (!this.userProfile) {
+      this.userProfile = this.createDefaultProfile()
+    }
+
+    // Update last active
+    this.userProfile.history.lastActive = Date.now()
+
+    // Track common questions
+    if (!this.userProfile.history.commonQuestions.includes(input)) {
+      this.userProfile.history.commonQuestions.push(input)
+
+      // Keep only last 50 questions
+      if (this.userProfile.history.commonQuestions.length > 50) {
+        this.userProfile.history.commonQuestions = this.userProfile.history.commonQuestions.slice(-50)
+      }
+    }
+
+    // Extract topics from input
+    const topics = this.extractTopics(input)
+    topics.forEach((topic) => {
+      if (!this.userProfile!.preferences.topics.includes(topic)) {
+        this.userProfile!.preferences.topics.push(topic)
+      }
+    })
+
+    // Update learning progress based on context
+    if (context && context.keywords) {
+      context.keywords.forEach((keyword: string) => {
+        if (!this.userProfile!.history.learningProgress[keyword]) {
+          this.userProfile!.history.learningProgress[keyword] = 0.1
+        } else {
+          this.userProfile!.history.learningProgress[keyword] = Math.min(
+            1,
+            this.userProfile!.history.learningProgress[keyword] + 0.05,
+          )
+        }
+      })
+    }
+
+    // Save profile
+    await this.saveUserProfile()
+  }
+
+  private extractTopics(input: string): string[] {
+    const topics: string[] = []
+    const lowercaseInput = input.toLowerCase()
+
+    // Common topic categories
+    const topicKeywords = {
+      mathematics: ["math", "calculate", "equation", "number"],
+      science: ["science", "physics", "chemistry", "biology"],
+      technology: ["code", "program", "computer", "software"],
+      philosophy: ["philosophy", "ethics", "moral", "meaning"],
+      language: ["word", "define", "vocabulary", "grammar"],
+    }
+
+    Object.entries(topicKeywords).forEach(([topic, keywords]) => {
+      if (keywords.some((keyword) => lowercaseInput.includes(keyword))) {
+        topics.push(topic)
+      }
+    })
+
+    return topics
+  }
+
+  private createDefaultProfile(): UserProfile {
+    return {
+      preferences: {
+        responseStyle: "detailed",
+        topics: [],
+        learningLevel: "intermediate",
+      },
+      history: {
+        commonQuestions: [],
+        learningProgress: {},
+        lastActive: Date.now(),
+      },
     }
   }
 
@@ -162,39 +277,10 @@ export class UserInfoModule implements ModuleInterface {
       const profileData = await storageManager.loadLearntData("/learnt/user-profile.json")
       if (profileData && profileData.profile) {
         this.userProfile = profileData.profile
-      } else {
-        await this.createDefaultProfile()
       }
     } catch (error) {
       console.error("Error loading user profile:", error)
-      await this.createDefaultProfile()
     }
-  }
-
-  private async createDefaultProfile(): Promise<void> {
-    this.userProfile = {
-      id: generateId(),
-      preferences: {
-        learningStyle: "adaptive",
-        difficultyLevel: 3,
-        interests: [],
-        goals: [],
-      },
-      history: {
-        totalInteractions: 0,
-        favoriteTopics: [],
-        learningProgress: {},
-        achievements: [],
-      },
-      settings: {
-        responseStyle: "detailed",
-        verbosity: 2,
-        showSources: true,
-        showReasoning: true,
-      },
-    }
-
-    await this.saveUserProfile()
   }
 
   private async saveUserProfile(): Promise<void> {
@@ -204,7 +290,6 @@ export class UserInfoModule implements ModuleInterface {
       metadata: {
         version: "1.0.0",
         lastUpdated: Date.now(),
-        totalEntries: 1,
       },
       profile: this.userProfile,
     }
@@ -212,189 +297,8 @@ export class UserInfoModule implements ModuleInterface {
     await storageManager.saveLearntData("/learnt/user-profile.json", profileData)
   }
 
-  private getUserPreferences(): any {
-    return {
-      type: "preferences",
-      data: this.userProfile?.preferences,
-      description: "Your current learning preferences and interests",
-    }
-  }
-
-  private getLearningStyle(): any {
-    const learningStyles = {
-      visual: "You learn best through visual aids, diagrams, and images",
-      auditory: "You learn best through listening and verbal explanations",
-      kinesthetic: "You learn best through hands-on activities and practice",
-      reading: "You learn best through reading and written materials",
-      adaptive: "Your learning style adapts based on the content and context",
-    }
-
-    const currentStyle = this.userProfile?.preferences.learningStyle || "adaptive"
-
-    return {
-      type: "learning_style",
-      style: currentStyle,
-      description: learningStyles[currentStyle as keyof typeof learningStyles],
-      recommendations: this.getLearningRecommendations(currentStyle),
-    }
-  }
-
-  private getLearningRecommendations(style: string): string[] {
-    const recommendations = {
-      visual: [
-        "Use diagrams and flowcharts when explaining concepts",
-        "Include visual examples and illustrations",
-        "Break down complex information into visual chunks",
-      ],
-      auditory: [
-        "Provide verbal explanations and discussions",
-        "Use analogies and storytelling",
-        "Include audio examples when possible",
-      ],
-      kinesthetic: [
-        "Include practical examples and exercises",
-        "Provide step-by-step instructions",
-        "Encourage hands-on practice",
-      ],
-      reading: [
-        "Provide detailed written explanations",
-        "Include references and further reading",
-        "Use structured text with clear headings",
-      ],
-      adaptive: [
-        "Mix different presentation styles",
-        "Adjust based on topic complexity",
-        "Provide multiple explanation formats",
-      ],
-    }
-
-    return recommendations[style as keyof typeof recommendations] || recommendations.adaptive
-  }
-
-  private getProgress(): any {
-    const progress = this.userProfile?.history.learningProgress || {}
-    const totalInteractions = this.userProfile?.history.totalInteractions || 0
-
-    return {
-      type: "progress",
-      totalInteractions,
-      topicProgress: progress,
-      achievements: this.userProfile?.history.achievements || [],
-      favoriteTopics: this.userProfile?.history.favoriteTopics || [],
-    }
-  }
-
-  private getSettings(): any {
-    return {
-      type: "settings",
-      data: this.userProfile?.settings,
-      description: "Your current system settings and preferences",
-    }
-  }
-
-  private getHistory(context?: any): any {
-    const recentTopics = context?.topics || []
-    const conversationLength = context?.conversationLength || 0
-
-    return {
-      type: "history",
-      recentTopics,
-      conversationLength,
-      sessionDuration: context?.sessionDuration || 0,
-      totalInteractions: this.userProfile?.history.totalInteractions || 0,
-    }
-  }
-
-  private buildUserResponse(results: any[]): string {
-    if (results.length === 1) {
-      const result = results[0]
-
-      switch (result.type) {
-        case "preferences":
-          return `**Your Preferences:**\n\n**Learning Style:** ${result.data.learningStyle}\n**Difficulty Level:** ${result.data.difficultyLevel}/5\n**Interests:** ${result.data.interests.join(", ") || "None set"}\n**Goals:** ${result.data.goals.join(", ") || "None set"}`
-
-        case "learning_style":
-          return `**Your Learning Style: ${result.style}**\n\n${result.description}\n\n**Recommendations:**\n${result.recommendations.map((rec: string) => `• ${rec}`).join("\n")}`
-
-        case "progress":
-          return `**Your Learning Progress:**\n\n**Total Interactions:** ${result.totalInteractions}\n**Favorite Topics:** ${result.favoriteTopics.join(", ") || "None yet"}\n**Achievements:** ${result.achievements.join(", ") || "None yet"}`
-
-        case "settings":
-          return `**Your Settings:**\n\n**Response Style:** ${result.data.responseStyle}\n**Verbosity:** ${result.data.verbosity}/3\n**Show Sources:** ${result.data.showSources ? "Yes" : "No"}\n**Show Reasoning:** ${result.data.showReasoning ? "Yes" : "No"}`
-
-        case "history":
-          return `**Session History:**\n\n**Messages:** ${result.conversationLength}\n**Duration:** ${Math.round(result.sessionDuration / 60000)} minutes\n**Recent Topics:** ${result.recentTopics.join(", ") || "None"}\n**Total Interactions:** ${result.totalInteractions}`
-
-        default:
-          return JSON.stringify(result, null, 2)
-      }
-    }
-
-    let response = "Here's your user information:\n\n"
-    results.forEach((result, index) => {
-      response += `${index + 1}. **${result.type}**: ${result.description || "User data"}\n`
-    })
-    return response
-  }
-
-  async updateUserPreference(key: string, value: any): Promise<void> {
-    if (!this.userProfile) await this.createDefaultProfile()
-
-    if (this.userProfile) {
-      // Update preferences based on key
-      if (key in this.userProfile.preferences) {
-        ;(this.userProfile.preferences as any)[key] = value
-      } else if (key in this.userProfile.settings) {
-        ;(this.userProfile.settings as any)[key] = value
-      }
-
-      await this.saveUserProfile()
-    }
-  }
-
-  async recordInteraction(topic: string, success: boolean): Promise<void> {
-    if (!this.userProfile) await this.createDefaultProfile()
-
-    if (this.userProfile) {
-      this.userProfile.history.totalInteractions++
-
-      // Update favorite topics
-      const favoriteTopics = this.userProfile.history.favoriteTopics
-      const existingIndex = favoriteTopics.indexOf(topic)
-
-      if (existingIndex > -1) {
-        // Move to front if already exists
-        favoriteTopics.splice(existingIndex, 1)
-        favoriteTopics.unshift(topic)
-      } else {
-        // Add new topic
-        favoriteTopics.unshift(topic)
-        if (favoriteTopics.length > 10) {
-          favoriteTopics.pop()
-        }
-      }
-
-      // Update learning progress
-      if (!this.userProfile.history.learningProgress[topic]) {
-        this.userProfile.history.learningProgress[topic] = 0
-      }
-
-      if (success) {
-        this.userProfile.history.learningProgress[topic]++
-      }
-
-      await this.saveUserProfile()
-    }
-  }
-
   async learn(data: any): Promise<void> {
-    // Extract learning insights from interaction
-    if (data.context && data.context.topics) {
-      for (const topic of data.context.topics) {
-        await this.recordInteraction(topic, data.results.length > 0)
-      }
-    }
-
+    // Learning is handled in updateUserProfile
     this.stats.lastUpdate = Date.now()
   }
 

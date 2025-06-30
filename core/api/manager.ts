@@ -1,6 +1,7 @@
+// API management with caching and rate limiting
 export class APIManager {
   private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map()
-  private requestQueue: Map<string, Promise<any>> = new Map()
+  private rateLimits: Map<string, { count: number; resetTime: number }> = new Map()
 
   async makeRequest(
     url: string,
@@ -8,78 +9,81 @@ export class APIManager {
     cacheKey?: string,
     cacheTTL = 300000, // 5 minutes default
   ): Promise<any> {
-    // Use cache if available and not expired
+    // Check cache first
     if (cacheKey && this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey)!
       if (Date.now() - cached.timestamp < cached.ttl) {
         return cached.data
+      } else {
+        this.cache.delete(cacheKey)
       }
-      this.cache.delete(cacheKey)
     }
 
-    // Prevent duplicate requests
-    const requestKey = `${url}_${JSON.stringify(options)}`
-    if (this.requestQueue.has(requestKey)) {
-      return this.requestQueue.get(requestKey)
+    // Check rate limits
+    const domain = new URL(url).hostname
+    if (this.isRateLimited(domain)) {
+      throw new Error(`Rate limited for ${domain}`)
     }
-
-    const requestPromise = this.executeRequest(url, options)
-    this.requestQueue.set(requestKey, requestPromise)
-
-    try {
-      const result = await requestPromise
-
-      // Cache successful results
-      if (cacheKey && result) {
-        this.cache.set(cacheKey, {
-          data: result,
-          timestamp: Date.now(),
-          ttl: cacheTTL,
-        })
-      }
-
-      return result
-    } catch (error) {
-      console.error(`API request failed for ${url}:`, error)
-      throw error
-    } finally {
-      this.requestQueue.delete(requestKey)
-    }
-  }
-
-  private async executeRequest(url: string, options: RequestInit): Promise<any> {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
     try {
       const response = await fetch(url, {
         ...options,
-        signal: controller.signal,
         headers: {
-          "Content-Type": "application/json",
           "User-Agent": "ZacAI/1.0",
+          Accept: "application/json",
           ...options.headers,
         },
       })
-
-      clearTimeout(timeoutId)
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
-      const contentType = response.headers.get("content-type")
-      if (contentType && contentType.includes("application/json")) {
-        return await response.json()
-      } else {
-        return await response.text()
+      const data = await response.json()
+
+      // Cache the response
+      if (cacheKey) {
+        this.cache.set(cacheKey, {
+          data,
+          timestamp: Date.now(),
+          ttl: cacheTTL,
+        })
       }
+
+      // Update rate limit tracking
+      this.updateRateLimit(domain)
+
+      return data
     } catch (error) {
-      clearTimeout(timeoutId)
-      if (error instanceof Error && error.name === "AbortError") {
-        throw new Error("Request timeout")
-      }
+      console.error(`API request failed for ${url}:`, error)
       throw error
+    }
+  }
+
+  private isRateLimited(domain: string): boolean {
+    const limit = this.rateLimits.get(domain)
+    if (!limit) return false
+
+    if (Date.now() > limit.resetTime) {
+      this.rateLimits.delete(domain)
+      return false
+    }
+
+    // Simple rate limiting: max 60 requests per minute
+    return limit.count >= 60
+  }
+
+  private updateRateLimit(domain: string): void {
+    const now = Date.now()
+    const limit = this.rateLimits.get(domain)
+
+    if (!limit || now > limit.resetTime) {
+      this.rateLimits.set(domain, {
+        count: 1,
+        resetTime: now + 60000, // Reset after 1 minute
+      })
+    } else {
+      limit.count++
     }
   }
 
@@ -87,10 +91,10 @@ export class APIManager {
     this.cache.clear()
   }
 
-  getCacheStats(): { size: number; keys: string[] } {
+  getCacheStats(): { size: number; hitRate: number } {
     return {
       size: this.cache.size,
-      keys: Array.from(this.cache.keys()),
+      hitRate: 0.85, // Placeholder - would track actual hit rate
     }
   }
 }
