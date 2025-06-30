@@ -1,252 +1,114 @@
 "use client"
-
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { Book, Plus, Search, Trash2, Edit, Save } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-interface KnowledgeEntry {
+type KnowledgeItem = {
   id: string
-  topic: string
-  content: string
+  question: string
+  answer: string
   category: string
-  timestamp: number
 }
 
-export default function KnowledgeManagementTab() {
-  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeEntry[]>([])
+export function KnowledgeManagementTab() {
+  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeItem[]>([])
+  const [newQuestion, setNewQuestion] = useState("")
+  const [newAnswer, setNewAnswer] = useState("")
+  const [newCategory, setNewCategory] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
-  const [newEntry, setNewEntry] = useState({ topic: "", content: "", category: "" })
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const loadKnowledgeBase = async () => {
-    setIsLoading(true)
-    try {
-      // Simulate loading knowledge base
-      const mockKnowledge: KnowledgeEntry[] = [
-        {
-          id: "1",
-          topic: "Mathematics Basics",
-          content: "Basic arithmetic operations including addition, subtraction, multiplication, and division.",
-          category: "Math",
-          timestamp: Date.now() - 86400000,
-        },
-        {
-          id: "2",
-          topic: "Conversation Patterns",
-          content: "Common greeting patterns and response templates for natural conversation flow.",
-          category: "Language",
-          timestamp: Date.now() - 172800000,
-        },
-        {
-          id: "3",
-          topic: "Memory Management",
-          content: "Techniques for storing and retrieving user information and conversation context.",
-          category: "System",
-          timestamp: Date.now() - 259200000,
-        },
-      ]
-      setKnowledgeBase(mockKnowledge)
-    } catch (error) {
-      console.error("Failed to load knowledge base:", error)
-    }
-    setIsLoading(false)
-  }
 
   useEffect(() => {
-    loadKnowledgeBase()
+    // In a real app, this would fetch from a database.
+    // For now, we'll use mock data.
+    const mockKnowledge: KnowledgeItem[] = [
+      { id: "1", question: "What is the capital of France?", answer: "Paris", category: "Geography" },
+      { id: "2", question: "What is 2 + 2?", answer: "4", category: "Math" },
+      { id: "3", question: "What is the formula for water?", answer: "H2O", category: "Science" },
+    ]
+    setKnowledgeBase(mockKnowledge)
   }, [])
 
-  const addKnowledgeEntry = () => {
-    if (newEntry.topic && newEntry.content) {
-      const entry: KnowledgeEntry = {
-        id: Date.now().toString(),
-        topic: newEntry.topic,
-        content: newEntry.content,
-        category: newEntry.category || "General",
-        timestamp: Date.now(),
+  const handleAddItem = () => {
+    if (newQuestion && newAnswer && newCategory) {
+      const newItem: KnowledgeItem = {
+        id: (knowledgeBase.length + 1).toString(),
+        question: newQuestion,
+        answer: newAnswer,
+        category: newCategory,
       }
-      setKnowledgeBase([entry, ...knowledgeBase])
-      setNewEntry({ topic: "", content: "", category: "" })
+      setKnowledgeBase([...knowledgeBase, newItem])
+      setNewQuestion("")
+      setNewAnswer("")
+      setNewCategory("")
     }
   }
 
-  const deleteEntry = (id: string) => {
-    setKnowledgeBase(knowledgeBase.filter((entry) => entry.id !== id))
-  }
-
-  const startEditing = (entry: KnowledgeEntry) => {
-    setEditingId(entry.id)
-    setNewEntry({
-      topic: entry.topic,
-      content: entry.content,
-      category: entry.category,
-    })
-  }
-
-  const saveEdit = () => {
-    if (editingId) {
-      setKnowledgeBase(
-        knowledgeBase.map((entry) =>
-          entry.id === editingId
-            ? { ...entry, topic: newEntry.topic, content: newEntry.content, category: newEntry.category }
-            : entry,
-        ),
-      )
-      setEditingId(null)
-      setNewEntry({ topic: "", content: "", category: "" })
-    }
+  const handleDeleteItem = (id: string) => {
+    setKnowledgeBase(knowledgeBase.filter((item) => item.id !== id))
   }
 
   const filteredKnowledge = knowledgeBase.filter(
-    (entry) =>
-      entry.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.category.toLowerCase().includes(searchTerm.toLowerCase()),
+    (item) =>
+      item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const categories = [...new Set(knowledgeBase.map((entry) => entry.category))]
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">📚 Knowledge Management</h2>
-        <Badge variant="outline" className="bg-blue-50">
-          {knowledgeBase.length} Entries
-        </Badge>
-      </div>
-
-      {/* Search */}
+    <div className="flex flex-col h-full p-4 space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="w-5 h-5" />
-            Search Knowledge Base
-          </CardTitle>
+          <CardTitle>Add New Knowledge</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Input
-            placeholder="Search topics, content, or categories..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <CardContent className="space-y-2">
+          <Input placeholder="Question" value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} />
+          <Input placeholder="Answer" value={newAnswer} onChange={(e) => setNewAnswer(e.target.value)} />
+          <Input placeholder="Category" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
         </CardContent>
+        <CardFooter>
+          <Button onClick={handleAddItem}>Add Item</Button>
+        </CardFooter>
       </Card>
-
-      {/* Add/Edit Entry */}
-      <Card>
+      <Card className="flex-1 flex flex-col">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {editingId ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-            {editingId ? "Edit Entry" : "Add New Entry"}
-          </CardTitle>
+          <CardTitle>Knowledge Base</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="flex-1 flex flex-col space-y-2 p-0">
+          <div className="px-6 pb-2">
             <Input
-              placeholder="Topic/Title"
-              value={newEntry.topic}
-              onChange={(e) => setNewEntry({ ...newEntry, topic: e.target.value })}
-            />
-            <Input
-              placeholder="Category"
-              value={newEntry.category}
-              onChange={(e) => setNewEntry({ ...newEntry, category: e.target.value })}
+              placeholder="Search knowledge base..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Textarea
-            placeholder="Content/Description"
-            value={newEntry.content}
-            onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
-            rows={4}
-          />
-          <div className="flex gap-2">
-            <Button onClick={editingId ? saveEdit : addKnowledgeEntry}>
-              {editingId ? (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Entry
-                </>
-              )}
-            </Button>
-            {editingId && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEditingId(null)
-                  setNewEntry({ topic: "", content: "", category: "" })
-                }}
-              >
-                Cancel
-              </Button>
-            )}
-          </div>
+          <ScrollArea className="flex-1 px-6">
+            <div className="space-y-4">
+              {filteredKnowledge.map((item) => (
+                <Card key={item.id}>
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-sm font-semibold">{item.question}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 text-sm">
+                    <p>
+                      <span className="font-semibold">Answer:</span> {item.answer}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Category:</span> {item.category}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="p-4">
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteItem(item.id)}>
+                      Delete
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
         </CardContent>
       </Card>
-
-      {/* Categories */}
-      <Card>
-        <CardHeader>
-          <CardTitle>📂 Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Badge key={category} variant="secondary">
-                {category} ({knowledgeBase.filter((e) => e.category === category).length})
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Knowledge Entries */}
-      <div className="space-y-4">
-        {filteredKnowledge.map((entry) => (
-          <Card key={entry.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Book className="w-5 h-5" />
-                  <CardTitle className="text-lg">{entry.topic}</CardTitle>
-                  <Badge variant="outline">{entry.category}</Badge>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => startEditing(entry)}>
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => deleteEntry(entry.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-2">{entry.content}</p>
-              <p className="text-xs text-gray-400">Added: {new Date(entry.timestamp).toLocaleDateString()}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredKnowledge.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-8">
-            <Book className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-gray-500">No knowledge entries found</p>
-            {searchTerm && <p className="text-sm text-gray-400 mt-2">Try adjusting your search terms</p>}
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
