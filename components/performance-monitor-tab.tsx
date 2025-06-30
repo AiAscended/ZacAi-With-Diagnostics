@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { ReliableAISystem } from "@/lib/reliable-ai-system"
 import { Activity, Clock, Cpu, Database, RefreshCw } from "lucide-react"
 
 interface PerformanceMetrics {
@@ -18,7 +17,6 @@ interface PerformanceMetrics {
 }
 
 export default function PerformanceMonitorTab() {
-  const [aiSystem] = useState(() => new ReliableAISystem())
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     responseTime: 0,
     memoryUsage: 0,
@@ -29,23 +27,17 @@ export default function PerformanceMonitorTab() {
   })
   const [isLoading, setIsLoading] = useState(false)
 
-  const loadMetrics = async () => {
+  const loadMetrics = () => {
     setIsLoading(true)
-    try {
-      await aiSystem.initialize()
-      const stats = aiSystem.getStats()
-
-      setMetrics({
-        responseTime: Math.random() * 100 + 50, // Simulated
-        memoryUsage: Math.random() * 80 + 10, // Simulated
-        vocabularySize: stats.vocabularySize,
-        mathFunctions: stats.mathFunctions,
-        conversationCount: stats.conversationCount || 0,
-        uptime: Date.now() - (Date.now() - Math.random() * 3600000), // Simulated
-      })
-    } catch (error) {
-      console.error("Failed to load metrics:", error)
-    }
+    // Simulate loading metrics
+    setMetrics({
+      responseTime: Math.random() * 100 + 50,
+      memoryUsage: Math.random() * 80 + 10,
+      vocabularySize: 450 + Math.floor(Math.random() * 50),
+      mathFunctions: 20 + Math.floor(Math.random() * 10),
+      conversationCount: 100 + Math.floor(Math.random() * 50),
+      uptime: Date.now() - (Date.now() - Math.random() * 3600000 * 24),
+    })
     setIsLoading(false)
   }
 

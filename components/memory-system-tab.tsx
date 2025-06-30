@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { ReliableAISystem } from "@/lib/reliable-ai-system"
 import { Brain, Trash2, Search, RefreshCw } from "lucide-react"
 
 interface MemoryEntry {
@@ -21,7 +20,6 @@ interface MemoryEntry {
 }
 
 export default function MemorySystemTab() {
-  const [aiSystem] = useState(() => new ReliableAISystem())
   const [memories, setMemories] = useState<MemoryEntry[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedType, setSelectedType] = useState<string>("all")
