@@ -1,16 +1,12 @@
 "use client"
 
-import { Input } from "@/components/ui/input"
-
-import { useEffect } from "react"
-
-import { useState } from "react"
-
 import type React from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
@@ -33,7 +29,7 @@ interface SystemSettings {
   apiFallback: boolean
 }
 
-export default function SystemSettingsTab() {
+export function SystemSettingsTab() {
   const [settings, setSettings] = useState<SystemSettings>({
     responseSpeed: 75,
     memoryRetention: 80,
@@ -59,7 +55,25 @@ export default function SystemSettingsTab() {
     const savedSettings = localStorage.getItem("zacai-system-settings")
     if (savedSettings) {
       try {
-        setSettings(JSON.parse(savedSettings))
+        const loadedSettings = JSON.parse(savedSettings)
+        // Ensure all keys are present, falling back to defaults if not
+        const defaultSettings: SystemSettings = {
+          responseSpeed: 75,
+          memoryRetention: 80,
+          learningRate: 60,
+          confidenceThreshold: 70,
+          maxConversationHistory: 100,
+          enableMathMode: true,
+          enableMemoryLearning: true,
+          enablePerformanceLogging: true,
+          defaultLanguage: "english",
+          responseStyle: "balanced",
+          debugMode: false,
+          autoSave: true,
+          enableContinuousLearning: true,
+          apiFallback: true,
+        }
+        setSettings({ ...defaultSettings, ...loadedSettings })
       } catch (error) {
         console.error("Failed to load settings:", error)
       }
@@ -261,7 +275,6 @@ export default function SystemSettingsTab() {
               id="learning-mode"
               checked={settings.enableContinuousLearning}
               onCheckedChange={(checked) => updateSetting("enableContinuousLearning", checked)}
-              defaultChecked
             />
           </div>
 
@@ -274,7 +287,6 @@ export default function SystemSettingsTab() {
               id="api-fallback"
               checked={settings.apiFallback}
               onCheckedChange={(checked) => updateSetting("apiFallback", checked)}
-              defaultChecked
             />
           </div>
 
