@@ -76,11 +76,8 @@ export interface ChatMessage {
   content: string
   timestamp: number
   confidence?: number
-  knowledgeUsed?: string[]
-  suggestions?: string[]
-  thinking?: string[]
+  reasoning?: string[]
   mathAnalysis?: any
-  responseTime?: number
 }
 
 export interface ThoughtNode {
@@ -111,6 +108,13 @@ export interface ReasoningEngineResponse {
   connectionStatus: string
 }
 
+export interface AIResponse {
+  content: string
+  confidence: number
+  reasoning?: string[]
+  mathAnalysis?: any
+}
+
 export interface SystemStats {
   vocabulary: {
     total: number
@@ -131,6 +135,23 @@ export interface SystemStats {
   vocabularySize: number
   mathFunctions: number
   memoryEntries: number
+  totalMessages: number
+  seedProgress: number
+  responseTime: number
+  vocabularyData: Map<string, any>
+  memoryData: Map<string, any>
+  personalInfoData: Map<string, any>
+  factsData: Map<string, any>
+  mathFunctionsData: Map<string, any>
+  learnedVocabulary: number
+  learnedMathematics: number
+  learnedScience: number
+  learnedCoding: number
+  apiStatus: any
+  currentDateTime: any
+  batchQueueSize: number
+  systemName: string
+  systemVersion: string
 }
 
 export interface PatternMatch {

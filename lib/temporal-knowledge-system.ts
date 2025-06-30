@@ -1,43 +1,8 @@
 export class TemporalKnowledgeSystem {
   private timeZone = "UTC"
-  private dateFormats: Map<string, Intl.DateTimeFormatOptions> = new Map()
 
   constructor() {
-    this.initializeDateFormats()
     this.detectUserTimeZone()
-  }
-
-  private initializeDateFormats(): void {
-    this.dateFormats.set("full", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      timeZoneName: "short",
-    })
-
-    this.dateFormats.set("date", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-
-    this.dateFormats.set("time", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      timeZoneName: "short",
-    })
-
-    this.dateFormats.set("short", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
   }
 
   private detectUserTimeZone(): void {
@@ -49,53 +14,29 @@ export class TemporalKnowledgeSystem {
     }
   }
 
-  public getCurrentDateTime(): any {
+  public getCurrentDateTime() {
     const now = new Date()
     return {
-      timestamp: now.getTime(),
       iso: now.toISOString(),
-      timezone: this.timeZone,
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
-      day: now.getDate(),
-      weekday: now.getDay(),
-      hour: now.getHours(),
-      minute: now.getMinutes(),
-      second: now.getSeconds(),
-      weekdayName: now.toLocaleDateString("en-US", { weekday: "long" }),
-      monthName: now.toLocaleDateString("en-US", { month: "long" }),
       formatted: {
-        full: this.formatDate(now, "full"),
-        date: this.formatDate(now, "date"),
-        time: this.formatDate(now, "time"),
-        short: this.formatDate(now, "short"),
+        full: now.toLocaleString(),
+        date: now.toLocaleDateString(),
+        time: now.toLocaleTimeString(),
       },
+      timezone: this.timeZone,
     }
-  }
-
-  public formatDate(date: Date, format = "full"): string {
-    const formatOptions = this.dateFormats.get(format) || this.dateFormats.get("full")!
-    return new Intl.DateTimeFormat("en-US", formatOptions).format(date)
   }
 
   public getRelativeTime(timestamp: number): string {
     const now = Date.now()
-    const diff = now - timestamp
-    const seconds = Math.floor(diff / 1000)
+    const seconds = Math.floor((now - timestamp) / 1000)
+    if (seconds < 60) return `${seconds} seconds ago`
     const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return `${minutes} minutes ago`
     const hours = Math.floor(minutes / 60)
+    if (hours < 24) return `${hours} hours ago`
     const days = Math.floor(hours / 24)
-    const weeks = Math.floor(days / 7)
-    const months = Math.floor(days / 30)
-    const years = Math.floor(days / 365)
-
-    if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`
-    if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`
-    if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""} ago`
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`
-    return "just now"
+    return `${days} days ago`
   }
 
   public isDateTimeQuery(message: string): boolean {
@@ -123,24 +64,24 @@ export class TemporalKnowledgeSystem {
 
     // What day is it?
     if (lowerMessage.includes("day")) {
-      return `📅 **Today is**: ${currentDateTime.weekdayName}\n\n` + `**Full Date**: ${currentDateTime.formatted.date}`
+      return `📅 **Today is**: ${currentDateTime.formatted.date}`
     }
 
     // What date is it?
     if (lowerMessage.includes("date")) {
       return (
         `📅 **Current Date**: ${currentDateTime.formatted.date}\n\n` +
-        `**Short Format**: ${currentDateTime.formatted.short}`
+        `**Short Format**: ${currentDateTime.formatted.date}`
       )
     }
 
     // What month/year is it?
     if (lowerMessage.includes("month")) {
-      return `📅 **Current Month**: ${currentDateTime.monthName} ${currentDateTime.year}`
+      return `📅 **Current Month**: ${currentDateTime.formatted.date}`
     }
 
     if (lowerMessage.includes("year")) {
-      return `📅 **Current Year**: ${currentDateTime.year}`
+      return `📅 **Current Year**: ${currentDateTime.formatted.date}`
     }
 
     // Default comprehensive response
@@ -150,10 +91,10 @@ export class TemporalKnowledgeSystem {
       `**Time**: ${currentDateTime.formatted.time}\n` +
       `**Timezone**: ${currentDateTime.timezone}\n\n` +
       `**Quick Facts**:\n` +
-      `• Year: ${currentDateTime.year}\n` +
-      `• Month: ${currentDateTime.monthName}\n` +
-      `• Day: ${currentDateTime.weekdayName}\n` +
-      `• Day of Month: ${currentDateTime.day}`
+      `• Year: ${currentDateTime.formatted.date}\n` +
+      `• Month: ${currentDateTime.formatted.date}\n` +
+      `• Day: ${currentDateTime.formatted.date}\n` +
+      `• Day of Month: ${currentDateTime.formatted.date}`
     )
   }
 

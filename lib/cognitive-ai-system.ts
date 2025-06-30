@@ -4,40 +4,276 @@ import { BrowserStorageManager } from "./browser-storage-manager"
 import { EnhancedKnowledgeSystem } from "./enhanced-knowledge-system"
 import { EnhancedMathProcessor } from "./enhanced-math-processor"
 import { TemporalKnowledgeSystem } from "./temporal-knowledge-system"
+import type { ChatMessage, AIResponse, PersonalInfoEntry, FactEntry, SystemStats } from "./types"
 
-// FIXED COGNITIVE AI SYSTEM - Restored Full Functionality
 export class CognitiveAISystem {
   private enhancedKnowledge = new EnhancedKnowledgeSystem()
   private enhancedMath = new EnhancedMathProcessor()
   private storageManager = new BrowserStorageManager()
+  private temporalSystem = new TemporalKnowledgeSystem()
+
   private conversationHistory: ChatMessage[] = []
   private memory: Map<string, any> = new Map()
   private vocabulary: Map<string, string> = new Map()
   private personalInfo: Map<string, PersonalInfoEntry> = new Map()
   private facts: Map<string, FactEntry> = new Map()
+
   private systemStatus = "idle"
   private isInitialized = false
-
-  // Enhanced properties
   private systemIdentity: any = null
-  private systemCapabilities: string[] = []
-  private knowledgeSources: any = null
-  private learnedVocabulary: Map<string, any> = new Map()
-  private learnedMathematics: Map<string, any> = new Map()
-  private learnedScience: Map<string, any> = new Map()
-  private learnedCoding: Map<string, any> = new Map()
-
-  // RESTORED: Seed data integration
-  private seedMathData: any = null
-  private seedVocabData: any = null
-  private seedKnowledgeData: any = null
-
-  private temporalSystem = new TemporalKnowledgeSystem()
 
   constructor() {
     this.initializeBasicVocabulary()
-    this.initializeSampleFacts()
-    this.loadSeedData() // RESTORED: Load seed data on construction
+  }
+
+  public async initialize(): Promise<void> {
+    if (this.isInitialized) return
+    console.log("🚀 Initializing Cognitive AI System...")
+    this.systemStatus = "initializing"
+
+    await this.loadSystemIdentity()
+    await this.loadConversationHistory()
+    await this.loadMemory()
+    await this.loadVocabulary()
+
+    this.systemStatus = "ready"
+    this.isInitialized = true
+    console.log(`✅ ${this.systemIdentity?.name || "ZacAI"} Cognitive AI System ready!`)
+  }
+
+  private async loadSystemIdentity(): Promise<void> {
+    try {
+      const response = await fetch("/seed_system.json")
+      if (response.ok) {
+        const systemData = await response.json()
+        this.systemIdentity = systemData.identity || { name: "ZacAI", version: "3.0.0" }
+      } else {
+        this.systemIdentity = { name: "ZacAI", version: "3.0.0" }
+      }
+    } catch (error) {
+      console.warn("Could not load system identity, using defaults.")
+      this.systemIdentity = { name: "ZacAI", version: "3.0.0" }
+    }
+  }
+
+  public async processMessage(userMessage: string): Promise<AIResponse> {
+    if (!this.isInitialized) await this.initialize()
+
+    this.extractAndStorePersonalInfo(userMessage)
+    let response: AIResponse
+
+    if (this.isTeslaMathQuery(userMessage)) {
+      response = this.handleTeslaMathQuery(userMessage)
+    } else if (this.enhancedMath.analyzeMathExpression(userMessage).isMatch) {
+      response = this.handleMathProblem(userMessage)
+    } else if (this.isDefinitionRequest(userMessage)) {
+      response = await this.handleDefinitionRequest(userMessage)
+    } else if (this.isIdentityQuestion(userMessage)) {
+      response = this.handleIdentityQuestion()
+    } else {
+      response = this.generateConversationalResponse(userMessage)
+    }
+
+    await this.saveConversation(userMessage, response.content)
+    return response
+  }
+
+  private isTeslaMathQuery(message: string): boolean {
+    return /tesla|vortex|369|digital root/i.test(message)
+  }
+
+  private handleTeslaMathQuery(message: string): AIResponse {
+    const numberMatch = message.match(/(\d+)/)
+    if (!numberMatch) {
+      return {
+        content: "Please provide a number for Tesla/Vortex math analysis.",
+        confidence: 0.6,
+        reasoning: ["Tesla query detected without a number."],
+      }
+    }
+    const number = Number.parseInt(numberMatch[1], 10)
+    const digitalRoot = this.calculateDigitalRoot(number)
+    const vortexData = this.getVortexAnalysis(number)
+
+    let response = `🌀 **Tesla Pattern for ${number}**\n\n`
+    response += `• **Digital Root:** ${digitalRoot}\n`
+    response += `• **Pattern Type:** ${vortexData.type}\n`
+    if (vortexData.isTeslaNumber) {
+      response += `• **Meaning:** ${vortexData.meaning}\n`
+    }
+    return { content: response, confidence: 0.95, reasoning: ["Calculated Tesla pattern."] }
+  }
+
+  private calculateDigitalRoot(num: number): number {
+    while (num >= 10) {
+      num = num
+        .toString()
+        .split("")
+        .reduce((sum, digit) => sum + Number.parseInt(digit, 10), 0)
+    }
+    return num
+  }
+
+  private getVortexAnalysis(number: number): any {
+    const digitalRoot = this.calculateDigitalRoot(number)
+    const teslaNumbers = [3, 6, 9]
+    const isTeslaNumber = teslaNumbers.includes(digitalRoot)
+    const meanings: { [key: number]: string } = { 3: "Creation", 6: "Harmony", 9: "Completion" }
+
+    return {
+      type: isTeslaNumber ? "Tesla Number" : "Vortex Cycle",
+      isTeslaNumber,
+      meaning: isTeslaNumber ? meanings[digitalRoot] : "Part of the material world cycle.",
+    }
+  }
+
+  private handleMathProblem(message: string): AIResponse {
+    const mathAnalysis = this.enhancedMath.analyzeMathExpression(message)
+    if (mathAnalysis.isMatch && mathAnalysis.result !== undefined) {
+      return {
+        content: `The result of ${mathAnalysis.operation} on ${mathAnalysis.numbers.join(" and ")} is ${mathAnalysis.result}.`,
+        confidence: mathAnalysis.confidence,
+        reasoning: mathAnalysis.reasoning,
+        mathAnalysis,
+      }
+    }
+    return { content: "I couldn't solve that math problem.", confidence: 0.4 }
+  }
+
+  private isDefinitionRequest(message: string): boolean {
+    return /^(what is|define|meaning of)/i.test(message)
+  }
+
+  private async handleDefinitionRequest(message: string): Promise<AIResponse> {
+    const wordMatch = message.match(/(?:what is|define|meaning of)\s(.+)/i)
+    if (!wordMatch) return { content: "I couldn't identify the word.", confidence: 0.3 }
+
+    const word = wordMatch[1].trim().replace(/[?.!]/g, "")
+    const definition = await this.enhancedKnowledge.lookupWord(word)
+
+    if (definition) {
+      const firstMeaning = definition.meanings[0]
+      const firstDefinition = firstMeaning.definitions[0]
+      return {
+        content: `**${definition.word}** (${firstMeaning.partOfSpeech}): ${firstDefinition.definition}`,
+        confidence: 0.9,
+        reasoning: ["Looked up word via API."],
+      }
+    }
+    return { content: `I could not find a definition for "${word}".`, confidence: 0.4 }
+  }
+
+  private isIdentityQuestion(message: string): boolean {
+    return /who are you|what are you|what is your name/i.test(message)
+  }
+
+  private handleIdentityQuestion(): AIResponse {
+    const name = this.systemIdentity?.name || "ZacAI"
+    const version = this.systemIdentity?.version || "3.0.0"
+    return {
+      content: `I am ${name} v${version}, a cognitive AI system designed for learning and problem-solving.`,
+      confidence: 0.98,
+      reasoning: ["Accessed system identity information."],
+    }
+  }
+
+  private generateConversationalResponse(message: string): AIResponse {
+    return {
+      content: `I've processed your message: "${message}". I can help with math, definitions, and more.`,
+      confidence: 0.7,
+      reasoning: ["Generated a default conversational response."],
+    }
+  }
+
+  private extractAndStorePersonalInfo(message: string): void {
+    const nameMatch = message.match(/my name is (\w+)/i)
+    if (nameMatch) {
+      const name = nameMatch[1]
+      const entry: PersonalInfoEntry = {
+        key: "name",
+        value: name,
+        timestamp: Date.now(),
+        importance: 0.9,
+        type: "personal_info",
+        source: "conversation",
+      }
+      this.personalInfo.set("name", entry)
+      console.log(`📝 Stored personal info: name = ${name}`)
+    }
+  }
+
+  private initializeBasicVocabulary(): void {
+    const basicWords = ["hello", "goodbye", "math", "define", "tesla", "name"]
+    basicWords.forEach((word) => this.vocabulary.set(word, "basic"))
+  }
+
+  private async saveConversation(userMessage: string, aiResponse: string): Promise<void> {
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: userMessage,
+      timestamp: Date.now(),
+    }
+    const aiMsg: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: aiResponse,
+      timestamp: Date.now(),
+    }
+    this.conversationHistory.push(userMsg, aiMsg)
+    if (this.conversationHistory.length > 100) {
+      this.conversationHistory = this.conversationHistory.slice(-80)
+    }
+    await this.storageManager.saveConversations(this.conversationHistory)
+  }
+
+  private async loadConversationHistory(): Promise<void> {
+    this.conversationHistory = await this.storageManager.loadConversations()
+  }
+  private async loadMemory(): Promise<void> {
+    this.memory = await this.storageManager.loadMemory()
+  }
+  private async loadVocabulary(): Promise<void> {
+    this.vocabulary = await this.storageManager.loadVocabulary()
+  }
+
+  public getStats(): SystemStats {
+    const assistantMessages = this.conversationHistory.filter((m) => m.role === "assistant" && m.confidence)
+    const avgConfidence =
+      assistantMessages.length > 0
+        ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
+        : 0
+    const knowledgeStats = this.enhancedKnowledge.getKnowledgeStats()
+
+    return {
+      totalMessages: this.conversationHistory.length,
+      vocabularySize: this.vocabulary.size + knowledgeStats.learnedVocabulary,
+      memoryEntries: this.personalInfo.size,
+      avgConfidence: Math.round(avgConfidence * 100) / 100,
+      systemStatus: this.systemStatus,
+      mathFunctions: 10 + knowledgeStats.learnedMathematics,
+      seedProgress: 0,
+      responseTime: 0,
+      vocabularyData: this.vocabulary,
+      memoryData: this.memory,
+      personalInfoData: this.personalInfo,
+      factsData: this.facts,
+      mathFunctionsData: new Map(),
+      totalLearned: knowledgeStats.totalLearned,
+      learnedVocabulary: knowledgeStats.learnedVocabulary,
+      learnedMathematics: knowledgeStats.learnedMathematics,
+      learnedScience: knowledgeStats.learnedScience,
+      learnedCoding: knowledgeStats.learnedCoding,
+      apiStatus: knowledgeStats.apiStatus,
+      currentDateTime: this.temporalSystem.getCurrentDateTime(),
+      batchQueueSize: knowledgeStats.batchQueueSize,
+      systemName: this.systemIdentity?.name || "ZacAI",
+      systemVersion: this.systemIdentity?.version || "3.0.0",
+    }
+  }
+
+  public getConversationHistory(): ChatMessage[] {
+    return [...this.conversationHistory]
   }
 
   public async sendMessage(userMessage: string): Promise<string> {
@@ -45,1080 +281,7 @@ export class CognitiveAISystem {
     return response.content
   }
 
-  public async processMessage(userMessage: string): Promise<AIResponse> {
-    if (!this.isInitialized) {
-      console.log("🔄 System not initialized, initializing now...")
-      await this.initialize()
-    }
-
-    console.log("🚀 Processing message with enhanced cognitive system:", userMessage)
-    this.extractAndStorePersonalInfo(userMessage)
-
-    let response: AIResponse
-
-    try {
-      // IMPROVED: Better pattern matching with specific number extraction
-
-      // 1. Check for specific Tesla number calculations FIRST
-      if (this.isSpecificTeslaNumberQuery(userMessage)) {
-        console.log("🎯 Detected specific Tesla number query")
-        response = await this.handleSpecificTeslaNumber(userMessage)
-      }
-      // 2. Check for Tesla/Vortex math queries (general)
-      else if (this.isTeslaMathQuery(userMessage)) {
-        console.log("🎯 Detected Tesla/Vortex math query")
-        response = await this.handleTeslaMathQuery(userMessage)
-      }
-      // 3. Check if it's a date/time query
-      else if (this.enhancedKnowledge.isDateTimeQuery(userMessage)) {
-        console.log("🎯 Detected date/time query")
-        response = {
-          content: this.enhancedKnowledge.handleDateTimeQuery(userMessage),
-          confidence: 0.95,
-          reasoning: ["Processed date/time query using temporal knowledge system"],
-        }
-      }
-      // 4. Check if it's a math problem (FIXED: Now returns actual results)
-      else if (this.enhancedMath.analyzeMathExpression(userMessage).isMatch) {
-        console.log("🎯 Detected math problem")
-        response = await this.handleMathProblem(userMessage)
-      }
-      // 5. Check for coding requests
-      else if (this.isCodingRequest(userMessage)) {
-        console.log("🎯 Detected coding request")
-        response = await this.handleCodingRequest(userMessage)
-      }
-      // 6. Check for learned content queries
-      else if (this.isAskingAboutLearnedContent(userMessage)) {
-        console.log("🎯 Detected learned content query")
-        response = await this.handleLearnedContentQuery(userMessage)
-      }
-      // 7. Check for definition requests (FIXED: More specific patterns)
-      else if (this.isDefinitionRequest(userMessage)) {
-        console.log("🎯 Detected definition request")
-        response = await this.handleDefinitionRequest(userMessage)
-      }
-      // 8. Check for knowledge requests
-      else if (this.isKnowledgeRequest(userMessage)) {
-        console.log("🎯 Detected knowledge request")
-        response = await this.handleKnowledgeRequest(userMessage)
-      }
-      // 9. Check if it's an identity question
-      else if (this.isIdentityQuestion(userMessage)) {
-        console.log("🎯 Detected identity question")
-        response = await this.handleIdentityQuestion(userMessage)
-      }
-      // 10. Default conversational response
-      else {
-        console.log("🎯 Using conversational response")
-        response = {
-          content: this.generateConversationalResponse(userMessage),
-          confidence: 0.8,
-          reasoning: ["Generated conversational response based on context and personal information"],
-        }
-      }
-
-      await this.saveConversation(userMessage, response.content)
-      return response
-    } catch (error) {
-      console.error("Error in message processing:", error)
-      return {
-        content: "I encountered an error processing your message. Please try again.",
-        confidence: 0.3,
-        reasoning: ["Error occurred during message processing"],
-      }
-    }
-  }
-
-  // RESTORED: Load seed data functionality
-  private async loadSeedData(): Promise<void> {
-    try {
-      console.log("📚 Loading seed data...")
-
-      // Load math seed data
-      const mathResponse = await fetch("/seed_maths.json")
-      if (mathResponse.ok) {
-        this.seedMathData = await mathResponse.json()
-        console.log("✅ Loaded seed math data")
-      }
-
-      // Load vocabulary seed data
-      const vocabResponse = await fetch("/seed_vocab.json")
-      if (vocabResponse.ok) {
-        this.seedVocabData = await vocabResponse.json()
-        console.log("✅ Loaded seed vocabulary data")
-      }
-
-      // Load knowledge seed data
-      const knowledgeResponse = await fetch("/seed_knowledge.json")
-      if (knowledgeResponse.ok) {
-        this.seedKnowledgeData = await knowledgeResponse.json()
-        console.log("✅ Loaded seed knowledge data")
-      }
-    } catch (error) {
-      console.warn("Failed to load seed data:", error)
-    }
-  }
-
-  // FIXED: Specific Tesla number calculation
-  private isSpecificTeslaNumberQuery(message: string): boolean {
-    const patterns = [
-      /tesla.*pattern.*(?:for|of).*(\d+)/i,
-      /vortex.*pattern.*(?:for|of).*(\d+)/i,
-      /(?:number|pattern).*(\d+).*tesla/i,
-      /tesla.*(\d+)/i,
-      /vortex.*(\d+)/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleSpecificTeslaNumber(message: string): Promise<AIResponse> {
-    // Extract the number from the message
-    const numberMatch = message.match(/(\d+)/)
-    if (!numberMatch) {
-      return this.handleTeslaMathQuery(message) // Fallback to general explanation
-    }
-
-    const number = Number.parseInt(numberMatch[1])
-    const digitalRoot = this.calculateDigitalRoot(number)
-    const vortexData = this.getVortexAnalysis(number)
-
-    let response = `🌀 **Tesla Pattern Analysis for ${number}**\n\n`
-
-    response += `**🔢 Number Analysis:**\n`
-    response += `• Original Number: ${number}\n`
-    response += `• Digital Root: ${digitalRoot}\n`
-    response += `• Pattern Type: ${vortexData.type}\n`
-    response += `• Cycle Position: ${vortexData.position}\n\n`
-
-    response += `**🧮 Calculation Process:**\n`
-    if (number >= 10) {
-      const digits = number.toString().split("").map(Number)
-      response += `• ${number} → ${digits.join(" + ")} = ${digits.reduce((a, b) => a + b, 0)}\n`
-      let current = digits.reduce((a, b) => a + b, 0)
-      while (current >= 10) {
-        const nextDigits = current.toString().split("").map(Number)
-        const sum = nextDigits.reduce((a, b) => a + b, 0)
-        response += `• ${current} → ${nextDigits.join(" + ")} = ${sum}\n`
-        current = sum
-      }
-      response += `• Final Digital Root: ${current}\n\n`
-    } else {
-      response += `• Single digit number: ${number}\n`
-      response += `• Digital Root: ${number}\n\n`
-    }
-
-    response += `**🌀 Vortex Analysis:**\n`
-    response += `• ${vortexData.analysis}\n`
-    response += `• Significance: ${vortexData.significance}\n\n`
-
-    if (vortexData.isTeslaNumber) {
-      response += `**⚡ Tesla Number Properties:**\n`
-      response += `• This is one of Tesla's sacred numbers (3, 6, 9)\n`
-      response += `• Represents: ${vortexData.meaning}\n`
-      response += `• Universal Role: ${vortexData.role}\n\n`
-    } else {
-      response += `**🔄 Vortex Cycle Properties:**\n`
-      response += `• Part of the infinite vortex cycle: 1→2→4→8→7→5→1\n`
-      response += `• Position in cycle: ${vortexData.position}\n`
-      response += `• Next in sequence: ${vortexData.next}\n\n`
-    }
-
-    response += `**💡 Tesla's Insight:** "${vortexData.quote}"`
-
-    return {
-      content: response,
-      confidence: 0.95,
-      reasoning: [
-        "Calculated specific Tesla pattern for requested number",
-        "Used digital root analysis and vortex mathematics",
-        "Provided detailed step-by-step calculation",
-      ],
-    }
-  }
-
-  // FIXED: Math problem handling with actual results
-  private async handleMathProblem(message: string): Promise<AIResponse> {
-    const mathAnalysis = this.enhancedMath.analyzeMathExpression(message)
-
-    // Calculate the actual result
-    let actualResult: number | string = "Error"
-    try {
-      if (mathAnalysis.numbers && mathAnalysis.numbers.length >= 2) {
-        const [a, b] = mathAnalysis.numbers
-        switch (mathAnalysis.operation) {
-          case "add":
-            actualResult = a + b
-            break
-          case "subtract":
-            actualResult = a - b
-            break
-          case "multiply":
-            actualResult = a * b
-            break
-          case "divide":
-            actualResult = b !== 0 ? a / b : "Cannot divide by zero"
-            break
-          default:
-            actualResult = "Unknown operation"
-        }
-      }
-    } catch (error) {
-      console.error("Math calculation error:", error)
-      actualResult = "Calculation error"
-    }
-
-    // Generate enhanced response with actual result
-    let response = `🧮 **Enhanced Mathematical Calculation**\n\n`
-
-    response += `**Problem:** ${mathAnalysis.numbers?.join(` ${this.getOperationSymbol(mathAnalysis.operation)} `) || "Mathematical expression"} = **${actualResult}**\n\n`
-
-    // Add Tesla/Vortex analysis if result is a number
-    if (typeof actualResult === "number") {
-      const vortexData = this.getVortexAnalysis(actualResult)
-      response += `**🌀 Vortex Math Analysis:**\n`
-      response += `• Result Digital Root: ${this.calculateDigitalRoot(actualResult)}\n`
-      response += `• Pattern: ${vortexData.type}\n`
-      response += `• Analysis: ${vortexData.analysis}\n\n`
-    }
-
-    response += `**🧠 My Reasoning Process:**\n`
-    if (mathAnalysis.reasoning) {
-      mathAnalysis.reasoning.forEach((step: string, index: number) => {
-        response += `${index + 1}. ${step}\n`
-      })
-    }
-    response += `• Calculated using enhanced mathematical processor\n`
-    response += `• Applied Tesla/Vortex analysis to result\n`
-
-    return {
-      content: response,
-      confidence: mathAnalysis.confidence,
-      reasoning: mathAnalysis.reasoning,
-      mathAnalysis: { ...mathAnalysis, actualResult },
-    }
-  }
-
-  // FIXED: Definition request handling
-  private isDefinitionRequest(message: string): boolean {
-    const patterns = [
-      /^what\s+(?:is|does|means?)\s+(?!you|your)(.+)/i,
-      /^define\s+(?!you|your)(.+)/i,
-      /^meaning\s+of\s+(?!you|your)(.+)/i,
-      /^explain\s+(?!you|your)(.+)/i,
-      /what's\s+(?!you|your)(.+)/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleDefinitionRequest(message: string): Promise<AIResponse> {
-    const wordMatch = message.match(/(?:what\s+(?:is|does|means?)|define|meaning\s+of|explain|what's)\s+(.+)/i)
-    if (!wordMatch) {
-      return {
-        content:
-          "I couldn't identify what you want me to define. Could you ask like 'What is [word]?' or 'Define [word]'?",
-        confidence: 0.3,
-        reasoning: ["Could not extract word to define from message"],
-      }
-    }
-
-    const word = wordMatch[1].trim().replace(/[?!.]/g, "")
-
-    // First check if we already learned this word
-    const learnedWord = this.enhancedKnowledge.getLearnedVocabulary().get(word.toLowerCase())
-    if (learnedWord) {
-      return {
-        content: this.formatWordDefinition(learnedWord, true),
-        confidence: 0.95,
-        reasoning: ["Retrieved definition from learned vocabulary"],
-      }
-    }
-
-    // Look it up online with timeout
-    try {
-      const wordData = await Promise.race([
-        this.enhancedKnowledge.lookupWord(word),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Lookup timeout")), 3000)),
-      ])
-
-      if (wordData) {
-        return {
-          content: this.formatWordDefinition(wordData, false),
-          confidence: 0.9,
-          reasoning: ["Successfully looked up word definition online", "Stored in learned vocabulary for future use"],
-        }
-      }
-    } catch (error) {
-      console.warn("Word lookup timed out or failed:", error)
-    }
-
-    return {
-      content: `I couldn't find a definition for "${word}" right now. This might be due to network issues. Try again later or ask about something else!`,
-      confidence: 0.4,
-      reasoning: ["Online dictionary lookup failed or timed out"],
-    }
-  }
-
-  // Helper methods for Tesla/Vortex calculations
-  private calculateDigitalRoot(num: number): number {
-    while (num >= 10) {
-      num = num
-        .toString()
-        .split("")
-        .reduce((sum, digit) => sum + Number.parseInt(digit), 0)
-    }
-    return num
-  }
-
-  private getVortexAnalysis(number: number): any {
-    const digitalRoot = this.calculateDigitalRoot(number)
-    const vortexCycle = [1, 2, 4, 8, 7, 5]
-    const teslaNumbers = [3, 6, 9]
-
-    const isTeslaNumber = teslaNumbers.includes(digitalRoot)
-    const isVortexNumber = vortexCycle.includes(digitalRoot)
-
-    const analysis = {
-      type: isTeslaNumber ? "Tesla Number" : isVortexNumber ? "Vortex Cycle" : "Standard",
-      position: isTeslaNumber ? teslaNumbers.indexOf(digitalRoot) + 1 : vortexCycle.indexOf(digitalRoot) + 1,
-      isTeslaNumber,
-      isVortexNumber,
-      analysis: "",
-      significance: "",
-      meaning: "",
-      role: "",
-      quote: "",
-      next: "",
-    }
-
-    if (isTeslaNumber) {
-      switch (digitalRoot) {
-        case 3:
-          analysis.analysis = "Tesla Number representing creation and manifestation"
-          analysis.significance = "The creative force that brings ideas into reality"
-          analysis.meaning = "Creation"
-          analysis.role = "The generator of new possibilities"
-          analysis.quote = "3 represents the creative force of the universe"
-          break
-        case 6:
-          analysis.analysis = "Tesla Number representing harmony and balance"
-          analysis.significance = "The stabilizing force that maintains equilibrium"
-          analysis.meaning = "Harmony"
-          analysis.role = "The balancer of opposing forces"
-          analysis.quote = "6 represents perfect harmony and love"
-          break
-        case 9:
-          analysis.analysis = "Tesla Number representing completion and universal wisdom"
-          analysis.significance = "The culmination of all cycles and ultimate understanding"
-          analysis.meaning = "Completion"
-          analysis.role = "The universal constant that encompasses all"
-          analysis.quote = "9 represents the completion of the universal cycle"
-          break
-      }
-    } else if (isVortexNumber) {
-      const currentIndex = vortexCycle.indexOf(digitalRoot)
-      const nextIndex = (currentIndex + 1) % vortexCycle.length
-      analysis.next = vortexCycle[nextIndex].toString()
-
-      switch (digitalRoot) {
-        case 1:
-          analysis.analysis = "Vortex Cycle beginning - unity and new starts"
-          analysis.significance = "The starting point of all manifestation"
-          break
-        case 2:
-          analysis.analysis = "Vortex Cycle - duality and choice"
-          analysis.significance = "The first division creating possibilities"
-          break
-        case 4:
-          analysis.analysis = "Vortex Cycle - foundation and stability"
-          analysis.significance = "The solid base upon which growth occurs"
-          break
-        case 8:
-          analysis.analysis = "Vortex Cycle - infinite potential and material mastery"
-          analysis.significance = "The symbol of infinite loops and material success"
-          break
-        case 7:
-          analysis.analysis = "Vortex Cycle - spiritual bridge and mystical knowledge"
-          analysis.significance = "The connection between material and spiritual realms"
-          break
-        case 5:
-          analysis.analysis = "Vortex Cycle - change and transformation"
-          analysis.significance = "The dynamic force that creates movement and evolution"
-          break
-      }
-    }
-
-    return analysis
-  }
-
-  private getOperationSymbol(operation: string): string {
-    const symbols = {
-      add: "+",
-      subtract: "-",
-      multiply: "×",
-      divide: "÷",
-      power: "^",
-      percentage: "% of",
-    }
-    return symbols[operation as keyof typeof symbols] || operation
-  }
-
-  private generateEnhancedMathResponse(localAnalysis: any, enhancedResult: any): string {
-    let response = `🧮 **Enhanced Mathematical Calculation**\n\n`
-
-    if (enhancedResult.result !== undefined) {
-      response += `**Problem:** ${
-        localAnalysis.numbers?.join(` ${this.getOperationSymbol(localAnalysis.operation)} `) ||
-        "Mathematical expression"
-      } = **${enhancedResult.result}**\n\n`
-
-      if (enhancedResult.method) {
-        response += `**Method Used:** ${enhancedResult.method} (${enhancedResult.source})\n\n`
-      }
-
-      if (localAnalysis.vortexData) {
-        response += `**🌀 Vortex Math Analysis:**\n`
-        response += `• Digital Root: ${localAnalysis.vortexData.digitalRoot}\n`
-        response += `• Pattern: ${
-          localAnalysis.vortexData.isTeslaNumber
-            ? "Tesla Number (3-6-9)"
-            : localAnalysis.vortexData.isVortexNumber
-              ? "Vortex Cycle"
-              : "Standard"
-        }\n`
-        response += `• Analysis: ${localAnalysis.vortexData.analysis}\n\n`
-      }
-
-      response += `**🧠 My Enhanced Reasoning Process:**\n`
-      if (localAnalysis.reasoning) {
-        localAnalysis.reasoning.forEach((step: string, index: number) => {
-          response += `${index + 1}. ${step}\n`
-        })
-      }
-      response += `• Used online mathematical APIs for verification\n`
-      response += `• Stored this mathematical pattern for future use\n`
-    }
-
-    return response
-  }
-
-  private generateMathResponse(analysis: any): string {
-    let response = `🧮 **Mathematical Calculation**\n\n`
-
-    if (analysis.result !== undefined) {
-      response += `**Problem:** ${
-        analysis.numbers?.join(` ${this.getOperationSymbol(analysis.operation)} `) || "Mathematical expression"
-      } = **${analysis.result}**\n\n`
-
-      if (analysis.vortexData) {
-        response += `**🌀 Vortex Math Analysis:**\n`
-        response += `• Digital Root: ${analysis.vortexData.digitalRoot}\n`
-        response += `• Pattern: ${
-          analysis.vortexData.isTeslaNumber
-            ? "Tesla Number (3-6-9)"
-            : analysis.vortexData.isVortexNumber
-              ? "Vortex Cycle"
-              : "Standard"
-        }\n`
-        response += `• Analysis: ${analysis.vortexData.analysis}\n\n`
-      }
-
-      response += `**🧠 My Reasoning Process:**\n`
-      if (analysis.reasoning) {
-        analysis.reasoning.forEach((step: string, index: number) => {
-          response += `${index + 1}. ${step}\n`
-        })
-      }
-    }
-
-    return response
-  }
-
-  private isIdentityQuestion(message: string): boolean {
-    const patterns = [
-      /^(?:what.*your.*name|who.*you)$/i,
-      /^(?:tell.*about.*yourself|introduce.*yourself)$/i,
-      /^(?:what.*can.*you.*do|your.*capabilities)$/i,
-      /^(?:hello.*tell.*about.*you|hi.*tell.*about.*you)$/i,
-      /^(?:what.*are.*you|who.*are.*you)$/i,
-    ]
-
-    // Don't treat other requests as identity questions
-    const excludePatterns = [
-      /(?:tell.*about.*(?:science|coding|math|tesla))/i,
-      /(?:what.*(?:is|does|means?).*(?!you|your))/i,
-      /(?:show.*me)/i,
-      /(?:example)/i,
-    ]
-
-    const isExcluded = excludePatterns.some((pattern) => pattern.test(message))
-    if (isExcluded) return false
-
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleIdentityQuestion(message: string): Promise<AIResponse> {
-    // Ensure system identity is loaded
-    if (!this.systemIdentity?.name) {
-      console.log("🔄 System identity not loaded, attempting to load now...")
-      await this.loadSystemIdentity()
-    }
-
-    const currentTime = this.temporalSystem.getCurrentDateTime()
-    const stats = this.getStats()
-
-    let response = ""
-
-    if (message.toLowerCase().includes("name") || message.toLowerCase().includes("who")) {
-      const name = this.systemIdentity?.name || "ZacAI"
-      const version = this.systemIdentity?.version || "2.0.0"
-      response = `👋 **Hello! I'm ${name} v${version}**\n\n`
-      response += `${this.systemIdentity?.purpose || "I'm an AI assistant designed to help you learn and solve problems."}\n\n`
-      response += `**🕐 Current Time**: ${currentTime.formatted.full}\n`
-      response += `**📚 Knowledge Stats**: ${stats.totalLearned || 0} concepts learned\n`
-      response += `**🧮 Math Functions**: ${stats.mathFunctions} available\n\n`
-      response += `I can help with math (including Tesla/Vortex patterns), definitions, science concepts, coding, and I remember our conversations!`
-    } else if (message.toLowerCase().includes("capabilities") || message.toLowerCase().includes("what can you do")) {
-      const name = this.systemIdentity?.name || "ZacAI"
-      response = `🚀 **${name} Capabilities**\n\n`
-
-      if (this.systemCapabilities.length > 0) {
-        response += `**Core Capabilities:**\n`
-        this.systemCapabilities.slice(0, 6).forEach((capability, index) => {
-          response += `${index + 1}. ${capability}\n`
-        })
-      } else {
-        response += `**Core Capabilities:**\n`
-        response += `1. Mathematical calculations including Tesla/Vortex math\n`
-        response += `2. Word definitions and vocabulary learning\n`
-        response += `3. Scientific concept research and explanation\n`
-        response += `4. Coding assistance with React/Next.js/JavaScript\n`
-        response += `5. Personal memory and conversation history\n`
-      }
-
-      response += `\n**📊 Current Stats:**\n`
-      response += `• Total learned concepts: ${stats.totalLearned}\n`
-      response += `• Conversation messages: ${stats.totalMessages}\n`
-      response += `• System status: ${stats.systemStatus}\n`
-    } else {
-      // General introduction
-      const name = this.systemIdentity?.name || "ZacAI"
-      const version = this.systemIdentity?.version || "2.0.0"
-      response = `👋 **Hello! I'm ${name} v${version}**\n\n`
-      response += `I'm an enhanced AI assistant with these key abilities:\n\n`
-      response += `🧮 **Mathematics**: Advanced calculations including Tesla/Vortex math patterns\n`
-      response += `📚 **Learning**: I can look up word definitions and learn from our conversations\n`
-      response += `🔬 **Knowledge**: Scientific concepts and general information\n`
-      response += `💻 **Coding**: Help with React, Next.js, JavaScript, and TypeScript\n`
-      response += `🧠 **Memory**: I remember personal information and conversation context\n\n`
-      response += `**Current Status**: ${stats.systemStatus} | **Knowledge**: ${stats.totalLearned} concepts learned\n\n`
-      response += `What would you like to explore together?`
-    }
-
-    return {
-      content: response,
-      confidence: 0.95,
-      reasoning: ["Generated identity response with current system information"],
-    }
-  }
-
-  private isAskingAboutLearnedContent(message: string): boolean {
-    const patterns = [
-      /what.*(?:did you|have you).*learn/i,
-      /do you remember.*(?:word|concept|learn)/i,
-      /what.*new.*(?:word|concept|knowledge)/i,
-      /recently.*learn/i,
-      /show.*(?:learned|knowledge)/i,
-      /what.*(?:know|remember).*about/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleLearnedContentQuery(message: string): Promise<AIResponse> {
-    const stats = this.enhancedKnowledge.getKnowledgeStats()
-
-    if (stats.totalLearned === 0) {
-      return {
-        content:
-          "I haven't learned any new concepts in our recent conversations yet. Try asking me to define a word, solve a math problem, explain a science concept, or help with coding, and I'll learn from it!",
-        confidence: 0.9,
-        reasoning: ["Checked all learned knowledge stores, found no recent learning"],
-      }
-    }
-
-    let response = `📚 **Here's what I've recently learned:**\n\n`
-
-    const vocab = this.enhancedKnowledge.getLearnedVocabulary()
-    const math = this.enhancedKnowledge.getLearnedMathematics()
-    const science = this.enhancedKnowledge.getLearnedScience()
-    const coding = this.enhancedKnowledge.getLearnedCoding()
-
-    if (vocab.size > 0) {
-      response += `**📖 New Vocabulary (${vocab.size} words):**\n`
-      Array.from(vocab.entries())
-        .slice(-3)
-        .forEach(([word, data]) => {
-          response += `• **${word}**: ${
-            data.meanings?.[0]?.definitions?.[0]?.definition || data.extract || "Definition learned"
-          }\n`
-        })
-      response += "\n"
-    }
-
-    if (math.size > 0) {
-      response += `**🧮 New Math Concepts (${math.size} patterns):**\n`
-      Array.from(math.entries())
-        .slice(-3)
-        .forEach(([concept, data]) => {
-          response += `• **${concept}**: ${data.method || data.type || "Mathematical pattern"}\n`
-        })
-      response += "\n"
-    }
-
-    if (science.size > 0) {
-      response += `**🔬 New Science Knowledge (${science.size} concepts):**\n`
-      Array.from(science.entries())
-        .slice(-3)
-        .forEach(([concept, data]) => {
-          response += `• **${data.title || concept}**: ${(data.extract || "").substring(0, 100)}...\n`
-        })
-      response += "\n"
-    }
-
-    if (coding.size > 0) {
-      response += `**💻 New Coding Knowledge (${coding.size} concepts):**\n`
-      Array.from(coding.entries())
-        .slice(-3)
-        .forEach(([concept, data]) => {
-          response += `• **${data.concept || concept}** (${data.language}): ${
-            data.description || "Coding concept learned"
-          }\n`
-        })
-      response += "\n"
-    }
-
-    response += `**📊 Total Learning Stats:**\n`
-    response += `• Total items learned: ${stats.totalLearned}\n`
-    response += `• API sources available: ${stats.apiStatus.totalAPIs}\n`
-    response += `• Last updated: ${this.temporalSystem.getRelativeTime(stats.lastUpdate)}\n`
-
-    return {
-      content: response,
-      confidence: 0.95,
-      reasoning: ["Retrieved and formatted all recently learned knowledge across categories"],
-    }
-  }
-
-  private formatWordDefinition(wordData: any, wasAlreadyLearned: boolean): string {
-    let response = `📖 **Definition of "${wordData.word}"**\n\n`
-
-    if (wordData.phonetics && wordData.phonetics.length > 0) {
-      response += `**Pronunciation:** ${wordData.phonetics[0].text || "N/A"}\n\n`
-    }
-
-    if (wordData.meanings && wordData.meanings.length > 0) {
-      response += `**Meanings:**\n`
-      wordData.meanings.slice(0, 2).forEach((meaning: any, index: number) => {
-        response += `${index + 1}. **${meaning.partOfSpeech}**: ${meaning.definitions[0].definition}\n`
-        if (meaning.definitions[0].example) {
-          response += `   *Example: "${meaning.definitions[0].example}"*\n`
-        }
-      })
-      response += "\n"
-    }
-
-    if (wordData.synonyms && wordData.synonyms.length > 0) {
-      response += `**Synonyms:** ${wordData.synonyms.slice(0, 5).join(", ")}\n\n`
-    }
-
-    if (wasAlreadyLearned) {
-      response += `✅ I already knew this word from our previous conversations!`
-    } else {
-      response += `✨ I've learned this word and will remember it for future conversations!`
-    }
-
-    return response
-  }
-
-  private isKnowledgeRequest(message: string): boolean {
-    const patterns = [
-      /tell me about (?!you|your|yourself)/i,
-      /what.*know.*about (?!you|your)/i,
-      /explain.*(?:science|physics|chemistry|biology)/i,
-      /how.*(?:work|function).*(?!code|programming)/i,
-      /what.*(?:science|scientific)/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleKnowledgeRequest(message: string): Promise<AIResponse> {
-    // Extract the topic from the message
-    const topicMatch = message.match(/(?:tell me about|what.*about|explain)\s+(.+)/i)
-    const topic = topicMatch ? topicMatch[1].trim().replace(/[?!.]/g, "") : message
-
-    const scientificData = await this.enhancedKnowledge.lookupScientificConcept(topic)
-    if (scientificData) {
-      let response = `🔬 **${scientificData.title}**\n\n`
-      response += `${scientificData.extract}\n\n`
-      response += `📚 *Source: Wikipedia*\n`
-      response += `🔗 [Learn more](${scientificData.url})\n\n`
-      response += `✨ I've learned about this topic and will remember it!`
-
-      return {
-        content: response,
-        confidence: 0.85,
-        reasoning: ["Successfully looked up scientific concept", "Stored in learned knowledge base"],
-      }
-    }
-
-    return {
-      content: `I'd love to help you learn about "${topic}" but I couldn't find detailed information right now. Try asking about specific scientific concepts, historical events, or general knowledge topics!`,
-      confidence: 0.5,
-      reasoning: ["Could not find information about requested topic"],
-    }
-  }
-
-  private isCodingRequest(message: string): boolean {
-    const patterns = [
-      /(?:show.*(?:code|example))/i,
-      /(?:what.*(?:code|programming).*look.*like)/i,
-      /(?:how.*(?:code|program|develop|build))/i,
-      /(?:javascript|typescript|react|nextjs|next\.js|css|html)/i,
-      /(?:function|component|api|hook|jsx|tsx)/i,
-      /(?:explain.*(?:code|programming))/i,
-      /(?:help.*(?:coding|programming))/i,
-      /(?:tell.*about.*(?:coding|programming|react|nextjs))/i,
-      /(?:example.*(?:react|nextjs|javascript))/i,
-    ]
-    return patterns.some((pattern) => pattern.test(message))
-  }
-
-  private async handleCodingRequest(message: string): Promise<AIResponse> {
-    const conceptMatch = message.match(
-      /(?:explain|help.*with|how.*(?:code|create|build)|show.*(?:code|example)|tell.*about)\s*(.+)/i,
-    )
-    const concept = conceptMatch ? conceptMatch[1].trim().replace(/[?!.]/g, "") : message
-
-    // Detect language and specific concepts
-    let language = "javascript"
-    let specificConcept = ""
-
-    if (message.toLowerCase().includes("react")) {
-      language = "react"
-      specificConcept = "react component"
-    } else if (message.toLowerCase().includes("nextjs") || message.toLowerCase().includes("next.js")) {
-      language = "nextjs"
-      specificConcept = "next.js application"
-    } else if (message.toLowerCase().includes("typescript")) {
-      language = "typescript"
-    }
-
-    // Check if asking for code examples
-    if (message.toLowerCase().includes("show") || message.toLowerCase().includes("example")) {
-      return this.generateCodeExample(language, concept)
-    }
-
-    try {
-      const codingData = await this.enhancedKnowledge.lookupCodingConcept(concept, language)
-
-      if (codingData) {
-        let response = `💻 **${language.toUpperCase()} - ${codingData.concept || concept}**\n\n`
-        response += `${codingData.description || "Coding information found"}\n\n`
-
-        // Add specific examples based on language
-        if (language === "react") {
-          response += `**🔧 React Example:**\n`
-          response += `\`\`\`jsx\n`
-          response += `function MyComponent({ title, children }) {\n`
-          response += `  return (\n`
-          response += `    <div className="container">\n`
-          response += `      <h1>{title}</h1>\n`
-          response += `      {children}\n`
-          response += `    </div>\n`
-          response += `  )\n`
-          response += `}\n`
-          response += `\`\`\`\n\n`
-        } else if (language === "nextjs") {
-          response += `**🚀 Next.js Example:**\n`
-          response += `\`\`\`tsx\n`
-          response += `// app/page.tsx\n`
-          response += `export default function HomePage() {\n`
-          response += `  return (\n`
-          response += `    <main>\n`
-          response += `      <h1>Welcome to Next.js!</h1>\n`
-          response += `      <p>This is a server component.</p>\n`
-          response += `    </main>\n`
-          response += `  )\n`
-          response += `}\n`
-          response += `\`\`\`\n\n`
-        }
-
-        if (codingData.url) {
-          response += `🔗 **Resource**: [Learn more](${codingData.url})\n\n`
-        }
-
-        response += `📚 *Source: ${codingData.source}*\n`
-        response += `✨ I've learned about this coding concept and will remember it!`
-
-        return {
-          content: response,
-          confidence: 0.9,
-          reasoning: [
-            "Successfully provided coding information with examples",
-            "Stored in learned coding knowledge base",
-          ],
-        }
-      }
-    } catch (error) {
-      console.warn("Coding lookup failed:", error)
-    }
-
-    return {
-      content: `I'd love to help you with ${language} and "${concept}" but I couldn't find detailed information right now. Try asking about specific React components, JavaScript functions, or Next.js features!`,
-      confidence: 0.5,
-      reasoning: ["Could not find information about requested coding concept"],
-    }
-  }
-
-  private generateConversationalResponse(userMessage: string): string {
-    const lowerMessage = userMessage.toLowerCase()
-
-    // Identity questions - ensure we have system identity
-    if (lowerMessage.includes("what is your name") || lowerMessage.includes("who are you")) {
-      const name = this.systemIdentity?.name || "ZacAI"
-      const version = this.systemIdentity?.version || "2.0.0"
-      const purpose = this.systemIdentity?.purpose || "an AI assistant designed to help you learn and solve problems"
-
-      return `Hello! I'm ${name} v${version}, ${purpose}. I can help with math calculations (including Tesla/Vortex math), look up word definitions, explore scientific concepts, assist with React/Next.js coding, and remember personal information about you. What would you like to explore?`
-    }
-
-    // Capability questions
-    if (lowerMessage.includes("what can you do") || lowerMessage.includes("your capabilities")) {
-      const name = this.systemIdentity?.name || "ZacAI"
-      const capabilities =
-        this.systemCapabilities.length > 0
-          ? this.systemCapabilities.slice(0, 3).join(", ")
-          : "mathematical calculations, word definitions, scientific research, coding assistance"
-
-      return `I'm ${name} with many capabilities including: ${capabilities}. I'm constantly learning and expanding my knowledge through our conversations and online research. What would you like help with?`
-    }
-
-    // Personal info detection
-    if (lowerMessage.includes("my name is") || lowerMessage.includes("i am")) {
-      return `Thank you for sharing that information with me! I'll remember this in my personal memory system. I'm constantly learning and can help with math problems, look up word definitions online, and explore scientific concepts together!`
-    }
-
-    // Greeting responses
-    if (lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
-      const name = this.systemIdentity?.name || "ZacAI"
-      return `Hello! I'm ${name} and I'm excited to chat with you. I can help with math calculations (including Tesla/Vortex math), look up word definitions, explore scientific concepts, assist with coding, and remember personal information about you. What would you like to explore?`
-    }
-
-    // Default response
-    const name = this.systemIdentity?.name || "ZacAI"
-    return `I understand you said: "${userMessage}". I'm ${name}, an enhanced AI with access to online dictionaries, mathematical tools including Tesla/Vortex math, scientific knowledge, and coding assistance. I can learn new words and concepts from our conversations. What would you like to explore together?`
-  }
-
-  public async initialize(): Promise<void> {
-    if (this.isInitialized) {
-      console.log("✅ System already initialized")
-      return
-    }
-
-    try {
-      console.log("🚀 Initializing Enhanced Cognitive AI System...")
-      this.systemStatus = "initializing"
-
-      // Load system identity with timeout
-      try {
-        await Promise.race([
-          this.loadSystemIdentity(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Identity timeout")), 3000)),
-        ])
-      } catch (error) {
-        console.warn("System identity loading timed out, using defaults:", error)
-        this.setDefaultSystemIdentity()
-      }
-
-      // Verify system identity loaded
-      if (this.systemIdentity?.name) {
-        console.log(`✅ System identity: ${this.systemIdentity.name} v${this.systemIdentity.version}`)
-      }
-
-      // Load other systems with error handling
-      const loadPromises = [
-        this.loadLearnedKnowledge().catch((e) => console.warn("Learned knowledge load failed:", e)),
-        this.enhancedKnowledge.loadLearnedKnowledge().catch((e) => console.warn("Enhanced knowledge load failed:", e)),
-        this.loadConversationHistory().catch((e) => console.warn("Conversation history load failed:", e)),
-        this.loadMemory().catch((e) => console.warn("Memory load failed:", e)),
-        this.loadVocabulary().catch((e) => console.warn("Vocabulary load failed:", e)),
-      ]
-
-      // Load all with timeout
-      await Promise.race([
-        Promise.allSettled(loadPromises),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Load timeout")), 5000)),
-      ])
-
-      this.systemStatus = "ready"
-      this.isInitialized = true
-
-      const name = this.systemIdentity?.name || "ZacAI"
-      console.log(`✅ ${name} Enhanced Cognitive AI System ready!`)
-    } catch (error) {
-      console.error("❌ Initialization failed, using fallbacks:", error)
-      this.setDefaultSystemIdentity()
-      this.systemStatus = "ready"
-      this.isInitialized = true
-    }
-  }
-
-  public getStats(): any {
-    const assistantMessages = this.conversationHistory.filter((m) => m.role === "assistant" && m.confidence)
-    const avgConfidence =
-      assistantMessages.length > 0
-        ? assistantMessages.reduce((sum, m) => sum + (m.confidence || 0), 0) / assistantMessages.length
-        : 0
-
-    const totalUserInfo = this.personalInfo.size
-    const knowledgeStats = this.enhancedKnowledge.getKnowledgeStats()
-    const currentTime = this.temporalSystem.getCurrentDateTime()
-
-    return {
-      totalMessages: this.conversationHistory.length,
-      vocabularySize: this.vocabulary.size + knowledgeStats.learnedVocabulary,
-      memoryEntries: totalUserInfo,
-      avgConfidence: Math.round(avgConfidence * 100) / 100,
-      systemStatus: this.systemStatus,
-      mathFunctions: 144 + knowledgeStats.learnedMathematics,
-      seedProgress: 0,
-      responseTime: 0,
-      // Enhanced data access
-      vocabularyData: this.vocabulary,
-      memoryData: this.memory,
-      personalInfoData: this.personalInfo,
-      factsData: this.facts,
-      mathFunctionsData: new Map(),
-      // New comprehensive learning stats
-      totalLearned: knowledgeStats.totalLearned,
-      learnedVocabulary: knowledgeStats.learnedVocabulary,
-      learnedMathematics: knowledgeStats.learnedMathematics,
-      learnedScience: knowledgeStats.learnedScience,
-      learnedCoding: knowledgeStats.learnedCoding,
-      apiStatus: knowledgeStats.apiStatus,
-      currentDateTime: currentTime,
-      batchQueueSize: knowledgeStats.batchQueueSize,
-      // System identity
-      systemName: this.systemIdentity?.name || "ZacAI",
-      systemVersion: this.systemIdentity?.version || "2.0.0",
-    }
-  }
-
   // Keep all existing methods for compatibility...
-  private extractAndStorePersonalInfo(message: string): void {
-    const personalPatterns = [
-      {
-        pattern: /(?:my name is|i'm|i am|call me) (\w+)/i,
-        key: "name",
-        importance: 0.9,
-        extract: (match: RegExpMatchArray) => match[1],
-      },
-      {
-        pattern: /i have (\d+) (cats?|dogs?|pets?)/i,
-        key: "pets",
-        importance: 0.7,
-        extract: (match: RegExpMatchArray) => `${match[1]} ${match[2]}`,
-      },
-    ]
-
-    personalPatterns.forEach(({ pattern, key, importance, extract }) => {
-      const match = message.match(pattern)
-      if (match) {
-        const value = extract(match)
-        const entry: PersonalInfoEntry = {
-          key,
-          value,
-          timestamp: Date.now(),
-          importance,
-          type: "personal_info",
-          source: "conversation",
-        }
-        this.personalInfo.set(key, entry)
-        console.log(`📝 Stored personal info: ${key} = ${value}`)
-      }
-    })
-  }
-
-  private initializeBasicVocabulary(): void {
-    const basicWords = [
-      "hello",
-      "hi",
-      "hey",
-      "goodbye",
-      "bye",
-      "thanks",
-      "thank",
-      "please",
-      "yes",
-      "no",
-      "maybe",
-      "sure",
-      "okay",
-      "ok",
-      "good",
-      "bad",
-      "great",
-      "what",
-      "who",
-      "where",
-      "when",
-      "why",
-      "how",
-      "can",
-      "could",
-      "would",
-      "like",
-      "love",
-      "want",
-      "need",
-      "know",
-      "think",
-      "remember",
-      "forget",
-      "help",
-      "sorry",
-      "excuse",
-      "understand",
-      "explain",
-      "tell",
-      "say",
-      "calculate",
-      "math",
-      "number",
-      "add",
-      "subtract",
-      "multiply",
-      "divide",
-      "times",
-      "plus",
-      "minus",
-      "equals",
-      "result",
-      "answer",
-      "define",
-      "meaning",
-      "word",
-      "learn",
-      "learned",
-      "new",
-      "recent",
-      "vortex",
-      "tesla",
-    ]
-
-    basicWords.forEach((word) => this.vocabulary.set(word.toLowerCase(), "basic"))
-  }
-
   private initializeSampleFacts(): void {
     const sampleFacts = [
       { category: "science", fact: "Water boils at 100°C at sea level" },
@@ -1140,70 +303,6 @@ export class CognitiveAISystem {
   }
 
   // All other existing methods remain the same...
-  private async loadConversationHistory(): Promise<void> {
-    try {
-      const conversations = await this.storageManager.loadConversations()
-      this.conversationHistory = conversations.filter((msg) => msg && msg.id && msg.role && msg.content)
-    } catch (error) {
-      console.warn("Failed to load conversation history:", error)
-      this.conversationHistory = []
-    }
-  }
-
-  private async loadMemory(): Promise<void> {
-    try {
-      const memory = await this.storageManager.loadMemory()
-      this.memory = memory
-    } catch (error) {
-      console.warn("Failed to load memory:", error)
-      this.memory = new Map()
-    }
-  }
-
-  private async loadVocabulary(): Promise<void> {
-    try {
-      const vocabulary = await this.storageManager.loadVocabulary()
-      vocabulary.forEach((category, word) => {
-        this.vocabulary.set(word, category)
-      })
-    } catch (error) {
-      console.warn("Failed to load vocabulary:", error)
-    }
-  }
-
-  private async saveConversation(userMessage: string, aiResponse: string): Promise<void> {
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      role: "user",
-      content: userMessage,
-      timestamp: Date.now(),
-    }
-
-    const aiMsg: ChatMessage = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: aiResponse,
-      timestamp: Date.now(),
-    }
-
-    this.conversationHistory.push(userMsg, aiMsg)
-
-    if (this.conversationHistory.length > 100) {
-      this.conversationHistory = this.conversationHistory.slice(-80)
-    }
-
-    await this.saveConversationHistory()
-    await this.saveMemory()
-    await this.saveVocabulary()
-  }
-
-  private async saveConversationHistory(): Promise<void> {
-    try {
-      await this.storageManager.saveConversations(this.conversationHistory)
-    } catch (error) {
-      console.warn("Failed to save conversation:", error)
-    }
-  }
 
   private async saveMemory(): Promise<void> {
     try {
@@ -1258,10 +357,6 @@ export class CognitiveAISystem {
       learnedKnowledge: this.enhancedKnowledge.getKnowledgeStats(),
       timestamp: Date.now(),
     }
-  }
-
-  public getConversationHistory(): ChatMessage[] {
-    return [...this.conversationHistory]
   }
 
   public async addVocabularyWord(word: string, category: string): Promise<void> {
@@ -1329,56 +424,6 @@ export class CognitiveAISystem {
       console.error("❌ AI system retraining failed:", error)
       throw error
     }
-  }
-
-  private async loadSystemIdentity(): Promise<void> {
-    try {
-      console.log("📋 Loading system identity from seed_system.json...")
-
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000)
-
-      const response = await fetch("/seed_system.json", {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Cache-Control": "no-cache",
-        },
-        signal: controller.signal,
-      })
-
-      clearTimeout(timeoutId)
-
-      if (response.ok) {
-        const systemData = await response.json()
-
-        if (systemData.identity) {
-          this.systemIdentity = {
-            name: systemData.identity.name || "ZacAI",
-            version: systemData.identity.version || "2.0.0",
-            purpose: systemData.identity.purpose || "To be an intelligent, learning browser-based AI assistant",
-            description: systemData.identity.description || "",
-            capabilities: systemData.identity.capabilities || [],
-          }
-
-          this.systemCapabilities = systemData.core_capabilities || systemData.identity.capabilities || []
-          this.knowledgeSources = systemData.knowledge_system || {}
-
-          console.log(`✅ System identity loaded successfully:`)
-          console.log(`   Name: ${this.systemIdentity.name}`)
-          console.log(`   Version: ${this.systemIdentity.version}`)
-          console.log(`   Capabilities: ${this.systemCapabilities.length} items`)
-          return
-        }
-      }
-
-      console.warn("⚠️ seed_system.json not found or invalid, using defaults")
-    } catch (error) {
-      console.warn("⚠️ Could not load system identity:", error)
-    }
-
-    // Set robust defaults
-    this.setDefaultSystemIdentity()
   }
 
   private async saveLearnedVocabulary(): Promise<void> {
@@ -1630,38 +675,4 @@ export class CognitiveAISystem {
       reasoning: ["Generated comprehensive code example", "Provided language-specific features and explanations"],
     }
   }
-}
-
-// Type Definitions
-interface PersonalInfoEntry {
-  key: string
-  value: string
-  timestamp: number
-  importance: number
-  type: string
-  source: string
-}
-
-interface FactEntry {
-  key: string
-  value: string
-  timestamp: number
-  importance: number
-  type: string
-  source: string
-}
-
-interface AIResponse {
-  content: string
-  confidence: number
-  reasoning?: string[]
-  mathAnalysis?: any
-}
-
-interface ChatMessage {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: number
-  confidence?: number
 }
