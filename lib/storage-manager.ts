@@ -1,45 +1,55 @@
 // lib/storage-manager.ts
 
+/**
+ * Manages loading and saving data from localStorage and public JSON files.
+ * This centralizes data access logic for the AI's knowledge modules.
+ */
 export class StorageManager {
-  // Fetches a seed JSON file from the public directory
-  public async loadSeedData<T>(fileName: string): Promise<T | null> {
+  /**
+   * Loads data from the browser's localStorage.
+   * @param key The key to retrieve from localStorage.
+   * @returns The parsed JSON data, or null if not found or invalid.
+   */
+  public loadData(key: string): any | null {
     try {
-      console.log(`🌱 Loading seed data from: ${fileName}`)
-      const response = await fetch(`/${fileName}`)
+      if (typeof window === "undefined") return null
+      const data = window.localStorage.getItem(key)
+      return data ? JSON.parse(data) : null
+    } catch (error) {
+      console.error(`[StorageManager] Error loading data for key "${key}":`, error)
+      return null
+    }
+  }
+
+  /**
+   * Saves data to the browser's localStorage.
+   * @param key The key to save the data under.
+   * @param data The data to be saved (will be stringified).
+   */
+  public saveData(key: string, data: any): void {
+    try {
+      if (typeof window === "undefined") return
+      window.localStorage.setItem(key, JSON.stringify(data))
+    } catch (error) {
+      console.error(`[StorageManager] Error saving data for key "${key}":`, error)
+    }
+  }
+
+  /**
+   * Loads a JSON file from the public directory.
+   * @param path The path to the JSON file within the /public directory (e.g., "/seed_vocab.json").
+   * @returns The parsed JSON data, or null if fetching fails.
+   */
+  public async loadJSON(path: string): Promise<any | null> {
+    try {
+      const response = await fetch(path)
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${fileName}: ${response.statusText}`)
+        throw new Error(`Failed to fetch ${path}: ${response.statusText}`)
       }
-      const data = await response.json()
-      console.log(`✅ Successfully loaded ${fileName}`)
-      return data
+      return await response.json()
     } catch (error) {
-      console.error(`Error loading seed data from ${fileName}:`, error)
+      console.error(`[StorageManager] Error loading JSON from "${path}":`, error)
       return null
-    }
-  }
-
-  // Loads learned data from localStorage
-  public loadLearnedData<T>(key: string): T | null {
-    try {
-      const data = localStorage.getItem(key)
-      if (data) {
-        console.log(`🧠 Loaded learned data from localStorage key: ${key}`)
-        return JSON.parse(data)
-      }
-      return null
-    } catch (error) {
-      console.error(`Error loading learned data from ${key}:`, error)
-      return null
-    }
-  }
-
-  // Saves learned data to localStorage
-  public saveLearnedData(key: string, data: any): void {
-    try {
-      localStorage.setItem(key, JSON.stringify(data, null, 2))
-      console.log(`💾 Saved learned data to localStorage key: ${key}`)
-    } catch (error) {
-      console.error(`Error saving learned data to ${key}:`, error)
     }
   }
 }

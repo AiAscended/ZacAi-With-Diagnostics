@@ -1,6 +1,6 @@
 // lib/modules/vocabulary-module.ts
 import type { IKnowledgeModule, KnowledgeEntry, QueryResult } from "@/lib/types"
-import StorageManager from "@/lib/storage-manager"
+import { StorageManager } from "@/lib/storage-manager"
 
 export class VocabularyModule implements IKnowledgeModule {
   public name = "Vocabulary"

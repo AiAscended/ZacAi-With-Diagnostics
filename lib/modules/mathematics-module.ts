@@ -1,6 +1,6 @@
 // lib/modules/mathematics-module.ts
 import type { IKnowledgeModule, KnowledgeEntry, QueryResult } from "@/lib/types"
-import StorageManager from "@/lib/storage-manager"
+import { StorageManager } from "@/lib/storage-manager"
 
 export class MathematicsModule implements IKnowledgeModule {
   public name = "Mathematics"
@@ -46,8 +46,8 @@ export class MathematicsModule implements IKnowledgeModule {
       if (/[^0-9+\-*/().\s]/.test(expression)) {
         throw new Error("Invalid characters in expression")
       }
-      // eslint-disable-next-line no-eval
-      const result = eval(expression)
+      // Using Function constructor is safer than eval in some contexts
+      const result = new Function(`return ${expression}`)()
       return result
     } catch (error) {
       return "Error: Invalid mathematical expression."
