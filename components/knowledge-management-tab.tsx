@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { ReliableAISystem } from "@/lib/reliable-ai-system"
 import { Book, Plus, Search, Trash2, Edit, Save } from "lucide-react"
 
 interface KnowledgeEntry {
@@ -18,7 +17,6 @@ interface KnowledgeEntry {
 }
 
 export default function KnowledgeManagementTab() {
-  const [aiSystem] = useState(() => new ReliableAISystem())
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeEntry[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [newEntry, setNewEntry] = useState({ topic: "", content: "", category: "" })
