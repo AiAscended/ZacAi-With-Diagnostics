@@ -43,12 +43,10 @@ export default function Home() {
     return (
       <main className="flex h-screen w-screen flex-col items-center justify-center p-4 bg-background text-foreground">
         <div className="w-full max-w-md text-center">
-          <div className="inline-block p-4 bg-secondary/50 rounded-full border border-border mb-6">
+          <div className="inline-block p-4 bg-secondary rounded-full border border-border mb-6">
             <Brain className="h-12 w-12 text-primary animate-pulse" />
           </div>
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-slate-200 to-primary text-transparent bg-clip-text">
-            ZacAI is Waking Up
-          </h1>
+          <h1 className="text-3xl font-bold mb-2 text-primary">ZacAI is Waking Up</h1>
           <p className="text-muted-foreground mb-6">{initializationMessage}</p>
           <Progress value={progress} className="w-full" />
         </div>

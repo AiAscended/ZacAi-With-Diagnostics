@@ -4,8 +4,8 @@
 import { useState } from "react"
 import type { CognitiveEngine } from "@/lib/cognitive-engine"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardHeader, CardTitle } from "@/lib/ui/card"
-import { BrainCircuit, BookOpen, MessageSquare, Settings } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { BrainCircuit, BookOpen, MessageSquare, Settings, Calculator } from "lucide-react"
 import KnowledgeViewerTab from "./knowledge-viewer-tab"
 import ChatTab from "./chat-tab"
 
@@ -17,18 +17,20 @@ export default function AIControlPanel({ engine }: AIControlPanelProps) {
   const [activeTab, setActiveTab] = useState("chat")
 
   return (
-    <Card className="w-full max-w-7xl h-[90vh] flex flex-col bg-card/80 backdrop-blur-sm border-border/50">
+    <Card className="w-full max-w-7xl h-[95vh] flex flex-col bg-card shadow-2xl rounded-lg border">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
-        <CardHeader className="border-b border-border/50">
+        <CardHeader className="border-b">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <BrainCircuit className="h-8 w-8 text-primary" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <BrainCircuit className="h-8 w-8 text-primary" />
+              </div>
               <div>
                 <CardTitle className="text-2xl font-bold">ZacAI Cognitive Engine</CardTitle>
                 <p className="text-sm text-muted-foreground">Modular AI Control Panel</p>
               </div>
             </div>
-            <TabsList className="grid w-full max-w-md grid-cols-4">
+            <TabsList className="grid w-full max-w-sm grid-cols-4">
               <TabsTrigger value="chat">
                 <MessageSquare className="h-4 w-4 mr-2" /> Chat
               </TabsTrigger>
@@ -36,7 +38,7 @@ export default function AIControlPanel({ engine }: AIControlPanelProps) {
                 <BookOpen className="h-4 w-4 mr-2" /> Vocab
               </TabsTrigger>
               <TabsTrigger value="math">
-                <span className="mr-2">🧮</span> Math
+                <Calculator className="h-4 w-4 mr-2" /> Math
               </TabsTrigger>
               <TabsTrigger value="settings" disabled>
                 <Settings className="h-4 w-4 mr-2" /> Settings
@@ -49,10 +51,10 @@ export default function AIControlPanel({ engine }: AIControlPanelProps) {
           <TabsContent value="chat" className="m-0 h-full">
             <ChatTab engine={engine} />
           </TabsContent>
-          <TabsContent value="vocab" className="m-0">
+          <TabsContent value="vocab" className="m-0 h-full">
             <KnowledgeViewerTab module={engine.getModule("Vocabulary")} />
           </TabsContent>
-          <TabsContent value="math" className="m-0">
+          <TabsContent value="math" className="m-0 h-full">
             <KnowledgeViewerTab module={engine.getModule("Mathematics")} />
           </TabsContent>
           <TabsContent value="settings" className="m-0 p-6">

@@ -65,25 +65,23 @@ export default function ChatTab({ engine }: ChatTabProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
+    <div className="flex flex-col h-full bg-secondary/30">
+      <ScrollArea className="flex-grow p-4 sm:p-6" ref={scrollAreaRef}>
         <div className="space-y-6">
           {messages.map((message) => (
-            <div key={message.id} className={`flex items-start gap-4 ${message.role === "user" ? "justify-end" : ""}`}>
+            <div key={message.id} className={`flex items-start gap-3 ${message.role === "user" ? "justify-end" : ""}`}>
               {message.role === "assistant" && (
-                <div className="p-2 bg-primary rounded-full text-primary-foreground">
+                <div className="p-2 bg-background border rounded-full text-primary">
                   <Bot className="h-6 w-6" />
                 </div>
               )}
               <Card
                 className={`max-w-2xl ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground"
+                  message.role === "user" ? "bg-primary text-primary-foreground" : "bg-background"
                 }`}
               >
                 <CardContent className="p-4">
-                  <div className="prose prose-invert prose-sm max-w-none">
+                  <div className="prose prose-sm max-w-none">
                     <ReactMarkdown>{message.content}</ReactMarkdown>
                   </div>
                   {message.role === "assistant" && message.reasoning && (
@@ -92,7 +90,7 @@ export default function ChatTab({ engine }: ChatTabProps) {
                         <BrainCircuit className="h-3 w-3" />
                         Show Reasoning
                       </summary>
-                      <div className="mt-2 p-3 bg-background/50 rounded-md space-y-1 text-muted-foreground">
+                      <div className="mt-2 p-3 bg-secondary rounded-md space-y-1 text-muted-foreground">
                         <p className="font-bold flex items-center gap-2">
                           {message.confidence && message.confidence > 0.7 ? (
                             <CheckCircle className="h-4 w-4 text-green-500" />
@@ -112,18 +110,18 @@ export default function ChatTab({ engine }: ChatTabProps) {
                 </CardContent>
               </Card>
               {message.role === "user" && (
-                <div className="p-2 bg-secondary rounded-full text-secondary-foreground">
+                <div className="p-2 bg-background border rounded-full text-primary">
                   <User className="h-6 w-6" />
                 </div>
               )}
             </div>
           ))}
           {isThinking && (
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-primary rounded-full text-primary-foreground">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-background border rounded-full text-primary">
                 <Bot className="h-6 w-6" />
               </div>
-              <Card className="max-w-2xl bg-secondary text-secondary-foreground">
+              <Card className="max-w-2xl bg-background">
                 <CardContent className="p-4 flex items-center gap-2 text-muted-foreground">
                   <BrainCircuit className="h-5 w-5 animate-pulse" />
                   <span>ZacAI is thinking...</span>
@@ -133,8 +131,8 @@ export default function ChatTab({ engine }: ChatTabProps) {
           )}
         </div>
       </ScrollArea>
-      <div className="p-4 border-t border-border/50">
-        <form onSubmit={handleSubmit} className="flex items-center gap-4">
+      <div className="p-4 border-t bg-background">
+        <form onSubmit={handleSubmit} className="flex items-center gap-4 max-w-4xl mx-auto">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
