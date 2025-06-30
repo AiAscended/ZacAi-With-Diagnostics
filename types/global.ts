@@ -36,7 +36,6 @@ export interface ModuleResponse {
   source: string
   timestamp: number
   metadata?: any
-  reasoning?: string[]
 }
 
 export interface ModuleStats {
@@ -45,6 +44,16 @@ export interface ModuleStats {
   averageResponseTime: number
   learntEntries: number
   lastUpdate: number
+}
+
+export interface SystemStats {
+  initialized: boolean
+  modules: { [key: string]: ModuleStats }
+  learning: any
+  cognitive: any
+  uptime: number
+  totalQueries: number
+  averageResponseTime: number
 }
 
 export interface LearntDataEntry {
@@ -61,39 +70,35 @@ export interface LearntDataEntry {
   relationships: string[]
 }
 
-export interface ConversationContext {
-  id: string
-  messages: Message[]
-  userInfo: any
-  preferences: any
-  timestamp: number
+export interface IntentAnalysis {
+  intent: string
+  confidence: number
+  entities: any[]
+  context: any
+  suggestedModules: string[]
 }
 
-export interface Message {
-  id: string
-  role: "user" | "assistant"
+export interface ContextMessage {
+  role: "user" | "assistant" | "system"
   content: string
-  timestamp: number
+  timestamp?: number
   metadata?: any
 }
 
-export interface ContextData {
-  recentMessages: Message[]
-  topics: string[]
-  entities: any
-  conversationFlow: string
-  sessionDuration: number
-  messageCount: number
-  userQuestionCount: number
-  assistantResponseCount: number
+export interface ReasoningStep {
+  step: number
+  reasoning: string
+  input: any
+  output: any
+  confidence: number
+  timestamp: number
 }
 
-export interface SystemStats {
-  initialized: boolean
-  modules: { [key: string]: ModuleStats }
-  learning?: any
-  cognitive?: any
-  uptime: number
-  totalQueries: number
-  averageResponseTime: number
+export interface ReasoningChain {
+  id: string
+  input: string
+  steps: ReasoningStep[]
+  finalOutput: any
+  totalConfidence: number
+  processingTime: number
 }

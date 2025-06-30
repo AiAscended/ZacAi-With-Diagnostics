@@ -10,47 +10,43 @@ export interface VocabularyEntry {
   frequency: number
   etymology?: string
   pronunciation?: string
-  phonetics?: string
 }
 
 export interface MathConcept {
-  id: string
   name: string
-  formula: string
   description: string
+  formula?: string
   category: string
   difficulty: number
-  prerequisites: string[]
-  applications: string[]
   examples: MathExample[]
+  applications: string[]
 }
 
 export interface MathExample {
   problem: string
   solution: string
-  steps: string[]
   explanation: string
+  steps: string[]
 }
 
 export interface FactEntry {
-  id: string
   topic: string
-  fact: string
+  content: string
+  source: string
   category: string
-  sources: string[]
-  reliability: number
-  lastVerified: number
-  relatedFacts: string[]
+  verified: boolean
+  lastUpdated: number
+  relatedTopics: string[]
 }
 
 export interface CodingConcept {
-  id: string
+  name: string
   language: string
-  concept: string
   description: string
+  syntax: string
   examples: CodeExample[]
-  bestPractices: string[]
-  commonMistakes: string[]
+  difficulty: number
+  category: string
 }
 
 export interface CodeExample {
@@ -61,10 +57,9 @@ export interface CodeExample {
 }
 
 export interface PhilosophicalConcept {
-  id: string
   name: string
   description: string
-  philosopher: string
+  philosopher?: string
   school: string
   relatedConcepts: string[]
   arguments: string[]
@@ -73,38 +68,16 @@ export interface PhilosophicalConcept {
 
 export interface UserProfile {
   name?: string
-  preferences: {
-    responseStyle: "brief" | "detailed" | "technical"
-    topics: string[]
-    learningLevel: "beginner" | "intermediate" | "advanced"
-  }
-  history: {
-    commonQuestions: string[]
-    learningProgress: { [topic: string]: number }
-    lastActive: number
-  }
+  preferences: { [key: string]: any }
+  learningHistory: LearningRecord[]
+  interests: string[]
+  skillLevel: { [domain: string]: number }
 }
 
-export interface MathOperation {
-  type: string
-  operation: string
-  result: number | string
-  steps: string[]
+export interface LearningRecord {
+  topic: string
+  timestamp: number
   confidence: number
-  method: string
-}
-
-export interface TeslaVortexResult {
-  input: number
-  pattern: number[]
-  vortexMap: string
-  explanation: string
-  digitalRoot: number
-}
-
-export interface SacredGeometryResult {
-  shape: string
-  properties: any
-  calculations: any
-  significance: string
+  source: string
+  context: string
 }

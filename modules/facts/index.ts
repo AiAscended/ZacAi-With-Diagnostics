@@ -42,7 +42,6 @@ export class FactsModule implements ModuleInterface {
     this.stats.totalQueries++
 
     try {
-      // Extract topics to research
       const topics = this.extractTopics(input)
 
       if (topics.length === 0) {
@@ -58,7 +57,7 @@ export class FactsModule implements ModuleInterface {
       const facts: FactEntry[] = []
 
       for (const topic of topics) {
-        const fact = await this.getFactInformation(topic)
+        const fact = await this.getFactAboutTopic(topic)
         if (fact) {
           facts.push(fact)
         }
@@ -77,7 +76,6 @@ export class FactsModule implements ModuleInterface {
       const response = this.buildFactResponse(facts)
       const confidence = this.calculateFactConfidence(facts)
 
-      // Learn from this interaction
       await this.learn({
         input,
         facts,
@@ -115,39 +113,36 @@ export class FactsModule implements ModuleInterface {
   private extractTopics(input: string): string[] {
     const topics: string[] = []
 
-    // Look for "tell me about" patterns
-    const tellMeMatch = input.match(/tell\s+me\s+about\s+(.+?)(?:\.|$)/i)
+    // Look for "tell me about X" patterns
+    const tellMeMatch = input.match(/tell me about (.+?)(?:\.|$)/i)
     if (tellMeMatch) {
       topics.push(tellMeMatch[1].trim())
     }
 
-    // Look for "what is" patterns
-    const whatIsMatch = input.match(/what\s+is\s+(.+?)(?:\?|$)/i)
+    // Look for "what is X" patterns
+    const whatIsMatch = input.match(/what is (.+?)(?:\?|$)/i)
     if (whatIsMatch) {
       topics.push(whatIsMatch[1].trim())
     }
 
-    // Look for "information about" patterns
-    const infoMatch = input.match(/information\s+about\s+(.+?)(?:\.|$)/i)
+    // Look for "information about X" patterns
+    const infoMatch = input.match(/information about (.+?)(?:\.|$)/i)
     if (infoMatch) {
       topics.push(infoMatch[1].trim())
     }
 
     // Extract potential topics from keywords
-    if (topics.length === 0) {
-      const keywords = input
-        .toLowerCase()
-        .split(/\W+/)
-        .filter((word) => word.length > 3)
-        .slice(0, 3)
-
-      topics.push(...keywords)
+    const keywords = ["science", "history", "technology", "nature", "space", "earth", "biology", "physics", "chemistry"]
+    for (const keyword of keywords) {
+      if (input.toLowerCase().includes(keyword)) {
+        topics.push(keyword)
+      }
     }
 
-    return [...new Set(topics)]
+    return [...new Set(topics)] // Remove duplicates
   }
 
-  private async getFactInformation(topic: string): Promise<FactEntry | null> {
+  private async getFactAboutTopic(topic: string): Promise<FactEntry | null> {
     // Check learnt data first
     const learntFact = this.searchLearntData(topic)
     if (learntFact) {
@@ -160,11 +155,11 @@ export class FactsModule implements ModuleInterface {
       return seedFact
     }
 
-    // Try Wikipedia API
-    const wikipediaFact = await this.lookupWikipedia(topic)
-    if (wikipediaFact) {
-      await this.saveToLearntData(topic, wikipediaFact)
-      return wikipediaFact
+    // Try Wikipedia API lookup
+    const wikiFact = await this.lookupWikipedia(topic)
+    if (wikiFact) {
+      await this.saveToLearntData(topic, wikiFact)
+      return wikiFact
     }
 
     return null
@@ -175,7 +170,7 @@ export class FactsModule implements ModuleInterface {
 
     for (const entry of Object.values(this.learntData.entries)) {
       const entryData = entry as any
-      if (entryData.content && entryData.content.topic.toLowerCase().includes(topic.toLowerCase())) {
+      if (entryData.content && entryData.content.topic === topic) {
         return entryData.content
       }
     }
@@ -186,12 +181,16 @@ export class FactsModule implements ModuleInterface {
   private searchSeedData(topic: string): FactEntry | null {
     if (!this.seedData || !this.seedData.facts) return null
 
-    for (const fact of this.seedData.facts) {
-      if (
-        fact.topic.toLowerCase().includes(topic.toLowerCase()) ||
-        fact.fact.toLowerCase().includes(topic.toLowerCase())
-      ) {
-        return fact
+    const factData = this.seedData.facts[topic.toLowerCase()]
+    if (factData) {
+      return {
+        topic,
+        content: factData.content,
+        source: factData.source || "seed-data",
+        category: factData.category || "general",
+        verified: true,
+        lastUpdated: Date.now(),
+        relatedTopics: factData.relatedTopics || [],
       }
     }
 
@@ -200,22 +199,20 @@ export class FactsModule implements ModuleInterface {
 
   private async lookupWikipedia(topic: string): Promise<FactEntry | null> {
     try {
-      // First, search for the topic
-      const searchUrl = `${MODULE_CONFIG.facts.apiEndpoints.wikipedia}/page/summary/${encodeURIComponent(topic)}`
-      const cacheKey = `wiki_${topic.toLowerCase().replace(/\s+/g, "_")}`
+      const url = `${MODULE_CONFIG.facts.apiEndpoints.wikipedia}/${encodeURIComponent(topic)}`
+      const cacheKey = `wiki_${topic.toLowerCase()}`
 
-      const response = await apiManager.makeRequest(searchUrl, {}, cacheKey, 3600000) // 1 hour cache
+      const response = await apiManager.makeRequest(url, {}, cacheKey, 86400000) // 24 hour cache
 
       if (response && response.extract) {
         return {
-          id: generateId(),
-          topic: response.title || topic,
-          fact: response.extract,
-          category: "wikipedia",
-          sources: [response.content_urls?.desktop?.page || searchUrl],
-          reliability: 0.8, // Wikipedia is generally reliable
-          lastVerified: Date.now(),
-          relatedFacts: [],
+          topic,
+          content: response.extract,
+          source: "wikipedia",
+          category: this.categorizeWikipediaContent(response),
+          verified: true,
+          lastUpdated: Date.now(),
+          relatedTopics: this.extractRelatedTopics(response.extract),
         }
       }
     } catch (error) {
@@ -225,18 +222,42 @@ export class FactsModule implements ModuleInterface {
     return null
   }
 
+  private categorizeWikipediaContent(response: any): string {
+    const content = response.extract?.toLowerCase() || ""
+
+    if (content.includes("science") || content.includes("scientific")) return "science"
+    if (content.includes("history") || content.includes("historical")) return "history"
+    if (content.includes("technology") || content.includes("computer")) return "technology"
+    if (content.includes("nature") || content.includes("animal") || content.includes("plant")) return "nature"
+    if (content.includes("space") || content.includes("planet") || content.includes("star")) return "space"
+
+    return "general"
+  }
+
+  private extractRelatedTopics(content: string): string[] {
+    const topics: string[] = []
+
+    // Simple extraction of capitalized words that might be related topics
+    const matches = content.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g)
+    if (matches) {
+      topics.push(...matches.slice(0, 5)) // Take first 5 potential topics
+    }
+
+    return topics
+  }
+
   private async saveToLearntData(topic: string, fact: FactEntry): Promise<void> {
     const learntEntry = {
       id: generateId(),
       content: fact,
-      confidence: fact.reliability,
+      confidence: 0.8, // Wikipedia data is generally reliable
       source: "wikipedia-api",
       context: `Looked up information about "${topic}"`,
       timestamp: Date.now(),
       usageCount: 1,
       lastUsed: Date.now(),
-      verified: fact.reliability > 0.7,
-      tags: ["wikipedia", fact.category],
+      verified: true,
+      tags: ["api-lookup", fact.category],
       relationships: [],
     }
 
@@ -247,17 +268,18 @@ export class FactsModule implements ModuleInterface {
   private buildFactResponse(facts: FactEntry[]): string {
     if (facts.length === 1) {
       const fact = facts[0]
-      let response = `**${fact.topic}**\n\n${fact.fact}`
+      let response = `**${fact.topic}**\n\n${fact.content}`
 
-      if (fact.sources && fact.sources.length > 0) {
-        response += `\n\n*Source: ${fact.sources[0]}*`
+      if (fact.relatedTopics && fact.relatedTopics.length > 0) {
+        response += `\n\n**Related topics:** ${fact.relatedTopics.slice(0, 3).join(", ")}`
       }
 
+      response += `\n\n*Source: ${fact.source}*`
       return response
     } else {
       let response = "Here's what I found:\n\n"
       facts.forEach((fact, index) => {
-        response += `${index + 1}. **${fact.topic}**: ${fact.fact.substring(0, 200)}${fact.fact.length > 200 ? "..." : ""}\n\n`
+        response += `**${index + 1}. ${fact.topic}**\n${fact.content}\n\n`
       })
       return response
     }
@@ -266,12 +288,14 @@ export class FactsModule implements ModuleInterface {
   private calculateFactConfidence(facts: FactEntry[]): number {
     if (facts.length === 0) return 0
 
-    const avgReliability = facts.reduce((sum, fact) => sum + fact.reliability, 0) / facts.length
+    let totalConfidence = 0
+    for (const fact of facts) {
+      if (fact.source === "wikipedia") totalConfidence += 0.9
+      else if (fact.source === "seed-data") totalConfidence += 0.95
+      else totalConfidence += 0.7
+    }
 
-    // Adjust confidence based on number of facts found
-    const countBonus = Math.min(0.1, facts.length * 0.02)
-
-    return Math.min(1, avgReliability + countBonus)
+    return Math.min(1, totalConfidence / facts.length)
   }
 
   async learn(data: any): Promise<void> {

@@ -8,52 +8,36 @@ export function formatNumber(num: number): string {
   return num.toString()
 }
 
-export function formatPercentage(value: number): string {
-  return `${Math.round(value * 100)}%`
+export function formatPercentage(value: number, total: number): string {
+  if (total === 0) return "0%"
+  return Math.round((value / total) * 100) + "%"
 }
 
 export function formatDuration(ms: number): string {
-  if (ms < 1000) {
-    return `${ms}ms`
-  }
-  if (ms < 60000) {
-    return `${(ms / 1000).toFixed(1)}s`
-  }
-  if (ms < 3600000) {
-    return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
-  }
-  return `${Math.floor(ms / 3600000)}h ${Math.floor((ms % 3600000) / 60000)}m`
+  const seconds = Math.floor(ms / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+
+  if (hours > 0) return `${hours}h ${minutes % 60}m`
+  if (minutes > 0) return `${minutes}m ${seconds % 60}s`
+  return `${seconds}s`
 }
 
 export function formatRelativeTime(timestamp: number): string {
   const now = Date.now()
   const diff = now - timestamp
 
-  if (diff < 60000) {
-    return "Just now"
-  }
-  if (diff < 3600000) {
-    const minutes = Math.floor(diff / 60000)
-    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`
-  }
-  if (diff < 86400000) {
-    const hours = Math.floor(diff / 3600000)
-    return `${hours} hour${hours > 1 ? "s" : ""} ago`
-  }
-  if (diff < 604800000) {
-    const days = Math.floor(diff / 86400000)
-    return `${days} day${days > 1 ? "s" : ""} ago`
-  }
+  const seconds = Math.floor(diff / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (seconds < 60) return "just now"
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days < 7) return `${days}d ago`
 
   return new Date(timestamp).toLocaleDateString()
-}
-
-export function formatConfidence(confidence: number): string {
-  if (confidence >= 0.9) return "Very High"
-  if (confidence >= 0.7) return "High"
-  if (confidence >= 0.5) return "Medium"
-  if (confidence >= 0.3) return "Low"
-  return "Very Low"
 }
 
 export function formatFileSize(bytes: number): string {
@@ -107,10 +91,7 @@ export function formatPhoneNumber(phone: string): string {
 }
 
 export function formatCamelCase(str: string): string {
-  return str
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (str) => str.toUpperCase())
-    .trim()
+  return str.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())
 }
 
 export function formatKebabCase(str: string): string {
@@ -195,4 +176,13 @@ export function formatWeight(grams: number, unit: "metric" | "imperial" = "metri
   }
   const kg = grams / 1000
   return `${kg.toFixed(1)} kg`
+}
+
+export function capitalizeFirst(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength - 3) + "..."
 }

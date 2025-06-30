@@ -1,6 +1,7 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
 import type { CodingConcept } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
+import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
 
 export class CodingModule implements ModuleInterface {
@@ -24,8 +25,8 @@ export class CodingModule implements ModuleInterface {
     console.log("Initializing Coding Module...")
 
     try {
-      this.seedData = await storageManager.loadSeedData("/seed/coding.json")
-      this.learntData = await storageManager.loadLearntData("/learnt/coding.json")
+      this.seedData = await storageManager.loadSeedData(MODULE_CONFIG.coding.seedFile)
+      this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.coding.learntFile)
 
       this.initialized = true
       console.log("Coding Module initialized successfully")
@@ -40,10 +41,9 @@ export class CodingModule implements ModuleInterface {
     this.stats.totalQueries++
 
     try {
-      // Check if input is coding-related
-      const codingTopics = this.extractCodingTopics(input)
+      const codingQueries = this.extractCodingQueries(input)
 
-      if (codingTopics.length === 0) {
+      if (codingQueries.length === 0) {
         return {
           success: false,
           data: null,
@@ -55,8 +55,8 @@ export class CodingModule implements ModuleInterface {
 
       const concepts: CodingConcept[] = []
 
-      for (const topic of codingTopics) {
-        const concept = await this.getCodingConcept(topic)
+      for (const query of codingQueries) {
+        const concept = await this.getCodingConcept(query)
         if (concept) {
           concepts.push(concept)
         }
@@ -75,7 +75,6 @@ export class CodingModule implements ModuleInterface {
       const response = this.buildCodingResponse(concepts)
       const confidence = this.calculateCodingConfidence(concepts)
 
-      // Learn from this interaction
       await this.learn({
         input,
         concepts,
@@ -92,7 +91,7 @@ export class CodingModule implements ModuleInterface {
         source: this.name,
         timestamp: Date.now(),
         metadata: {
-          topicsProcessed: codingTopics.length,
+          queriesProcessed: codingQueries.length,
           conceptsFound: concepts.length,
         },
       }
@@ -110,57 +109,63 @@ export class CodingModule implements ModuleInterface {
     }
   }
 
-  private extractCodingTopics(input: string): string[] {
-    const topics: string[] = []
-    const lowercaseInput = input.toLowerCase()
+  private extractCodingQueries(input: string): string[] {
+    const queries: string[] = []
 
-    // Programming languages
-    const languages = ["javascript", "python", "java", "c++", "c#", "go", "rust", "typescript", "php", "ruby"]
-    languages.forEach((lang) => {
-      if (lowercaseInput.includes(lang)) {
-        topics.push(lang)
+    // Look for programming language mentions
+    const languages = ["javascript", "python", "java", "c++", "html", "css", "react", "node"]
+    for (const lang of languages) {
+      if (input.toLowerCase().includes(lang)) {
+        queries.push(lang)
       }
-    })
-
-    // Programming concepts
-    const concepts = ["function", "variable", "loop", "array", "object", "class", "method", "algorithm", "recursion"]
-    concepts.forEach((concept) => {
-      if (lowercaseInput.includes(concept)) {
-        topics.push(concept)
-      }
-    })
-
-    // Code-related keywords
-    if (lowercaseInput.includes("code") || lowercaseInput.includes("program") || lowercaseInput.includes("develop")) {
-      topics.push("programming")
     }
 
-    return [...new Set(topics)]
+    // Look for coding concepts
+    const concepts = ["function", "variable", "loop", "array", "object", "class", "method", "algorithm"]
+    for (const concept of concepts) {
+      if (input.toLowerCase().includes(concept)) {
+        queries.push(concept)
+      }
+    }
+
+    // Look for "how to code" patterns
+    const howToMatch = input.match(/how to (?:code|program|write) (.+?)(?:\?|$)/i)
+    if (howToMatch) {
+      queries.push(howToMatch[1].trim())
+    }
+
+    return [...new Set(queries)] // Remove duplicates
   }
 
-  private async getCodingConcept(topic: string): Promise<CodingConcept | null> {
+  private async getCodingConcept(query: string): Promise<CodingConcept | null> {
     // Check learnt data first
-    const learntConcept = this.searchLearntData(topic)
+    const learntConcept = this.searchLearntData(query)
     if (learntConcept) {
       return learntConcept
     }
 
     // Check seed data
-    const seedConcept = this.searchSeedData(topic)
+    const seedConcept = this.searchSeedData(query)
     if (seedConcept) {
       return seedConcept
     }
 
-    // Generate basic concept if not found
-    return this.generateBasicConcept(topic)
+    // Generate basic concept if it's a common programming term
+    const generatedConcept = this.generateBasicConcept(query)
+    if (generatedConcept) {
+      await this.saveToLearntData(query, generatedConcept)
+      return generatedConcept
+    }
+
+    return null
   }
 
-  private searchLearntData(topic: string): CodingConcept | null {
+  private searchLearntData(query: string): CodingConcept | null {
     if (!this.learntData || !this.learntData.entries) return null
 
     for (const entry of Object.values(this.learntData.entries)) {
       const entryData = entry as any
-      if (entryData.content && entryData.content.concept.toLowerCase().includes(topic.toLowerCase())) {
+      if (entryData.content && entryData.content.name === query) {
         return entryData.content
       }
     }
@@ -168,96 +173,123 @@ export class CodingModule implements ModuleInterface {
     return null
   }
 
-  private searchSeedData(topic: string): CodingConcept | null {
+  private searchSeedData(query: string): CodingConcept | null {
     if (!this.seedData || !this.seedData.concepts) return null
 
-    for (const concept of this.seedData.concepts) {
-      if (
-        concept.concept.toLowerCase().includes(topic.toLowerCase()) ||
-        concept.language.toLowerCase().includes(topic.toLowerCase())
-      ) {
-        return concept
+    const conceptData = this.seedData.concepts[query.toLowerCase()]
+    if (conceptData) {
+      return {
+        name: query,
+        language: conceptData.language || "general",
+        description: conceptData.description,
+        syntax: conceptData.syntax || "",
+        examples: conceptData.examples || [],
+        difficulty: conceptData.difficulty || 1,
+        category: conceptData.category || "general",
       }
     }
 
     return null
   }
 
-  private generateBasicConcept(topic: string): CodingConcept | null {
+  private generateBasicConcept(query: string): CodingConcept | null {
     const basicConcepts: { [key: string]: Partial<CodingConcept> } = {
-      javascript: {
-        language: "JavaScript",
-        concept: "JavaScript Programming",
-        description: "A versatile programming language used for web development, both frontend and backend.",
-        examples: [
-          {
-            title: "Hello World",
-            code: 'console.log("Hello, World!");',
-            explanation: 'This prints "Hello, World!" to the console.',
-          },
-        ],
-      },
-      python: {
-        language: "Python",
-        concept: "Python Programming",
-        description: "A high-level programming language known for its simplicity and readability.",
-        examples: [
-          {
-            title: "Hello World",
-            code: 'print("Hello, World!")',
-            explanation: 'This prints "Hello, World!" to the console.',
-          },
-        ],
-      },
       function: {
-        language: "General",
-        concept: "Functions",
-        description: "A reusable block of code that performs a specific task.",
+        description: "A reusable block of code that performs a specific task",
+        syntax: "function functionName() { /* code */ }",
         examples: [
           {
             title: "Basic Function",
-            code: 'function greet(name) {\n  return "Hello, " + name;\n}',
-            explanation: "This function takes a name parameter and returns a greeting.",
+            code: "function greet(name) {\n  return 'Hello, ' + name + '!';\n}",
+            explanation: "A simple function that takes a name parameter and returns a greeting",
           },
         ],
+        difficulty: 2,
+        category: "fundamentals",
+      },
+      variable: {
+        description: "A container that stores data values",
+        syntax: "let variableName = value;",
+        examples: [
+          {
+            title: "Variable Declaration",
+            code: "let message = 'Hello World';\nconst pi = 3.14159;",
+            explanation: "Examples of declaring variables with let and const",
+          },
+        ],
+        difficulty: 1,
+        category: "fundamentals",
+      },
+      loop: {
+        description: "A programming construct that repeats a block of code",
+        syntax: "for (let i = 0; i < length; i++) { /* code */ }",
+        examples: [
+          {
+            title: "For Loop",
+            code: "for (let i = 0; i < 5; i++) {\n  console.log(i);\n}",
+            explanation: "A for loop that prints numbers 0 through 4",
+          },
+        ],
+        difficulty: 2,
+        category: "control-flow",
       },
     }
 
-    const conceptData = basicConcepts[topic.toLowerCase()]
-    if (conceptData) {
+    const concept = basicConcepts[query.toLowerCase()]
+    if (concept) {
       return {
-        id: generateId(),
-        language: conceptData.language || "General",
-        concept: conceptData.concept || topic,
-        description: conceptData.description || `Information about ${topic}`,
-        examples: conceptData.examples || [],
-        bestPractices: [],
-        commonMistakes: [],
+        name: query,
+        language: "javascript",
+        description: concept.description!,
+        syntax: concept.syntax!,
+        examples: concept.examples!,
+        difficulty: concept.difficulty!,
+        category: concept.category!,
       }
     }
 
     return null
+  }
+
+  private async saveToLearntData(query: string, concept: CodingConcept): Promise<void> {
+    const learntEntry = {
+      id: generateId(),
+      content: concept,
+      confidence: 0.7,
+      source: "coding-module",
+      context: `Generated concept for "${query}"`,
+      timestamp: Date.now(),
+      usageCount: 1,
+      lastUsed: Date.now(),
+      verified: false,
+      tags: ["generated", concept.category],
+      relationships: [],
+    }
+
+    await storageManager.addLearntEntry(MODULE_CONFIG.coding.learntFile, learntEntry)
+    this.stats.learntEntries++
   }
 
   private buildCodingResponse(concepts: CodingConcept[]): string {
     if (concepts.length === 1) {
       const concept = concepts[0]
-      let response = `**${concept.concept}** (${concept.language})\n\n${concept.description}`
+      let response = `**${concept.name}** (${concept.language})\n\n${concept.description}`
 
-      if (concept.examples && concept.examples.length > 0) {
-        response += `\n\n**Example:**\n\`\`\`${concept.language.toLowerCase()}\n${concept.examples[0].code}\n\`\`\``
-        response += `\n\n${concept.examples[0].explanation}`
+      if (concept.syntax) {
+        response += `\n\n**Syntax:**\n\`\`\`${concept.language}\n${concept.syntax}\n\`\`\``
       }
 
-      if (concept.bestPractices && concept.bestPractices.length > 0) {
-        response += `\n\n**Best Practices:**\n${concept.bestPractices.map((practice) => `• ${practice}`).join("\n")}`
+      if (concept.examples && concept.examples.length > 0) {
+        const example = concept.examples[0]
+        response += `\n\n**Example:**\n\`\`\`${concept.language}\n${example.code}\n\`\`\``
+        response += `\n\n${example.explanation}`
       }
 
       return response
     } else {
       let response = "Here are the coding concepts:\n\n"
       concepts.forEach((concept, index) => {
-        response += `${index + 1}. **${concept.concept}** (${concept.language}): ${concept.description}\n\n`
+        response += `**${index + 1}. ${concept.name}** (${concept.language})\n${concept.description}\n\n`
       })
       return response
     }
@@ -266,43 +298,16 @@ export class CodingModule implements ModuleInterface {
   private calculateCodingConfidence(concepts: CodingConcept[]): number {
     if (concepts.length === 0) return 0
 
-    // Higher confidence for concepts with examples and best practices
     let totalConfidence = 0
     for (const concept of concepts) {
-      let confidence = 0.6 // Base confidence
-
-      if (concept.examples && concept.examples.length > 0) confidence += 0.2
-      if (concept.bestPractices && concept.bestPractices.length > 0) confidence += 0.1
-      if (concept.description && concept.description.length > 50) confidence += 0.1
-
-      totalConfidence += Math.min(1, confidence)
+      if (concept.examples && concept.examples.length > 0) totalConfidence += 0.9
+      else totalConfidence += 0.6
     }
 
-    return totalConfidence / concepts.length
+    return Math.min(1, totalConfidence / concepts.length)
   }
 
   async learn(data: any): Promise<void> {
-    if (data.concepts && data.concepts.length > 0) {
-      for (const concept of data.concepts) {
-        const learntEntry = {
-          id: generateId(),
-          content: concept,
-          confidence: 0.8,
-          source: "coding-module",
-          context: data.input,
-          timestamp: Date.now(),
-          usageCount: 1,
-          lastUsed: Date.now(),
-          verified: true,
-          tags: [concept.language.toLowerCase(), "coding"],
-          relationships: [],
-        }
-
-        await storageManager.addLearntEntry("/learnt/coding.json", learntEntry)
-        this.stats.learntEntries++
-      }
-    }
-
     this.stats.lastUpdate = Date.now()
   }
 

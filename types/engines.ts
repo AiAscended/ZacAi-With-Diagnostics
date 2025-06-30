@@ -1,66 +1,37 @@
 // Engine-specific type definitions
-export interface CognitiveEngineConfig {
-  modules: string[]
-  reasoning: boolean
-  learning: boolean
-  confidence: {
-    threshold: number
-    aggregation: "average" | "weighted" | "max"
-  }
+export interface CognitiveEngineStats {
+  initialized: boolean
+  registeredModules: string[]
+  contextStats: any
 }
 
-export interface ReasoningChain {
-  id: string
-  steps: ReasoningStep[]
-  conclusion: string
-  confidence: number
-  sources: string[]
+export interface LearningEngineStats {
+  totalLearned: number
+  learningRate: number
+  retentionRate: number
+  averageConfidence: number
+  lastLearningSession: number
 }
 
-export interface ReasoningStep {
-  id: string
-  description: string
-  input: any
-  output: any
-  confidence: number
-  reasoning: string
+export interface ReasoningEngineStats {
+  totalReasoningChains: number
+  averageSteps: number
+  averageConfidence: number
+  successRate: number
 }
 
 export interface LearningPattern {
   id: string
-  type: string
   pattern: string
+  frequency: number
   confidence: number
-  occurrences: number
+  lastSeen: number
   examples: string[]
-  metadata: {
-    firstSeen: number
-    lastSeen: number
-    source: string
-  }
 }
 
-export interface IntentAnalysis {
-  intent: string
-  confidence: number
-  entities: Entity[]
-  context: any
-  suggestedModules: string[]
-}
-
-export interface Entity {
-  type: string
-  value: string
-  confidence: number
-  start: number
-  end: number
-}
-
-export interface CognitiveEngineStats {
-  initialized: boolean
-  registeredModules: string[]
-  contextStats: {
-    messageCount: number
-    duration: number
-  }
+export interface ContextStats {
+  totalMessages: number
+  averageLength: number
+  topicDistribution: { [topic: string]: number }
+  sentimentAnalysis: any
 }

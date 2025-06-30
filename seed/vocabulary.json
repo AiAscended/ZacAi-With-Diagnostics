@@ -1,88 +1,123 @@
 {
   "metadata": {
-    "version": "2.0.0",
-    "lastUpdated": "2024-01-01T00:00:00Z",
+    "version": "1.0.0",
+    "lastUpdated": 1704067200000,
     "totalEntries": 1000,
-    "categories": ["academic", "technical", "common", "advanced"],
-    "sources": ["oxford", "merriam-webster", "cambridge"]
+    "source": "comprehensive-dictionary"
   },
-  "vocabulary": [
-    {
-      "word": "algorithm",
+  "words": {
+    "algorithm": {
       "definition": "A process or set of rules to be followed in calculations or other problem-solving operations",
       "partOfSpeech": "noun",
-      "pronunciation": "/ˈælɡəˌrɪðəm/",
-      "etymology": "From Arabic al-Khwarizmi, 9th-century Persian mathematician",
       "examples": [
-        "The search algorithm efficiently finds relevant results",
-        "Machine learning algorithms can recognize patterns in data"
+        "The sorting algorithm efficiently organized the data",
+        "Machine learning algorithms can recognize patterns"
       ],
-      "synonyms": ["procedure", "method", "process", "formula"],
-      "antonyms": ["randomness", "chaos"],
-      "difficulty": 7,
-      "frequency": 8,
-      "category": "technical"
+      "synonyms": ["procedure", "method", "process"],
+      "difficulty": 4,
+      "frequency": 3,
+      "etymology": "From Arabic al-Khwarizmi, named after the 9th-century mathematician"
     },
-    {
-      "word": "quantum",
-      "definition": "The smallest possible discrete unit of any physical property",
+    "quantum": {
+      "definition": "The minimum amount of any physical entity involved in an interaction",
       "partOfSpeech": "noun",
-      "pronunciation": "/ˈkwɒntəm/",
-      "etymology": "From Latin quantus meaning 'how much'",
       "examples": [
         "Quantum mechanics describes the behavior of matter at atomic scales",
         "A quantum of light is called a photon"
       ],
       "synonyms": ["unit", "amount", "portion"],
-      "antonyms": ["continuous", "infinite"],
-      "difficulty": 8,
-      "frequency": 6,
-      "category": "academic"
+      "difficulty": 5,
+      "frequency": 2,
+      "etymology": "From Latin quantus meaning 'how much'"
     },
-    {
-      "word": "serendipity",
-      "definition": "The occurrence and development of events by chance in a happy or beneficial way",
+    "consciousness": {
+      "definition": "The state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings",
       "partOfSpeech": "noun",
-      "pronunciation": "/ˌsɛrənˈdɪpɪti/",
-      "etymology": "Coined by Horace Walpole in 1754, from Persian fairy tale 'The Three Princes of Serendip'",
-      "examples": ["The discovery of penicillin was a result of serendipity", "Their meeting was pure serendipity"],
-      "synonyms": ["chance", "luck", "fortune", "coincidence"],
-      "antonyms": ["misfortune", "design", "intention"],
-      "difficulty": 6,
-      "frequency": 4,
-      "category": "advanced"
+      "examples": [
+        "Human consciousness remains one of the greatest mysteries",
+        "The patient regained consciousness after surgery"
+      ],
+      "synonyms": ["awareness", "cognition", "perception"],
+      "difficulty": 4,
+      "frequency": 3,
+      "etymology": "From Latin conscientius meaning 'knowing with others'"
     },
-    {
-      "word": "ubiquitous",
-      "definition": "Present, appearing, or found everywhere",
+    "artificial": {
+      "definition": "Made or produced by human beings rather than occurring naturally",
       "partOfSpeech": "adjective",
-      "pronunciation": "/juːˈbɪkwɪtəs/",
-      "etymology": "From Latin ubique meaning 'everywhere'",
       "examples": [
-        "Smartphones have become ubiquitous in modern society",
-        "The ubiquitous presence of social media affects daily life"
+        "Artificial intelligence mimics human cognitive functions",
+        "The artificial flowers looked surprisingly real"
       ],
-      "synonyms": ["omnipresent", "pervasive", "universal", "widespread"],
-      "antonyms": ["rare", "scarce", "limited", "absent"],
-      "difficulty": 7,
-      "frequency": 5,
-      "category": "academic"
+      "synonyms": ["synthetic", "man-made", "manufactured"],
+      "antonyms": ["natural", "organic", "genuine"],
+      "difficulty": 2,
+      "frequency": 4
     },
-    {
-      "word": "paradigm",
-      "definition": "A typical example or pattern of something; a model",
+    "intelligence": {
+      "definition": "The ability to acquire and apply knowledge and skills",
       "partOfSpeech": "noun",
-      "pronunciation": "/ˈpærəˌdaɪm/",
-      "etymology": "From Greek paradeigma meaning 'pattern'",
       "examples": [
-        "The new theory represents a paradigm shift in physics",
-        "This approach follows the traditional paradigm"
+        "Emotional intelligence is as important as academic intelligence",
+        "The spy gathered intelligence about enemy movements"
       ],
-      "synonyms": ["model", "pattern", "example", "framework"],
-      "antonyms": ["anomaly", "exception", "deviation"],
-      "difficulty": 6,
-      "frequency": 6,
-      "category": "academic"
+      "synonyms": ["intellect", "wisdom", "understanding"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "mathematics": {
+      "definition": "The abstract science of number, quantity, and space",
+      "partOfSpeech": "noun",
+      "examples": ["Mathematics is the language of science", "She excelled in advanced mathematics"],
+      "synonyms": ["math", "arithmetic", "calculation"],
+      "difficulty": 3,
+      "frequency": 4,
+      "etymology": "From Greek mathematikos meaning 'fond of learning'"
+    },
+    "philosophy": {
+      "definition": "The study of the fundamental nature of knowledge, reality, and existence",
+      "partOfSpeech": "noun",
+      "examples": [
+        "Ancient Greek philosophy laid the foundation for Western thought",
+        "His philosophy of life emphasized compassion"
+      ],
+      "synonyms": ["wisdom", "ideology", "worldview"],
+      "difficulty": 4,
+      "frequency": 3,
+      "etymology": "From Greek philosophia meaning 'love of wisdom'"
+    },
+    "science": {
+      "definition": "The intellectual and practical activity encompassing the systematic study of the structure and behavior of the physical and natural world",
+      "partOfSpeech": "noun",
+      "examples": [
+        "Science has revolutionized our understanding of the universe",
+        "Computer science combines mathematics and engineering"
+      ],
+      "synonyms": ["knowledge", "research", "study"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "technology": {
+      "definition": "The application of scientific knowledge for practical purposes",
+      "partOfSpeech": "noun",
+      "examples": [
+        "Modern technology has transformed communication",
+        "Renewable energy technology is advancing rapidly"
+      ],
+      "synonyms": ["innovation", "engineering", "technique"],
+      "difficulty": 3,
+      "frequency": 5
+    },
+    "programming": {
+      "definition": "The process of creating a set of instructions that tell a computer how to perform a task",
+      "partOfSpeech": "noun",
+      "examples": [
+        "Programming requires logical thinking and attention to detail",
+        "She learned programming to build mobile apps"
+      ],
+      "synonyms": ["coding", "development", "software engineering"],
+      "difficulty": 3,
+      "frequency": 3
     }
-  ]
+  }
 }

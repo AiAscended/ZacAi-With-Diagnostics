@@ -1,40 +1,58 @@
 {
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2024-01-01T00:00:00Z",
-    "totalFacts": 2000,
-    "sources": ["Wikipedia", "Encyclopedia Britannica", "National Geographic"]
+    "lastUpdated": 1704067200000,
+    "totalEntries": 200,
+    "source": "verified-knowledge-base"
   },
-  "facts": [
-    {
-      "id": "earth_age",
-      "topic": "Earth",
-      "fact": "Earth is approximately 4.54 billion years old, determined through radiometric dating of meteorites and the oldest Earth rocks.",
+  "facts": {
+    "artificial intelligence": {
+      "content": "Artificial Intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans. The term was first coined by John McCarthy in 1956. Modern AI includes machine learning, deep learning, natural language processing, and computer vision.",
+      "source": "scientific-consensus",
+      "category": "technology",
+      "relatedTopics": ["machine learning", "neural networks", "robotics", "computer science"]
+    },
+    "quantum physics": {
+      "content": "Quantum physics is the branch of physics that studies matter and energy at the smallest scales, typically at the level of atoms and subatomic particles. It reveals that energy, momentum, angular momentum, and other quantities are restricted to discrete values (quantized).",
+      "source": "scientific-consensus",
       "category": "science",
-      "sources": ["https://en.wikipedia.org/wiki/Age_of_Earth"],
-      "reliability": 0.95,
-      "lastVerified": 1704067200000,
-      "relatedFacts": ["solar_system_formation", "geological_time_scale"]
+      "relatedTopics": ["quantum mechanics", "particle physics", "wave-particle duality", "uncertainty principle"]
     },
-    {
-      "id": "human_brain_neurons",
-      "topic": "Human Brain",
-      "fact": "The human brain contains approximately 86 billion neurons, each connected to thousands of other neurons through synapses.",
-      "category": "biology",
-      "sources": ["https://en.wikipedia.org/wiki/Neuron"],
-      "reliability": 0.9,
-      "lastVerified": 1704067200000,
-      "relatedFacts": ["neural_networks", "consciousness", "memory"]
+    "consciousness": {
+      "content": "Consciousness refers to the state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings. It remains one of the greatest mysteries in science and philosophy, with ongoing debates about its nature and origins.",
+      "source": "scientific-consensus",
+      "category": "philosophy",
+      "relatedTopics": ["awareness", "cognition", "philosophy of mind", "neuroscience"]
     },
-    {
-      "id": "speed_of_light",
-      "topic": "Physics",
-      "fact": "The speed of light in a vacuum is exactly 299,792,458 meters per second, making it a fundamental constant of nature.",
-      "category": "physics",
-      "sources": ["https://en.wikipedia.org/wiki/Speed_of_light"],
-      "reliability": 1.0,
-      "lastVerified": 1704067200000,
-      "relatedFacts": ["relativity", "electromagnetic_radiation", "photons"]
+    "tesla": {
+      "content": "Nikola Tesla (1856-1943) was a Serbian-American inventor, electrical engineer, mechanical engineer, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system. He held over 300 patents and made groundbreaking discoveries in electromagnetism.",
+      "source": "historical-record",
+      "category": "history",
+      "relatedTopics": ["electricity", "invention", "alternating current", "wireless technology"]
+    },
+    "mathematics": {
+      "content": "Mathematics is the abstract science of number, quantity, and space, either as abstract concepts or as applied to other disciplines such as physics and engineering. It includes arithmetic, algebra, geometry, calculus, statistics, and many other specialized fields.",
+      "source": "academic-consensus",
+      "category": "science",
+      "relatedTopics": ["numbers", "geometry", "algebra", "calculus", "statistics"]
+    },
+    "programming": {
+      "content": "Computer programming is the process of creating a set of instructions that tell a computer how to perform a task. Programming can be done using a variety of computer programming languages, such as JavaScript, Python, Java, C++, and many others.",
+      "source": "technical-documentation",
+      "category": "technology",
+      "relatedTopics": ["software development", "algorithms", "coding", "computer science"]
+    },
+    "philosophy": {
+      "content": "Philosophy is the study of general and fundamental questions about existence, knowledge, values, reason, mind, and language. It is distinguished from other ways of addressing such problems by its critical, generally systematic approach and its reliance on rational argument.",
+      "source": "academic-consensus",
+      "category": "philosophy",
+      "relatedTopics": ["ethics", "metaphysics", "epistemology", "logic", "aesthetics"]
+    },
+    "science": {
+      "content": "Science is a systematic enterprise that builds and organizes knowledge in the form of testable explanations and predictions about the universe. It encompasses physics, chemistry, biology, earth sciences, and many other fields of study.",
+      "source": "scientific-method",
+      "category": "science",
+      "relatedTopics": ["research", "experimentation", "hypothesis", "theory", "evidence"]
     }
-  ]
+  }
 }

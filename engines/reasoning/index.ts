@@ -1,422 +1,298 @@
-import type { ReasoningChain, ReasoningStep, IntentAnalysis } from "@/types/engines"
+// Reasoning engine for logical analysis and decision making
+import type { ReasoningChain, ReasoningStep, ModuleResponse } from "@/types/global"
 import { generateId, calculateConfidence } from "@/utils/helpers"
 
 export class ReasoningEngine {
-  private chains: Map<string, ReasoningChain> = new Map()
   private initialized = false
+  private reasoningChains: Map<string, ReasoningChain> = new Map()
+  private stats = {
+    totalChains: 0,
+    averageSteps: 0,
+    averageConfidence: 0,
+    successRate: 0,
+  }
 
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log("🧠 Initializing Reasoning Engine...")
+    console.log("Initializing Reasoning Engine...")
     this.initialized = true
-    console.log("✅ Reasoning Engine initialized")
+    console.log("Reasoning Engine initialized successfully")
   }
 
-  async createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain> {
+  async createReasoningChain(input: string, context: any, moduleResponses: ModuleResponse[]): Promise<ReasoningChain> {
     const chainId = generateId()
+    const startTime = Date.now()
+
     const steps: ReasoningStep[] = []
 
     // Step 1: Input Analysis
-    const inputAnalysis = await this.analyzeInput(input, context)
     steps.push({
-      id: generateId(),
-      description: "Analyzing user input for intent and entities",
+      step: 1,
+      reasoning: "Analyzing user input for intent, entities, and context",
       input: { text: input, context },
-      output: inputAnalysis,
-      confidence: inputAnalysis.confidence,
-      reasoning: `Identified intent as '${inputAnalysis.intent}' with ${inputAnalysis.entities.length} entities`,
-    })
-
-    // Step 2: Context Integration
-    const contextIntegration = this.integrateContext(context, inputAnalysis)
-    steps.push({
-      id: generateId(),
-      description: "Integrating conversation context and history",
-      input: context,
-      output: contextIntegration,
+      output: this.analyzeInput(input, context),
       confidence: 0.8,
-      reasoning: "Analyzed conversation flow and extracted relevant context patterns",
+      timestamp: Date.now(),
     })
 
-    // Step 3: Module Response Analysis
+    // Step 2: Module Selection
+    steps.push({
+      step: 2,
+      reasoning: "Determining which knowledge modules to consult",
+      input: steps[0].output,
+      output: this.selectModules(input, context),
+      confidence: 0.7,
+      timestamp: Date.now(),
+    })
+
+    // Step 3: Response Synthesis
     if (moduleResponses.length > 0) {
-      const responseAnalysis = this.analyzeModuleResponses(moduleResponses)
       steps.push({
-        id: generateId(),
-        description: "Evaluating and ranking module responses",
+        step: 3,
+        reasoning: "Synthesizing responses from knowledge modules",
         input: moduleResponses,
-        output: responseAnalysis,
-        confidence: responseAnalysis.confidence,
-        reasoning: `Analyzed ${moduleResponses.length} module responses and selected best match`,
+        output: this.synthesizeResponses(moduleResponses),
+        confidence: calculateConfidence(moduleResponses.map((r) => r.confidence)),
+        timestamp: Date.now(),
       })
     }
 
-    // Step 4: Logical Validation
-    const validation = await this.validateLogic(steps, input)
-    steps.push(validation)
+    // Step 4: Confidence Assessment
+    steps.push({
+      step: steps.length + 1,
+      reasoning: "Assessing overall confidence and quality of response",
+      input: steps[steps.length - 1]?.output || steps[0].output,
+      output: this.assessConfidence(steps, moduleResponses),
+      confidence: 0.9,
+      timestamp: Date.now(),
+    })
 
-    // Step 5: Confidence Calculation
-    const overallConfidence = this.calculateOverallConfidence(steps)
-
-    // Step 6: Conclusion Formation
-    const conclusion = this.formConclusion(steps, moduleResponses)
+    const totalConfidence = calculateConfidence(steps.map((s) => s.confidence))
+    const processingTime = Date.now() - startTime
 
     const chain: ReasoningChain = {
       id: chainId,
+      input,
       steps,
-      conclusion,
-      confidence: overallConfidence,
-      sources: moduleResponses.map((r) => r.source || "unknown"),
+      finalOutput: steps[steps.length - 1].output,
+      totalConfidence,
+      processingTime,
     }
 
-    this.chains.set(chainId, chain)
+    this.reasoningChains.set(chainId, chain)
+    this.updateStats(chain)
+
     return chain
   }
 
-  private async analyzeInput(input: string, context: any): Promise<IntentAnalysis> {
-    const lowercaseInput = input.toLowerCase()
-
-    // Intent classification
-    let intent = "general"
-    let confidence = 0.5
-
-    const intentPatterns = {
-      question: {
-        patterns: ["what", "how", "why", "when", "where", "who", "which"],
-        confidence: 0.8,
-      },
-      definition: {
-        patterns: ["define", "meaning", "what is", "what does", "explain"],
-        confidence: 0.9,
-      },
-      calculation: {
-        patterns: ["calculate", "solve", "compute", "math", "=", "+", "-", "*", "/"],
-        confidence: 0.95,
-      },
-      instruction: {
-        patterns: ["how to", "show me", "teach me", "help me"],
-        confidence: 0.85,
-      },
-      comparison: {
-        patterns: ["compare", "difference", "versus", "vs", "better"],
-        confidence: 0.8,
-      },
+  private analyzeInput(input: string, context: any): any {
+    const analysis = {
+      intent: this.determineIntent(input),
+      entities: this.extractEntities(input),
+      complexity: this.assessComplexity(input),
+      contextRelevance: this.assessContextRelevance(input, context),
+      suggestedModules: [] as string[],
     }
 
-    for (const [intentType, config] of Object.entries(intentPatterns)) {
-      if (config.patterns.some((pattern) => lowercaseInput.includes(pattern))) {
-        intent = intentType
-        confidence = config.confidence
-        break
-      }
+    // Determine suggested modules based on analysis
+    if (analysis.intent === "definition" || input.toLowerCase().includes("define")) {
+      analysis.suggestedModules.push("vocabulary", "facts")
+    }
+    if (analysis.intent === "calculation" || /\d+|\+|-|\*|\//.test(input)) {
+      analysis.suggestedModules.push("mathematics")
+    }
+    if (analysis.intent === "coding" || input.toLowerCase().includes("code")) {
+      analysis.suggestedModules.push("coding")
+    }
+    if (analysis.intent === "philosophical" || input.toLowerCase().includes("philosophy")) {
+      analysis.suggestedModules.push("philosophy")
+    }
+    if (analysis.suggestedModules.length === 0) {
+      analysis.suggestedModules.push("facts") // Default fallback
     }
 
-    // Entity extraction
-    const entities = this.extractEntities(input)
-
-    // Suggested modules based on intent and entities
-    const suggestedModules = this.suggestModules(intent, entities, lowercaseInput)
-
-    return {
-      intent,
-      confidence,
-      entities,
-      context,
-      suggestedModules,
-    }
+    return analysis
   }
 
-  private extractEntities(input: string): any[] {
-    const entities: any[] = []
+  private determineIntent(input: string): string {
+    const lower = input.toLowerCase()
 
-    // Numbers
-    const numberMatches = input.match(/-?\d+\.?\d*/g)
-    if (numberMatches) {
-      numberMatches.forEach((match, index) => {
-        entities.push({
-          type: "number",
-          value: match,
-          confidence: 0.95,
-          start: input.indexOf(match),
-          end: input.indexOf(match) + match.length,
-        })
-      })
+    if (lower.includes("define") || lower.includes("what is") || lower.includes("meaning")) {
+      return "definition"
+    }
+    if (lower.includes("calculate") || lower.includes("solve") || /\d+[+\-*/]/.test(input)) {
+      return "calculation"
+    }
+    if (lower.includes("code") || lower.includes("program") || lower.includes("function")) {
+      return "coding"
+    }
+    if (lower.includes("philosophy") || lower.includes("ethics") || lower.includes("moral")) {
+      return "philosophical"
+    }
+    if (lower.includes("fact") || lower.includes("information") || lower.includes("tell me about")) {
+      return "factual"
     }
 
-    // Mathematical operators
-    const mathOperators = ["+", "-", "*", "/", "=", "^", "%"]
-    mathOperators.forEach((op) => {
-      if (input.includes(op)) {
-        entities.push({
-          type: "math_operator",
-          value: op,
-          confidence: 0.9,
-          start: input.indexOf(op),
-          end: input.indexOf(op) + op.length,
-        })
+    return "general"
+  }
+
+  private extractEntities(input: string): string[] {
+    // Simple entity extraction - in a real system this would be more sophisticated
+    const entities: string[] = []
+    const words = input.split(/\s+/)
+
+    // Look for capitalized words (potential proper nouns)
+    words.forEach((word) => {
+      if (word.length > 2 && word[0] === word[0].toUpperCase()) {
+        entities.push(word)
       }
     })
 
-    // Capitalized words (potential proper nouns)
-    const capitalizedWords = input.match(/\b[A-Z][a-z]+\b/g)
-    if (capitalizedWords) {
-      capitalizedWords.forEach((word) => {
-        entities.push({
-          type: "proper_noun",
-          value: word,
-          confidence: 0.7,
-          start: input.indexOf(word),
-          end: input.indexOf(word) + word.length,
-        })
-      })
+    // Look for numbers
+    const numbers = input.match(/\d+/g)
+    if (numbers) {
+      entities.push(...numbers)
     }
 
     return entities
   }
 
-  private suggestModules(intent: string, entities: any[], input: string): string[] {
-    const modules: string[] = []
+  private assessComplexity(input: string): number {
+    let complexity = 0
 
-    // Mathematics module
-    if (
-      intent === "calculation" ||
-      entities.some((e) => e.type === "number" || e.type === "math_operator") ||
-      /\b(math|calculate|solve|equation|formula)\b/i.test(input)
-    ) {
-      modules.push("mathematics")
-    }
+    // Length factor
+    complexity += Math.min(input.length / 100, 1) * 0.3
 
-    // Vocabulary module
-    if (intent === "definition" || /\b(define|meaning|word|definition|synonym|antonym)\b/i.test(input)) {
-      modules.push("vocabulary")
-    }
+    // Word count factor
+    const wordCount = input.split(/\s+/).length
+    complexity += Math.min(wordCount / 20, 1) * 0.3
 
-    // Facts module
-    if (intent === "question" || /\b(fact|information|tell me about|what is|explain)\b/i.test(input)) {
-      modules.push("facts")
-    }
+    // Technical terms factor
+    const technicalTerms = ["algorithm", "quantum", "philosophy", "mathematics", "programming"]
+    const hasTechnicalTerms = technicalTerms.some((term) => input.toLowerCase().includes(term))
+    if (hasTechnicalTerms) complexity += 0.4
 
-    // Coding module
-    if (/\b(code|program|function|algorithm|programming|javascript|python)\b/i.test(input)) {
-      modules.push("coding")
-    }
-
-    // Philosophy module
-    if (/\b(philosophy|ethics|moral|meaning of life|existence|consciousness)\b/i.test(input)) {
-      modules.push("philosophy")
-    }
-
-    // User info module
-    if (/\b(my|me|I|remember|profile|preferences)\b/i.test(input)) {
-      modules.push("user-info")
-    }
-
-    return modules.length > 0 ? modules : ["facts"] // Default to facts if no specific module
+    return Math.min(complexity, 1)
   }
 
-  private integrateContext(context: any, inputAnalysis: IntentAnalysis): any {
+  private assessContextRelevance(input: string, context: any): number {
+    if (!context || !context.topics) return 0.5
+
+    const inputWords = new Set(input.toLowerCase().split(/\s+/))
+    const contextTopics = new Set(context.topics)
+
+    const intersection = new Set([...inputWords].filter((x) => contextTopics.has(x)))
+    const union = new Set([...inputWords, ...contextTopics])
+
+    return union.size > 0 ? intersection.size / union.size : 0.5
+  }
+
+  private selectModules(input: string, context: any): any {
+    const analysis = this.analyzeInput(input, context)
     return {
-      conversationFlow: context.conversationFlow || "new",
-      topics: context.topics || [],
-      sessionDuration: context.sessionDuration || 0,
-      messageCount: context.messageCount || 0,
-      relevantHistory: context.recentMessages?.slice(-3) || [],
-      userPreferences: context.userPreferences || {},
-      contextualClues: this.extractContextualClues(context, inputAnalysis),
+      selectedModules: analysis.suggestedModules,
+      reasoning: `Selected modules based on intent: ${analysis.intent}`,
+      confidence: 0.8,
     }
   }
 
-  private extractContextualClues(context: any, inputAnalysis: IntentAnalysis): string[] {
-    const clues: string[] = []
-
-    if (context.topics && context.topics.length > 0) {
-      clues.push(`Previous topics: ${context.topics.join(", ")}`)
-    }
-
-    if (context.conversationFlow === "follow_up") {
-      clues.push("User is asking a follow-up question")
-    }
-
-    if (context.messageCount > 5) {
-      clues.push("Extended conversation - user likely seeking detailed information")
-    }
-
-    if (inputAnalysis.suggestedModules.length > 1) {
-      clues.push(`Multi-domain query involving: ${inputAnalysis.suggestedModules.join(", ")}`)
-    }
-
-    return clues
-  }
-
-  private analyzeModuleResponses(responses: any[]): any {
-    const validResponses = responses.filter((r) => r.success && r.data)
-
-    if (validResponses.length === 0) {
+  private synthesizeResponses(responses: ModuleResponse[]): any {
+    if (responses.length === 0) {
       return {
-        bestResponse: null,
+        synthesis: "No module responses to synthesize",
         confidence: 0,
-        reasoning: "No valid responses from modules",
+        sources: [],
       }
     }
 
     // Sort by confidence
-    const sortedResponses = validResponses.sort((a, b) => b.confidence - a.confidence)
+    const sortedResponses = responses.sort((a, b) => b.confidence - a.confidence)
     const bestResponse = sortedResponses[0]
 
     return {
-      bestResponse,
-      alternativeResponses: sortedResponses.slice(1),
+      synthesis: bestResponse.data,
       confidence: bestResponse.confidence,
-      reasoning: `Selected response from ${bestResponse.source} with ${Math.round(bestResponse.confidence * 100)}% confidence`,
+      sources: responses.map((r) => r.source),
+      alternativeResponses: sortedResponses.slice(1, 3).map((r) => ({
+        source: r.source,
+        confidence: r.confidence,
+        preview: typeof r.data === "string" ? r.data.substring(0, 100) : "Complex data",
+      })),
     }
   }
 
-  private async validateLogic(steps: ReasoningStep[], originalInput: string): Promise<ReasoningStep> {
-    const validationResults = {
-      consistency: this.checkConsistency(steps),
-      completeness: this.checkCompleteness(steps),
-      relevance: this.checkRelevance(steps, originalInput),
-      logicalFlow: this.checkLogicalFlow(steps),
-    }
+  private assessConfidence(steps: ReasoningStep[], moduleResponses: ModuleResponse[]): any {
+    const stepConfidences = steps.map((s) => s.confidence)
+    const moduleConfidences = moduleResponses.map((r) => r.confidence)
 
-    const overallValidation = calculateConfidence(Object.values(validationResults))
+    const overallConfidence = calculateConfidence([...stepConfidences, ...moduleConfidences])
 
     return {
-      id: generateId(),
-      description: "Validating logical consistency and completeness",
-      input: { steps, originalInput },
-      output: validationResults,
-      confidence: overallValidation,
-      reasoning: `Validation complete: consistency=${Math.round(validationResults.consistency * 100)}%, completeness=${Math.round(validationResults.completeness * 100)}%, relevance=${Math.round(validationResults.relevance * 100)}%`,
+      overallConfidence,
+      stepConfidences,
+      moduleConfidences,
+      qualityAssessment: this.assessQuality(overallConfidence),
+      recommendations: this.generateRecommendations(overallConfidence, moduleResponses),
     }
   }
 
-  private checkConsistency(steps: ReasoningStep[]): number {
-    // Check if steps build logically on each other
-    let consistencyScore = 1.0
+  private assessQuality(confidence: number): string {
+    if (confidence > 0.8) return "High quality response with strong confidence"
+    if (confidence > 0.6) return "Good quality response with moderate confidence"
+    if (confidence > 0.4) return "Acceptable response with some uncertainty"
+    return "Low confidence response, may need clarification"
+  }
 
-    for (let i = 1; i < steps.length; i++) {
-      const currentStep = steps[i]
-      const previousStep = steps[i - 1]
+  private generateRecommendations(confidence: number, responses: ModuleResponse[]): string[] {
+    const recommendations: string[] = []
 
-      // Check if current step uses output from previous step
-      if (currentStep.input && previousStep.output) {
-        // Simple consistency check - in production this would be more sophisticated
-        consistencyScore *= 0.95
-      }
+    if (confidence < 0.5) {
+      recommendations.push("Consider asking for clarification or rephrasing the question")
     }
 
-    return Math.max(0.6, consistencyScore)
-  }
-
-  private checkCompleteness(steps: ReasoningStep[]): number {
-    const requiredSteps = ["input_analysis", "context_integration", "response_analysis"]
-    const stepDescriptions = steps.map((s) => s.description.toLowerCase())
-
-    let completenessScore = 0
-    requiredSteps.forEach((required) => {
-      if (stepDescriptions.some((desc) => desc.includes(required.replace("_", " ")))) {
-        completenessScore += 1 / requiredSteps.length
-      }
-    })
-
-    return Math.max(0.5, completenessScore)
-  }
-
-  private checkRelevance(steps: ReasoningStep[], originalInput: string): number {
-    // Check if reasoning steps are relevant to the original input
-    const inputKeywords = originalInput
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((w) => w.length > 2)
-
-    let relevanceScore = 0
-    steps.forEach((step) => {
-      const stepText = (step.description + " " + step.reasoning).toLowerCase()
-      const relevantKeywords = inputKeywords.filter((keyword) => stepText.includes(keyword))
-      relevanceScore += relevantKeywords.length / inputKeywords.length
-    })
-
-    return Math.min(1.0, relevanceScore / steps.length)
-  }
-
-  private checkLogicalFlow(steps: ReasoningStep[]): number {
-    // Check if confidence scores follow a logical pattern
-    if (steps.length < 2) return 1.0
-
-    let flowScore = 1.0
-    for (let i = 1; i < steps.length; i++) {
-      const confidenceDiff = Math.abs(steps[i].confidence - steps[i - 1].confidence)
-      if (confidenceDiff > 0.5) {
-        flowScore *= 0.8 // Penalize large confidence jumps
-      }
+    if (responses.length === 0) {
+      recommendations.push("Try asking about a different topic or provide more context")
     }
 
-    return Math.max(0.6, flowScore)
-  }
-
-  private calculateOverallConfidence(steps: ReasoningStep[]): number {
-    if (steps.length === 0) return 0
-
-    const confidences = steps.map((s) => s.confidence)
-    const weights = steps.map((_, index) => 1 / (index + 1)) // Higher weight for earlier steps
-
-    let weightedSum = 0
-    let totalWeight = 0
-
-    confidences.forEach((confidence, index) => {
-      weightedSum += confidence * weights[index]
-      totalWeight += weights[index]
-    })
-
-    return weightedSum / totalWeight
-  }
-
-  private formConclusion(steps: ReasoningStep[], moduleResponses: any[]): string {
-    const validResponses = moduleResponses.filter((r) => r.success && r.data)
-
-    if (validResponses.length === 0) {
-      return "Unable to generate a confident response based on available information."
+    if (responses.length === 1) {
+      recommendations.push("Multiple perspectives might be helpful for this topic")
     }
 
-    const bestResponse = validResponses.sort((a, b) => b.confidence - a.confidence)[0]
-    const confidenceLevel = Math.round(bestResponse.confidence * 100)
-
-    return `Based on analysis using ${steps.length} reasoning steps, the most appropriate response comes from the ${bestResponse.source} module with ${confidenceLevel}% confidence. The reasoning process validated logical consistency and contextual relevance.`
+    return recommendations
   }
 
-  getReasoningChain(chainId: string): ReasoningChain | null {
-    return this.chains.get(chainId) || null
-  }
-
-  getRecentChains(count = 5): ReasoningChain[] {
-    return Array.from(this.chains.values())
-      .sort((a, b) => {
-        const aTime = a.steps[0]?.input?.timestamp || 0
-        const bTime = b.steps[0]?.input?.timestamp || 0
-        return bTime - aTime
-      })
-      .slice(0, count)
+  private updateStats(chain: ReasoningChain): void {
+    this.stats.totalChains++
+    this.stats.averageSteps =
+      (this.stats.averageSteps * (this.stats.totalChains - 1) + chain.steps.length) / this.stats.totalChains
+    this.stats.averageConfidence =
+      (this.stats.averageConfidence * (this.stats.totalChains - 1) + chain.totalConfidence) / this.stats.totalChains
+    this.stats.successRate =
+      chain.totalConfidence > 0.5
+        ? (this.stats.successRate * (this.stats.totalChains - 1) + 1) / this.stats.totalChains
+        : (this.stats.successRate * (this.stats.totalChains - 1)) / this.stats.totalChains
   }
 
   getStats(): any {
     return {
-      totalChains: this.chains.size,
-      averageSteps:
-        this.chains.size > 0
-          ? Array.from(this.chains.values()).reduce((sum, chain) => sum + chain.steps.length, 0) / this.chains.size
-          : 0,
-      averageConfidence:
-        this.chains.size > 0
-          ? Array.from(this.chains.values()).reduce((sum, chain) => sum + chain.confidence, 0) / this.chains.size
-          : 0,
+      ...this.stats,
       initialized: this.initialized,
+      activeChains: this.reasoningChains.size,
     }
   }
 
-  clearChains(): void {
-    this.chains.clear()
+  getReasoningChain(id: string): ReasoningChain | undefined {
+    return this.reasoningChains.get(id)
+  }
+
+  clearOldChains(): void {
+    const cutoff = Date.now() - 3600000 // 1 hour
+    for (const [id, chain] of this.reasoningChains.entries()) {
+      if (chain.steps[0].timestamp < cutoff) {
+        this.reasoningChains.delete(id)
+      }
+    }
   }
 }
 
