@@ -35,9 +35,9 @@ import {
   Database,
   Activity,
 } from "lucide-react"
-import KnowledgeManagementTab from "./knowledge-management-tab"
-import SystemSettingsTab from "./system-settings-tab"
-import MemorySystemTab from "./memory-system-tab"
+import { KnowledgeManagementTab } from "./knowledge-management-tab"
+import { SystemSettingsTab } from "./system-settings-tab"
+import { MemorySystemTab } from "./memory-system-tab"
 
 interface ChatMessage {
   id: string

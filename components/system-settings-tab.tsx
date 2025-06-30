@@ -1,13 +1,16 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+
+import { useEffect } from "react"
+
+import { useState } from "react"
+
+import type React from "react"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
@@ -26,6 +29,8 @@ interface SystemSettings {
   responseStyle: string
   debugMode: boolean
   autoSave: boolean
+  enableContinuousLearning: boolean
+  apiFallback: boolean
 }
 
 export default function SystemSettingsTab() {
@@ -42,6 +47,8 @@ export default function SystemSettingsTab() {
     responseStyle: "balanced",
     debugMode: false,
     autoSave: true,
+    enableContinuousLearning: true,
+    apiFallback: true,
   })
 
   const [hasChanges, setHasChanges] = useState(false)
@@ -92,6 +99,8 @@ export default function SystemSettingsTab() {
         responseStyle: "balanced",
         debugMode: false,
         autoSave: true,
+        enableContinuousLearning: true,
+        apiFallback: true,
       }
       setSettings(defaultSettings)
       setHasChanges(true)
@@ -245,10 +254,40 @@ export default function SystemSettingsTab() {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label>Debug Mode</Label>
-              <p className="text-sm text-gray-500">Show detailed system information</p>
+              <Label>Enable Continuous Learning</Label>
+              <p className="text-sm text-gray-500">Allow the AI to learn from new conversations.</p>
             </div>
-            <Switch checked={settings.debugMode} onCheckedChange={(checked) => updateSetting("debugMode", checked)} />
+            <Switch
+              id="learning-mode"
+              checked={settings.enableContinuousLearning}
+              onCheckedChange={(checked) => updateSetting("enableContinuousLearning", checked)}
+              defaultChecked
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label>API Fallback</Label>
+              <p className="text-sm text-gray-500">Use external APIs if internal knowledge is insufficient.</p>
+            </div>
+            <Switch
+              id="api-fallback"
+              checked={settings.apiFallback}
+              onCheckedChange={(checked) => updateSetting("apiFallback", checked)}
+              defaultChecked
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label>Debug Mode</Label>
+              <p className="text-sm text-gray-500">Show detailed logs and reasoning in the console.</p>
+            </div>
+            <Switch
+              id="debug-mode"
+              checked={settings.debugMode}
+              onCheckedChange={(checked) => updateSetting("debugMode", checked)}
+            />
           </div>
 
           <div className="flex items-center justify-between">
