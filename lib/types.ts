@@ -1,18 +1,20 @@
 // COMPLETE TYPE DEFINITIONS FOR ZACAI MASTER SYSTEM
 
-export interface VocabularyEntry {
+// Generic entry for any knowledge type
+export interface KnowledgeEntry {
+  [key: string]: any
+  timestamp: number
+  source: "seed" | "learned"
+}
+
+export interface VocabularyEntry extends KnowledgeEntry {
   word: string
   definition: string
-  partOfSpeech: string
+  part_of_speech: string
   examples: string[]
-  source: string
-  confidence: number
-  phonetic: string
-  synonyms: string[]
-  antonyms: string[]
-  frequency: number
-  timestamp: number
-  category: string
+  phonetic?: string
+  synonyms?: string[]
+  antonyms?: string[]
 }
 
 export interface WordEntry {
@@ -72,12 +74,11 @@ export interface CodingEntry {
 
 export interface ChatMessage {
   id: string
-  role: "user" | "assistant"
+  role: "user" | "assistant" | "system"
   content: string
   timestamp: number
+  thinkingProcess?: string[]
   confidence?: number
-  reasoning?: string[]
-  mathAnalysis?: any
 }
 
 export interface ThoughtNode {
@@ -175,4 +176,19 @@ export interface PerformanceMetrics {
 export interface VocabularyLoader {
   loadVocabulary(): Promise<void>
   getWord(word: string): WordEntry | null
+}
+
+// Interface for any knowledge module
+export interface IKnowledgeModule {
+  name: string
+  initialize(): Promise<void>
+  getKnowledge(): Map<string, KnowledgeEntry>
+  findTerm(term: string): Promise<KnowledgeEntry | null>
+}
+
+// Response from the main engine
+export interface EngineResponse {
+  content: string
+  confidence: number
+  thinkingProcess: string[]
 }

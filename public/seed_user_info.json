@@ -1,0 +1,32 @@
+{
+  "schema": {
+    "name": {
+      "type": "string",
+      "description": "The user's first name or full name.",
+      "triggers": ["my name is", "i'm", "i am", "call me"]
+    },
+    "location": {
+      "type": "string",
+      "description": "The user's city, state, or country.",
+      "triggers": ["i live in", "i'm from", "my location is"]
+    },
+    "interests": {
+      "type": "array",
+      "description": "Topics, hobbies, or subjects the user is interested in.",
+      "triggers": ["i like", "i'm interested in", "my hobbies are", "i enjoy"]
+    },
+    "profession": {
+      "type": "string",
+      "description": "The user's job or occupation.",
+      "triggers": ["i work as", "my job is", "i am a"]
+    }
+  },
+  "instructions": [
+    "When a user provides personal information, identify the type based on the schema triggers.",
+    "Store the extracted information in the 'learnt_user_info.json' file.",
+    "Use stored information to personalize future conversations.",
+    "Never share stored user information with external APIs or other users.",
+    "Prioritize explicit statements (e.g., 'my name is...') over implicit ones.",
+    "Update information if the user provides a new value for an existing key."
+  ]
+}
