@@ -36,50 +36,41 @@ export class MathematicsModule {
     let mathAnalysis: any = { operation: "Unknown", confidence: 0 }
     let confidence = 0.4
 
-    // Tesla/Vortex Math
-    const teslaMatch = message.match(/(?:tesla|vortex|digital root).+?(\d+)/)
+    const teslaMatch = message.match(/(?:tesla|vortex|digital root).+?(\d+)/i)
     if (teslaMatch && teslaMatch[1]) {
       const num = Number.parseInt(teslaMatch[1], 10)
       thinkingSteps.push(`🌀 Matched Tesla/Vortex pattern. Performing digital root analysis for: ${num}`)
       let current = num
-      const steps = [num]
       while (current > 9) {
-        const sum = String(current)
+        current = String(current)
           .split("")
           .reduce((s, digit) => s + Number.parseInt(digit, 10), 0)
-        steps.push(sum)
-        current = sum
       }
-      responseText = `The digital root (Tesla pattern) for ${num} is ${current}. The sequence is: ${steps.join(" -> ")}.`
+      responseText = `The digital root (Tesla pattern) for ${num} is ${current}.`
       knowledge = ["Vortex Math", "Digital Root"]
       mathAnalysis = { operation: "Digital Root", input: num, result: current, confidence: 1.0, seedDataUsed: true }
       confidence = 1.0
-      thinkingSteps.push(`✅ Digital root found: ${current}.`)
       return { responseText, knowledge, mathAnalysis, confidence }
     }
 
-    // Simple calculation
-    const calcMatch = message.match(/(?:calculate|what is)\s*([0-9\s.+\-*/x×÷^()]+)/)
+    const calcMatch = message.match(/(?:calculate|what is|what's)\s*([0-9\s.+\-*/x×÷^()]+)/i)
     if (calcMatch && calcMatch[1]) {
-      let expression = calcMatch[1].trim()
+      const expression = calcMatch[1].trim().replace(/[x×]/g, "*").replace(/÷/g, "/")
       thinkingSteps.push(`🔍 Matched simple calculation pattern. Evaluating expression: "${expression}"`)
-      expression = expression.replace(/[x×]/g, "*").replace(/÷/g, "/")
       try {
-        const result = new Function(`return ${expression}`)()
+        // Using a safer evaluation method
+        const result = Function(`'use strict'; return (${expression})`)()
         responseText = `The result of ${expression} is ${result}.`
         knowledge = ["Simple Calculation"]
         mathAnalysis = { operation: "Evaluation", expression, result, confidence: 1.0, seedDataUsed: false }
         confidence = 1.0
-        thinkingSteps.push(`✅ Calculation successful. Result: ${result}.`)
       } catch (e) {
         responseText = `I couldn't evaluate the expression "${expression}". It seems to be invalid.`
-        thinkingSteps.push(`❌ Calculation failed for expression: "${expression}".`)
         confidence = 0.2
       }
       return { responseText, knowledge, mathAnalysis, confidence }
     }
 
-    thinkingSteps.push("⚠️ No specific math operation matched. Exiting Math Processor.")
     return { responseText, knowledge, mathAnalysis, confidence }
   }
 
