@@ -3,8 +3,7 @@
 
 import type { ChatMessage, EngineResponse, IKnowledgeModule } from "./types"
 import { VocabularyModule } from "./modules/vocabulary-module"
-// Import other modules as they are created
-// import { MathematicsModule } from './modules/mathematics-module';
+import { MathematicsModule } from "./modules/mathematics-module"
 
 export class CognitiveEngine {
   private modules: Map<string, IKnowledgeModule> = new Map()
@@ -14,7 +13,7 @@ export class CognitiveEngine {
   constructor() {
     // Register all modules here
     this.registerModule(new VocabularyModule())
-    // this.registerModule(new MathematicsModule());
+    this.registerModule(new MathematicsModule())
   }
 
   private registerModule(module: IKnowledgeModule) {
@@ -41,8 +40,9 @@ export class CognitiveEngine {
     })
     thinkingProcess.push("Received user input.")
 
-    // 1. Intent Recognition (simple version for now)
+    // Intent Recognition
     const definitionIntent = userInput.toLowerCase().match(/^(?:define|what is|what's the meaning of)\s(.+)/)
+    const mathIntent = userInput.toLowerCase().match(/^(?:calculate|compute|what is|solve)\s+(.+)/)
 
     let responseContent = ""
     let confidence = 0.5
@@ -50,7 +50,7 @@ export class CognitiveEngine {
     if (definitionIntent) {
       const term = definitionIntent[1].replace(/[?.!]/g, "")
       thinkingProcess.push(`Recognized 'definition' intent for term: "${term}".`)
-      const vocabModule = this.modules.get("Vocabulary")
+      const vocabModule = this.modules.get("Vocabulary") as VocabularyModule
       if (vocabModule) {
         thinkingProcess.push("Querying Vocabulary Module...")
         const result = await vocabModule.findTerm(term)
@@ -64,10 +64,21 @@ export class CognitiveEngine {
           thinkingProcess.push("Vocabulary Module returned no result.")
         }
       }
+    } else if (mathIntent) {
+      const expression = mathIntent[1]
+      thinkingProcess.push(`Recognized 'math' intent for expression: "${expression}".`)
+      const mathModule = this.modules.get("Mathematics") as MathematicsModule
+      if (mathModule) {
+        thinkingProcess.push("Delegating to Mathematics Module...")
+        const result = mathModule.evaluateExpression(expression)
+        responseContent = result.answer
+        confidence = result.confidence
+        thinkingProcess.push(...result.reasoning)
+      }
     } else {
       // Default conversational response
       thinkingProcess.push("No specific intent recognized. Generating conversational response.")
-      responseContent = `I'm processing your message: "${userInput}". My modular system is online. Try asking me to define a word, like "define technology".`
+      responseContent = `I'm processing your message: "${userInput}". My modular system is online. Try asking me to define a word or calculate something (e.g., "calculate 12 * 3").`
       confidence = 0.7
     }
 

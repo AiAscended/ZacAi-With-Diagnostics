@@ -109,7 +109,7 @@ export default function AIControlPanel({ engine }: AIControlPanelProps) {
               <TabsTrigger value="vocabulary">
                 <BookOpen className="mr-2 h-4 w-4" /> Vocabulary
               </TabsTrigger>
-              <TabsTrigger value="mathematics" disabled>
+              <TabsTrigger value="mathematics">
                 <Calculator className="mr-2 h-4 w-4" /> Math
               </TabsTrigger>
               {/* <TabsTrigger value="coding" disabled><Code className="mr-2 h-4 w-4"/>Coding</TabsTrigger>
@@ -119,7 +119,7 @@ export default function AIControlPanel({ engine }: AIControlPanelProps) {
               <KnowledgeViewerTab data={engine.getModuleData("Vocabulary")} title="Vocabulary" />
             </TabsContent>
             <TabsContent value="mathematics" className="flex-1 mt-2">
-              <p className="p-4 text-center text-muted-foreground">Mathematics module not yet implemented.</p>
+              <KnowledgeViewerTab data={engine.getModuleData("Mathematics")} title="Mathematics" />
             </TabsContent>
           </Tabs>
         </CardContent>
