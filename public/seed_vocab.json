@@ -1021,59 +1021,14 @@
     "examples": ["I also agree", "Also important", "Also known as"],
     "frequency": 61
   },
-  "back": {
-    "definition": "In the direction that is the reverse of forward; return",
-    "part_of_speech": "adverb/noun",
-    "phonetic": "bæk",
-    "synonyms": ["return", "behind"],
-    "antonyms": ["forward", "front"],
-    "examples": ["Come back", "Back home", "Back door"],
-    "frequency": 60
-  },
-  "after": {
-    "definition": "In the time following an event; behind in place",
-    "part_of_speech": "preposition/adverb",
-    "phonetic": "ˈæftər",
-    "synonyms": ["following", "subsequent to"],
-    "antonyms": ["before", "prior to"],
-    "examples": ["After dinner", "After school", "Day after"],
-    "frequency": 59
-  },
-  "use": {
-    "definition": "Take, hold, or deploy as a means of accomplishing something",
-    "part_of_speech": "verb/noun",
-    "phonetic": "juːz",
-    "synonyms": ["employ", "utilize", "apply"],
-    "antonyms": ["disuse", "ignore"],
-    "examples": ["Use the tool", "Use your brain", "Good use"],
-    "frequency": 59
-  },
-  "two": {
-    "definition": "The number 2; equivalent to the sum of one and one",
-    "part_of_speech": "number",
-    "phonetic": "tuː",
-    "synonyms": ["pair", "couple"],
-    "antonyms": ["one", "single"],
-    "examples": ["Two cats", "I need two minutes", "Two by two"],
-    "frequency": 58
-  },
-  "how": {
-    "definition": "In what way or manner; by what means; to what extent",
-    "part_of_speech": "adverb",
-    "phonetic": "haʊ",
-    "synonyms": ["in what way"],
-    "antonyms": [],
-    "examples": ["How are you?", "How does it work?", "How much"],
-    "frequency": 58
-  },
-  "our": {
-    "definition": "Belonging to or associated with the speaker and one or more others",
+  "your": {
+    "definition": "Belonging to or associated with the person being addressed",
     "part_of_speech": "pronoun",
-    "phonetic": "aʊr",
-    "synonyms": ["ours"],
-    "antonyms": ["their", "your"],
-    "examples": ["Our house", "Our time", "Our turn"],
-    "frequency": 57
+    "phonetic": "jʊr",
+    "synonyms": ["yours"],
+    "antonyms": ["my", "our"],
+    "examples": ["Your book", "Your turn", "Your choice"],
+    "frequency": 60
   },
   "work": {
     "definition": "Activity involving mental or physical effort; be employed",
@@ -1082,25 +1037,16 @@
     "synonyms": ["job", "labor", "employment"],
     "antonyms": ["rest", "leisure"],
     "examples": ["Go to work", "Hard work", "Work together"],
-    "frequency": 57
+    "frequency": 60
   },
-  "first": {
-    "definition": "Coming before all others in time or order; earliest.",
-    "part_of_speech": "adjective/adverb",
-    "phonetic": "fɜːrst",
-    "synonyms": ["initial", "earliest", "leading"],
-    "antonyms": ["last", "final"],
-    "examples": ["First place.", "First, we need to plan."],
-    "frequency": 56
-  },
-  "well": {
-    "definition": "In a good or satisfactory way; in good health",
-    "part_of_speech": "adverb/adjective",
-    "phonetic": "wel",
-    "synonyms": ["good", "fine", "healthy"],
-    "antonyms": ["badly", "poorly", "sick"],
-    "examples": ["Well done", "Feel well", "Very well"],
-    "frequency": 56
+  "life": {
+    "definition": "The condition that distinguishes animals and plants from inorganic matter",
+    "part_of_speech": "noun",
+    "phonetic": "laɪf",
+    "synonyms": ["existence", "living"],
+    "antonyms": ["death"],
+    "examples": ["Life is good", "Real life", "Life story"],
+    "frequency": 59
   },
   "way": {
     "definition": "A method, style, or manner of doing something; path or route",
@@ -1109,15 +1055,69 @@
     "synonyms": ["method", "manner", "path"],
     "antonyms": ["obstacle", "barrier"],
     "examples": ["This way", "The right way", "Way to go"],
-    "frequency": 55
+    "frequency": 59
   },
-  "even": {
-    "definition": "Used to emphasize something surprising; flat and smooth",
-    "part_of_speech": "adverb/adjective",
-    "phonetic": "ˈiːvən",
-    "synonyms": ["also", "flat", "level"],
-    "antonyms": ["odd", "uneven"],
-    "examples": ["Even better", "Even number", "Even so"],
+  "may": {
+    "definition": "Expressing possibility; asking for or giving permission",
+    "part_of_speech": "modal verb",
+    "phonetic": "meɪ",
+    "synonyms": ["might", "could"],
+    "antonyms": ["cannot", "will not"],
+    "examples": ["It may rain", "May I help?", "May be"],
+    "frequency": 58
+  },
+  "back": {
+    "definition": "In the direction that is the reverse of forward; return",
+    "part_of_speech": "adverb/noun",
+    "phonetic": "bæk",
+    "synonyms": ["return", "behind"],
+    "antonyms": ["forward", "front"],
+    "examples": ["Come back", "Back home", "Back door"],
+    "frequency": 58
+  },
+  "through": {
+    "definition": "Moving in one side and out of the other; by way of",
+    "part_of_speech": "preposition",
+    "phonetic": "θruː",
+    "synonyms": ["via", "across"],
+    "antonyms": ["around", "avoiding"],
+    "examples": ["Through the door", "Through time", "Go through"],
+    "frequency": 57
+  },
+  "day": {
+    "definition": "A period of twenty-four hours; the time of light between sunrise and sunset",
+    "part_of_speech": "noun",
+    "phonetic": "deɪ",
+    "synonyms": ["date", "twenty-four hours"],
+    "antonyms": ["night", "evening"],
+    "examples": ["Good day", "Every day", "Day and night"],
+    "frequency": 57
+  },
+  "get": {
+    "definition": "Come to have or hold; receive; become",
+    "part_of_speech": "verb",
+    "phonetic": "ɡet",
+    "synonyms": ["obtain", "acquire", "receive"],
+    "antonyms": ["give", "lose"],
+    "examples": ["Get the book", "Get ready", "Get going"],
+    "frequency": 56
+  },
+  "use": {
+    "definition": "Take, hold, or deploy as a means of accomplishing something",
+    "part_of_speech": "verb/noun",
+    "phonetic": "juːz",
+    "synonyms": ["employ", "utilize", "apply"],
+    "antonyms": ["disuse", "ignore"],
+    "examples": ["Use the tool", "Use your brain", "Good use"],
+    "frequency": 56
+  },
+  "man": {
+    "definition": "An adult male human being",
+    "part_of_speech": "noun",
+    "phonetic": "mæn",
+    "synonyms": ["male", "gentleman", "guy"],
+    "antonyms": ["woman", "female"],
+    "examples": ["The man walked", "He is a good man", "Old man"],
     "frequency": 55
   },
   "new": {
@@ -1127,52 +1127,88 @@
     "synonyms": ["fresh", "recent", "modern"],
     "antonyms": ["old", "ancient"],
     "examples": ["New car", "New idea", "Brand new"],
+    "frequency": 55
+  },
+  "here": {
+    "definition": "In, at, or to this place or position",
+    "part_of_speech": "adverb",
+    "phonetic": "hɪr",
+    "synonyms": ["in this place"],
+    "antonyms": ["there", "elsewhere"],
+    "examples": ["Come here", "Here it is", "Right here"],
     "frequency": 54
   },
-  "want": {
-    "definition": "Have a desire to possess or do something; wish for.",
-    "part_of_speech": "verb",
-    "phonetic": "wɑːnt",
-    "synonyms": ["desire", "wish", "crave"],
-    "antonyms": ["dislike", "hate"],
-    "examples": ["I want a new phone.", "What do you want to do?"],
+  "old": {
+    "definition": "Having lived for a long time; no longer young; former",
+    "part_of_speech": "adjective",
+    "phonetic": "oʊld",
+    "synonyms": ["aged", "elderly", "ancient"],
+    "antonyms": ["young", "new", "fresh"],
+    "examples": ["Old man", "Old times", "How old"],
     "frequency": 54
   },
-  "because": {
-    "definition": "For the reason that; since",
-    "part_of_speech": "conjunction",
-    "phonetic": "bɪˈkɔːz",
-    "synonyms": ["since", "as", "due to"],
-    "antonyms": ["despite", "although"],
-    "examples": ["Because of you", "Just because", "Because I said so"],
-    "frequency": 53
-  },
-  "any": {
-    "definition": "Used to refer to one or some of a thing or number of things, no matter how much or many.",
-    "part_of_speech": "determiner/pronoun",
-    "phonetic": "ˈɛni",
-    "synonyms": ["some"],
-    "antonyms": ["no", "none"],
-    "examples": ["Do you have any questions?", "I don't want any trouble."],
-    "frequency": 53
-  },
-  "these": {
-    "definition": "Plural of this; used to identify a specific person or thing close at hand.",
-    "part_of_speech": "pronoun/determiner",
-    "phonetic": "ðiːz",
-    "synonyms": ["this"],
-    "antonyms": ["those", "that"],
-    "examples": ["These are my friends.", "I like these shoes."],
-    "frequency": 52
-  },
-  "give": {
-    "definition": "Freely transfer the possession of something to someone.",
+  "see": {
+    "definition": "Perceive with the eyes; discern visually; understand",
     "part_of_speech": "verb",
-    "phonetic": "ɡɪv",
-    "synonyms": ["provide", "offer", "present"],
-    "antonyms": ["take", "receive"],
-    "examples": ["Give me the book.", "She gave him a gift."],
+    "phonetic": "siː",
+    "synonyms": ["observe", "view", "watch"],
+    "antonyms": ["blind", "ignore"],
+    "examples": ["I see you", "See the movie", "I see what you mean"],
+    "frequency": 53
+  },
+  "him": {
+    "definition": "Used as the object of a verb or preposition to refer to a male",
+    "part_of_speech": "pronoun",
+    "phonetic": "hɪm",
+    "synonyms": ["he"],
+    "antonyms": ["her"],
+    "examples": ["I saw him", "Give it to him", "Tell him"],
+    "frequency": 53
+  },
+  "two": {
+    "definition": "The number 2; equivalent to the sum of one and one",
+    "part_of_speech": "number",
+    "phonetic": "tuː",
+    "synonyms": ["pair", "couple"],
+    "antonyms": ["one", "single"],
+    "examples": ["Two cats", "I need two minutes", "Two by two"],
     "frequency": 52
+  },
+  "how": {
+    "definition": "In what way or manner; by what means; to what extent",
+    "part_of_speech": "adverb",
+    "phonetic": "haʊ",
+    "synonyms": ["in what way"],
+    "antonyms": [],
+    "examples": ["How are you?", "How does it work?", "How much"],
+    "frequency": 52
+  },
+  "its": {
+    "definition": "Belonging to or associated with a thing previously mentioned",
+    "part_of_speech": "pronoun",
+    "phonetic": "ɪts",
+    "synonyms": [],
+    "antonyms": [],
+    "examples": ["The dog wagged its tail", "Its color", "On its own"],
+    "frequency": 51
+  },
+  "our": {
+    "definition": "Belonging to or associated with the speaker and one or more others",
+    "part_of_speech": "pronoun",
+    "phonetic": "aʊr",
+    "synonyms": ["ours"],
+    "antonyms": ["their", "your"],
+    "examples": ["Our house", "Our time", "Our turn"],
+    "frequency": 51
+  },
+  "out": {
+    "definition": "Moving away from the inside; not at home or work",
+    "part_of_speech": "adverb/preposition",
+    "phonetic": "aʊt",
+    "synonyms": ["outside", "away"],
+    "antonyms": ["in", "inside"],
+    "examples": ["Go out", "Turn out", "Out there"],
+    "frequency": 50
   },
   "day": {
     "definition": "A period of twenty-four hours; the time of light between sunrise and sunset",
@@ -1181,16 +1217,619 @@
     "synonyms": ["date", "twenty-four hours"],
     "antonyms": ["night", "evening"],
     "examples": ["Good day", "Every day", "Day and night"],
-    "frequency": 51
+    "frequency": 50
   },
-  "most": {
-    "definition": "Greatest in amount or degree; the majority of.",
+  "get": {
+    "definition": "Come to have or hold; receive; become",
+    "part_of_speech": "verb",
+    "phonetic": "ɡet",
+    "synonyms": ["obtain", "acquire", "receive"],
+    "antonyms": ["give", "lose"],
+    "examples": ["Get the book", "Get ready", "Get going"],
+    "frequency": 49
+  },
+  "has": {
+    "definition": "Third person singular present of have; possesses",
+    "part_of_speech": "verb",
+    "phonetic": "hæz",
+    "synonyms": ["owns", "possesses"],
+    "antonyms": ["lacks", "needs"],
+    "examples": ["He has a car", "She has time", "It has been"],
+    "frequency": 49
+  },
+  "had": {
+    "definition": "Past tense of have; possessed in the past",
+    "part_of_speech": "verb",
+    "phonetic": "hæd",
+    "synonyms": ["possessed", "owned"],
+    "antonyms": ["lacked", "needed"],
+    "examples": ["I had lunch", "She had a car", "Had been there"],
+    "frequency": 48
+  },
+  "let": {
+    "definition": "Allow to; not prevent or forbid; used to make suggestions",
+    "part_of_speech": "verb",
+    "phonetic": "let",
+    "synonyms": ["allow", "permit"],
+    "antonyms": ["prevent", "forbid"],
+    "examples": ["Let me help", "Let's go", "Let it be"],
+    "frequency": 48
+  },
+  "put": {
+    "definition": "Move to or place in a particular position",
+    "part_of_speech": "verb",
+    "phonetic": "pʊt",
+    "synonyms": ["place", "set", "position"],
+    "antonyms": ["remove", "take away"],
+    "examples": ["Put it down", "Put on clothes", "Put together"],
+    "frequency": 47
+  },
+  "too": {
+    "definition": "To a higher degree than is desirable; also; in addition",
+    "part_of_speech": "adverb",
+    "phonetic": "tuː",
+    "synonyms": ["also", "as well", "excessively"],
+    "antonyms": ["not enough", "insufficient"],
+    "examples": ["Too hot", "Me too", "Too much"],
+    "frequency": 47
+  },
+  "old": {
+    "definition": "Having lived for a long time; no longer young; former",
+    "part_of_speech": "adjective",
+    "phonetic": "oʊld",
+    "synonyms": ["aged", "elderly", "ancient"],
+    "antonyms": ["young", "new", "fresh"],
+    "examples": ["Old man", "Old times", "How old"],
+    "frequency": 46
+  },
+  "why": {
+    "definition": "For what reason or purpose; the reason for which",
+    "part_of_speech": "adverb",
+    "phonetic": "waɪ",
+    "synonyms": ["for what reason"],
+    "antonyms": [],
+    "examples": ["Why did you do that?", "That's why", "Why not"],
+    "frequency": 46
+  },
+  "let": {
+    "definition": "Allow to; not prevent or forbid; used to make suggestions",
+    "part_of_speech": "verb",
+    "phonetic": "let",
+    "synonyms": ["allow", "permit"],
+    "antonyms": ["prevent", "forbid"],
+    "examples": ["Let me help", "Let's go", "Let it be"],
+    "frequency": 45
+  },
+  "great": {
+    "definition": "Of ability, quality, or eminence considerably above average",
+    "part_of_speech": "adjective",
+    "phonetic": "ɡreɪt",
+    "synonyms": ["excellent", "wonderful", "fantastic"],
+    "antonyms": ["terrible", "awful", "poor"],
+    "examples": ["Great job", "Great idea", "Feel great"],
+    "frequency": 45
+  },
+  "same": {
+    "definition": "Identical; not different; unchanged",
+    "part_of_speech": "adjective/pronoun",
+    "phonetic": "seɪm",
+    "synonyms": ["identical", "equal"],
+    "antonyms": ["different", "other"],
+    "examples": ["Same time", "The same", "Same here"],
+    "frequency": 44
+  },
+  "big": {
+    "definition": "Of considerable size, extent, or intensity",
+    "part_of_speech": "adjective",
+    "phonetic": "bɪɡ",
+    "synonyms": ["large", "huge", "enormous", "massive"],
+    "antonyms": ["small", "tiny", "little"],
+    "examples": ["A big house", "This is a big problem", "Big deal"],
+    "frequency": 44
+  },
+  "group": {
+    "definition": "A number of people or things that are located, gathered, or classed together",
+    "part_of_speech": "noun",
+    "phonetic": "ɡruːp",
+    "synonyms": ["team", "collection", "set"],
+    "antonyms": ["individual", "single"],
+    "examples": ["Group of friends", "Work group", "Group together"],
+    "frequency": 43
+  },
+  "woman": {
+    "definition": "An adult female human being",
+    "part_of_speech": "noun",
+    "phonetic": "ˈwʊmən",
+    "synonyms": ["female", "lady", "girl"],
+    "antonyms": ["man", "male"],
+    "examples": ["The woman smiled", "She is a strong woman", "Young woman"],
+    "frequency": 43
+  },
+  "world": {
+    "definition": "The earth, together with all of its countries and peoples",
+    "part_of_speech": "noun",
+    "phonetic": "wɜːrld",
+    "synonyms": ["earth", "globe", "planet"],
+    "antonyms": ["space", "universe"],
+    "examples": ["Around the world", "World peace", "Real world"],
+    "frequency": 42
+  },
+  "school": {
+    "definition": "An institution for educating children or adults",
+    "part_of_speech": "noun",
+    "phonetic": "skuːl",
+    "synonyms": ["academy", "institution", "college"],
+    "antonyms": ["home", "workplace"],
+    "examples": ["Go to school", "School day", "High school"],
+    "frequency": 42
+  },
+  "still": {
+    "definition": "Up to and including the present time; nevertheless",
+    "part_of_speech": "adverb",
+    "phonetic": "stɪl",
+    "synonyms": ["yet", "even now", "however"],
+    "antonyms": ["no longer", "moving"],
+    "examples": ["Still here", "Still working", "Still life"],
+    "frequency": 41
+  },
+  "try": {
+    "definition": "Make an attempt or effort to do something",
+    "part_of_speech": "verb",
+    "phonetic": "traɪ",
+    "synonyms": ["attempt", "endeavor", "strive"],
+    "antonyms": ["quit", "give up"],
+    "examples": ["Try again", "Try your best", "Nice try"],
+    "frequency": 41
+  },
+  "last": {
+    "definition": "Coming after all others in time or order; most recent",
     "part_of_speech": "adjective/adverb",
-    "phonetic": "moʊst",
-    "synonyms": ["greatest", "majority"],
-    "antonyms": ["least", "fewest"],
-    "examples": ["This is the most important part.", "Most people agree."],
-    "frequency": 51
+    "phonetic": "læst",
+    "synonyms": ["final", "latest", "recent"],
+    "antonyms": ["first", "initial"],
+    "examples": ["Last time", "At last", "Last night"],
+    "frequency": 40
+  },
+  "ask": {
+    "definition": "Say something in order to obtain an answer or information",
+    "part_of_speech": "verb",
+    "phonetic": "æsk",
+    "synonyms": ["inquire", "question", "request"],
+    "antonyms": ["answer", "tell"],
+    "examples": ["Ask a question", "Ask for help", "Don't ask"],
+    "frequency": 40
+  },
+  "kind": {
+    "definition": "Having or showing a friendly, generous, or considerate nature",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "kaɪnd",
+    "synonyms": ["nice", "gentle", "caring"],
+    "antonyms": ["cruel", "mean", "harsh"],
+    "examples": ["Kind person", "What kind", "Be kind"],
+    "frequency": 39
+  },
+  "hand": {
+    "definition": "The end part of a person's arm beyond the wrist",
+    "part_of_speech": "noun",
+    "phonetic": "hænd",
+    "synonyms": ["palm", "fist"],
+    "antonyms": ["foot"],
+    "examples": ["Raise your hand", "Shake hands", "On hand"],
+    "frequency": 39
+  },
+  "high": {
+    "definition": "Of great vertical extent; far above ground or sea level",
+    "part_of_speech": "adjective",
+    "phonetic": "haɪ",
+    "synonyms": ["tall", "elevated", "lofty"],
+    "antonyms": ["low", "short"],
+    "examples": ["High mountain", "High school", "High quality"],
+    "frequency": 38
+  },
+  "country": {
+    "definition": "A nation with its own government, occupying a particular territory",
+    "part_of_speech": "noun",
+    "phonetic": "ˈkʌntri",
+    "synonyms": ["nation", "state", "land"],
+    "antonyms": ["city", "town"],
+    "examples": ["My country", "Country music", "Foreign country"],
+    "frequency": 38
+  },
+  "point": {
+    "definition": "A particular spot, place, or position; the tapered end of something",
+    "part_of_speech": "noun/verb",
+    "phonetic": "pɔɪnt",
+    "synonyms": ["spot", "location", "tip"],
+    "antonyms": ["blunt", "dull"],
+    "examples": ["Good point", "Point out", "Starting point"],
+    "frequency": 37
+  },
+  "small": {
+    "definition": "Of a size that is less than normal or usual",
+    "part_of_speech": "adjective",
+    "phonetic": "smɔːl",
+    "synonyms": ["little", "tiny", "minute"],
+    "antonyms": ["big", "large", "huge"],
+    "examples": ["A small dog", "Small details matter", "Small world"],
+    "frequency": 37
+  },
+  "turn": {
+    "definition": "Move in a circular direction; change direction",
+    "part_of_speech": "verb/noun",
+    "phonetic": "tɜːrn",
+    "synonyms": ["rotate", "spin", "change"],
+    "antonyms": ["straight", "continue"],
+    "examples": ["Turn around", "Your turn", "Turn on"],
+    "frequency": 36
+  },
+  "right": {
+    "definition": "Morally good; correct; the opposite of left",
+    "part_of_speech": "adjective/adverb/noun",
+    "phonetic": "raɪt",
+    "synonyms": ["correct", "proper", "good"],
+    "antonyms": ["wrong", "left", "bad"],
+    "examples": ["Right answer", "Turn right", "Human rights"],
+    "frequency": 36
+  },
+  "move": {
+    "definition": "Go in a specified direction; change position",
+    "part_of_speech": "verb/noun",
+    "phonetic": "muːv",
+    "synonyms": ["go", "shift", "relocate"],
+    "antonyms": ["stay", "remain", "stop"],
+    "examples": ["Move forward", "Good move", "Move house"],
+    "frequency": 35
+  },
+  "thing": {
+    "definition": "An object that one need not, cannot, or does not wish to give a specific name to",
+    "part_of_speech": "noun",
+    "phonetic": "θɪŋ",
+    "synonyms": ["object", "item", "matter"],
+    "antonyms": ["person", "being"],
+    "examples": ["Good thing", "The thing is", "Many things"],
+    "frequency": 35
+  },
+  "place": {
+    "definition": "A particular position, point, or area in space; a location",
+    "part_of_speech": "noun/verb",
+    "phonetic": "pleɪs",
+    "synonyms": ["location", "spot", "position"],
+    "antonyms": ["nowhere", "remove"],
+    "examples": ["Nice place", "Take place", "In place"],
+    "frequency": 34
+  },
+  "own": {
+    "definition": "Belonging to oneself; possess as property",
+    "part_of_speech": "adjective/verb",
+    "phonetic": "oʊn",
+    "synonyms": ["possess", "have", "personal"],
+    "antonyms": ["rent", "borrow", "shared"],
+    "examples": ["My own", "Own a house", "On your own"],
+    "frequency": 34
+  },
+  "say": {
+    "definition": "Utter words; express in words",
+    "part_of_speech": "verb",
+    "phonetic": "seɪ",
+    "synonyms": ["speak", "tell", "utter"],
+    "antonyms": ["listen", "hear"],
+    "examples": ["Say hello", "What did you say?", "They say"],
+    "frequency": 33
+  },
+  "where": {
+    "definition": "In or to what place or position",
+    "part_of_speech": "adverb",
+    "phonetic": "wer",
+    "synonyms": ["in which place"],
+    "antonyms": [],
+    "examples": ["Where are you?", "Where to go", "Know where"],
+    "frequency": 33
+  },
+  "much": {
+    "definition": "A large amount of; to a great extent",
+    "part_of_speech": "determiner/adverb",
+    "phonetic": "mʌtʃ",
+    "synonyms": ["a lot", "many", "greatly"],
+    "antonyms": ["little", "few", "slightly"],
+    "examples": ["How much", "Too much", "Much better"],
+    "frequency": 32
+  },
+  "every": {
+    "definition": "Used to refer to all the individual members of a set",
+    "part_of_speech": "determiner",
+    "phonetic": "ˈevri",
+    "synonyms": ["each", "all"],
+    "antonyms": ["no", "none"],
+    "examples": ["Every day", "Every person", "Every time"],
+    "frequency": 32
+  },
+  "those": {
+    "definition": "Used to identify specific people or things observed or heard",
+    "part_of_speech": "pronoun/determiner",
+    "phonetic": "ðoʊz",
+    "synonyms": ["these"],
+    "antonyms": ["this", "that"],
+    "examples": ["Those people", "One of those", "Those days"],
+    "frequency": 31
+  },
+  "come": {
+    "definition": "Move or travel toward or into a place; arrive",
+    "part_of_speech": "verb",
+    "phonetic": "kʌm",
+    "synonyms": ["arrive", "approach"],
+    "antonyms": ["go", "leave"],
+    "examples": ["Come here", "Come home", "Come on"],
+    "frequency": 31
+  },
+  "water": {
+    "definition": "A colorless, transparent, odorless liquid that forms seas, lakes, rivers",
+    "part_of_speech": "noun",
+    "phonetic": "ˈwɔːtər",
+    "synonyms": ["liquid", "H2O"],
+    "antonyms": ["fire", "dry"],
+    "examples": ["Drink water", "Water flows", "Hot water"],
+    "frequency": 30
+  },
+  "long": {
+    "definition": "Measuring a great distance from end to end; for a long time",
+    "part_of_speech": "adjective/adverb",
+    "phonetic": "lɔːŋ",
+    "synonyms": ["lengthy", "extended", "far"],
+    "antonyms": ["short", "brief"],
+    "examples": ["Long road", "Long time", "How long"],
+    "frequency": 30
+  },
+  "little": {
+    "definition": "Small in size, amount, or degree; young",
+    "part_of_speech": "adjective/adverb",
+    "phonetic": "ˈlɪtəl",
+    "synonyms": ["small", "tiny", "young"],
+    "antonyms": ["big", "large", "much"],
+    "examples": ["Little house", "A little", "Little bit"],
+    "frequency": 29
+  },
+  "very": {
+    "definition": "Used for emphasis; to a high degree",
+    "part_of_speech": "adverb",
+    "phonetic": "ˈveri",
+    "synonyms": ["extremely", "really", "quite"],
+    "antonyms": ["slightly", "barely"],
+    "examples": ["Very good", "Very much", "Very well"],
+    "frequency": 29
+  },
+  "after": {
+    "definition": "In the time following an event; behind in place",
+    "part_of_speech": "preposition/adverb",
+    "phonetic": "ˈæftər",
+    "synonyms": ["following", "subsequent to"],
+    "antonyms": ["before", "prior to"],
+    "examples": ["After dinner", "After school", "Day after"],
+    "frequency": 28
+  },
+  "word": {
+    "definition": "A single distinct meaningful element of speech or writing",
+    "part_of_speech": "noun",
+    "phonetic": "wɜːrd",
+    "synonyms": ["term", "expression", "vocabulary"],
+    "antonyms": ["silence"],
+    "examples": ["Good word", "Word of mouth", "Last word"],
+    "frequency": 28
+  },
+  "long": {
+    "definition": "Measuring a great distance from end to end; for a long time",
+    "part_of_speech": "adjective/adverb",
+    "phonetic": "lɔːŋ",
+    "synonyms": ["lengthy", "extended", "far"],
+    "antonyms": ["short", "brief"],
+    "examples": ["Long road", "Long time", "How long"],
+    "frequency": 27
+  },
+  "house": {
+    "definition": "A building for human habitation; a family or dynasty",
+    "part_of_speech": "noun",
+    "phonetic": "haʊs",
+    "synonyms": ["home", "residence", "dwelling"],
+    "antonyms": ["outdoors", "street"],
+    "examples": ["My house", "House party", "White House"],
+    "frequency": 27
+  },
+  "never": {
+    "definition": "At no time in the past or future; not ever",
+    "part_of_speech": "adverb",
+    "phonetic": "ˈnevər",
+    "synonyms": ["not ever", "at no time"],
+    "antonyms": ["always", "ever"],
+    "examples": ["Never again", "Never mind", "Never say never"],
+    "frequency": 26
+  },
+  "another": {
+    "definition": "Used to refer to an additional person or thing of the same type",
+    "part_of_speech": "determiner/pronoun",
+    "phonetic": "əˈnʌðər",
+    "synonyms": ["additional", "different", "other"],
+    "antonyms": ["same", "identical"],
+    "examples": ["Another day", "One another", "Another time"],
+    "frequency": 26
+  },
+  "seem": {
+    "definition": "Give the impression of being something or having a quality",
+    "part_of_speech": "verb",
+    "phonetic": "siːm",
+    "synonyms": ["appear", "look", "sound"],
+    "antonyms": ["be", "actually"],
+    "examples": ["Seem happy", "It seems right", "Seem like"],
+    "frequency": 25
+  },
+  "something": {
+    "definition": "A thing that is unspecified or unknown",
+    "part_of_speech": "pronoun",
+    "phonetic": "ˈsʌmθɪŋ",
+    "synonyms": ["anything", "some thing"],
+    "antonyms": ["nothing"],
+    "examples": ["Something good", "Something else", "Do something"],
+    "frequency": 25
+  },
+  "need": {
+    "definition": "Require something because it is essential or very important",
+    "part_of_speech": "verb/noun",
+    "phonetic": "niːd",
+    "synonyms": ["require", "want", "necessity"],
+    "antonyms": ["have", "possess"],
+    "examples": ["Need help", "In need", "Need to go"],
+    "frequency": 24
+  },
+  "well": {
+    "definition": "In a good or satisfactory way; in good health",
+    "part_of_speech": "adverb/adjective",
+    "phonetic": "wel",
+    "synonyms": ["good", "fine", "healthy"],
+    "antonyms": ["badly", "poorly", "sick"],
+    "examples": ["Well done", "Feel well", "Very well"],
+    "frequency": 24
+  },
+  "large": {
+    "definition": "Of considerable or relatively great size, extent, or capacity",
+    "part_of_speech": "adjective",
+    "phonetic": "lɑːrdʒ",
+    "synonyms": ["big", "huge", "enormous"],
+    "antonyms": ["small", "tiny", "little"],
+    "examples": ["Large house", "Large number", "By and large"],
+    "frequency": 23
+  },
+  "must": {
+    "definition": "Used to indicate obligation, duty, or correctness",
+    "part_of_speech": "modal verb",
+    "phonetic": "mʌst",
+    "synonyms": ["have to", "should", "ought to"],
+    "antonyms": ["mustn't", "needn't"],
+    "examples": ["Must go", "Must be", "Must have"],
+    "frequency": 23
+  },
+  "big": {
+    "definition": "Of considerable size, extent, or intensity",
+    "part_of_speech": "adjective",
+    "phonetic": "bɪɡ",
+    "synonyms": ["large", "huge", "enormous"],
+    "antonyms": ["small", "tiny", "little"],
+    "examples": ["Big house", "Big problem", "Big deal"],
+    "frequency": 22
+  },
+  "even": {
+    "definition": "Used to emphasize something surprising; flat and smooth",
+    "part_of_speech": "adverb/adjective",
+    "phonetic": "ˈiːvən",
+    "synonyms": ["also", "flat", "level"],
+    "antonyms": ["odd", "uneven"],
+    "examples": ["Even better", "Even number", "Even so"],
+    "frequency": 22
+  },
+  "such": {
+    "definition": "Of the type previously mentioned; to so high a degree",
+    "part_of_speech": "determiner/pronoun",
+    "phonetic": "sʌtʃ",
+    "synonyms": ["like that", "so much"],
+    "antonyms": ["different", "unlike"],
+    "examples": ["Such a day", "Such as", "No such thing"],
+    "frequency": 21
+  },
+  "because": {
+    "definition": "For the reason that; since",
+    "part_of_speech": "conjunction",
+    "phonetic": "bɪˈkɔːz",
+    "synonyms": ["since", "as", "due to"],
+    "antonyms": ["despite", "although"],
+    "examples": ["Because of you", "Just because", "Because I said so"],
+    "frequency": 21
+  },
+  "turn": {
+    "definition": "Move in a circular direction; change direction",
+    "part_of_speech": "verb/noun",
+    "phonetic": "tɜːrn",
+    "synonyms": ["rotate", "spin", "change"],
+    "antonyms": ["straight", "continue"],
+    "examples": ["Turn around", "Your turn", "Turn on"],
+    "frequency": 20
+  },
+  "here": {
+    "definition": "In, at, or to this place or position",
+    "part_of_speech": "adverb",
+    "phonetic": "hɪr",
+    "synonyms": ["in this place"],
+    "antonyms": ["there", "elsewhere"],
+    "examples": ["Come here", "Here it is", "Right here"],
+    "frequency": 20
+  },
+  "why": {
+    "definition": "For what reason or purpose; the reason for which",
+    "part_of_speech": "adverb",
+    "phonetic": "waɪ",
+    "synonyms": ["for what reason"],
+    "antonyms": [],
+    "examples": ["Why did you do that?", "That's why", "Why not"],
+    "frequency": 19
+  },
+  "ask": {
+    "definition": "Say something in order to obtain an answer or information",
+    "part_of_speech": "verb",
+    "phonetic": "æsk",
+    "synonyms": ["inquire", "question", "request"],
+    "antonyms": ["answer", "tell"],
+    "examples": ["Ask a question", "Ask for help", "Don't ask"],
+    "frequency": 19
+  },
+  "men": {
+    "definition": "Plural of man; adult male human beings",
+    "part_of_speech": "noun",
+    "phonetic": "men",
+    "synonyms": ["males", "gentlemen", "guys"],
+    "antonyms": ["women", "females"],
+    "examples": ["Good men", "Men and women", "Young men"],
+    "frequency": 18
+  },
+  "read": {
+    "definition": "Look at and comprehend the meaning of written or printed matter",
+    "part_of_speech": "verb",
+    "phonetic": "riːd",
+    "synonyms": ["study", "peruse", "scan"],
+    "antonyms": ["write", "ignore"],
+    "examples": ["Read a book", "Read aloud", "Read between lines"],
+    "frequency": 18
+  },
+  "need": {
+    "definition": "Require something because it is essential or very important",
+    "part_of_speech": "verb/noun",
+    "phonetic": "niːd",
+    "synonyms": ["require", "want", "necessity"],
+    "antonyms": ["have", "possess"],
+    "examples": ["Need help", "In need", "Need to go"],
+    "frequency": 17
+  },
+  "land": {
+    "definition": "The part of the earth's surface that is not covered by water",
+    "part_of_speech": "noun/verb",
+    "phonetic": "lænd",
+    "synonyms": ["ground", "earth", "territory"],
+    "antonyms": ["water", "sea"],
+    "examples": ["Dry land", "Land a job", "Promised land"],
+    "frequency": 17
+  },
+  "different": {
+    "definition": "Not the same as another; distinct in nature",
+    "part_of_speech": "adjective",
+    "phonetic": "ˈdɪfərənt",
+    "synonyms": ["distinct", "separate", "unlike"],
+    "antonyms": ["same", "identical", "similar"],
+    "examples": ["Different way", "Something different", "Different from"],
+    "frequency": 16
+  },
+  "home": {
+    "definition": "The place where one lives; one's place of residence",
+    "part_of_speech": "noun/adverb",
+    "phonetic": "hoʊm",
+    "synonyms": ["house", "residence", "dwelling"],
+    "antonyms": ["away", "abroad"],
+    "examples": ["Go home", "Home sweet home", "At home"],
+    "frequency": 16
   },
   "us": {
     "definition": "Used by a speaker to refer to himself or herself and others",
@@ -1199,6 +1838,213 @@
     "synonyms": ["we", "ourselves"],
     "antonyms": ["them", "they"],
     "examples": ["Help us", "Between us", "All of us"],
-    "frequency": 50
+    "frequency": 15
+  },
+  "move": {
+    "definition": "Go in a specified direction; change position",
+    "part_of_speech": "verb/noun",
+    "phonetic": "muːv",
+    "synonyms": ["go", "shift", "relocate"],
+    "antonyms": ["stay", "remain", "stop"],
+    "examples": ["Move forward", "Good move", "Move house"],
+    "frequency": 15
+  },
+  "try": {
+    "definition": "Make an attempt or effort to do something",
+    "part_of_speech": "verb",
+    "phonetic": "traɪ",
+    "synonyms": ["attempt", "endeavor", "strive"],
+    "antonyms": ["quit", "give up"],
+    "examples": ["Try again", "Try your best", "Nice try"],
+    "frequency": 14
+  },
+  "kind": {
+    "definition": "Having or showing a friendly, generous, or considerate nature",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "kaɪnd",
+    "synonyms": ["nice", "gentle", "caring"],
+    "antonyms": ["cruel", "mean", "harsh"],
+    "examples": ["Kind person", "What kind", "Be kind"],
+    "frequency": 14
+  },
+  "hand": {
+    "definition": "The end part of a person's arm beyond the wrist",
+    "part_of_speech": "noun",
+    "phonetic": "hænd",
+    "synonyms": ["palm", "fist"],
+    "antonyms": ["foot"],
+    "examples": ["Raise your hand", "Shake hands", "On hand"],
+    "frequency": 13
+  },
+  "picture": {
+    "definition": "A painting, drawing, photograph, or other image",
+    "part_of_speech": "noun/verb",
+    "phonetic": "ˈpɪktʃər",
+    "synonyms": ["image", "photo", "illustration"],
+    "antonyms": ["reality", "actual"],
+    "examples": ["Take a picture", "Picture this", "Big picture"],
+    "frequency": 13
+  },
+  "again": {
+    "definition": "Once more; another time",
+    "part_of_speech": "adverb",
+    "phonetic": "əˈɡen",
+    "synonyms": ["once more", "anew"],
+    "antonyms": ["never", "once"],
+    "examples": ["Try again", "Again and again", "Here we go again"],
+    "frequency": 12
+  },
+  "change": {
+    "definition": "Make or become different; alter",
+    "part_of_speech": "verb/noun",
+    "phonetic": "tʃeɪndʒ",
+    "synonyms": ["alter", "modify", "transform"],
+    "antonyms": ["keep", "maintain", "preserve"],
+    "examples": ["Change clothes", "Climate change", "Change of heart"],
+    "frequency": 12
+  },
+  "off": {
+    "definition": "Away from the place in question; not on",
+    "part_of_speech": "adverb/preposition",
+    "phonetic": "ɔːf",
+    "synonyms": ["away", "not on"],
+    "antonyms": ["on", "toward"],
+    "examples": ["Turn off", "Day off", "Off limits"],
+    "frequency": 11
+  },
+  "play": {
+    "definition": "Engage in activity for enjoyment; perform music",
+    "part_of_speech": "verb/noun",
+    "phonetic": "pleɪ",
+    "synonyms": ["game", "perform", "act"],
+    "antonyms": ["work", "stop"],
+    "examples": ["Play games", "Play music", "Child's play"],
+    "frequency": 11
+  },
+  "spell": {
+    "definition": "Write or name the letters that form a word in correct sequence",
+    "part_of_speech": "verb/noun",
+    "phonetic": "spel",
+    "synonyms": ["write out", "letter"],
+    "antonyms": ["misspell"],
+    "examples": ["Spell your name", "Magic spell", "Spell it out"],
+    "frequency": 10
+  },
+  "air": {
+    "definition": "The invisible gaseous substance surrounding the earth",
+    "part_of_speech": "noun",
+    "phonetic": "er",
+    "synonyms": ["atmosphere", "oxygen"],
+    "antonyms": ["water", "solid"],
+    "examples": ["Fresh air", "Air travel", "On the air"],
+    "frequency": 10
+  },
+  "away": {
+    "definition": "To or at a distance from a particular place",
+    "part_of_speech": "adverb",
+    "phonetic": "əˈweɪ",
+    "synonyms": ["distant", "far", "gone"],
+    "antonyms": ["near", "close", "here"],
+    "examples": ["Go away", "Far away", "Right away"],
+    "frequency": 9
+  },
+  "animal": {
+    "definition": "A living organism that feeds on organic matter",
+    "part_of_speech": "noun",
+    "phonetic": "ˈænɪməl",
+    "synonyms": ["creature", "beast", "wildlife"],
+    "antonyms": ["plant", "human"],
+    "examples": ["Wild animal", "Animal rights", "Farm animal"],
+    "frequency": 9
+  },
+  "page": {
+    "definition": "One side of a leaf of paper in a book, magazine, or newspaper",
+    "part_of_speech": "noun",
+    "phonetic": "peɪdʒ",
+    "synonyms": ["sheet", "leaf"],
+    "antonyms": [],
+    "examples": ["Turn the page", "Front page", "Web page"],
+    "frequency": 8
+  },
+  "mother": {
+    "definition": "A woman in relation to her child or children",
+    "part_of_speech": "noun",
+    "phonetic": "ˈmʌðər",
+    "synonyms": ["mom", "mama", "parent"],
+    "antonyms": ["father", "dad"],
+    "examples": ["My mother", "Mother nature", "Mother tongue"],
+    "frequency": 8
+  },
+  "answer": {
+    "definition": "A thing said, written, or done to deal with a question",
+    "part_of_speech": "noun/verb",
+    "phonetic": "ˈænsər",
+    "synonyms": ["reply", "response", "solution"],
+    "antonyms": ["question", "ask"],
+    "examples": ["Right answer", "Answer the phone", "No answer"],
+    "frequency": 7
+  },
+  "found": {
+    "definition": "Past tense of find; discovered",
+    "part_of_speech": "verb",
+    "phonetic": "faʊnd",
+    "synonyms": ["discovered", "located"],
+    "antonyms": ["lost", "missing"],
+    "examples": ["Found it", "Lost and found", "Well founded"],
+    "frequency": 7
+  },
+  "study": {
+    "definition": "The devotion of time and attention to acquiring knowledge",
+    "part_of_speech": "noun/verb",
+    "phonetic": "ˈstʌdi",
+    "synonyms": ["learn", "research", "examine"],
+    "antonyms": ["ignore", "neglect"],
+    "examples": ["Study hard", "Case study", "Study abroad"],
+    "frequency": 6
+  },
+  "still": {
+    "definition": "Up to and including the present time; nevertheless",
+    "part_of_speech": "adverb",
+    "phonetic": "stɪl",
+    "synonyms": ["yet", "even now", "however"],
+    "antonyms": ["no longer", "moving"],
+    "examples": ["Still here", "Still working", "Still life"],
+    "frequency": 6
+  },
+  "learn": {
+    "definition": "Acquire knowledge or skill through study, experience, or instruction",
+    "part_of_speech": "verb",
+    "phonetic": "lɜːrn",
+    "synonyms": ["study", "master", "acquire"],
+    "antonyms": ["forget", "unlearn", "ignore"],
+    "examples": ["Learn something new", "Learn quickly", "Live and learn"],
+    "frequency": 5
+  },
+  "should": {
+    "definition": "Used to indicate obligation, duty, or correctness",
+    "part_of_speech": "modal verb",
+    "phonetic": "ʃʊd",
+    "synonyms": ["ought to", "must"],
+    "antonyms": ["shouldn't", "mustn't"],
+    "examples": ["Should go", "Should have", "You should know"],
+    "frequency": 5
+  },
+  "american": {
+    "definition": "Relating to or characteristic of the United States or its inhabitants",
+    "part_of_speech": "adjective/noun",
+    "phonetic": "əˈmerɪkən",
+    "synonyms": ["US", "USA"],
+    "antonyms": ["foreign", "non-American"],
+    "examples": ["American dream", "American citizen", "All American"],
+    "frequency": 4
+  },
+  "world": {
+    "definition": "The earth, together with all of its countries and peoples",
+    "part_of_speech": "noun",
+    "phonetic": "wɜːrld",
+    "synonyms": ["earth", "globe", "planet"],
+    "antonyms": ["space", "universe"],
+    "examples": ["Around the world", "World peace", "Real world"],
+    "frequency": 4
   }
 }

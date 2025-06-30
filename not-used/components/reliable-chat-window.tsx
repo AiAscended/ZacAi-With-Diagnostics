@@ -917,7 +917,7 @@ export default function ReliableChatWindow() {
                                   key={idx}
                                   variant="outline"
                                   size="sm"
-                                  className="text-xs h-6 px-2"
+                                  className="text-xs h-6 px-2 bg-transparent"
                                   onClick={() => setInput(suggestion)}
                                 >
                                   {suggestion}
@@ -1007,7 +1007,7 @@ export default function ReliableChatWindow() {
                       key={idx}
                       variant="outline"
                       size="sm"
-                      className="text-xs"
+                      className="text-xs bg-transparent"
                       onClick={() => handleSuggestionClick(suggestion)}
                     >
                       {suggestion.text}
@@ -1125,7 +1125,7 @@ export default function ReliableChatWindow() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full text-left justify-start"
+                      className="w-full text-left justify-start bg-transparent"
                       onClick={() => setInput("Remember that I work as a developer")}
                     >
                       "Remember that I work as a developer"
@@ -1133,7 +1133,7 @@ export default function ReliableChatWindow() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full text-left justify-start"
+                      className="w-full text-left justify-start bg-transparent"
                       onClick={() => setInput("What did we talk about earlier?")}
                     >
                       "What did we talk about earlier?"
@@ -1141,7 +1141,7 @@ export default function ReliableChatWindow() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full text-left justify-start"
+                      className="w-full text-left justify-start bg-transparent"
                       onClick={() => setInput("Calculate the square root of 144")}
                     >
                       "Calculate the square root of 144"
@@ -1161,7 +1161,12 @@ export default function ReliableChatWindow() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button onClick={handleSeedVocabulary} disabled={isSeeding} className="w-full" variant="outline">
+                <Button
+                  onClick={handleSeedVocabulary}
+                  disabled={isSeeding}
+                  className="w-full bg-transparent"
+                  variant="outline"
+                >
                   {isSeeding ? (
                     <>
                       <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -1175,7 +1180,7 @@ export default function ReliableChatWindow() {
                   )}
                 </Button>
 
-                <Button onClick={exportData} className="w-full" variant="outline">
+                <Button onClick={exportData} className="w-full bg-transparent" variant="outline">
                   <Download className="w-4 h-4 mr-2" />
                   Export Data
                 </Button>

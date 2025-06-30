@@ -1,11 +1,9 @@
 export class EnhancedAPIManager {
   private apiStatus: Map<string, any> = new Map()
   private rateLimitDelay = 200 // ms between requests
-  private baseUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 
   constructor() {
     this.initializeAPIStatus()
-    console.log("🌐 Enhanced API Manager initialized.")
   }
 
   private initializeAPIStatus(): void {
@@ -53,7 +51,7 @@ export class EnhancedAPIManager {
     const apis = [
       {
         name: "Free Dictionary API",
-        url: `${this.baseUrl}${word}`,
+        url: `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
         parser: this.parseDictionaryAPI.bind(this),
       },
     ]
@@ -82,9 +80,6 @@ export class EnhancedAPIManager {
           this.updateAPIStatus(api.name, true)
           console.log(`✅ ${api.name} lookup successful for: ${word}`)
           return parsed
-        } else if (response.status === 404) {
-          console.log(`[API] No definition found for "${word}".`)
-          return null
         }
       } catch (error) {
         console.warn(`${api.name} failed for "${word}":`, error)

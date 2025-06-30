@@ -645,7 +645,7 @@ export default function DiagnosticChatWindow() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full text-left justify-start"
+                    className="w-full text-left justify-start bg-transparent"
                     onClick={() => setInput("2 + 2")}
                   >
                     Basic Math: 2 + 2
@@ -653,7 +653,7 @@ export default function DiagnosticChatWindow() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full text-left justify-start"
+                    className="w-full text-left justify-start bg-transparent"
                     onClick={() => setInput("sqrt(16)")}
                   >
                     Advanced: sqrt(16)
@@ -661,7 +661,7 @@ export default function DiagnosticChatWindow() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full text-left justify-start"
+                    className="w-full text-left justify-start bg-transparent"
                     onClick={() => setInput("Remember: diagnostic test")}
                   >
                     Memory Test
