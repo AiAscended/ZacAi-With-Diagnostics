@@ -312,7 +312,7 @@ export class SimpleAISystem {
           definition: apiData.definition,
           partOfSpeech: apiData.partOfSpeech || "unknown",
           examples: apiData.examples || [],
-          source: "learned-api",
+          source: "learned",
           confidence: 0.85,
           timestamp: Date.now(),
         }
@@ -390,6 +390,38 @@ export class SimpleAISystem {
     `
     thinkingSteps.push("✅ Report generated.")
     return { responseText, knowledge: ["System Diagnostic"] }
+  }
+
+  private async lookupWordOnline(word: string): Promise<any> {
+    try {
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+      if (!response.ok) {
+        console.warn(`Dictionary API failed for "${word}" with status: ${response.status}`)
+        return null
+      }
+      const data = await response.json()
+      if (data && Array.isArray(data) && data.length > 0) {
+        const entry = data[0]
+        const definition = entry.meanings?.[0]?.definitions?.[0]?.definition
+        const partOfSpeech = entry.meanings?.[0]?.partOfSpeech
+        const examples = entry.meanings?.[0]?.definitions?.[0]?.example
+          ? [entry.meanings[0].definitions[0].example]
+          : []
+
+        if (definition) {
+          return {
+            word: entry.word,
+            definition,
+            partOfSpeech,
+            examples,
+          }
+        }
+      }
+      return null
+    } catch (error) {
+      console.error("Error looking up word online:", error)
+      return null
+    }
   }
 
   private async saveLearnedVocabulary(): Promise<void> {
@@ -482,6 +514,38 @@ export class SimpleAISystem {
         coding: this.coding.size > 0,
       },
       isInitialized: this.isInitialized,
+    }
+  }
+
+  private async lookupWordOnline(word: string): Promise<any> {
+    try {
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+      if (!response.ok) {
+        console.warn(`Dictionary API failed for "${word}" with status: ${response.status}`)
+        return null
+      }
+      const data = await response.json()
+      if (data && Array.isArray(data) && data.length > 0) {
+        const entry = data[0]
+        const definition = entry.meanings?.[0]?.definitions?.[0]?.definition
+        const partOfSpeech = entry.meanings?.[0]?.partOfSpeech
+        const examples = entry.meanings?.[0]?.definitions?.[0]?.example
+          ? [entry.meanings[0].definitions[0].example]
+          : []
+
+        if (definition) {
+          return {
+            word: entry.word,
+            definition,
+            partOfSpeech,
+            examples,
+          }
+        }
+      }
+      return null
+    } catch (error) {
+      console.error("Error looking up word online:", error)
+      return null
     }
   }
 
