@@ -15,13 +15,16 @@ export class TeslaVortexMath {
       digitalRoot,
       teslaPattern,
       significance,
-      vortexPosition
+      vortexPosition,
     }
   }
 
   static calculateDigitalRoot(num: number): number {
     while (num >= 10) {
-      num = num.toString().split('').reduce((sum, digit) => sum + Number.parseInt(digit), 0)
+      num = num
+        .toString()
+        .split("")
+        .reduce((sum, digit) => sum + Number.parseInt(digit), 0)
     }
     return num
   }
@@ -45,7 +48,7 @@ export class TeslaVortexMath {
       6: "Tesla Key - Harmony, responsibility, nurturing, cosmic balance",
       7: "Spirituality, introspection, analysis, mystery",
       8: "Material success, power, achievement, infinity",
-      9: "Tesla Key - Completion, universal love, service, enlightenment"
+      9: "Tesla Key - Completion, universal love, service, enlightenment",
     }
     return significance[digitalRoot] || "Unknown significance"
   }
@@ -74,17 +77,20 @@ export class TeslaVortexMath {
   // Tesla multiplication table
   static teslaMultiplicationTable(number: number): { [key: number]: number } {
     const table: { [key: number]: number } = {}
-    
+
     for (let i = 1; i <= 12; i++) {
       const result = number * i
       table[i] = this.calculateDigitalRoot(result)
     }
-    
+
     return table
   }
 
   // Doubling sequence (Tesla's favorite)
-  static doublingSequence(start: number, iterations: number): {
+  static doublingSequence(
+    start: number,
+    iterations: number,
+  ): {
     sequence: number[]
     digitalRoots: number[]
     pattern: string
@@ -106,10 +112,10 @@ export class TeslaVortexMath {
 
   private static analyzePattern(digitalRoots: number[]): string {
     const uniqueRoots = [...new Set(digitalRoots)]
-    
-    if (uniqueRoots.every(root => [1, 2, 4, 5, 7, 8].includes(root))) {
+
+    if (uniqueRoots.every((root) => [1, 2, 4, 5, 7, 8].includes(root))) {
       return "Pure Vortex Pattern - No Tesla Keys (3,6,9)"
-    } else if (uniqueRoots.some(root => [3, 6, 9].includes(root))) {
+    } else if (uniqueRoots.some((root) => [3, 6, 9].includes(root))) {
       return "Mixed Pattern - Contains Tesla Keys"
     } else {
       return "Unknown Pattern"
@@ -156,3 +162,67 @@ export class TeslaVortexMath {
       digitalRootSum: number
     }
   } {
+    const solids = {
+      tetrahedron: { vertices: 4, edges: 6, faces: 4 },
+      cube: { vertices: 8, edges: 12, faces: 6 },
+      octahedron: { vertices: 6, edges: 12, faces: 8 },
+      dodecahedron: { vertices: 20, edges: 30, faces: 12 },
+      icosahedron: { vertices: 12, edges: 30, faces: 20 },
+    }
+
+    const result: any = {}
+
+    Object.entries(solids).forEach(([name, solid]) => {
+      const eulerCharacteristic = solid.vertices - solid.edges + solid.faces
+      const digitalRootSum = this.calculateDigitalRoot(solid.vertices + solid.edges + solid.faces)
+
+      result[name] = {
+        ...solid,
+        eulerCharacteristic,
+        digitalRootSum,
+      }
+    })
+
+    return result
+  }
+
+  // Frequency and vibration calculations
+  static calculateFrequency(wavelength: number, speedOfSound = 343): number {
+    return speedOfSound / wavelength
+  }
+
+  static calculateWavelength(frequency: number, speedOfSound = 343): number {
+    return speedOfSound / frequency
+  }
+
+  // Tesla's favorite numbers analysis
+  static isTeslaNumber(num: number): boolean {
+    const digitalRoot = this.calculateDigitalRoot(num)
+    return [3, 6, 9].includes(digitalRoot)
+  }
+
+  static findTeslaNumbers(start: number, end: number): number[] {
+    const teslaNumbers = []
+
+    for (let i = start; i <= end; i++) {
+      if (this.isTeslaNumber(i)) {
+        teslaNumbers.push(i)
+      }
+    }
+
+    return teslaNumbers
+  }
+
+  // Energy calculations based on Tesla's theories
+  static calculateResonantFrequency(inductance: number, capacitance: number): number {
+    // f = 1 / (2π√(LC))
+    return 1 / (2 * Math.PI * Math.sqrt(inductance * capacitance))
+  }
+
+  static calculateWirelessPowerEfficiency(distance: number, frequency: number, power: number): number {
+    // Simplified wireless power transmission efficiency
+    const wavelength = 299792458 / frequency // c / f
+    const efficiency = Math.exp((-2 * Math.PI * distance) / wavelength)
+    return efficiency * 100 // Return as percentage
+  }
+}
