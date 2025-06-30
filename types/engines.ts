@@ -1,10 +1,20 @@
 // Engine-specific type definitions
-export interface IntentAnalysis {
-  intent: string
+export interface CognitiveEngineConfig {
+  modules: string[]
+  reasoning: boolean
+  learning: boolean
+  confidence: {
+    threshold: number
+    aggregation: "average" | "weighted" | "max"
+  }
+}
+
+export interface ReasoningChain {
+  id: string
+  steps: ReasoningStep[]
+  conclusion: string
   confidence: number
-  entities: string[]
-  context: any
-  suggestedModules: string[]
+  sources: string[]
 }
 
 export interface ReasoningStep {
@@ -14,14 +24,6 @@ export interface ReasoningStep {
   output: any
   confidence: number
   reasoning: string
-}
-
-export interface ReasoningChain {
-  id: string
-  steps: ReasoningStep[]
-  conclusion: string
-  confidence: number
-  sources: string[]
 }
 
 export interface LearningPattern {
@@ -36,6 +38,22 @@ export interface LearningPattern {
     lastSeen: number
     source: string
   }
+}
+
+export interface IntentAnalysis {
+  intent: string
+  confidence: number
+  entities: Entity[]
+  context: any
+  suggestedModules: string[]
+}
+
+export interface Entity {
+  type: string
+  value: string
+  confidence: number
+  start: number
+  end: number
 }
 
 export interface CognitiveEngineStats {

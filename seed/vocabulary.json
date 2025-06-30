@@ -1,49 +1,88 @@
 {
   "metadata": {
-    "version": "1.0.0",
+    "version": "2.0.0",
     "lastUpdated": "2024-01-01T00:00:00Z",
-    "totalWords": 1000,
-    "sources": ["Oxford Dictionary", "Merriam-Webster", "Cambridge Dictionary"]
+    "totalEntries": 1000,
+    "categories": ["academic", "technical", "common", "advanced"],
+    "sources": ["oxford", "merriam-webster", "cambridge"]
   },
-  "words": {
-    "algorithm": {
-      "definition": "A process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer",
+  "vocabulary": [
+    {
+      "word": "algorithm",
+      "definition": "A process or set of rules to be followed in calculations or other problem-solving operations",
       "partOfSpeech": "noun",
+      "pronunciation": "/ˈælɡəˌrɪðəm/",
+      "etymology": "From Arabic al-Khwarizmi, 9th-century Persian mathematician",
       "examples": [
-        "The search algorithm quickly found the relevant results",
-        "Machine learning algorithms can identify patterns in data"
+        "The search algorithm efficiently finds relevant results",
+        "Machine learning algorithms can recognize patterns in data"
       ],
-      "etymology": "From Arabic al-Khwarizmi, named after the 9th-century mathematician",
-      "difficulty": 4,
-      "frequency": 3,
-      "synonyms": ["procedure", "method", "process"],
-      "antonyms": [],
-      "categories": ["technology", "mathematics"]
+      "synonyms": ["procedure", "method", "process", "formula"],
+      "antonyms": ["randomness", "chaos"],
+      "difficulty": 7,
+      "frequency": 8,
+      "category": "technical"
     },
-    "serendipity": {
+    {
+      "word": "quantum",
+      "definition": "The smallest possible discrete unit of any physical property",
+      "partOfSpeech": "noun",
+      "pronunciation": "/ˈkwɒntəm/",
+      "etymology": "From Latin quantus meaning 'how much'",
+      "examples": [
+        "Quantum mechanics describes the behavior of matter at atomic scales",
+        "A quantum of light is called a photon"
+      ],
+      "synonyms": ["unit", "amount", "portion"],
+      "antonyms": ["continuous", "infinite"],
+      "difficulty": 8,
+      "frequency": 6,
+      "category": "academic"
+    },
+    {
+      "word": "serendipity",
       "definition": "The occurrence and development of events by chance in a happy or beneficial way",
       "partOfSpeech": "noun",
-      "examples": [
-        "A fortunate stroke of serendipity brought the two inventors together",
-        "The discovery was pure serendipity"
-      ],
-      "etymology": "Coined by Horace Walpole in 1754, from the Persian fairy tale 'The Three Princes of Serendip'",
-      "difficulty": 3,
-      "frequency": 2,
-      "synonyms": ["chance", "fortune", "luck"],
-      "antonyms": ["misfortune", "bad luck"],
-      "categories": ["general", "philosophy"]
+      "pronunciation": "/ˌsɛrənˈdɪpɪti/",
+      "etymology": "Coined by Horace Walpole in 1754, from Persian fairy tale 'The Three Princes of Serendip'",
+      "examples": ["The discovery of penicillin was a result of serendipity", "Their meeting was pure serendipity"],
+      "synonyms": ["chance", "luck", "fortune", "coincidence"],
+      "antonyms": ["misfortune", "design", "intention"],
+      "difficulty": 6,
+      "frequency": 4,
+      "category": "advanced"
     },
-    "ephemeral": {
-      "definition": "Lasting for a very short time",
+    {
+      "word": "ubiquitous",
+      "definition": "Present, appearing, or found everywhere",
       "partOfSpeech": "adjective",
-      "examples": ["The beauty of cherry blossoms is ephemeral", "Social media trends are often ephemeral"],
-      "etymology": "From Greek ephemeros, meaning 'lasting only a day'",
-      "difficulty": 4,
-      "frequency": 2,
-      "synonyms": ["temporary", "fleeting", "transient"],
-      "antonyms": ["permanent", "lasting", "enduring"],
-      "categories": ["general", "literature"]
+      "pronunciation": "/juːˈbɪkwɪtəs/",
+      "etymology": "From Latin ubique meaning 'everywhere'",
+      "examples": [
+        "Smartphones have become ubiquitous in modern society",
+        "The ubiquitous presence of social media affects daily life"
+      ],
+      "synonyms": ["omnipresent", "pervasive", "universal", "widespread"],
+      "antonyms": ["rare", "scarce", "limited", "absent"],
+      "difficulty": 7,
+      "frequency": 5,
+      "category": "academic"
+    },
+    {
+      "word": "paradigm",
+      "definition": "A typical example or pattern of something; a model",
+      "partOfSpeech": "noun",
+      "pronunciation": "/ˈpærəˌdaɪm/",
+      "etymology": "From Greek paradeigma meaning 'pattern'",
+      "examples": [
+        "The new theory represents a paradigm shift in physics",
+        "This approach follows the traditional paradigm"
+      ],
+      "synonyms": ["model", "pattern", "example", "framework"],
+      "antonyms": ["anomaly", "exception", "deviation"],
+      "difficulty": 6,
+      "frequency": 6,
+      "category": "academic"
     }
-  }
+  ]
 }

@@ -36,6 +36,7 @@ export interface ModuleResponse {
   source: string
   timestamp: number
   metadata?: any
+  reasoning?: string[]
 }
 
 export interface ModuleStats {
@@ -74,4 +75,25 @@ export interface Message {
   content: string
   timestamp: number
   metadata?: any
+}
+
+export interface ContextData {
+  recentMessages: Message[]
+  topics: string[]
+  entities: any
+  conversationFlow: string
+  sessionDuration: number
+  messageCount: number
+  userQuestionCount: number
+  assistantResponseCount: number
+}
+
+export interface SystemStats {
+  initialized: boolean
+  modules: { [key: string]: ModuleStats }
+  learning?: any
+  cognitive?: any
+  uptime: number
+  totalQueries: number
+  averageResponseTime: number
 }

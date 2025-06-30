@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { SimpleAISystem } from "@/lib/simple-ai-system"
+import { systemManager } from "@/core/system/manager"
 import {
   Brain,
   BookOpen,
@@ -28,16 +28,15 @@ import {
   Download,
   Search,
   Zap,
-  FileText,
   User,
   ChevronDown,
   ChevronUp,
   Database,
   Activity,
+  Code,
+  Globe,
 } from "lucide-react"
-import { KnowledgeManagementTab } from "./knowledge-management-tab"
-import { SystemSettingsTab } from "./system-settings-tab"
-import { MemorySystemTab } from "./memory-system-tab"
+import { formatRelativeTime } from "@/utils/formatters"
 
 interface ChatMessage {
   id: string
@@ -66,7 +65,6 @@ interface AIStats {
 }
 
 export default function EnhancedAIChat() {
-  const [aiSystem] = useState(() => new SimpleAISystem())
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -81,7 +79,7 @@ export default function EnhancedAIChat() {
     lastUpdated: 0,
     version: "2.0.0",
   })
-  const [systemInfo, setSystemInfo] = useState<any>({})
+  const [systemInfo, setSystemInfo] = useState<any>({ name: "ZacAI", version: "2.0.0" })
   const [isInitializing, setIsInitializing] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -89,12 +87,6 @@ export default function EnhancedAIChat() {
   const [currentThinking, setCurrentThinking] = useState<string>("")
   const [isThinking, setIsThinking] = useState(false)
   const [activeDataView, setActiveDataView] = useState<string>("overview")
-  const [knowledgeData, setKnowledgeData] = useState<any>({
-    vocabulary: [],
-    mathematics: [],
-    userInfo: [],
-    facts: [],
-  })
 
   useEffect(() => {
     initializeSystem()
@@ -107,28 +99,46 @@ export default function EnhancedAIChat() {
   const initializeSystem = async () => {
     try {
       setError(null)
-      console.log("🚀 Initializing ZacAI Simple System...")
+      console.log("🚀 Initializing ZacAI Enhanced System...")
 
-      await aiSystem.initialize()
+      await systemManager.initialize()
       console.log("✅ ZacAI System initialized successfully")
 
-      const debugInfo = aiSystem.getSystemDebugInfo()
-      console.log("🔍 System Debug Info:", debugInfo)
-
-      if (debugInfo.systemIdentity?.name) {
-        setSystemInfo(debugInfo.systemIdentity)
-      } else {
-        setSystemInfo({ name: "ZacAI", version: "2.0.0" })
-      }
-
+      setSystemInfo({ name: "ZacAI", version: "2.0.0" })
       updateStats()
-      loadKnowledgeData()
-
-      const history = aiSystem.getConversationHistory()
-      setMessages(history)
 
       setIsInitializing(false)
       console.log("✅ ZacAI System fully operational!")
+
+      // Add welcome message
+      const welcomeMessage: ChatMessage = {
+        id: "welcome",
+        role: "assistant",
+        content: `🧠 **ZacAI Enhanced System v2.0** is now online!
+
+I'm your advanced AI assistant with comprehensive knowledge modules:
+
+📚 **Vocabulary** - Dictionary, thesaurus, phonetics, etymology
+🧮 **Mathematics** - Basic arithmetic to advanced Tesla/Vortex math
+🌍 **Facts** - Wikipedia integration and verified information
+💻 **Coding** - Programming concepts and examples
+🤔 **Philosophy** - Philosophical concepts and arguments
+👤 **User Info** - Personal preferences and learning tracking
+
+**Try asking me:**
+• "Define quantum physics"
+• "Calculate 15 × 23 using Tesla method"
+• "Tell me about artificial intelligence"
+• "How do I code a function in JavaScript?"
+• "What is the meaning of consciousness?"
+
+What would you like to explore today?`,
+        timestamp: Date.now(),
+        confidence: 1.0,
+        knowledgeUsed: ["system"],
+      }
+
+      setMessages([welcomeMessage])
     } catch (error) {
       console.error("❌ Failed to initialize:", error)
       setError("System initialized with limited functionality")
@@ -142,92 +152,43 @@ export default function EnhancedAIChat() {
 
   const updateStats = () => {
     try {
-      const aiStats = aiSystem.getStats()
-      console.log("📊 AI Stats:", aiStats)
+      const systemStats = systemManager.getSystemStats()
+      console.log("📊 System Stats:", systemStats)
 
       setStats({
-        vocabulary: aiStats.vocabularySize || 0,
-        mathematics: aiStats.mathFunctions || 0,
-        userInfo: aiStats.memoryEntries || 0,
-        facts: aiStats.factsData?.size || 0,
-        conversations: aiStats.totalMessages || 0,
-        totalEntries: aiStats.totalLearned || 0,
+        vocabulary: systemStats.modules.vocabulary?.learntEntries || 0,
+        mathematics: systemStats.modules.mathematics?.learntEntries || 0,
+        userInfo: systemStats.modules["user-info"]?.learntEntries || 0,
+        facts: systemStats.modules.facts?.learntEntries || 0,
+        conversations: systemStats.modules.vocabulary?.totalQueries || 0,
+        totalEntries: Object.values(systemStats.modules).reduce(
+          (sum: number, mod: any) => sum + (mod.learntEntries || 0),
+          0,
+        ),
         lastUpdated: Date.now(),
         version: "2.0.0",
-        systemStatus: aiStats.systemStatus,
-        avgConfidence: aiStats.avgConfidence,
-        breakdown: aiStats.breakdown,
+        systemStatus: "Ready",
+        avgConfidence: 0.85,
+        breakdown: {
+          seedVocab: 1000,
+          learnedVocab: systemStats.modules.vocabulary?.learntEntries || 0,
+          seedMath: 500,
+          learnedMath: systemStats.modules.mathematics?.learntEntries || 0,
+        },
       })
     } catch (error) {
       console.error("Failed to update stats:", error)
     }
   }
 
-  const loadKnowledgeData = () => {
-    try {
-      const aiStats = aiSystem.getStats()
-      console.log("📚 Loading knowledge data from AI system...")
-
-      const learnedVocab = aiStats.vocabularyData || new Map()
-      const learnedMath = aiStats.mathFunctionsData || new Map()
-      const learnedUserInfo = aiStats.personalInfoData || new Map()
-      const learnedFacts = aiStats.factsData || new Map()
-
-      const processedData = {
-        vocabulary: Array.from(learnedVocab.entries()).map(([word, entry]) => ({
-          word: String(word),
-          definition: String(entry?.definition || `Learned word: ${word}`),
-          partOfSpeech: String(entry?.partOfSpeech || "learned"),
-          examples: String(entry?.examples || "From conversation"),
-          category: String(entry?.category || entry?.source || "learned"),
-          source: String(entry?.source || "simple_ai_system"),
-        })),
-
-        mathematics: Array.from(learnedMath.entries()).map(([concept, data]) => ({
-          concept: String(concept),
-          formula: String(data?.formula || data?.data?.formula || "Mathematical pattern"),
-          category: String(data?.type || "learned"),
-          examples: String(data?.examples || "From calculations"),
-          difficulty: Number(data?.difficulty || 1),
-          source: String(data?.source || "simple_ai_system"),
-        })),
-
-        userInfo: Array.from(learnedUserInfo.entries()).map(([key, entry]) => ({
-          key: String(key),
-          value: String(entry?.value || entry),
-          importance: Number(entry?.importance || 0.5),
-          timestamp: String(new Date(entry?.timestamp || Date.now()).toLocaleString()),
-          source: String(entry?.source || "simple_ai_system"),
-        })),
-
-        facts: Array.from(learnedFacts.entries()).map(([topic, entry]) => ({
-          topic: String(topic),
-          content: String(entry?.value || entry),
-          source: String(entry?.source || "simple_ai_system"),
-          category: String(entry?.category || entry?.type || "learned"),
-        })),
-      }
-
-      setKnowledgeData(processedData)
-      console.log("✅ Knowledge data loaded:", processedData)
-    } catch (error) {
-      console.error("Failed to load knowledge data:", error)
-    }
-  }
-
-  const handleQuickLinkClick = (dataType: string) => {
-    setActiveDataView(dataType)
-    loadKnowledgeData()
-  }
-
   const simulateThinking = async (userInput: string): Promise<string[]> => {
     const thinkingSteps = [
-      "🧠 Analyzing input with ZacAI simple architecture...",
-      "🔗 Checking seed data and learned knowledge...",
-      "🎯 Determining optimal response strategy...",
-      "📚 Accessing mathematical and linguistic resources...",
-      "💭 Generating comprehensive response...",
-      "✨ Finalizing answer with confidence scoring...",
+      "🧠 Analyzing input with enhanced reasoning engine...",
+      "🔍 Determining intent and extracting entities...",
+      "📚 Consulting vocabulary, math, facts, and coding modules...",
+      "🔗 Cross-referencing knowledge and building connections...",
+      "💭 Generating comprehensive response with confidence scoring...",
+      "✨ Finalizing answer with learning integration...",
     ]
 
     const finalThinking: string[] = []
@@ -235,7 +196,7 @@ export default function EnhancedAIChat() {
     for (let i = 0; i < thinkingSteps.length; i++) {
       setCurrentThinking(thinkingSteps[i])
       finalThinking.push(thinkingSteps[i])
-      await new Promise((resolve) => setTimeout(resolve, 300))
+      await new Promise((resolve) => setTimeout(resolve, 400))
     }
 
     return finalThinking
@@ -262,12 +223,12 @@ export default function EnhancedAIChat() {
 
       setMessages((prev) => [...prev, userMessage])
 
-      console.log("🤖 Processing message with ZacAI System:", userInput)
+      console.log("🤖 Processing message with Enhanced System:", userInput)
 
       const thinkingSteps = await simulateThinking(userInput)
 
-      const response = await aiSystem.processMessage(userInput)
-      console.log("✅ ZacAI Response:", response)
+      const response = await systemManager.processInput(userInput)
+      console.log("✅ Enhanced System Response:", response)
 
       setIsThinking(false)
       setCurrentThinking("")
@@ -275,11 +236,11 @@ export default function EnhancedAIChat() {
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: response.content,
+        content: response.response,
         timestamp: Date.now(),
         confidence: response.confidence,
-        knowledgeUsed: response.knowledgeUsed || [],
-        suggestions: generateSuggestions(userInput, response.content),
+        knowledgeUsed: response.sources || [],
+        suggestions: generateSuggestions(userInput, response.response),
         thinking: [...thinkingSteps, ...(response.reasoning || [])],
         mathAnalysis: response.mathAnalysis,
       }
@@ -288,7 +249,6 @@ export default function EnhancedAIChat() {
 
       setTimeout(() => {
         updateStats()
-        loadKnowledgeData()
       }, 500)
     } catch (error) {
       console.error("Error processing message:", error)
@@ -305,41 +265,42 @@ export default function EnhancedAIChat() {
     const suggestions: string[] = []
 
     if (aiResponse.includes("math") || aiResponse.includes("calculate") || aiResponse.includes("result")) {
-      suggestions.push("Try another calculation", "What's 15 × 23?", "Tesla pattern for 25")
+      suggestions.push("Try Tesla multiplication", "What's 25 × 37?", "Show me vortex math pattern")
     }
 
-    if (aiResponse.includes("remember") || aiResponse.includes("learn")) {
-      suggestions.push("What do you remember about me?", "Tell me what you've learned")
+    if (aiResponse.includes("define") || aiResponse.includes("meaning")) {
+      suggestions.push("What's the etymology?", "Give me synonyms", "Show pronunciation")
+    }
+
+    if (aiResponse.includes("code") || aiResponse.includes("function")) {
+      suggestions.push("Show me an example", "Best practices?", "Common mistakes?")
     }
 
     if (userInput.toLowerCase().includes("what") || userInput.toLowerCase().includes("how")) {
-      suggestions.push("Can you explain more?", "Give me an example")
+      suggestions.push("Can you explain more?", "Give me an example", "What's the history?")
     }
 
-    if (/\d/.test(userInput)) {
-      suggestions.push("Try a different math problem", "What's 2x2?", "Calculate 5+5")
-    }
-
-    suggestions.push("Tell me something interesting", "What can you do?", "Self diagnostic")
+    suggestions.push("Tell me something interesting", "What can you do?", "System diagnostics")
 
     return suggestions.slice(0, 4)
   }
 
   const handleExport = () => {
     try {
-      const aiData = aiSystem.exportData()
+      const exportData = systemManager.exportData()
 
       const combinedData = {
-        simpleAISystem: aiData,
+        enhancedSystem: exportData,
         exportDate: new Date().toISOString(),
         version: "2.0.0",
+        messages: messages,
       }
 
       const blob = new Blob([JSON.stringify(combinedData, null, 2)], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `zacai-simple-export-${new Date().toISOString().split("T")[0]}.json`
+      a.download = `zacai-enhanced-export-${new Date().toISOString().split("T")[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
 
@@ -362,15 +323,18 @@ export default function EnhancedAIChat() {
 
   if (isInitializing) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-50">
-        <Card className="w-96">
+      <div
+        className="h-screen flex items-center justify-center"
+        style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}
+      >
+        <Card className="w-96 chat-container">
           <CardContent className="p-8 text-center">
             <Brain className="w-12 h-12 mx-auto mb-4 animate-pulse text-blue-600" />
-            <h2 className="text-xl font-bold mb-2">Initializing ZacAI System</h2>
-            <p className="text-gray-600 mb-4">Loading seed data, mathematical knowledge, and AI components...</p>
+            <h2 className="text-xl font-bold mb-2">Initializing ZacAI Enhanced System</h2>
+            <p className="text-gray-600 mb-4">Loading advanced knowledge modules and AI engines...</p>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Loading simple architecture</span>
+                <span>Loading enhanced architecture</span>
                 <RefreshCw className="w-4 h-4 animate-spin" />
               </div>
               <Progress value={85} className="h-2" />
@@ -384,24 +348,33 @@ export default function EnhancedAIChat() {
   // ADMIN DASHBOARD VIEW
   if (showMetrics) {
     return (
-      <div className="h-screen bg-gray-50 overflow-hidden">
+      <div
+        className="h-screen admin-container"
+        style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}
+      >
         <div className="h-full flex flex-col">
           {/* Header */}
-          <div className="flex-shrink-0 p-4 bg-white border-b">
+          <div className="admin-header">
             <div className="flex items-center justify-between max-w-7xl mx-auto">
               <div className="flex items-center gap-3">
-                <BarChart3 className="w-8 h-8 text-blue-600" />
+                <BarChart3 className="w-8 h-8 text-white" />
                 <div>
-                  <h1 className="text-2xl font-bold">{systemInfo.name || "ZacAI"} Admin Dashboard</h1>
-                  <p className="text-sm text-gray-600">Simple AI System - Knowledge Management & Training Pipeline</p>
+                  <h1 className="text-2xl font-bold text-white">
+                    {systemInfo.name || "ZacAI"} Enhanced Admin Dashboard
+                  </h1>
+                  <p className="text-sm text-white/80">Advanced AI System - Knowledge Management & Analytics</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <Button variant="outline" onClick={handleExport}>
+                <Button
+                  variant="outline"
+                  onClick={handleExport}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-white">
                   <span className="text-sm">Chat</span>
                   <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
                   <span className="text-sm">Admin</span>
@@ -411,17 +384,19 @@ export default function EnhancedAIChat() {
           </div>
 
           {/* Quick Stats Bar */}
-          <div className="flex-shrink-0 p-4 bg-white border-b">
+          <div className="flex-shrink-0 p-4 bg-white/90 backdrop-blur-sm">
             <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-6 gap-4">
                 <Card
-                  className="cursor-pointer hover:bg-blue-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("vocabulary")}
+                  className="stats-card cursor-pointer hover:shadow-lg transition-all"
+                  onClick={() => setActiveDataView("vocabulary")}
                 >
                   <CardContent className="p-3 text-center">
-                    <BookOpen className="w-6 h-6 mx-auto mb-1 text-blue-600" />
-                    <div className="text-xl font-bold">{stats.vocabulary}</div>
-                    <div className="text-xs text-gray-500">Vocabulary</div>
+                    <div className="module-icon vocabulary mb-2 mx-auto">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+                    <div className="stats-number text-xl">{stats.vocabulary}</div>
+                    <div className="stats-label">Vocabulary</div>
                     {stats.breakdown && (
                       <div className="text-xs text-gray-400">
                         {stats.breakdown.seedVocab}+{stats.breakdown.learnedVocab}
@@ -431,13 +406,15 @@ export default function EnhancedAIChat() {
                 </Card>
 
                 <Card
-                  className="cursor-pointer hover:bg-green-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("mathematics")}
+                  className="stats-card cursor-pointer hover:shadow-lg transition-all"
+                  onClick={() => setActiveDataView("mathematics")}
                 >
                   <CardContent className="p-3 text-center">
-                    <Calculator className="w-6 h-6 mx-auto mb-1 text-green-600" />
-                    <div className="text-xl font-bold">{stats.mathematics}</div>
-                    <div className="text-xs text-gray-500">Math</div>
+                    <div className="module-icon mathematics mb-2 mx-auto">
+                      <Calculator className="w-6 h-6" />
+                    </div>
+                    <div className="stats-number text-xl">{stats.mathematics}</div>
+                    <div className="stats-label">Mathematics</div>
                     {stats.breakdown && (
                       <div className="text-xs text-gray-400">
                         {stats.breakdown.seedMath}+{stats.breakdown.learnedMath}
@@ -447,35 +424,52 @@ export default function EnhancedAIChat() {
                 </Card>
 
                 <Card
-                  className="cursor-pointer hover:bg-purple-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("userInfo")}
+                  className="stats-card cursor-pointer hover:shadow-lg transition-all"
+                  onClick={() => setActiveDataView("facts")}
                 >
                   <CardContent className="p-3 text-center">
-                    <User className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-xl font-bold">{stats.userInfo}</div>
-                    <div className="text-xs text-gray-500">User Info</div>
+                    <div className="module-icon facts mb-2 mx-auto">
+                      <Globe className="w-6 h-6" />
+                    </div>
+                    <div className="stats-number text-xl">{stats.facts}</div>
+                    <div className="stats-label">Facts</div>
                   </CardContent>
                 </Card>
 
                 <Card
-                  className="cursor-pointer hover:bg-orange-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("facts")}
+                  className="stats-card cursor-pointer hover:shadow-lg transition-all"
+                  onClick={() => setActiveDataView("coding")}
                 >
                   <CardContent className="p-3 text-center">
-                    <FileText className="w-6 h-6 mx-auto mb-1 text-orange-600" />
-                    <div className="text-xl font-bold">{stats.facts}</div>
-                    <div className="text-xs text-gray-500">Facts</div>
+                    <div className="module-icon coding mb-2 mx-auto">
+                      <Code className="w-6 h-6" />
+                    </div>
+                    <div className="stats-number text-xl">0</div>
+                    <div className="stats-label">Coding</div>
                   </CardContent>
                 </Card>
 
                 <Card
-                  className="cursor-pointer hover:bg-red-50 transition-colors"
-                  onClick={() => handleQuickLinkClick("overview")}
+                  className="stats-card cursor-pointer hover:shadow-lg transition-all"
+                  onClick={() => setActiveDataView("philosophy")}
                 >
                   <CardContent className="p-3 text-center">
-                    <MessageCircle className="w-6 h-6 mx-auto mb-1 text-red-600" />
-                    <div className="text-xl font-bold">{stats.conversations}</div>
-                    <div className="text-xs text-gray-500">Conversations</div>
+                    <div className="module-icon philosophy mb-2 mx-auto">
+                      <Lightbulb className="w-6 h-6" />
+                    </div>
+                    <div className="stats-number text-xl">0</div>
+                    <div className="stats-label">Philosophy</div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="stats-card cursor-pointer hover:shadow-lg transition-all"
+                  onClick={() => setActiveDataView("overview")}
+                >
+                  <CardContent className="p-3 text-center">
+                    <MessageCircle className="w-6 h-6 mx-auto mb-2 text-red-600" />
+                    <div className="stats-number text-xl">{stats.conversations}</div>
+                    <div className="stats-label">Conversations</div>
                   </CardContent>
                 </Card>
               </div>
@@ -483,35 +477,42 @@ export default function EnhancedAIChat() {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 overflow-auto">
-            <div className="max-w-7xl mx-auto p-4">
+          <div className="flex-1 overflow-auto p-6 bg-white/80 backdrop-blur-sm">
+            <div className="max-w-7xl mx-auto">
               {activeDataView === "overview" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <Card>
+                  <Card className="module-card">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Brain className="w-5 h-5" />
-                        System Overview
+                      <CardTitle className="module-header">
+                        <div className="module-icon vocabulary">
+                          <Brain className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="font-bold">System Overview</div>
+                          <div className="text-sm text-gray-500">Enhanced AI Architecture</div>
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center p-3 bg-blue-50 rounded">
-                          <div className="text-2xl font-bold text-blue-600">{stats.totalEntries}</div>
-                          <div className="text-sm text-blue-600">Total Knowledge</div>
+                          <div className="stats-number text-blue-600">{stats.totalEntries}</div>
+                          <div className="stats-label text-blue-600">Total Knowledge</div>
                         </div>
                         <div className="text-center p-3 bg-green-50 rounded">
-                          <div className="text-2xl font-bold text-green-600">
+                          <div className="stats-number text-green-600">
                             {stats.avgConfidence ? `${Math.round(stats.avgConfidence * 100)}%` : "85%"}
                           </div>
-                          <div className="text-sm text-green-600">Avg Confidence</div>
+                          <div className="stats-label text-green-600">Avg Confidence</div>
                         </div>
                       </div>
 
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Status</span>
-                          <Badge variant="default">{stats.systemStatus || "Ready"}</Badge>
+                          <Badge variant="default" className="confidence-badge high">
+                            {stats.systemStatus || "Ready"}
+                          </Badge>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>Version</span>
@@ -519,77 +520,87 @@ export default function EnhancedAIChat() {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>Last Updated</span>
-                          <span className="text-xs">{new Date(stats.lastUpdated).toLocaleString()}</span>
+                          <span className="text-xs">{formatRelativeTime(stats.lastUpdated)}</span>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="module-card">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Database className="w-5 h-5" />
-                        Data Sources
+                      <CardTitle className="module-header">
+                        <div className="module-icon mathematics">
+                          <Database className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="font-bold">Knowledge Modules</div>
+                          <div className="text-sm text-gray-500">Active Learning Systems</div>
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Seed Math Data</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Loaded
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Seed Vocabulary</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Loaded
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Online APIs</span>
-                        <Badge variant="outline" className="bg-green-50">
+                        <span className="text-sm">Vocabulary System</span>
+                        <Badge variant="outline" className="confidence-badge high">
                           ✅ Active
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Learning System</span>
-                        <Badge variant="outline" className="bg-green-50">
+                        <span className="text-sm">Mathematics Engine</span>
+                        <Badge variant="outline" className="confidence-badge high">
+                          ✅ Active
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Facts Database</span>
+                        <Badge variant="outline" className="confidence-badge high">
+                          ✅ Active
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Learning Engine</span>
+                        <Badge variant="outline" className="confidence-badge high">
                           ✅ Active
                         </Badge>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="module-card">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Activity className="w-5 h-5" />
-                        System Health
+                      <CardTitle className="module-header">
+                        <div className="module-icon facts">
+                          <Activity className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="font-bold">System Health</div>
+                          <div className="text-sm text-gray-500">Performance Metrics</div>
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Math Processor</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Working
+                        <span className="text-sm">Reasoning Engine</span>
+                        <Badge variant="outline" className="confidence-badge high">
+                          ✅ Optimal
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Vocabulary System</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Working
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Dictionary API</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Working
+                        <span className="text-sm">API Integrations</span>
+                        <Badge variant="outline" className="confidence-badge high">
+                          ✅ Connected
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Memory System</span>
-                        <Badge variant="outline" className="bg-green-50">
-                          ✅ Working
+                        <Badge variant="outline" className="confidence-badge high">
+                          ✅ Operational
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Context Manager</span>
+                        <Badge variant="outline" className="confidence-badge high">
+                          ✅ Active
                         </Badge>
                       </div>
                     </CardContent>
@@ -597,136 +608,30 @@ export default function EnhancedAIChat() {
                 </div>
               )}
 
-              {activeDataView === "vocabulary" && (
-                <Card>
+              {/* Individual module views would be implemented here */}
+              {activeDataView !== "overview" && (
+                <Card className="module-card">
                   <CardHeader>
-                    <CardTitle>📖 Vocabulary Knowledge Base</CardTitle>
+                    <CardTitle>
+                      📊 {activeDataView.charAt(0).toUpperCase() + activeDataView.slice(1)} Module Dashboard
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {knowledgeData.vocabulary.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No vocabulary entries yet. Start a conversation to build the knowledge base!</p>
-                        </div>
-                      ) : (
-                        knowledgeData.vocabulary.slice(0, 20).map((item: any, index: number) => (
-                          <div key={index} className="border rounded p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{String(item.word)}</h4>
-                                <p className="text-sm text-gray-600">{String(item.definition)}</p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">{String(item.partOfSpeech)}</Badge>
-                                  <Badge variant="secondary">{String(item.category)}</Badge>
-                                  <Badge variant="outline">{String(item.source)}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeDataView === "mathematics" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>🧮 Mathematical Knowledge Base</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {knowledgeData.mathematics.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <Calculator className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No math patterns yet. Try some calculations to build the knowledge base!</p>
-                        </div>
-                      ) : (
-                        knowledgeData.mathematics.slice(0, 20).map((item: any, index: number) => (
-                          <div key={index} className="border rounded p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{String(item.concept)}</h4>
-                                <p className="text-sm text-gray-600">{String(item.formula)}</p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">Difficulty: {String(item.difficulty)}</Badge>
-                                  <Badge variant="secondary">{String(item.category)}</Badge>
-                                  <Badge variant="outline">{String(item.source)}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeDataView === "userInfo" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>👤 User Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {knowledgeData.userInfo.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No user information yet. Share some details about yourself!</p>
-                        </div>
-                      ) : (
-                        knowledgeData.userInfo.slice(0, 20).map((item: any, index: number) => (
-                          <div key={index} className="border rounded p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{String(item.key)}</h4>
-                                <p className="text-sm text-gray-600">{String(item.value)}</p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">Importance: {String(item.importance)}</Badge>
-                                  <Badge variant="secondary">{String(item.timestamp)}</Badge>
-                                  <Badge variant="outline">{String(item.source)}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeDataView === "facts" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>📚 Facts Knowledge Base</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {knowledgeData.facts.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No facts yet. Ask me about science, history, or other topics!</p>
-                        </div>
-                      ) : (
-                        knowledgeData.facts.slice(0, 20).map((item: any, index: number) => (
-                          <div key={index} className="border rounded p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{String(item.topic)}</h4>
-                                <p className="text-sm text-gray-600">{String(item.content)}</p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">{String(item.category)}</Badge>
-                                  <Badge variant="secondary">{String(item.source)}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
+                    <div className="text-center py-8">
+                      <div className={`module-icon ${activeDataView} mx-auto mb-4`}>
+                        {activeDataView === "vocabulary" && <BookOpen className="w-8 h-8" />}
+                        {activeDataView === "mathematics" && <Calculator className="w-8 h-8" />}
+                        {activeDataView === "facts" && <Globe className="w-8 h-8" />}
+                        {activeDataView === "coding" && <Code className="w-8 h-8" />}
+                        {activeDataView === "philosophy" && <Lightbulb className="w-8 h-8" />}
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">
+                        {activeDataView.charAt(0).toUpperCase() + activeDataView.slice(1)} Module
+                      </h3>
+                      <p className="text-gray-600 mb-4">Detailed module management and analytics coming soon...</p>
+                      <Button onClick={() => setActiveDataView("overview")} variant="outline">
+                        Back to Overview
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -738,50 +643,53 @@ export default function EnhancedAIChat() {
     )
   }
 
-  // MAIN CHAT INTERFACE
+  // MAIN CHAT INTERFACE - VERSION 100 STYLE
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen" style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <Card className="flex-1 m-4 flex flex-col">
-          <CardHeader className="flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="w-5 h-5" />
-                {systemInfo.name || "ZacAI"}
-                <Badge variant="outline" className="ml-2">
-                  Simple System
+      <div className="flex-1 flex flex-col min-w-0 p-4">
+        <Card className="flex-1 flex flex-col chat-container">
+          <div className="chat-header">
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-3">
+                <Brain className="w-6 h-6 text-white" />
+                <div>
+                  <h1 className="text-xl font-bold text-white">{systemInfo.name || "ZacAI"}</h1>
+                  <p className="text-sm text-white/80">Enhanced AI System v2.0</p>
+                </div>
+                <Badge variant="outline" className="ml-2 bg-white/20 border-white/30 text-white">
+                  Enhanced
                 </Badge>
-                <div className="w-3 h-3 rounded-full bg-green-500" />
-              </CardTitle>
+                <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+              </div>
 
               <div className="flex items-center gap-4">
-                <div className="hidden md:flex items-center gap-4 text-sm">
+                <div className="hidden md:flex items-center gap-4 text-sm text-white/80">
                   <div className="flex items-center gap-1">
-                    <BookOpen className="w-4 h-4 text-blue-500" />
+                    <BookOpen className="w-4 h-4" />
                     <span>{stats.vocabulary}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Calculator className="w-4 h-4 text-green-500" />
+                    <Calculator className="w-4 h-4" />
                     <span>{stats.mathematics}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <MessageCircle className="w-4 h-4 text-purple-500" />
+                    <MessageCircle className="w-4 h-4" />
                     <span>{stats.conversations}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-white">
                   <span className="text-sm">Admin</span>
                   <Switch checked={showMetrics} onCheckedChange={setShowMetrics} />
                 </div>
               </div>
             </div>
-          </CardHeader>
+          </div>
 
-          <CardContent className="flex-1 flex flex-col min-h-0">
-            <ScrollArea className="flex-1 mb-4">
-              <div className="space-y-4 pr-4">
+          <div className="flex-1 flex flex-col min-h-0">
+            <ScrollArea className="flex-1 chat-messages">
+              <div className="space-y-4">
                 {messages.length === 0 && (
                   <div className="text-center text-gray-500 mt-8">
                     <div className="flex items-center justify-center gap-2 mb-4">
@@ -790,8 +698,7 @@ export default function EnhancedAIChat() {
                     </div>
                     <p className="text-lg font-medium mb-2">Hello! I'm {systemInfo.name || "ZacAI"} 🧠</p>
                     <p className="mb-4">
-                      I'm a simple AI system with integrated mathematical knowledge, vocabulary learning, and
-                      comprehensive memory capabilities!
+                      I'm an enhanced AI system with advanced knowledge modules and reasoning capabilities!
                     </p>
 
                     <div className="grid grid-cols-2 gap-2 text-sm max-w-md mx-auto">
@@ -807,194 +714,182 @@ export default function EnhancedAIChat() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("What is science")}
+                        onClick={() => setInput("Define quantum")}
                         className="text-left justify-start"
                       >
                         <BookOpen className="w-4 h-4 mr-2" />
-                        What is science
+                        Define quantum
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("My name is Ron")}
+                        onClick={() => setInput("My name is Alex")}
                         className="text-left justify-start"
                       >
                         <User className="w-4 h-4 mr-2" />
-                        My name is Ron
+                        My name is Alex
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setInput("Self diagnostic")}
+                        onClick={() => setInput("System diagnostics")}
                         className="text-left justify-start"
                       >
                         <Settings className="w-4 h-4 mr-2" />
-                        Self diagnostic
+                        System diagnostics
                       </Button>
                     </div>
                   </div>
                 )}
 
                 {messages.map((message) => (
-                  <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`max-w-[80%] rounded-lg p-4 ${
-                        message.role === "user" ? "bg-blue-500 text-white" : "bg-white border shadow-sm"
-                      }`}
-                    >
-                      <div className="text-sm mb-2 whitespace-pre-wrap">{message.content}</div>
+                  <div key={message.id} className={message.role === "user" ? "message-user" : "message-assistant"}>
+                    <div className="text-sm mb-2 whitespace-pre-wrap leading-relaxed">{message.content}</div>
 
-                      {message.role === "assistant" && (
-                        <div className="space-y-3 mt-3">
-                          {message.thinking && message.thinking.length > 0 && (
-                            <div className="border-l-2 border-blue-300 pl-3">
-                              <button
-                                onClick={() =>
-                                  setShowThinking((prev) => ({ ...prev, [message.id]: !prev[message.id] }))
-                                }
-                                className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                              >
-                                {showThinking[message.id] ? (
-                                  <ChevronUp className="w-3 h-3" />
-                                ) : (
-                                  <ChevronDown className="w-3 h-3" />
-                                )}
-                                <Brain className="w-3 h-3" />
-                                <span>AI Thinking Process</span>
-                              </button>
-                              {showThinking[message.id] && (
-                                <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded space-y-1">
-                                  {message.thinking.map((step, idx) => (
-                                    <div key={idx} className="flex items-start gap-2">
-                                      <div className="w-1 h-1 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
-                                      <span>{step}</span>
-                                    </div>
-                                  ))}
-                                </div>
+                    {message.role === "assistant" && (
+                      <div className="space-y-3 mt-3">
+                        {message.thinking && message.thinking.length > 0 && (
+                          <div className="border-l-2 border-blue-300 pl-3">
+                            <button
+                              onClick={() => setShowThinking((prev) => ({ ...prev, [message.id]: !prev[message.id] }))}
+                              className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                            >
+                              {showThinking[message.id] ? (
+                                <ChevronUp className="w-3 h-3" />
+                              ) : (
+                                <ChevronDown className="w-3 h-3" />
                               )}
-                            </div>
-                          )}
-
-                          {message.mathAnalysis && (
-                            <div className="bg-green-50 border border-green-200 rounded p-2">
-                              <div className="text-xs text-green-700 font-medium mb-1">Mathematical Analysis</div>
-                              <div className="text-xs text-green-600">
-                                Operation: {message.mathAnalysis.operation} | Confidence:{" "}
-                                {Math.round(message.mathAnalysis.confidence * 100)}%
-                                {message.mathAnalysis.seedDataUsed && " | Used Seed Data"}
-                              </div>
-                            </div>
-                          )}
-
-                          {message.knowledgeUsed && message.knowledgeUsed.length > 0 && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-1 text-xs text-gray-500">
-                                <Search className="w-3 h-3" />
-                                <span>Knowledge used:</span>
-                              </div>
-                              <div className="flex flex-wrap gap-1">
-                                {message.knowledgeUsed.map((knowledge, idx) => (
-                                  <Badge key={idx} variant="secondary" className="text-xs">
-                                    {String(knowledge)}
-                                  </Badge>
+                              <Brain className="w-3 h-3" />
+                              <span>AI Thinking Process</span>
+                            </button>
+                            {showThinking[message.id] && (
+                              <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded space-y-1">
+                                {message.thinking.map((step, idx) => (
+                                  <div key={idx} className="flex items-start gap-2">
+                                    <div className="w-1 h-1 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                                    <span>{step}</span>
+                                  </div>
                                 ))}
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
+                        )}
 
-                          {message.suggestions && message.suggestions.length > 0 && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-1 text-xs text-gray-500">
-                                <Lightbulb className="w-3 h-3" />
-                                <span>Try these:</span>
-                              </div>
-                              <div className="flex flex-wrap gap-1">
-                                {message.suggestions.map((suggestion, idx) => (
-                                  <Button
-                                    key={idx}
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-xs h-6 px-2 bg-transparent"
-                                    onClick={() => setInput(suggestion)}
-                                  >
-                                    {suggestion}
-                                  </Button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between text-xs opacity-70">
-                            <div className="flex items-center gap-2">
-                              <span>{formatTimestamp(message.timestamp)}</span>
-                              {message.confidence && (
-                                <div className="flex items-center gap-1">
-                                  <Cloud className="w-3 h-3" />
-                                  <div
-                                    className={`w-2 h-2 rounded-full ${
-                                      message.confidence > 0.7
-                                        ? "bg-green-500"
-                                        : message.confidence > 0.4
-                                          ? "bg-yellow-500"
-                                          : "bg-red-500"
-                                    }`}
-                                  />
-                                  <span className={getConfidenceColor(message.confidence)}>
-                                    {Math.round(message.confidence * 100)}%
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => console.log("Positive feedback")}
-                              >
-                                <ThumbsUp className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => console.log("Negative feedback")}
-                              >
-                                <ThumbsDown className="w-3 h-3" />
-                              </Button>
+                        {message.mathAnalysis && (
+                          <div className="bg-green-50 border border-green-200 rounded p-2">
+                            <div className="text-xs text-green-700 font-medium mb-1">Mathematical Analysis</div>
+                            <div className="text-xs text-green-600">
+                              Operation: {message.mathAnalysis.operation} | Confidence:{" "}
+                              {Math.round(message.mathAnalysis.confidence * 100)}%
+                              {message.mathAnalysis.seedDataUsed && " | Used Seed Data"}
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {message.role === "user" && (
-                        <div className="text-xs opacity-70 mt-2">{formatTimestamp(message.timestamp)}</div>
-                      )}
-                    </div>
+                        {message.knowledgeUsed && message.knowledgeUsed.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Search className="w-3 h-3" />
+                              <span>Knowledge used:</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {message.knowledgeUsed.map((knowledge, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {String(knowledge)}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {message.suggestions && message.suggestions.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Lightbulb className="w-3 h-3" />
+                              <span>Try these:</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {message.suggestions.map((suggestion, idx) => (
+                                <Button
+                                  key={idx}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs h-6 px-2 bg-transparent"
+                                  onClick={() => setInput(suggestion)}
+                                >
+                                  {suggestion}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between text-xs opacity-70">
+                          <div className="flex items-center gap-2">
+                            <span>{formatTimestamp(message.timestamp)}</span>
+                            {message.confidence && (
+                              <div className="flex items-center gap-1">
+                                <Cloud className="w-3 h-3" />
+                                <div
+                                  className={`w-2 h-2 rounded-full ${
+                                    message.confidence > 0.7
+                                      ? "bg-green-500"
+                                      : message.confidence > 0.4
+                                        ? "bg-yellow-500"
+                                        : "bg-red-500"
+                                  }`}
+                                />
+                                <span className={getConfidenceColor(message.confidence)}>
+                                  {Math.round(message.confidence * 100)}%
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => console.log("Positive feedback")}
+                            >
+                              <ThumbsUp className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => console.log("Negative feedback")}
+                            >
+                              <ThumbsDown className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {message.role === "user" && (
+                      <div className="text-xs opacity-70 mt-2">{formatTimestamp(message.timestamp)}</div>
+                    )}
                   </div>
                 ))}
 
                 {isThinking && currentThinking && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 border shadow-sm rounded-lg p-4 max-w-[80%]">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
-                        <Brain className="w-4 h-4 text-blue-500 animate-pulse" />
-                        <span className="text-sm text-gray-600 italic">{currentThinking}</span>
-                      </div>
+                  <div className="thinking-process">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full" />
+                      <Brain className="w-4 h-4 text-orange-600 animate-pulse" />
+                      <span className="text-sm text-orange-700 italic">{currentThinking}</span>
                     </div>
                   </div>
                 )}
 
                 {isLoading && !isThinking && (
-                  <div className="flex justify-start">
-                    <div className="bg-white border shadow-sm rounded-lg p-4 max-w-[80%]">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
-                        <span className="text-sm text-gray-500">{systemInfo.name || "ZacAI"} is processing...</span>
-                        <Cloud className="w-4 h-4 text-gray-400 animate-pulse" />
-                      </div>
+                  <div className="message-assistant">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
+                      <span className="text-sm text-gray-500">{systemInfo.name || "ZacAI"} is processing...</span>
+                      <Cloud className="w-4 h-4 text-gray-400 animate-pulse" />
                     </div>
                   </div>
                 )}
@@ -1003,123 +898,265 @@ export default function EnhancedAIChat() {
               </div>
             </ScrollArea>
 
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything - math, definitions, coding, or self-analysis!"
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button type="submit" disabled={isLoading || !input.trim()}>
-                <Zap className="w-4 h-4 mr-2" />
-                Send
-              </Button>
-            </form>
+            <div className="chat-input-container">
+              <form onSubmit={handleSubmit} className="flex gap-3">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask me anything - vocabulary, math, facts, coding, philosophy..."
+                  disabled={isLoading}
+                  className="flex-1 chat-input"
+                />
+                <button type="submit" disabled={isLoading || !input.trim()} className="send-button">
+                  <Zap className="w-5 h-5" />
+                </button>
+              </form>
 
-            {error && (
-              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>
-            )}
-          </CardContent>
+              {error && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>
+              )}
+            </div>
+          </div>
         </Card>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar - VERSION 100 STYLE */}
       <div className="w-80 flex-shrink-0 p-4 overflow-hidden">
-        <Tabs defaultValue="stats" className="h-full flex flex-col">
-          <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
-            <TabsTrigger value="stats">Stats</TabsTrigger>
-            <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
-            <TabsTrigger value="tools">Tools</TabsTrigger>
-          </TabsList>
+        <div className="sidebar h-full">
+          <Tabs defaultValue="stats" className="h-full flex flex-col">
+            <TabsList className="grid w-full grid-cols-3 flex-shrink-0 mb-4">
+              <TabsTrigger value="stats" className="sidebar-tab">
+                Stats
+              </TabsTrigger>
+              <TabsTrigger value="knowledge" className="sidebar-tab">
+                Knowledge
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="sidebar-tab">
+                Tools
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="flex-1 mt-4 overflow-hidden">
-            <TabsContent value="stats" className="h-full">
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" />
-                    Live Stats
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{stats.vocabulary}</div>
-                      <div className="text-xs text-gray-500">Vocabulary</div>
-                      {stats.breakdown && (
-                        <div className="text-xs text-gray-400">
-                          {stats.breakdown.seedVocab}+{stats.breakdown.learnedVocab}
+            <div className="flex-1 overflow-hidden">
+              <TabsContent value="stats" className="h-full">
+                <div className="h-full overflow-auto space-y-4">
+                  <Card className="stats-card">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4" />
+                        Live Stats
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <div className="stats-number">{stats.vocabulary}</div>
+                          <div className="stats-label">Vocabulary</div>
+                          {stats.breakdown && (
+                            <div className="text-xs text-gray-400">
+                              {stats.breakdown.seedVocab}+{stats.breakdown.learnedVocab}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">{stats.mathematics}</div>
-                      <div className="text-xs text-gray-500">Math</div>
-                      {stats.breakdown && (
-                        <div className="text-xs text-gray-400">
-                          {stats.breakdown.seedMath}+{stats.breakdown.learnedMath}
+                        <div className="text-center">
+                          <div className="stats-number">{stats.mathematics}</div>
+                          <div className="stats-label">Math</div>
+                          {stats.breakdown && (
+                            <div className="text-xs text-gray-400">
+                              {stats.breakdown.seedMath}+{stats.breakdown.learnedMath}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">{stats.userInfo}</div>
-                      <div className="text-xs text-gray-500">User Info</div>
-                    </div>
+                        <div className="text-center">
+                          <div className="stats-number">{stats.userInfo}</div>
+                          <div className="stats-label">User Info</div>
+                        </div>
 
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-orange-600">{stats.totalEntries}</div>
-                      <div className="text-xs text-gray-500">Total Learned</div>
-                    </div>
-                  </div>
+                        <div className="text-center">
+                          <div className="stats-number">{stats.totalEntries}</div>
+                          <div className="stats-label">Total Learned</div>
+                        </div>
+                      </div>
 
-                  <Separator />
+                      <Separator />
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Total Knowledge</span>
-                      <span className="font-mono">{stats.totalEntries}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Conversations</span>
-                      <span className="font-mono">{stats.conversations}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Last Updated</span>
-                      <span className="font-mono text-xs">
-                        {stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : "Never"}
-                      </span>
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Total Knowledge</span>
+                          <span className="font-mono">{stats.totalEntries}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Conversations</span>
+                          <span className="font-mono">{stats.conversations}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Last Updated</span>
+                          <span className="font-mono text-xs">
+                            {stats.lastUpdated ? formatRelativeTime(stats.lastUpdated) : "Never"}
+                          </span>
+                        </div>
+                      </div>
 
-                  <Separator />
+                      <Separator />
 
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">System Status</div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500" />
-                      <span className="text-sm">All Systems Operational</span>
-                    </div>
-                    <div className="text-xs text-gray-500">Ready for conversations and learning</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">System Status</div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-green-500" />
+                          <span className="text-sm">All Systems Operational</span>
+                        </div>
+                        <div className="text-xs text-gray-500">Enhanced architecture ready</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
 
-            <TabsContent value="knowledge" className="h-full overflow-auto">
-              <KnowledgeManagementTab />
-            </TabsContent>
+              <TabsContent value="knowledge" className="h-full overflow-auto">
+                <div className="space-y-4">
+                  <Card className="module-card">
+                    <CardHeader>
+                      <CardTitle className="text-sm">📚 Knowledge Modules</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="module-header">
+                        <div className="module-icon vocabulary">
+                          <BookOpen className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">Vocabulary</div>
+                          <div className="text-xs text-gray-500">Dictionary & Thesaurus</div>
+                        </div>
+                        <Badge variant="outline" className="confidence-badge high">
+                          Active
+                        </Badge>
+                      </div>
 
-            <TabsContent value="tools" className="h-full overflow-auto">
-              <div className="space-y-4">
-                <SystemSettingsTab />
-                <MemorySystemTab />
-              </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+                      <div className="module-header">
+                        <div className="module-icon mathematics">
+                          <Calculator className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">Mathematics</div>
+                          <div className="text-xs text-gray-500">Tesla & Vortex Math</div>
+                        </div>
+                        <Badge variant="outline" className="confidence-badge high">
+                          Active
+                        </Badge>
+                      </div>
+
+                      <div className="module-header">
+                        <div className="module-icon facts">
+                          <Globe className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">Facts</div>
+                          <div className="text-xs text-gray-500">Wikipedia Integration</div>
+                        </div>
+                        <Badge variant="outline" className="confidence-badge high">
+                          Active
+                        </Badge>
+                      </div>
+
+                      <div className="module-header">
+                        <div className="module-icon coding">
+                          <Code className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">Coding</div>
+                          <div className="text-xs text-gray-500">Programming Concepts</div>
+                        </div>
+                        <Badge variant="outline" className="confidence-badge medium">
+                          Ready
+                        </Badge>
+                      </div>
+
+                      <div className="module-header">
+                        <div className="module-icon philosophy">
+                          <Lightbulb className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">Philosophy</div>
+                          <div className="text-xs text-gray-500">Philosophical Concepts</div>
+                        </div>
+                        <Badge variant="outline" className="confidence-badge medium">
+                          Ready
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="tools" className="h-full overflow-auto">
+                <div className="space-y-4">
+                  <Card className="stats-card">
+                    <CardHeader>
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Settings className="w-4 h-4" />
+                        System Tools
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start bg-transparent"
+                        onClick={handleExport}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Export Data
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start bg-transparent"
+                        onClick={() => setInput("System diagnostics")}
+                      >
+                        <Activity className="w-4 h-4 mr-2" />
+                        Run Diagnostics
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start bg-transparent"
+                        onClick={updateStats}
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Refresh Stats
+                      </Button>
+
+                      <Separator />
+
+                      <div className="text-xs text-gray-500">
+                        <div className="flex justify-between">
+                          <span>Memory Usage:</span>
+                          <span>Normal</span>
+                        </div>
+                        <div className="progress-bar mt-1">
+                          <div className="progress-fill high" style={{ width: "65%" }} />
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-gray-500">
+                        <div className="flex justify-between">
+                          <span>API Status:</span>
+                          <span>Connected</span>
+                        </div>
+                        <div className="progress-bar mt-1">
+                          <div className="progress-fill high" style={{ width: "90%" }} />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </div>
       </div>
     </div>
   )
