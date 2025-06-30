@@ -1,115 +1,205 @@
-// Context management for conversation tracking
-import type { ConversationContext, Message } from "@/types/global"
-import { generateId, extractKeywords } from "@/utils/helpers"
+import type { Message, ContextData } from "@/types/global"
 
 export class ContextManager {
-  private currentContext: ConversationContext | null = null
-  private contextHistory: ConversationContext[] = []
-  private maxHistorySize = 10
-  private maxMessageHistory = 50
+  private messages: Message[] = []
+  private sessionStart: number = Date.now()
+  private maxMessages = 100
+  private contextWindow = 10 // Number of recent messages to consider
 
-  createContext(): ConversationContext {
-    const context: ConversationContext = {
-      id: generateId(),
-      messages: [],
-      userInfo: {},
-      preferences: {
-        responseStyle: "detailed",
-        showThinking: true,
-        showSources: true,
-      },
-      timestamp: Date.now(),
-    }
-
-    this.currentContext = context
-    return context
+  createContext(): void {
+    this.messages = []
+    this.sessionStart = Date.now()
   }
 
   addMessage(message: Omit<Message, "id" | "timestamp">): void {
-    if (!this.currentContext) {
-      this.createContext()
-    }
-
     const fullMessage: Message = {
-      id: generateId(),
+      id: this.generateMessageId(),
       timestamp: Date.now(),
       ...message,
     }
 
-    this.currentContext!.messages.push(fullMessage)
+    this.messages.push(fullMessage)
 
-    // Trim message history if too long
-    if (this.currentContext!.messages.length > this.maxMessageHistory) {
-      this.currentContext!.messages = this.currentContext!.messages.slice(-this.maxMessageHistory)
+    // Keep only the most recent messages
+    if (this.messages.length > this.maxMessages) {
+      this.messages = this.messages.slice(-this.maxMessages)
     }
   }
 
-  extractContext(currentInput: string): any {
-    if (!this.currentContext) return {}
+  getRecentMessages(count?: number): Message[] {
+    const messageCount = count || this.contextWindow
+    return this.messages.slice(-messageCount)
+  }
 
-    const recentMessages = this.currentContext.messages.slice(-5)
-    const keywords = extractKeywords(currentInput)
+  getAllMessages(): Message[] {
+    return [...this.messages]
+  }
 
-    // Extract context from recent conversation
-    const conversationKeywords = recentMessages.flatMap((msg) => extractKeywords(msg.content)).slice(0, 20)
+  extractContext(currentInput: string): ContextData {
+    const recentMessages = this.getRecentMessages()
+    const userMessages = recentMessages.filter((m) => m.role === "user")
+    const assistantMessages = recentMessages.filter((m) => m.role === "assistant")
+
+    // Extract topics from recent conversation
+    const topics = this.extractTopics(recentMessages)
+
+    // Extract entities (numbers, names, etc.)
+    const entities = this.extractEntities(currentInput)
+
+    // Determine conversation flow
+    const conversationFlow = this.analyzeConversationFlow(recentMessages)
 
     return {
       recentMessages,
-      keywords,
-      conversationKeywords,
-      conversationLength: this.currentContext.messages.length,
-      userPreferences: this.currentContext.preferences,
-      sessionDuration: Date.now() - this.currentContext.timestamp,
+      topics,
+      entities,
+      conversationFlow,
+      sessionDuration: Date.now() - this.sessionStart,
+      messageCount: this.messages.length,
+      userQuestionCount: userMessages.length,
+      assistantResponseCount: assistantMessages.length,
     }
   }
 
-  updateUserInfo(info: any): void {
-    if (this.currentContext) {
-      this.currentContext.userInfo = { ...this.currentContext.userInfo, ...info }
+  private extractTopics(messages: Message[]): string[] {
+    const topics: Set<string> = new Set()
+
+    const topicKeywords = {
+      vocabulary: ["define", "meaning", "word", "definition", "synonym", "antonym"],
+      mathematics: ["calculate", "solve", "math", "equation", "number", "formula"],
+      facts: ["fact", "information", "tell me about", "what is", "explain"],
+      coding: ["code", "program", "function", "algorithm", "programming"],
+      philosophy: ["philosophy", "ethics", "moral", "meaning of life", "existence"],
     }
+
+    messages.forEach((message) => {
+      const content = message.content.toLowerCase()
+
+      Object.entries(topicKeywords).forEach(([topic, keywords]) => {
+        if (keywords.some((keyword) => content.includes(keyword))) {
+          topics.add(topic)
+        }
+      })
+    })
+
+    return Array.from(topics)
   }
 
-  updatePreferences(preferences: any): void {
-    if (this.currentContext) {
-      this.currentContext.preferences = { ...this.currentContext.preferences, ...preferences }
+  private extractEntities(text: string): any {
+    const entities = {
+      numbers: [],
+      dates: [],
+      names: [],
+      locations: [],
+      organizations: [],
     }
+
+    // Extract numbers
+    const numberMatches = text.match(/\b\d+(?:\.\d+)?\b/g)
+    if (numberMatches) {
+      entities.numbers = numberMatches.map(Number)
+    }
+
+    // Extract potential dates
+    const dateMatches = text.match(/\b\d{1,2}\/\d{1,2}\/\d{4}\b|\b\d{4}-\d{2}-\d{2}\b/g)
+    if (dateMatches) {
+      entities.dates = dateMatches
+    }
+
+    // Extract capitalized words (potential names/places)
+    const capitalizedMatches = text.match(/\b[A-Z][a-z]+\b/g)
+    if (capitalizedMatches) {
+      entities.names = capitalizedMatches
+    }
+
+    return entities
   }
 
-  saveContext(): void {
-    if (this.currentContext) {
-      this.contextHistory.unshift(this.currentContext)
+  private analyzeConversationFlow(messages: Message[]): string {
+    if (messages.length === 0) return "new_conversation"
 
-      // Trim history
-      if (this.contextHistory.length > this.maxHistorySize) {
-        this.contextHistory = this.contextHistory.slice(0, this.maxHistorySize)
+    const lastMessage = messages[messages.length - 1]
+    const secondLastMessage = messages.length > 1 ? messages[messages.length - 2] : null
+
+    // Check for follow-up questions
+    if (lastMessage.role === "user" && secondLastMessage?.role === "assistant") {
+      const followUpIndicators = ["also", "and", "what about", "how about", "can you"]
+      if (followUpIndicators.some((indicator) => lastMessage.content.toLowerCase().includes(indicator))) {
+        return "follow_up"
       }
     }
-  }
 
-  loadContext(contextId: string): ConversationContext | null {
-    const context = this.contextHistory.find((ctx) => ctx.id === contextId)
-    if (context) {
-      this.currentContext = context
-      return context
+    // Check for clarification requests
+    const clarificationIndicators = ["what do you mean", "can you explain", "i don't understand"]
+    if (clarificationIndicators.some((indicator) => lastMessage.content.toLowerCase().includes(indicator))) {
+      return "clarification"
     }
-    return null
-  }
 
-  getCurrentContext(): ConversationContext | null {
-    return this.currentContext
+    // Check for topic changes
+    const topics = this.extractTopics([lastMessage])
+    const previousTopics = this.extractTopics(messages.slice(-3, -1))
+
+    if (topics.length > 0 && previousTopics.length > 0) {
+      const hasCommonTopic = topics.some((topic) => previousTopics.includes(topic))
+      if (!hasCommonTopic) {
+        return "topic_change"
+      }
+    }
+
+    return "continuation"
   }
 
   getContextStats(): any {
     return {
-      messageCount: this.currentContext?.messages.length || 0,
-      duration: this.currentContext ? Date.now() - this.currentContext.timestamp : 0,
-      historySize: this.contextHistory.length,
+      messageCount: this.messages.length,
+      duration: Date.now() - this.sessionStart,
+      averageMessageLength:
+        this.messages.length > 0
+          ? this.messages.reduce((sum, msg) => sum + msg.content.length, 0) / this.messages.length
+          : 0,
+      topicsDiscussed: this.extractTopics(this.messages),
+      conversationHealth: this.assessConversationHealth(),
     }
   }
 
+  private assessConversationHealth(): string {
+    if (this.messages.length === 0) return "new"
+
+    const recentMessages = this.getRecentMessages(5)
+    const userMessages = recentMessages.filter((m) => m.role === "user")
+    const assistantMessages = recentMessages.filter((m) => m.role === "assistant")
+
+    const ratio = assistantMessages.length / Math.max(userMessages.length, 1)
+
+    if (ratio > 1.5) return "assistant_heavy"
+    if (ratio < 0.5) return "user_heavy"
+    return "balanced"
+  }
+
+  private generateMessageId(): string {
+    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  }
+
   clearContext(): void {
-    this.saveContext()
-    this.currentContext = null
+    this.messages = []
+    this.sessionStart = Date.now()
+  }
+
+  exportContext(): any {
+    return {
+      messages: this.messages,
+      sessionStart: this.sessionStart,
+      stats: this.getContextStats(),
+    }
+  }
+
+  importContext(contextData: any): void {
+    if (contextData.messages) {
+      this.messages = contextData.messages
+    }
+    if (contextData.sessionStart) {
+      this.sessionStart = contextData.sessionStart
+    }
   }
 }
 
