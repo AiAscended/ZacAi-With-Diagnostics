@@ -1,5 +1,9 @@
 import AdminDashboard from "@/ui/admin/dashboard"
 
 export default function AdminPage() {
-  return <AdminDashboard />
+  return (
+    <div className="min-h-screen bg-background">
+      <AdminDashboard />
+    </div>
+  )
 }

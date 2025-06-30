@@ -8,47 +8,67 @@ export class StorageManager {
     try {
       const response = await fetch(filePath)
       if (!response.ok) {
-        throw new Error(`Failed to load seed data from ${filePath}`)
+        console.warn(`Seed data not found at ${filePath}, using empty structure`)
+        return this.createEmptySeedStructure()
       }
       const data = await response.json()
       this.cache.set(`seed_${filePath}`, data)
       return data
     } catch (error) {
       console.error("Error loading seed data:", error)
-      return null
+      return this.createEmptySeedStructure()
     }
   }
 
   async loadLearntData(filePath: string): Promise<any> {
     try {
       // Try to load from localStorage first
-      const localData = localStorage.getItem(`${this.STORAGE_PREFIX}${filePath}`)
-      if (localData) {
-        const data = JSON.parse(localData)
-        this.cache.set(`learnt_${filePath}`, data)
-        return data
+      const localKey = `${this.STORAGE_PREFIX}${filePath.replace(/[^a-zA-Z0-9]/g, "_")}`
+      const localData = localStorage.getItem(localKey)
+
+      if (localData && localData.trim()) {
+        try {
+          const data = JSON.parse(localData)
+          this.cache.set(`learnt_${filePath}`, data)
+          return data
+        } catch (parseError) {
+          console.warn("Invalid JSON in localStorage, clearing:", parseError)
+          localStorage.removeItem(localKey)
+        }
       }
 
-      // Fallback to file system
-      const response = await fetch(filePath)
-      if (response.ok) {
-        const data = await response.json()
-        this.cache.set(`learnt_${filePath}`, data)
-        return data
+      // Try to load from file system
+      try {
+        const response = await fetch(filePath)
+        if (response.ok) {
+          const text = await response.text()
+          if (text.trim()) {
+            const data = JSON.parse(text)
+            this.cache.set(`learnt_${filePath}`, data)
+            return data
+          }
+        }
+      } catch (fetchError) {
+        console.warn(`Could not fetch learnt data from ${filePath}:`, fetchError)
       }
 
-      // Return empty structure if file doesn't exist
-      return this.createEmptyLearntStructure()
+      // Return empty structure if file doesn't exist or is empty
+      const emptyStructure = this.createEmptyLearntStructure()
+      this.cache.set(`learnt_${filePath}`, emptyStructure)
+      return emptyStructure
     } catch (error) {
       console.error("Error loading learnt data:", error)
-      return this.createEmptyLearntStructure()
+      const emptyStructure = this.createEmptyLearntStructure()
+      this.cache.set(`learnt_${filePath}`, emptyStructure)
+      return emptyStructure
     }
   }
 
   async saveLearntData(filePath: string, data: any): Promise<boolean> {
     try {
       const serializedData = JSON.stringify(data, null, 2)
-      localStorage.setItem(`${this.STORAGE_PREFIX}${filePath}`, serializedData)
+      const localKey = `${this.STORAGE_PREFIX}${filePath.replace(/[^a-zA-Z0-9]/g, "_")}`
+      localStorage.setItem(localKey, serializedData)
       this.cache.set(`learnt_${filePath}`, data)
       return true
     } catch (error) {
@@ -102,6 +122,18 @@ export class StorageManager {
         retentionRate: 0,
         utilizationRate: 0,
       },
+    }
+  }
+
+  private createEmptySeedStructure(): any {
+    return {
+      metadata: {
+        version: "1.0.0",
+        lastUpdated: new Date().toISOString(),
+        totalEntries: 0,
+        sources: [],
+      },
+      data: {},
     }
   }
 }

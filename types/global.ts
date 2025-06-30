@@ -1,4 +1,3 @@
-// Global type definitions for the ZacAI system
 export interface SystemConfig {
   version: string
   environment: "development" | "production" | "test"
@@ -46,6 +45,14 @@ export interface ModuleStats {
   lastUpdate: number
 }
 
+export interface IntentAnalysis {
+  intent: string
+  confidence: number
+  entities: string[]
+  context: any
+  suggestedModules: string[]
+}
+
 export interface LearntDataEntry {
   id: string
   content: any
@@ -60,18 +67,19 @@ export interface LearntDataEntry {
   relationships: string[]
 }
 
-export interface ConversationContext {
-  id: string
-  messages: Message[]
-  userInfo: any
-  preferences: any
-  timestamp: number
+export interface ContextMessage {
+  role: "user" | "assistant" | "system"
+  content: string
+  timestamp?: number
+  metadata?: any
 }
 
-export interface Message {
+export interface LearningPattern {
   id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: number
-  metadata?: any
+  type: string
+  pattern: any
+  confidence: number
+  occurrences: number
+  lastSeen: number
+  effectiveness: number
 }

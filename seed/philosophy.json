@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-01-01T00:00:00Z",
+    "totalConcepts": 100,
+    "sources": ["Stanford Encyclopedia of Philosophy", "Internet Encyclopedia of Philosophy"]
+  },
+  "concepts": [
+    {
+      "id": "categorical_imperative",
+      "name": "Categorical Imperative",
+      "description": "Kant's principle that moral actions must be universalizable and treat people as ends in themselves, never merely as means.",
+      "philosopher": "Immanuel Kant",
+      "school": "Deontological Ethics",
+      "relatedConcepts": ["duty", "moral_law", "autonomy"],
+      "arguments": [
+        "Act only according to maxims you could will to be universal laws",
+        "Treat humanity always as an end, never merely as means",
+        "Moral worth comes from acting from duty, not inclination"
+      ],
+      "counterArguments": [
+        "Too rigid and doesn't account for consequences",
+        "Conflicts can arise between different duties",
+        "Difficult to determine what can be universalized"
+      ],
+      "modernRelevance": "Foundational for human rights theory and medical ethics"
+    },
+    {
+      "id": "existential_authenticity",
+      "name": "Existential Authenticity",
+      "description": "The idea that individuals must create their own meaning and live according to their freely chosen values rather than conforming to external expectations.",
+      "philosopher": "Jean-Paul Sartre",
+      "school": "Existentialism",
+      "relatedConcepts": ["freedom", "responsibility", "bad_faith", "existence_precedes_essence"],
+      "arguments": [
+        "Humans are condemned to be free and must choose their essence",
+        "Authenticity requires taking full responsibility for one's choices",
+        "Bad faith involves denying one's freedom and responsibility"
+      ],
+      "counterArguments": [
+        "Complete freedom may be an illusion due to social constraints",
+        "Some values may be objectively better than others",
+        "Authenticity can lead to moral relativism"
+      ],
+      "modernRelevance": "Influences psychology, therapy, and discussions of personal identity"
+    },
+    {
+      "id": "utilitarian_calculus",
+      "name": "Utilitarian Calculus",
+      "description": "The method of determining the rightness of actions by calculating their consequences in terms of overall happiness or well-being produced.",
+      "philosopher": "Jeremy Bentham",
+      "school": "Utilitarianism",
+      "relatedConcepts": ["greatest_happiness_principle", "hedonistic_calculus", "consequentialism"],
+      "arguments": [
+        "Actions are right insofar as they promote happiness",
+        "The greatest good for the greatest number should guide decisions",
+        "Pleasure and pain can be quantified and compared"
+      ],
+      "counterArguments": [
+        "Difficult to measure and compare different types of happiness",
+        "May justify intuitively wrong actions if they maximize utility",
+        "Ignores individual rights and justice concerns"
+      ],
+      "modernRelevance": "Used in policy analysis, economics, and AI ethics"
+    }
+  ],
+  "schools": [
+    {
+      "name": "Stoicism",
+      "description": "Ancient philosophy emphasizing virtue, wisdom, and acceptance of what cannot be changed",
+      "keyFigures": ["Epictetus", "Marcus Aurelius", "Seneca"],
+      "corePrinciples": ["Focus on what you can control", "Virtue is the only true good", "Accept fate with equanimity"]
+    },
+    {
+      "name": "Existentialism",
+      "description": "20th-century philosophy emphasizing individual existence, freedom, and choice",
+      "keyFigures": ["Sartre", "Camus", "Heidegger", "Kierkegaard"],
+      "corePrinciples": [
+        "Existence precedes essence",
+        "Radical freedom and responsibility",
+        "Authenticity over conformity"
+      ]
+    }
+  ]
+}

@@ -1,110 +1,101 @@
-import type { ConversationContext, Message } from "@/types/global"
-import { generateId } from "@/utils/helpers"
+import type { ContextMessage } from "@/types/global"
 
 export class ContextManager {
-  private contexts: Map<string, ConversationContext> = new Map()
-  private currentContextId: string | null = null
+  private messages: ContextMessage[] = []
+  private maxContextLength = 50
+  private sessionStart = Date.now()
 
-  createContext(userInfo?: any): string {
-    const contextId = generateId()
-    const context: ConversationContext = {
-      id: contextId,
-      messages: [],
-      userInfo: userInfo || {},
-      preferences: {},
-      timestamp: Date.now(),
-    }
-
-    this.contexts.set(contextId, context)
-    this.currentContextId = contextId
-    return contextId
+  createContext(): void {
+    this.messages = []
+    this.sessionStart = Date.now()
   }
 
-  getCurrentContext(): ConversationContext | null {
-    if (!this.currentContextId) return null
-    return this.contexts.get(this.currentContextId) || null
-  }
-
-  addMessage(message: Omit<Message, "id" | "timestamp">): void {
-    const context = this.getCurrentContext()
-    if (!context) return
-
-    const fullMessage: Message = {
+  addMessage(message: ContextMessage): void {
+    const messageWithTimestamp: ContextMessage = {
       ...message,
-      id: generateId(),
-      timestamp: Date.now(),
+      timestamp: message.timestamp || Date.now(),
     }
 
-    context.messages.push(fullMessage)
+    this.messages.push(messageWithTimestamp)
 
-    // Keep only last 50 messages for performance
-    if (context.messages.length > 50) {
-      context.messages = context.messages.slice(-50)
+    // Trim context if it gets too long
+    if (this.messages.length > this.maxContextLength) {
+      this.messages = this.messages.slice(-this.maxContextLength)
     }
   }
 
-  getRecentMessages(count = 10): Message[] {
-    const context = this.getCurrentContext()
-    if (!context) return []
-
-    return context.messages.slice(-count)
+  getMessages(): ContextMessage[] {
+    return [...this.messages]
   }
 
-  extractContext(input: string): any {
-    const context = this.getCurrentContext()
-    if (!context) return {}
+  getRecentMessages(count = 10): ContextMessage[] {
+    return this.messages.slice(-count)
+  }
 
+  extractContext(currentInput: string): any {
     const recentMessages = this.getRecentMessages(5)
-    const keywords = this.extractKeywords(input)
+    const userMessages = recentMessages.filter((m) => m.role === "user")
+    const assistantMessages = recentMessages.filter((m) => m.role === "assistant")
 
     return {
-      recentMessages,
-      keywords,
-      userInfo: context.userInfo,
-      preferences: context.preferences,
-      conversationLength: context.messages.length,
+      currentInput,
+      recentUserInputs: userMessages.map((m) => m.content),
+      recentAssistantResponses: assistantMessages.map((m) => m.content),
+      conversationLength: this.messages.length,
+      sessionDuration: Date.now() - this.sessionStart,
+      topics: this.extractTopics(),
+      sentiment: this.analyzeSentiment(currentInput),
     }
   }
 
-  private extractKeywords(text: string): string[] {
-    return text
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((word) => word.length > 2)
-      .slice(0, 10) // Top 10 keywords
+  private extractTopics(): string[] {
+    const allText = this.messages.map((m) => m.content).join(" ")
+    const words = allText.toLowerCase().split(/\W+/)
+    const wordCount: { [key: string]: number } = {}
+
+    words.forEach((word) => {
+      if (word.length > 3) {
+        wordCount[word] = (wordCount[word] || 0) + 1
+      }
+    })
+
+    return Object.entries(wordCount)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10)
+      .map(([word]) => word)
   }
 
-  updateUserInfo(info: any): void {
-    const context = this.getCurrentContext()
-    if (context) {
-      context.userInfo = { ...context.userInfo, ...info }
-    }
+  private analyzeSentiment(text: string): "positive" | "negative" | "neutral" {
+    const positiveWords = ["good", "great", "excellent", "amazing", "wonderful", "fantastic", "love", "like", "enjoy"]
+    const negativeWords = ["bad", "terrible", "awful", "horrible", "hate", "dislike", "problem", "issue", "error"]
+
+    const words = text.toLowerCase().split(/\W+/)
+    let positiveCount = 0
+    let negativeCount = 0
+
+    words.forEach((word) => {
+      if (positiveWords.includes(word)) positiveCount++
+      if (negativeWords.includes(word)) negativeCount++
+    })
+
+    if (positiveCount > negativeCount) return "positive"
+    if (negativeCount > positiveCount) return "negative"
+    return "neutral"
   }
 
-  updatePreferences(preferences: any): void {
-    const context = this.getCurrentContext()
-    if (context) {
-      context.preferences = { ...context.preferences, ...preferences }
+  getContextStats(): any {
+    return {
+      messageCount: this.messages.length,
+      duration: Date.now() - this.sessionStart,
+      userMessages: this.messages.filter((m) => m.role === "user").length,
+      assistantMessages: this.messages.filter((m) => m.role === "assistant").length,
+      averageMessageLength: this.messages.reduce((sum, m) => sum + m.content.length, 0) / this.messages.length || 0,
     }
   }
 
   clearContext(): void {
-    if (this.currentContextId) {
-      this.contexts.delete(this.currentContextId)
-      this.currentContextId = null
-    }
-  }
-
-  getContextStats(): any {
-    const context = this.getCurrentContext()
-    if (!context) return null
-
-    return {
-      messageCount: context.messages.length,
-      duration: Date.now() - context.timestamp,
-      userMessages: context.messages.filter((m) => m.role === "user").length,
-      assistantMessages: context.messages.filter((m) => m.role === "assistant").length,
-    }
+    this.messages = []
+    this.sessionStart = Date.now()
   }
 }
 
