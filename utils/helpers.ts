@@ -1,5 +1,5 @@
 export function generateId(): string {
-  return Math.random().toString(36).substr(2, 9) + Date.now().toString(36)
+  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 }
 
 export function calculateConfidence(confidences: number[]): number {
@@ -7,26 +7,14 @@ export function calculateConfidence(confidences: number[]): number {
   return confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
 }
 
-export function sanitizeInput(input: string): string {
-  return input.trim().replace(/[<>]/g, "")
-}
-
-export function extractKeywords(text: string): string[] {
-  return text
-    .toLowerCase()
-    .split(/\W+/)
-    .filter((word) => word.length > 2)
-    .slice(0, 10)
-}
-
-export function calculateSimilarity(text1: string, text2: string): number {
-  const words1 = new Set(extractKeywords(text1))
-  const words2 = new Set(extractKeywords(text2))
+export function calculateSimilarity(str1: string, str2: string): number {
+  const words1 = new Set(str1.toLowerCase().split(/\s+/))
+  const words2 = new Set(str2.toLowerCase().split(/\s+/))
 
   const intersection = new Set([...words1].filter((x) => words2.has(x)))
   const union = new Set([...words1, ...words2])
 
-  return union.size === 0 ? 0 : intersection.size / union.size
+  return union.size > 0 ? intersection.size / union.size : 0
 }
 
 export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
@@ -50,16 +38,16 @@ export function throttle<T extends (...args: any[]) => any>(func: T, limit: numb
 
 export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") return obj
-  if (obj instanceof Date) return new Date(obj.getTime()) as unknown as T
-  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as unknown as T
+  if (obj instanceof Date) return new Date(obj.getTime()) as any
+  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as any
   if (typeof obj === "object") {
-    const clonedObj = {} as { [key: string]: any }
+    const clonedObj = {} as any
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
         clonedObj[key] = deepClone(obj[key])
       }
     }
-    return clonedObj as T
+    return clonedObj
   }
   return obj
 }
@@ -67,6 +55,13 @@ export function deepClone<T>(obj: T): T {
 export function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
+}
+
+export function sanitizeInput(input: string): string {
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/[<>]/g, "")
+    .trim()
 }
 
 export function formatBytes(bytes: number, decimals = 2): string {
@@ -80,32 +75,4 @@ export function formatBytes(bytes: number, decimals = 2): string {
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-export function randomChoice<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)]
-}
-
-export function chunk<T>(array: T[], size: number): T[][] {
-  const chunks: T[][] = []
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size))
-  }
-  return chunks
-}
-
-export function unique<T>(array: T[]): T[] {
-  return [...new Set(array)]
-}
-
-export function groupBy<T, K extends keyof T>(array: T[], key: K): Record<string, T[]> {
-  return array.reduce(
-    (groups, item) => {
-      const group = String(item[key])
-      groups[group] = groups[group] || []
-      groups[group].push(item)
-      return groups
-    },
-    {} as Record<string, T[]>,
-  )
 }
