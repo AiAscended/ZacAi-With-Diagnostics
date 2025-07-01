@@ -13,47 +13,38 @@ export interface VocabularyEntry {
 
 export interface MathConcept {
   name: string
-  formula?: string
   description: string
-  category: string
-  difficulty: number
-  prerequisites: string[]
-  applications: string[]
+  formula?: string
   examples: MathExample[]
+  difficulty: number
+  category: string
 }
 
 export interface MathExample {
   problem: string
   solution: string
-  steps: string[]
   explanation: string
+  steps: string[]
 }
 
 export interface FactEntry {
-  topic: string
+  title: string
   content: string
+  category: string
   source: string
-  category: string
-  verified: boolean
-  lastUpdated: number
-  relatedTopics: string[]
-}
-
-export interface CodingConcept {
-  name: string
-  language: string
-  description: string
-  syntax: string
-  examples: CodeExample[]
-  difficulty: number
-  category: string
+  reliability: number
+  lastVerified: number
+  tags: string[]
+  relatedFacts: string[]
 }
 
 export interface CodeExample {
-  title: string
+  language: string
   code: string
-  explanation: string
-  output?: string
+  description: string
+  concepts: string[]
+  difficulty: number
+  category: string
 }
 
 export interface PhilosophicalConcept {
@@ -66,17 +57,10 @@ export interface PhilosophicalConcept {
   counterArguments: string[]
 }
 
-export interface UserProfile {
-  preferences: { [key: string]: any }
-  learningHistory: LearningHistoryEntry[]
-  interests: string[]
-  skillLevel: { [key: string]: number }
-}
-
-export interface LearningHistoryEntry {
-  topic: string
+export interface UserPreference {
+  key: string
+  value: any
+  category: string
   timestamp: number
   confidence: number
-  source: string
-  context: string
 }

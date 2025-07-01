@@ -1,139 +1,111 @@
-interface ContextMessage {
-  role: "user" | "assistant"
-  content: string
-  timestamp?: number
-  metadata?: any
-}
-
-interface ContextStats {
-  messageCount: number
-  duration: number
-  topics: string[]
-  lastActivity: number
-}
+import type { ContextMessage } from "@/types/global"
 
 export class ContextManager {
   private messages: ContextMessage[] = []
-  private sessionStart: number = Date.now()
   private maxMessages = 50
+  private currentContext: any = {}
 
   createContext(): void {
-    this.messages = []
-    this.sessionStart = Date.now()
+    this.currentContext = {
+      sessionId: Date.now().toString(),
+      startTime: Date.now(),
+      messageCount: 0,
+      topics: new Set(),
+      entities: new Map(),
+      preferences: new Map(),
+    }
   }
 
   addMessage(message: ContextMessage): void {
-    const messageWithTimestamp = {
+    const fullMessage: ContextMessage = {
       ...message,
       timestamp: message.timestamp || Date.now(),
     }
 
-    this.messages.push(messageWithTimestamp)
+    this.messages.push(fullMessage)
+    this.currentContext.messageCount++
 
-    // Keep only recent messages
+    // Extract topics and entities
+    this.extractContextFromMessage(fullMessage)
+
+    // Maintain message limit
     if (this.messages.length > this.maxMessages) {
       this.messages = this.messages.slice(-this.maxMessages)
     }
   }
 
-  getMessages(limit?: number): ContextMessage[] {
-    if (limit) {
-      return this.messages.slice(-limit)
-    }
-    return [...this.messages]
-  }
-
-  getRecentMessages(count = 10): ContextMessage[] {
-    return this.messages.slice(-count)
-  }
-
-  extractContext(currentInput: string): any {
-    const recentMessages = this.getRecentMessages(5)
-    const topics = this.extractTopics(recentMessages)
+  extractContext(input: string): any {
+    const recentMessages = this.messages.slice(-10)
+    const topics = Array.from(this.currentContext.topics)
+    const entities = Object.fromEntries(this.currentContext.entities)
 
     return {
       recentMessages,
       topics,
-      sessionDuration: Date.now() - this.sessionStart,
-      messageCount: this.messages.length,
-      currentInput,
-      timestamp: Date.now(),
+      entities,
+      sessionInfo: {
+        messageCount: this.currentContext.messageCount,
+        sessionDuration: Date.now() - this.currentContext.startTime,
+      },
+      currentInput: input,
     }
   }
 
-  private extractTopics(messages: ContextMessage[]): string[] {
-    const topics: string[] = []
-    const topicKeywords = [
-      "mathematics",
-      "math",
-      "calculate",
-      "equation",
-      "vocabulary",
-      "define",
-      "meaning",
-      "word",
-      "facts",
-      "information",
-      "tell me about",
-      "coding",
-      "programming",
-      "function",
-      "code",
-      "philosophy",
-      "ethics",
-      "consciousness",
-      "existence",
-    ]
+  private extractContextFromMessage(message: ContextMessage): void {
+    const content = message.content.toLowerCase()
 
-    for (const message of messages) {
-      const content = message.content.toLowerCase()
-      for (const keyword of topicKeywords) {
-        if (content.includes(keyword) && !topics.includes(keyword)) {
-          topics.push(keyword)
-        }
+    // Extract simple topics
+    const topicKeywords = ["math", "vocabulary", "code", "philosophy", "science", "history"]
+    topicKeywords.forEach((topic) => {
+      if (content.includes(topic)) {
+        this.currentContext.topics.add(topic)
+      }
+    })
+
+    // Extract entities (simple name detection)
+    const nameMatches = content.match(/my name is (\w+)/i)
+    if (nameMatches) {
+      this.currentContext.entities.set("userName", nameMatches[1])
+    }
+
+    // Extract preferences
+    if (content.includes("i like") || content.includes("i prefer")) {
+      const preference = content.split(/i like|i prefer/i)[1]?.trim()
+      if (preference) {
+        this.currentContext.preferences.set("likes", preference)
       }
     }
-
-    return topics.slice(0, 5) // Return top 5 topics
   }
 
-  getContextStats(): ContextStats {
+  getContextStats(): any {
     return {
       messageCount: this.messages.length,
-      duration: Date.now() - this.sessionStart,
-      topics: this.extractTopics(this.messages),
-      lastActivity:
-        this.messages.length > 0 ? this.messages[this.messages.length - 1].timestamp || Date.now() : this.sessionStart,
+      sessionDuration: Date.now() - this.currentContext.startTime,
+      topicCount: this.currentContext.topics.size,
+      entityCount: this.currentContext.entities.size,
     }
-  }
-
-  clearContext(): void {
-    this.messages = []
-    this.sessionStart = Date.now()
   }
 
   exportContext(): any {
     return {
       messages: this.messages,
-      sessionStart: this.sessionStart,
+      context: this.currentContext,
       stats: this.getContextStats(),
     }
   }
 
-  importContext(contextData: any): void {
-    if (contextData.messages) {
-      this.messages = contextData.messages
+  importContext(data: any): void {
+    if (data.messages) {
+      this.messages = data.messages
     }
-    if (contextData.sessionStart) {
-      this.sessionStart = contextData.sessionStart
+    if (data.context) {
+      this.currentContext = data.context
     }
   }
 
-  getContextSummary(): string {
-    const stats = this.getContextStats()
-    const topics = stats.topics.length > 0 ? stats.topics.join(", ") : "general conversation"
-
-    return `Session: ${Math.floor(stats.duration / 60000)}m, Messages: ${stats.messageCount}, Topics: ${topics}`
+  clearContext(): void {
+    this.messages = []
+    this.createContext()
   }
 }
 

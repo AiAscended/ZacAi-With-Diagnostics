@@ -1,25 +1,35 @@
-// Learning engine for pattern recognition and knowledge acquisition
-import type { LearningEngine, LearningPattern } from "@/types/engines"
+import type { LearningEngineInterface } from "@/types/engines"
 import { generateId } from "@/utils/helpers"
 
-export class LearningEngineImpl implements LearningEngine {
+interface LearningEntry {
+  id: string
+  input: string
+  output: string
+  confidence: number
+  source: string
+  context: any
+  timestamp: number
+  feedback?: "positive" | "negative"
+  useCount: number
+}
+
+export class LearningEngine implements LearningEngineInterface {
   private initialized = false
-  private learningQueue: any[] = []
-  private patterns: LearningPattern[] = []
+  private learningQueue: LearningEntry[] = []
+  private patterns: Map<string, any> = new Map()
   private stats = {
     totalInteractions: 0,
-    patternsLearned: 0,
+    successfulLearning: 0,
     averageConfidence: 0,
-    learningRate: 0,
-    lastUpdate: Date.now(),
+    lastLearningTime: 0,
   }
 
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log("🎓 Initializing Learning Engine...")
+    console.log("Initializing Learning Engine...")
     this.initialized = true
-    console.log("✅ Learning Engine initialized")
+    console.log("Learning Engine initialized")
   }
 
   async learnFromInteraction(
@@ -29,7 +39,7 @@ export class LearningEngineImpl implements LearningEngine {
     source: string,
     context: any,
   ): Promise<void> {
-    const interaction = {
+    const entry: LearningEntry = {
       id: generateId(),
       input,
       output,
@@ -37,120 +47,121 @@ export class LearningEngineImpl implements LearningEngine {
       source,
       context,
       timestamp: Date.now(),
+      useCount: 1,
     }
 
-    // Add to learning queue
-    this.learningQueue.push(interaction)
+    this.learningQueue.push(entry)
     this.stats.totalInteractions++
 
-    // Process patterns
-    await this.identifyPatterns(interaction)
-
-    // Update stats
-    this.updateStats(confidence)
-
-    // Process queue if it gets too large
-    if (this.learningQueue.length > 100) {
-      await this.processQueue()
-    }
-  }
-
-  private async identifyPatterns(interaction: any): Promise<void> {
-    // Simple pattern identification
-    const inputWords = interaction.input.toLowerCase().split(/\s+/)
-    const outputLength = interaction.output.length
-
-    // Pattern: Question type -> Response confidence
-    const questionType = this.identifyQuestionType(interaction.input)
-    const existingPattern = this.patterns.find((p) => p.pattern === questionType)
-
-    if (existingPattern) {
-      existingPattern.frequency++
-      existingPattern.confidence = (existingPattern.confidence + interaction.confidence) / 2
-    } else {
-      this.patterns.push({
-        id: generateId(),
-        pattern: questionType,
-        frequency: 1,
-        confidence: interaction.confidence,
-        context: [interaction.source],
-        timestamp: Date.now(),
-      })
-      this.stats.patternsLearned++
+    // Process learning if confidence is high enough
+    if (confidence > 0.7) {
+      await this.processLearningEntry(entry)
+      this.stats.successfulLearning++
     }
 
-    // Keep only recent patterns
-    if (this.patterns.length > 1000) {
-      this.patterns = this.patterns.slice(-1000)
-    }
-  }
-
-  private identifyQuestionType(input: string): string {
-    const lowercaseInput = input.toLowerCase()
-
-    if (lowercaseInput.startsWith("what is") || lowercaseInput.startsWith("define")) {
-      return "definition_request"
-    }
-    if (lowercaseInput.includes("calculate") || lowercaseInput.match(/\d+.*[+\-*/]/)) {
-      return "calculation_request"
-    }
-    if (lowercaseInput.startsWith("tell me about") || lowercaseInput.startsWith("explain")) {
-      return "explanation_request"
-    }
-    if (lowercaseInput.includes("how to") || lowercaseInput.includes("how do")) {
-      return "instruction_request"
-    }
-
-    return "general_query"
-  }
-
-  private updateStats(confidence: number): void {
+    // Update average confidence
     this.stats.averageConfidence =
       (this.stats.averageConfidence * (this.stats.totalInteractions - 1) + confidence) / this.stats.totalInteractions
 
-    // Calculate learning rate (interactions per hour)
-    const hoursSinceStart = (Date.now() - this.stats.lastUpdate) / (1000 * 60 * 60)
-    if (hoursSinceStart > 0) {
-      this.stats.learningRate = this.stats.totalInteractions / hoursSinceStart
+    this.stats.lastLearningTime = Date.now()
+
+    // Maintain queue size
+    if (this.learningQueue.length > 1000) {
+      this.learningQueue = this.learningQueue.slice(-1000)
     }
   }
 
-  async processQueue(): Promise<void> {
-    // Process learning queue in batches
-    const batchSize = 50
-    const batch = this.learningQueue.splice(0, batchSize)
+  private async processLearningEntry(entry: LearningEntry): Promise<void> {
+    // Extract patterns from successful interactions
+    const inputKeywords = entry.input
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((w) => w.length > 2)
+    const pattern = {
+      keywords: inputKeywords,
+      source: entry.source,
+      confidence: entry.confidence,
+      timestamp: entry.timestamp,
+    }
 
-    for (const interaction of batch) {
-      // Additional processing could go here
-      // For now, we just ensure patterns are identified
-      await this.identifyPatterns(interaction)
+    // Store pattern for future reference
+    const patternKey = inputKeywords.slice(0, 3).join("_")
+    if (!this.patterns.has(patternKey)) {
+      this.patterns.set(patternKey, [])
+    }
+    this.patterns.get(patternKey)!.push(pattern)
+
+    // Limit patterns per key
+    const patterns = this.patterns.get(patternKey)!
+    if (patterns.length > 10) {
+      this.patterns.set(patternKey, patterns.slice(-10))
     }
   }
 
   async forceProcessQueue(): Promise<void> {
-    while (this.learningQueue.length > 0) {
-      await this.processQueue()
+    console.log(`Processing ${this.learningQueue.length} learning entries...`)
+
+    for (const entry of this.learningQueue) {
+      if (entry.confidence > 0.5) {
+        await this.processLearningEntry(entry)
+      }
     }
+
+    console.log("Learning queue processed")
   }
 
   getLearningStats(): any {
     return {
       ...this.stats,
       queueSize: this.learningQueue.length,
-      totalPatterns: this.patterns.length,
-      patternTypes: [...new Set(this.patterns.map((p) => p.pattern))],
-      topPatterns: this.patterns
-        .sort((a, b) => b.frequency - a.frequency)
-        .slice(0, 10)
-        .map((p) => ({ pattern: p.pattern, frequency: p.frequency, confidence: p.confidence })),
+      patternCount: this.patterns.size,
+      initialized: this.initialized,
     }
   }
 
   destroy(): void {
     this.learningQueue = []
-    this.patterns = []
+    this.patterns.clear()
     this.initialized = false
+  }
+
+  // Additional methods for pattern matching and recommendations
+  findSimilarPatterns(input: string): any[] {
+    const inputKeywords = input
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((w) => w.length > 2)
+    const matches: any[] = []
+
+    for (const [key, patterns] of this.patterns.entries()) {
+      const keyWords = key.split("_")
+      const overlap = inputKeywords.filter((word) => keyWords.includes(word))
+
+      if (overlap.length > 0) {
+        matches.push({
+          key,
+          patterns,
+          similarity: overlap.length / Math.max(inputKeywords.length, keyWords.length),
+        })
+      }
+    }
+
+    return matches.sort((a, b) => b.similarity - a.similarity).slice(0, 5)
+  }
+
+  getRecommendations(input: string): string[] {
+    const similarPatterns = this.findSimilarPatterns(input)
+    const recommendations: string[] = []
+
+    for (const match of similarPatterns) {
+      const bestPattern = match.patterns.sort((a: any, b: any) => b.confidence - a.confidence)[0]
+      if (bestPattern && bestPattern.source) {
+        recommendations.push(`Try ${bestPattern.source} module`)
+      }
+    }
+
+    return [...new Set(recommendations)].slice(0, 3)
   }
 }
 
-export const learningEngine = new LearningEngineImpl()
+export const learningEngine = new LearningEngine()

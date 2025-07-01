@@ -1,16 +1,24 @@
 // Type definitions for reasoning and learning engines
-export interface ReasoningEngine {
+export interface ReasoningEngineInterface {
   initialize(): Promise<void>
   createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain>
+  analyzeIntent(input: string): Promise<IntentAnalysis>
   getStats(): any
 }
 
-export interface LearningEngine {
+export interface LearningEngineInterface {
   initialize(): Promise<void>
   learnFromInteraction(input: string, output: string, confidence: number, source: string, context: any): Promise<void>
   getLearningStats(): any
   forceProcessQueue(): Promise<void>
   destroy(): void
+}
+
+export interface CognitiveEngineInterface {
+  initialize(): Promise<void>
+  registerModule(module: ModuleInterface): void
+  processInput(input: string): Promise<any>
+  getStats(): any
 }
 
 export interface ReasoningChain {
@@ -146,3 +154,5 @@ export interface AdaptationRule {
   action: (state: any) => any
   priority: number
 }
+
+export type ModuleInterface = {}

@@ -1,44 +1,52 @@
-import type { ReasoningEngine, ReasoningChain, ReasoningStep } from "@/types/engines"
+import type { ReasoningEngineInterface, ReasoningChain, ReasoningStep, IntentAnalysis } from "@/types/engines"
 import { generateId } from "@/utils/helpers"
 
-export class ReasoningEngineImpl implements ReasoningEngine {
+export class ReasoningEngine implements ReasoningEngineInterface {
   private initialized = false
   private reasoningHistory: ReasoningChain[] = []
 
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log("🧠 Initializing Reasoning Engine...")
+    console.log("Initializing Reasoning Engine...")
     this.initialized = true
-    console.log("✅ Reasoning Engine initialized")
+    console.log("Reasoning Engine initialized")
   }
 
   async createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain> {
+    const startTime = Date.now()
     const chainId = generateId()
+
     const steps: ReasoningStep[] = []
 
     // Step 1: Input Analysis
     steps.push({
       step: 1,
-      reasoning: "Analyzing user input for intent, entities, and context",
-      confidence: 0.9,
+      description: "Analyze user input",
+      input: input,
       output: {
-        intent: this.analyzeIntent(input),
-        entities: this.extractEntities(input),
+        cleanedInput: input.trim(),
+        wordCount: input.split(" ").length,
+        hasQuestion: input.includes("?"),
         suggestedModules: this.suggestModules(input),
       },
+      confidence: 0.9,
+      reasoning: "Analyzed input structure and content",
       timestamp: Date.now(),
     })
 
     // Step 2: Context Integration
     steps.push({
       step: 2,
-      reasoning: "Integrating conversation context and user history",
-      confidence: 0.8,
+      description: "Integrate conversation context",
+      input: context,
       output: {
-        contextRelevance: this.assessContextRelevance(input, context),
-        historicalPatterns: this.findHistoricalPatterns(input, context),
+        relevantHistory: context.recentMessages?.slice(-3) || [],
+        detectedTopics: context.topics || [],
+        userPreferences: context.entities || {},
       },
+      confidence: 0.8,
+      reasoning: "Integrated conversation history and user context",
       timestamp: Date.now(),
     })
 
@@ -46,37 +54,34 @@ export class ReasoningEngineImpl implements ReasoningEngine {
     if (moduleResponses.length > 0) {
       steps.push({
         step: 3,
-        reasoning: "Analyzing and ranking module responses",
-        confidence: 0.85,
+        description: "Analyze module responses",
+        input: moduleResponses,
         output: {
-          responseCount: moduleResponses.length,
-          bestResponse: this.selectBestResponse(moduleResponses),
-          confidenceScores: moduleResponses.map((r) => r.confidence),
+          bestResponse: moduleResponses[0],
+          alternativeResponses: moduleResponses.slice(1),
+          averageConfidence: moduleResponses.reduce((sum, r) => sum + r.confidence, 0) / moduleResponses.length,
         },
+        confidence: 0.85,
+        reasoning: `Analyzed ${moduleResponses.length} module responses`,
         timestamp: Date.now(),
       })
     }
 
-    // Step 4: Final Synthesis
-    const finalOutput = this.synthesizeResponse(input, context, moduleResponses, steps)
-    steps.push({
-      step: steps.length + 1,
-      reasoning: "Synthesizing final response with confidence assessment",
-      confidence: finalOutput.confidence,
-      output: finalOutput,
-      timestamp: Date.now(),
-    })
+    // Calculate final output and confidence
+    const totalConfidence = steps.reduce((sum, step) => sum + step.confidence, 0) / steps.length
+    const finalOutput = moduleResponses.length > 0 ? moduleResponses[0].data : "No suitable response found"
 
     const chain: ReasoningChain = {
       id: chainId,
       input,
       steps,
       finalOutput,
-      totalConfidence: this.calculateTotalConfidence(steps),
-      timestamp: Date.now(),
+      totalConfidence,
+      processingTime: Date.now() - startTime,
+      timestamp: startTime,
     }
 
-    // Store in history (keep last 100)
+    // Store in history
     this.reasoningHistory.push(chain)
     if (this.reasoningHistory.length > 100) {
       this.reasoningHistory = this.reasoningHistory.slice(-100)
@@ -85,151 +90,71 @@ export class ReasoningEngineImpl implements ReasoningEngine {
     return chain
   }
 
-  private analyzeIntent(input: string): string {
+  async analyzeIntent(input: string): Promise<IntentAnalysis> {
     const lowercaseInput = input.toLowerCase()
 
+    let intent = "general"
+    let confidence = 0.5
+    const suggestedModules: string[] = []
+
+    // Intent classification logic
     if (lowercaseInput.includes("define") || lowercaseInput.includes("meaning")) {
-      return "definition"
-    }
-    if (lowercaseInput.match(/\d+|\+|-|\*|\/|calculate|solve/)) {
-      return "calculation"
-    }
-    if (lowercaseInput.includes("tell me about") || lowercaseInput.includes("information")) {
-      return "information"
-    }
-    if (lowercaseInput.includes("code") || lowercaseInput.includes("program")) {
-      return "coding"
-    }
-    if (lowercaseInput.includes("philosophy") || lowercaseInput.includes("ethics")) {
-      return "philosophical"
-    }
-
-    return "general"
-  }
-
-  private extractEntities(input: string): string[] {
-    // Simple entity extraction - in a real system this would be more sophisticated
-    const entities: string[] = []
-    const words = input.split(/\s+/)
-
-    // Look for capitalized words (potential proper nouns)
-    for (const word of words) {
-      if (word.length > 2 && word[0] === word[0].toUpperCase()) {
-        entities.push(word)
-      }
+      intent = "definition"
+      confidence = 0.8
+      suggestedModules.push("vocabulary")
+    } else if (lowercaseInput.match(/\d+|\+|-|\*|\/|calculate/)) {
+      intent = "calculation"
+      confidence = 0.9
+      suggestedModules.push("mathematics")
+    } else if (lowercaseInput.includes("code") || lowercaseInput.includes("program")) {
+      intent = "coding"
+      confidence = 0.8
+      suggestedModules.push("coding")
+    } else if (lowercaseInput.includes("fact") || lowercaseInput.includes("information")) {
+      intent = "factual"
+      confidence = 0.7
+      suggestedModules.push("facts")
     }
 
-    return entities.slice(0, 5) // Limit to 5 entities
+    return {
+      intent,
+      confidence,
+      entities: [],
+      context: {},
+      suggestedModules,
+    }
   }
 
   private suggestModules(input: string): string[] {
     const modules: string[] = []
     const lowercaseInput = input.toLowerCase()
 
-    if (lowercaseInput.includes("define") || lowercaseInput.includes("meaning")) {
+    if (lowercaseInput.includes("define") || lowercaseInput.includes("word")) {
       modules.push("vocabulary")
     }
-    if (lowercaseInput.match(/\d+|\+|-|\*|\/|calculate|solve|math/)) {
+    if (lowercaseInput.match(/\d+|\+|-|\*|\/|math|calculate/)) {
       modules.push("mathematics")
     }
-    if (
-      lowercaseInput.includes("tell me about") ||
-      lowercaseInput.includes("information") ||
-      lowercaseInput.includes("fact")
-    ) {
-      modules.push("facts")
-    }
-    if (lowercaseInput.includes("code") || lowercaseInput.includes("program") || lowercaseInput.includes("function")) {
+    if (lowercaseInput.includes("code") || lowercaseInput.includes("program")) {
       modules.push("coding")
     }
-    if (
-      lowercaseInput.includes("philosophy") ||
-      lowercaseInput.includes("ethics") ||
-      lowercaseInput.includes("consciousness")
-    ) {
-      modules.push("philosophy")
-    }
-    if (lowercaseInput.includes("my name") || lowercaseInput.includes("remember") || lowercaseInput.includes("i am")) {
-      modules.push("user-info")
-    }
-
-    // If no specific modules, suggest facts as default
-    if (modules.length === 0) {
+    if (lowercaseInput.includes("fact") || lowercaseInput.includes("tell me about")) {
       modules.push("facts")
     }
-
-    return modules
-  }
-
-  private assessContextRelevance(input: string, context: any): number {
-    if (!context || !context.recentMessages) return 0.5
-
-    // Simple relevance scoring based on topic continuity
-    const inputWords = new Set(input.toLowerCase().split(/\s+/))
-    let relevanceScore = 0
-
-    for (const message of context.recentMessages.slice(-3)) {
-      const messageWords = new Set(message.content.toLowerCase().split(/\s+/))
-      const intersection = new Set([...inputWords].filter((x) => messageWords.has(x)))
-      relevanceScore += intersection.size / Math.max(inputWords.size, messageWords.size)
+    if (lowercaseInput.includes("philosophy") || lowercaseInput.includes("meaning of life")) {
+      modules.push("philosophy")
     }
 
-    return Math.min(1, relevanceScore / 3)
-  }
-
-  private findHistoricalPatterns(input: string, context: any): string[] {
-    const patterns: string[] = []
-
-    if (context && context.topics) {
-      patterns.push(`Recent topics: ${context.topics.join(", ")}`)
-    }
-
-    if (context && context.messageCount) {
-      patterns.push(`Session activity: ${context.messageCount} messages`)
-    }
-
-    return patterns
-  }
-
-  private selectBestResponse(moduleResponses: any[]): any {
-    if (moduleResponses.length === 0) return null
-
-    // Sort by confidence and return the best one
-    return moduleResponses.sort((a, b) => b.confidence - a.confidence)[0]
-  }
-
-  private synthesizeResponse(input: string, context: any, moduleResponses: any[], steps: ReasoningStep[]): any {
-    const bestResponse = this.selectBestResponse(moduleResponses)
-
-    if (bestResponse) {
-      return {
-        response: bestResponse.data,
-        confidence: bestResponse.confidence,
-        source: bestResponse.source,
-        reasoning: steps.map((s) => s.reasoning),
-      }
-    }
-
-    return {
-      response: "I'm not sure how to help with that. Could you please rephrase your question?",
-      confidence: 0.1,
-      source: "reasoning-engine",
-      reasoning: ["No suitable module responses found"],
-    }
-  }
-
-  private calculateTotalConfidence(steps: ReasoningStep[]): number {
-    if (steps.length === 0) return 0
-    return steps.reduce((sum, step) => sum + step.confidence, 0) / steps.length
+    return modules.length > 0 ? modules : ["facts"]
   }
 
   getStats(): any {
     return {
       initialized: this.initialized,
       totalChains: this.reasoningHistory.length,
-      averageSteps:
+      averageProcessingTime:
         this.reasoningHistory.length > 0
-          ? this.reasoningHistory.reduce((sum, chain) => sum + chain.steps.length, 0) / this.reasoningHistory.length
+          ? this.reasoningHistory.reduce((sum, chain) => sum + chain.processingTime, 0) / this.reasoningHistory.length
           : 0,
       averageConfidence:
         this.reasoningHistory.length > 0
@@ -239,4 +164,4 @@ export class ReasoningEngineImpl implements ReasoningEngine {
   }
 }
 
-export const reasoningEngine = new ReasoningEngineImpl()
+export const reasoningEngine = new ReasoningEngine()
