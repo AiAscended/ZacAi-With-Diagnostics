@@ -1,111 +1,87 @@
 import type { ContextMessage } from "@/types/global"
 
 export class ContextManager {
-  private messages: ContextMessage[] = []
-  private maxMessages = 50
-  private currentContext: any = {}
+  private conversations: Map<string, ContextMessage[]> = new Map()
+  private maxContextLength = 50
+  private maxMessageAge = 24 * 60 * 60 * 1000 // 24 hours
 
-  createContext(): void {
-    this.currentContext = {
-      sessionId: Date.now().toString(),
-      startTime: Date.now(),
-      messageCount: 0,
-      topics: new Set(),
-      entities: new Map(),
-      preferences: new Map(),
+  addMessage(conversationId: string, message: ContextMessage): void {
+    if (!this.conversations.has(conversationId)) {
+      this.conversations.set(conversationId, [])
     }
-  }
 
-  addMessage(message: ContextMessage): void {
-    const fullMessage: ContextMessage = {
+    const messages = this.conversations.get(conversationId)!
+    messages.push({
       ...message,
       timestamp: message.timestamp || Date.now(),
-    }
-
-    this.messages.push(fullMessage)
-    this.currentContext.messageCount++
-
-    // Extract topics and entities
-    this.extractContextFromMessage(fullMessage)
-
-    // Maintain message limit
-    if (this.messages.length > this.maxMessages) {
-      this.messages = this.messages.slice(-this.maxMessages)
-    }
-  }
-
-  extractContext(input: string): any {
-    const recentMessages = this.messages.slice(-10)
-    const topics = Array.from(this.currentContext.topics)
-    const entities = Object.fromEntries(this.currentContext.entities)
-
-    return {
-      recentMessages,
-      topics,
-      entities,
-      sessionInfo: {
-        messageCount: this.currentContext.messageCount,
-        sessionDuration: Date.now() - this.currentContext.startTime,
-      },
-      currentInput: input,
-    }
-  }
-
-  private extractContextFromMessage(message: ContextMessage): void {
-    const content = message.content.toLowerCase()
-
-    // Extract simple topics
-    const topicKeywords = ["math", "vocabulary", "code", "philosophy", "science", "history"]
-    topicKeywords.forEach((topic) => {
-      if (content.includes(topic)) {
-        this.currentContext.topics.add(topic)
-      }
     })
 
-    // Extract entities (simple name detection)
-    const nameMatches = content.match(/my name is (\w+)/i)
-    if (nameMatches) {
-      this.currentContext.entities.set("userName", nameMatches[1])
-    }
-
-    // Extract preferences
-    if (content.includes("i like") || content.includes("i prefer")) {
-      const preference = content.split(/i like|i prefer/i)[1]?.trim()
-      if (preference) {
-        this.currentContext.preferences.set("likes", preference)
-      }
-    }
+    // Trim old messages
+    this.trimContext(conversationId)
   }
 
-  getContextStats(): any {
+  getContext(conversationId: string, maxMessages?: number): ContextMessage[] {
+    const messages = this.conversations.get(conversationId) || []
+    const limit = maxMessages || this.maxContextLength
+
+    // Remove expired messages
+    const now = Date.now()
+    const validMessages = messages.filter((msg) => now - (msg.timestamp || 0) < this.maxMessageAge)
+
+    return validMessages.slice(-limit)
+  }
+
+  getLastMessage(conversationId: string): ContextMessage | null {
+    const messages = this.conversations.get(conversationId) || []
+    return messages.length > 0 ? messages[messages.length - 1] : null
+  }
+
+  clearContext(conversationId: string): void {
+    this.conversations.delete(conversationId)
+  }
+
+  getAllConversations(): string[] {
+    return Array.from(this.conversations.keys())
+  }
+
+  getConversationSummary(conversationId: string): {
+    messageCount: number
+    firstMessage?: number
+    lastMessage?: number
+  } {
+    const messages = this.conversations.get(conversationId) || []
+
+    if (messages.length === 0) {
+      return { messageCount: 0 }
+    }
+
     return {
-      messageCount: this.messages.length,
-      sessionDuration: Date.now() - this.currentContext.startTime,
-      topicCount: this.currentContext.topics.size,
-      entityCount: this.currentContext.entities.size,
+      messageCount: messages.length,
+      firstMessage: messages[0].timestamp,
+      lastMessage: messages[messages.length - 1].timestamp,
     }
   }
 
-  exportContext(): any {
-    return {
-      messages: this.messages,
-      context: this.currentContext,
-      stats: this.getContextStats(),
+  private trimContext(conversationId: string): void {
+    const messages = this.conversations.get(conversationId)!
+
+    if (messages.length > this.maxContextLength) {
+      messages.splice(0, messages.length - this.maxContextLength)
     }
+
+    // Remove expired messages
+    const now = Date.now()
+    const validMessages = messages.filter((msg) => now - (msg.timestamp || 0) < this.maxMessageAge)
+
+    this.conversations.set(conversationId, validMessages)
   }
 
-  importContext(data: any): void {
-    if (data.messages) {
-      this.messages = data.messages
-    }
-    if (data.context) {
-      this.currentContext = data.context
-    }
+  setMaxContextLength(length: number): void {
+    this.maxContextLength = length
   }
 
-  clearContext(): void {
-    this.messages = []
-    this.createContext()
+  setMaxMessageAge(ageMs: number): void {
+    this.maxMessageAge = ageMs
   }
 }
 

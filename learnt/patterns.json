@@ -2,16 +2,14 @@
   "metadata": {
     "version": "1.0.0",
     "lastUpdated": 1704067200000,
-    "totalEntries": 0,
-    "learningRate": 0,
-    "confidenceThreshold": 0.7
+    "totalPatterns": 0
   },
-  "entries": {},
-  "patterns": [],
+  "patterns": {},
+  "frequencies": {},
+  "correlations": {},
   "statistics": {
-    "learningVelocity": 0,
-    "accuracyRate": 0,
-    "retentionRate": 0,
-    "utilizationRate": 0
+    "mostCommonPatterns": [],
+    "patternAccuracy": 0,
+    "predictionSuccess": 0
   }
 }

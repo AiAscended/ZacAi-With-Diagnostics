@@ -1,91 +1,113 @@
+import { retry } from "@/utils/helpers"
+
 export class APIManager {
   private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map()
   private rateLimits: Map<string, { count: number; resetTime: number }> = new Map()
 
-  async makeRequest(url: string, options: RequestInit = {}, cacheKey?: string, cacheTTL = 300000): Promise<any> {
+  async get(url: string, options: RequestInit = {}, cacheTTL = 300000): Promise<any> {
     // Check cache first
-    if (cacheKey && this.cache.has(cacheKey)) {
-      const cached = this.cache.get(cacheKey)!
-      if (Date.now() - cached.timestamp < cached.ttl) {
-        return cached.data
-      }
-      this.cache.delete(cacheKey)
+    const cacheKey = `GET:${url}`
+    const cached = this.cache.get(cacheKey)
+    if (cached && Date.now() - cached.timestamp < cached.ttl) {
+      return cached.data
     }
 
     // Check rate limits
-    const domain = new URL(url).hostname
-    if (this.isRateLimited(domain)) {
-      throw new Error(`Rate limited for ${domain}`)
+    if (!this.checkRateLimit(url)) {
+      throw new Error("Rate limit exceeded")
     }
 
     try {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          "User-Agent": "ZacAI/2.0",
-          Accept: "application/json",
-          ...options.headers,
-        },
+      const response = await retry(async () => {
+        const res = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...options.headers,
+          },
+          ...options,
+        })
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
+
+        return res.json()
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
+      // Cache the response
+      this.cache.set(cacheKey, {
+        data: response,
+        timestamp: Date.now(),
+        ttl: cacheTTL,
+      })
 
-      const data = await response.json()
-
-      // Cache successful responses
-      if (cacheKey) {
-        this.cache.set(cacheKey, {
-          data,
-          timestamp: Date.now(),
-          ttl: cacheTTL,
-        })
-      }
-
-      // Update rate limit tracking
-      this.updateRateLimit(domain)
-
-      return data
+      return response
     } catch (error) {
-      console.error(`API request failed for ${url}:`, error)
+      console.error("API GET error:", error)
       throw error
     }
   }
 
-  private isRateLimited(domain: string): boolean {
-    const limit = this.rateLimits.get(domain)
-    if (!limit) return false
+  async post(url: string, data: any, options: RequestInit = {}): Promise<any> {
+    if (!this.checkRateLimit(url)) {
+      throw new Error("Rate limit exceeded")
+    }
 
-    if (Date.now() > limit.resetTime) {
-      this.rateLimits.delete(domain)
+    try {
+      const response = await retry(async () => {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...options.headers,
+          },
+          body: JSON.stringify(data),
+          ...options,
+        })
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
+
+        return res.json()
+      })
+
+      return response
+    } catch (error) {
+      console.error("API POST error:", error)
+      throw error
+    }
+  }
+
+  private checkRateLimit(url: string): boolean {
+    const now = Date.now()
+    const domain = new URL(url).hostname
+    const limit = this.rateLimits.get(domain)
+
+    if (!limit || now > limit.resetTime) {
+      this.rateLimits.set(domain, {
+        count: 1,
+        resetTime: now + 60000, // 1 minute window
+      })
+      return true
+    }
+
+    if (limit.count >= 60) {
+      // 60 requests per minute
       return false
     }
 
-    return limit.count >= 100 // 100 requests per hour
-  }
-
-  private updateRateLimit(domain: string): void {
-    const now = Date.now()
-    const hourFromNow = now + 3600000
-
-    const current = this.rateLimits.get(domain)
-    if (!current || now > current.resetTime) {
-      this.rateLimits.set(domain, { count: 1, resetTime: hourFromNow })
-    } else {
-      current.count++
-    }
+    limit.count++
+    return true
   }
 
   clearCache(): void {
     this.cache.clear()
   }
 
-  getCacheStats(): any {
-    return {
-      size: this.cache.size,
-      entries: Array.from(this.cache.keys()),
-    }
+  getCacheSize(): number {
+    return this.cache.size
   }
 }
 

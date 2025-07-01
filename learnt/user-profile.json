@@ -1,8 +1,17 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": 1704067200000,
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": 1704067200000,
+    "totalEntries": 0
+  },
   "preferences": {},
   "learningHistory": [],
   "interests": [],
-  "skillLevel": {}
+  "skillLevels": {},
+  "statistics": {
+    "totalInteractions": 0,
+    "averageSessionLength": 0,
+    "preferredTopics": [],
+    "learningProgress": {}
+  }
 }

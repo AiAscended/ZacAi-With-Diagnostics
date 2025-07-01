@@ -3,10 +3,10 @@
     "version": "1.0.0",
     "lastUpdated": 1704067200000,
     "totalEntries": 0,
-    "learningRate": 0,
-    "confidenceThreshold": 0.7
+    "learningRate": 0.7,
+    "confidenceThreshold": 0.65
   },
-  "entries": [],
+  "entries": {},
   "patterns": {},
   "statistics": {
     "learningVelocity": 0,
