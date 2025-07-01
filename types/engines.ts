@@ -1,24 +1,52 @@
 // Type definitions for reasoning and learning engines
-export interface ReasoningEngineInterface {
+export interface ReasoningEngine {
   initialize(): Promise<void>
   createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain>
   analyzeIntent(input: string): Promise<IntentAnalysis>
   getStats(): any
 }
 
-export interface LearningEngineInterface {
+export interface LearningEngine {
   initialize(): Promise<void>
-  learnFromInteraction(input: string, output: string, confidence: number, source: string, context: any): Promise<void>
+  learnFromInteraction(input: string, response: string, confidence: number, source: string, context: any): Promise<void>
+  identifyPatterns(): Promise<any[]>
   getLearningStats(): any
   forceProcessQueue(): Promise<void>
   destroy(): void
 }
 
-export interface CognitiveEngineInterface {
+export interface CognitiveEngine {
   initialize(): Promise<void>
   registerModule(module: ModuleInterface): void
   processInput(input: string): Promise<any>
   getStats(): any
+}
+
+export interface StorageEngine {
+  loadSeedData(filePath: string): Promise<any>
+  loadLearntData(filePath: string): Promise<any>
+  saveLearntData(filePath: string, data: any): Promise<boolean>
+  addLearntEntry(filePath: string, entry: LearntDataEntry): Promise<boolean>
+  getCachedData(key: string): any
+  setCachedData(key: string, data: any): void
+  clearCache(): void
+}
+
+export interface APIEngine {
+  makeRequest(url: string, options?: any, cacheKey?: string, cacheDuration?: number): Promise<any>
+  getCachedResponse(key: string): any
+  setCachedResponse(key: string, data: any, duration: number): void
+  clearCache(): void
+  getStats(): any
+}
+
+export interface ContextEngine {
+  createContext(): void
+  addMessage(message: ContextMessage): void
+  extractContext(input: string): any
+  getContextStats(): any
+  exportContext(): any
+  importContext(data: any): void
 }
 
 export interface ReasoningChain {
@@ -156,3 +184,7 @@ export interface AdaptationRule {
 }
 
 export type ModuleInterface = {}
+
+export type LearntDataEntry = {}
+
+export type ContextMessage = {}

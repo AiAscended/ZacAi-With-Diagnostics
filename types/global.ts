@@ -1,3 +1,23 @@
+export interface SystemConfig {
+  version: string
+  environment: "development" | "production" | "test"
+  features: {
+    vocabulary: boolean
+    mathematics: boolean
+    coding: boolean
+    facts: boolean
+    philosophy: boolean
+    userInfo: boolean
+    web3: boolean
+  }
+  apis: {
+    dictionary: string
+    wikipedia: string
+    wolfram: string
+    github: string
+  }
+}
+
 export interface ModuleInterface {
   name: string
   version: string
@@ -66,11 +86,10 @@ export interface ContextMessage {
 
 export interface ReasoningStep {
   step: number
-  description: string
+  reasoning: string
   input: any
   output: any
   confidence: number
-  reasoning: string
   timestamp: number
 }
 
@@ -81,5 +100,4 @@ export interface ReasoningChain {
   finalOutput: any
   totalConfidence: number
   processingTime: number
-  timestamp: number
 }

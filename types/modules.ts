@@ -15,52 +15,67 @@ export interface MathConcept {
   name: string
   description: string
   formula?: string
-  examples: MathExample[]
+  examples: Array<{
+    problem: string
+    solution: string
+    explanation: string
+  }>
   difficulty: number
   category: string
 }
 
-export interface MathExample {
-  problem: string
-  solution: string
-  explanation: string
-  steps: string[]
-}
-
 export interface FactEntry {
+  id: string
   title: string
   content: string
   category: string
   source: string
-  reliability: number
+  confidence: number
   lastVerified: number
   tags: string[]
-  relatedFacts: string[]
 }
 
 export interface CodeExample {
+  id: string
+  title: string
   language: string
   code: string
-  description: string
-  concepts: string[]
+  explanation: string
   difficulty: number
-  category: string
+  tags: string[]
 }
 
 export interface PhilosophicalConcept {
+  id: string
   name: string
   description: string
   philosopher?: string
   school: string
   relatedConcepts: string[]
-  arguments: string[]
-  counterArguments: string[]
+  arguments: Array<{
+    type: "for" | "against"
+    argument: string
+    source?: string
+  }>
 }
 
-export interface UserPreference {
-  key: string
-  value: any
-  category: string
-  timestamp: number
-  confidence: number
+export interface UserProfile {
+  id: string
+  name?: string
+  preferences: {
+    learningStyle: string
+    interests: string[]
+    difficulty: number
+  }
+  history: Array<{
+    timestamp: number
+    query: string
+    response: string
+    satisfaction?: number
+  }>
+  stats: {
+    totalQueries: number
+    favoriteTopics: string[]
+    learningProgress: { [topic: string]: number }
+  }
 }

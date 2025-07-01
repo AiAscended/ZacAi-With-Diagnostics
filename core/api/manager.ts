@@ -1,113 +1,91 @@
-import { retry } from "@/utils/helpers"
-
 export class APIManager {
-  private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map()
-  private rateLimits: Map<string, { count: number; resetTime: number }> = new Map()
+  private cache: Map<string, { data: any; timestamp: number; duration: number }> = new Map()
+  private requestQueue: Array<{ url: string; options: any; resolve: Function; reject: Function }> = []
+  private isProcessing = false
+  private rateLimitDelay = 1000 // 1 second between requests
 
-  async get(url: string, options: RequestInit = {}, cacheTTL = 300000): Promise<any> {
+  async makeRequest(url: string, options: any = {}, cacheKey?: string, cacheDuration = 300000): Promise<any> {
     // Check cache first
-    const cacheKey = `GET:${url}`
-    const cached = this.cache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < cached.ttl) {
-      return cached.data
+    if (cacheKey && this.getCachedResponse(cacheKey)) {
+      return this.getCachedResponse(cacheKey)
     }
 
-    // Check rate limits
-    if (!this.checkRateLimit(url)) {
-      throw new Error("Rate limit exceeded")
-    }
+    return new Promise((resolve, reject) => {
+      this.requestQueue.push({ url, options, resolve, reject })
+      this.processQueue()
+    })
+  }
 
-    try {
-      const response = await retry(async () => {
-        const res = await fetch(url, {
+  private async processQueue(): Promise<void> {
+    if (this.isProcessing || this.requestQueue.length === 0) return
+
+    this.isProcessing = true
+
+    while (this.requestQueue.length > 0) {
+      const request = this.requestQueue.shift()
+      if (!request) break
+
+      try {
+        const response = await fetch(request.url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...options.headers,
+            "User-Agent": "ZacAI/1.0",
           },
-          ...options,
+          ...request.options,
         })
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
         }
 
-        return res.json()
-      })
+        const data = await response.json()
+        request.resolve(data)
 
-      // Cache the response
-      this.cache.set(cacheKey, {
-        data: response,
-        timestamp: Date.now(),
-        ttl: cacheTTL,
-      })
-
-      return response
-    } catch (error) {
-      console.error("API GET error:", error)
-      throw error
-    }
-  }
-
-  async post(url: string, data: any, options: RequestInit = {}): Promise<any> {
-    if (!this.checkRateLimit(url)) {
-      throw new Error("Rate limit exceeded")
-    }
-
-    try {
-      const response = await retry(async () => {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...options.headers,
-          },
-          body: JSON.stringify(data),
-          ...options,
-        })
-
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        // Add delay between requests to respect rate limits
+        if (this.requestQueue.length > 0) {
+          await new Promise((resolve) => setTimeout(resolve, this.rateLimitDelay))
         }
-
-        return res.json()
-      })
-
-      return response
-    } catch (error) {
-      console.error("API POST error:", error)
-      throw error
+      } catch (error) {
+        console.error(`API request failed for ${request.url}:`, error)
+        request.reject(error)
+      }
     }
+
+    this.isProcessing = false
   }
 
-  private checkRateLimit(url: string): boolean {
+  getCachedResponse(key: string): any {
+    const cached = this.cache.get(key)
+    if (!cached) return null
+
     const now = Date.now()
-    const domain = new URL(url).hostname
-    const limit = this.rateLimits.get(domain)
-
-    if (!limit || now > limit.resetTime) {
-      this.rateLimits.set(domain, {
-        count: 1,
-        resetTime: now + 60000, // 1 minute window
-      })
-      return true
+    if (now - cached.timestamp > cached.duration) {
+      this.cache.delete(key)
+      return null
     }
 
-    if (limit.count >= 60) {
-      // 60 requests per minute
-      return false
-    }
+    return cached.data
+  }
 
-    limit.count++
-    return true
+  setCachedResponse(key: string, data: any, duration: number): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      duration,
+    })
   }
 
   clearCache(): void {
     this.cache.clear()
   }
 
-  getCacheSize(): number {
-    return this.cache.size
+  getStats(): any {
+    return {
+      cacheSize: this.cache.size,
+      queueLength: this.requestQueue.length,
+      isProcessing: this.isProcessing,
+    }
   }
 }
 

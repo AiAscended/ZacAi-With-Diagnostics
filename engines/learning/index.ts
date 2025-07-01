@@ -1,166 +1,167 @@
-import type { LearningEngineInterface } from "@/types/engines"
-import { generateId } from "@/utils/helpers"
+import type { LearningPattern } from "@/types/global"
+import { generateId, calculateSimilarity } from "@/utils/helpers"
 
-interface LearningEntry {
-  id: string
-  input: string
-  output: string
-  confidence: number
-  source: string
-  context: any
-  timestamp: number
-  feedback?: "positive" | "negative"
-  useCount: number
-}
-
-export class LearningEngine implements LearningEngineInterface {
+export class LearningEngine {
   private initialized = false
-  private learningQueue: LearningEntry[] = []
-  private patterns: Map<string, any> = new Map()
-  private stats = {
-    totalInteractions: 0,
-    successfulLearning: 0,
-    averageConfidence: 0,
-    lastLearningTime: 0,
-  }
+  private learningQueue: Array<{
+    input: string
+    response: string
+    confidence: number
+    source: string
+    context: any
+    timestamp: number
+  }> = []
+  private patterns: LearningPattern[] = []
+  private isProcessing = false
 
   async initialize(): Promise<void> {
     if (this.initialized) return
-
     console.log("Initializing Learning Engine...")
     this.initialized = true
-    console.log("Learning Engine initialized")
+    this.startProcessingQueue()
   }
 
   async learnFromInteraction(
     input: string,
-    output: string,
+    response: string,
     confidence: number,
     source: string,
     context: any,
   ): Promise<void> {
-    const entry: LearningEntry = {
-      id: generateId(),
+    this.learningQueue.push({
       input,
-      output,
+      response,
       confidence,
       source,
       context,
       timestamp: Date.now(),
-      useCount: 1,
-    }
+    })
 
-    this.learningQueue.push(entry)
-    this.stats.totalInteractions++
-
-    // Process learning if confidence is high enough
-    if (confidence > 0.7) {
-      await this.processLearningEntry(entry)
-      this.stats.successfulLearning++
-    }
-
-    // Update average confidence
-    this.stats.averageConfidence =
-      (this.stats.averageConfidence * (this.stats.totalInteractions - 1) + confidence) / this.stats.totalInteractions
-
-    this.stats.lastLearningTime = Date.now()
-
-    // Maintain queue size
-    if (this.learningQueue.length > 1000) {
-      this.learningQueue = this.learningQueue.slice(-1000)
+    // Process immediately if queue is getting large
+    if (this.learningQueue.length > 10) {
+      this.processLearningQueue()
     }
   }
 
-  private async processLearningEntry(entry: LearningEntry): Promise<void> {
-    // Extract patterns from successful interactions
-    const inputKeywords = entry.input
+  private startProcessingQueue(): void {
+    setInterval(() => {
+      if (this.learningQueue.length > 0) {
+        this.processLearningQueue()
+      }
+    }, 5000) // Process every 5 seconds
+  }
+
+  private async processLearningQueue(): Promise<void> {
+    if (this.isProcessing || this.learningQueue.length === 0) return
+
+    this.isProcessing = true
+
+    try {
+      const batch = this.learningQueue.splice(0, 5) // Process 5 at a time
+
+      for (const interaction of batch) {
+        await this.processInteraction(interaction)
+      }
+
+      // Update patterns
+      await this.updatePatterns()
+    } catch (error) {
+      console.error("Error processing learning queue:", error)
+    } finally {
+      this.isProcessing = false
+    }
+  }
+
+  private async processInteraction(interaction: any): Promise<void> {
+    // Extract keywords from input
+    const keywords = this.extractKeywords(interaction.input)
+
+    // Look for similar past interactions
+    const similarPatterns = this.findSimilarPatterns(interaction.input)
+
+    // Create or update pattern
+    if (similarPatterns.length > 0) {
+      // Update existing pattern
+      const pattern = similarPatterns[0]
+      pattern.frequency++
+      pattern.confidence = (pattern.confidence + interaction.confidence) / 2
+      pattern.timestamp = Date.now()
+    } else {
+      // Create new pattern
+      const newPattern: LearningPattern = {
+        id: generateId(),
+        pattern: interaction.input,
+        frequency: 1,
+        confidence: interaction.confidence,
+        context: keywords,
+        timestamp: Date.now(),
+      }
+      this.patterns.push(newPattern)
+    }
+
+    // Keep patterns manageable
+    if (this.patterns.length > 1000) {
+      this.patterns = this.patterns.sort((a, b) => b.frequency - a.frequency).slice(0, 1000)
+    }
+  }
+
+  private extractKeywords(text: string): string[] {
+    return text
       .toLowerCase()
-      .split(/\W+/)
-      .filter((w) => w.length > 2)
-    const pattern = {
-      keywords: inputKeywords,
-      source: entry.source,
-      confidence: entry.confidence,
-      timestamp: entry.timestamp,
-    }
+      .replace(/[^\w\s]/g, "")
+      .split(/\s+/)
+      .filter((word) => word.length > 2)
+      .slice(0, 10)
+  }
 
-    // Store pattern for future reference
-    const patternKey = inputKeywords.slice(0, 3).join("_")
-    if (!this.patterns.has(patternKey)) {
-      this.patterns.set(patternKey, [])
-    }
-    this.patterns.get(patternKey)!.push(pattern)
+  private findSimilarPatterns(input: string): LearningPattern[] {
+    return this.patterns
+      .filter((pattern) => calculateSimilarity(pattern.pattern, input) > 0.7)
+      .sort((a, b) => b.frequency - a.frequency)
+  }
 
-    // Limit patterns per key
-    const patterns = this.patterns.get(patternKey)!
-    if (patterns.length > 10) {
-      this.patterns.set(patternKey, patterns.slice(-10))
-    }
+  private async updatePatterns(): Promise<void> {
+    // Remove old, low-frequency patterns
+    const cutoffTime = Date.now() - 30 * 24 * 60 * 60 * 1000 // 30 days
+    this.patterns = this.patterns.filter((pattern) => pattern.timestamp > cutoffTime || pattern.frequency > 5)
+
+    // Sort by relevance (frequency * confidence)
+    this.patterns.sort((a, b) => {
+      const scoreA = a.frequency * a.confidence
+      const scoreB = b.frequency * b.confidence
+      return scoreB - scoreA
+    })
+  }
+
+  async identifyPatterns(): Promise<LearningPattern[]> {
+    return this.patterns.slice(0, 20) // Return top 20 patterns
   }
 
   async forceProcessQueue(): Promise<void> {
-    console.log(`Processing ${this.learningQueue.length} learning entries...`)
-
-    for (const entry of this.learningQueue) {
-      if (entry.confidence > 0.5) {
-        await this.processLearningEntry(entry)
-      }
+    while (this.learningQueue.length > 0) {
+      await this.processLearningQueue()
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
-
-    console.log("Learning queue processed")
   }
 
   getLearningStats(): any {
     return {
-      ...this.stats,
-      queueSize: this.learningQueue.length,
-      patternCount: this.patterns.size,
       initialized: this.initialized,
+      queueLength: this.learningQueue.length,
+      totalPatterns: this.patterns.length,
+      isProcessing: this.isProcessing,
+      topPatterns: this.patterns.slice(0, 5).map((p) => ({
+        pattern: p.pattern.substring(0, 50),
+        frequency: p.frequency,
+        confidence: p.confidence,
+      })),
     }
   }
 
   destroy(): void {
-    this.learningQueue = []
-    this.patterns.clear()
     this.initialized = false
-  }
-
-  // Additional methods for pattern matching and recommendations
-  findSimilarPatterns(input: string): any[] {
-    const inputKeywords = input
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((w) => w.length > 2)
-    const matches: any[] = []
-
-    for (const [key, patterns] of this.patterns.entries()) {
-      const keyWords = key.split("_")
-      const overlap = inputKeywords.filter((word) => keyWords.includes(word))
-
-      if (overlap.length > 0) {
-        matches.push({
-          key,
-          patterns,
-          similarity: overlap.length / Math.max(inputKeywords.length, keyWords.length),
-        })
-      }
-    }
-
-    return matches.sort((a, b) => b.similarity - a.similarity).slice(0, 5)
-  }
-
-  getRecommendations(input: string): string[] {
-    const similarPatterns = this.findSimilarPatterns(input)
-    const recommendations: string[] = []
-
-    for (const match of similarPatterns) {
-      const bestPattern = match.patterns.sort((a: any, b: any) => b.confidence - a.confidence)[0]
-      if (bestPattern && bestPattern.source) {
-        recommendations.push(`Try ${bestPattern.source} module`)
-      }
-    }
-
-    return [...new Set(recommendations)].slice(0, 3)
+    this.learningQueue = []
+    this.patterns = []
   }
 }
 
