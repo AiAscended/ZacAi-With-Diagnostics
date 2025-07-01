@@ -1,17 +1,8 @@
 {
-  "metadata": {
-    "version": "1.0.0",
-    "lastUpdated": 1704067200000,
-    "totalEntries": 0,
-    "learningRate": 0,
-    "confidenceThreshold": 0.7
-  },
-  "entries": {},
-  "patterns": {},
-  "statistics": {
-    "learningVelocity": 0,
-    "accuracyRate": 0,
-    "retentionRate": 0,
-    "utilizationRate": 0
-  }
+  "version": "1.0.0",
+  "lastUpdated": 1704067200000,
+  "preferences": {},
+  "learningHistory": [],
+  "interests": [],
+  "skillLevel": {}
 }

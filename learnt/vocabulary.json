@@ -6,7 +6,7 @@
     "learningRate": 0,
     "confidenceThreshold": 0.7
   },
-  "entries": {},
+  "entries": [],
   "patterns": {},
   "statistics": {
     "learningVelocity": 0,

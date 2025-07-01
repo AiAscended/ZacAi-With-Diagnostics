@@ -7,7 +7,7 @@
     "confidenceThreshold": 0.7
   },
   "entries": {},
-  "patterns": {},
+  "patterns": [],
   "statistics": {
     "learningVelocity": 0,
     "accuracyRate": 0,
