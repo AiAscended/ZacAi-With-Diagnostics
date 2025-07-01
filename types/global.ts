@@ -1,7 +1,6 @@
-// Global type definitions for the ZacAI system
 export interface SystemConfig {
   version: string
-  environment: "development" | "production" | "test"
+  environment: string
   features: {
     vocabulary: boolean
     mathematics: boolean
@@ -73,24 +72,16 @@ export interface LearntDataEntry {
 export interface IntentAnalysis {
   intent: string
   confidence: number
-  entities: any[]
+  entities: string[]
   context: any
   suggestedModules: string[]
-}
-
-export interface ContextMessage {
-  role: "user" | "assistant" | "system"
-  content: string
-  timestamp?: number
-  metadata?: any
 }
 
 export interface ReasoningStep {
   step: number
   reasoning: string
-  input: any
-  output: any
   confidence: number
+  output: any
   timestamp: number
 }
 
@@ -100,5 +91,21 @@ export interface ReasoningChain {
   steps: ReasoningStep[]
   finalOutput: any
   totalConfidence: number
-  processingTime: number
+  timestamp: number
+}
+
+export interface LearningPattern {
+  id: string
+  pattern: string
+  frequency: number
+  confidence: number
+  context: string[]
+  timestamp: number
+}
+
+export interface ContextMessage {
+  role: "user" | "assistant"
+  content: string
+  timestamp?: number
+  metadata?: any
 }

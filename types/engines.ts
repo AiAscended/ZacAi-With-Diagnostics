@@ -1,19 +1,33 @@
 // Type definitions for reasoning and learning engines
+export interface ReasoningEngine {
+  initialize(): Promise<void>
+  createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain>
+  getStats(): any
+}
+
+export interface LearningEngine {
+  initialize(): Promise<void>
+  learnFromInteraction(input: string, output: string, confidence: number, source: string, context: any): Promise<void>
+  getLearningStats(): any
+  forceProcessQueue(): Promise<void>
+  destroy(): void
+}
+
 export interface ReasoningChain {
   id: string
+  input: string
   steps: ReasoningStep[]
-  conclusion: string
-  confidence: number
-  sources: string[]
+  finalOutput: any
+  totalConfidence: number
+  timestamp: number
 }
 
 export interface ReasoningStep {
-  id: string
-  description: string
-  input: any
-  output: any
-  confidence: number
+  step: number
   reasoning: string
+  confidence: number
+  output: any
+  timestamp: number
 }
 
 export interface IntentAnalysis {
@@ -29,8 +43,8 @@ export interface LearningPattern {
   pattern: string
   frequency: number
   confidence: number
-  lastSeen: number
-  examples: string[]
+  context: string[]
+  timestamp: number
 }
 
 export interface LearningEngineStats {
