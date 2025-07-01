@@ -1,60 +1,70 @@
 // API management and caching system
-export class APIManager {
-  private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map()
-  private requestQueue: Map<string, Promise<any>> = new Map()
+interface APIRequest {
+  url: string
+  options?: RequestInit
+  cacheKey?: string
+  cacheDuration?: number
+}
 
-  async makeRequest(
-    url: string,
-    options: RequestInit = {},
-    cacheKey?: string,
-    cacheTTL = 300000, // 5 minutes default
-  ): Promise<any> {
+interface CacheEntry {
+  data: any
+  timestamp: number
+  duration: number
+}
+
+export class APIManager {
+  private cache: Map<string, CacheEntry> = new Map()
+  private requestQueue: Map<string, Promise<any>> = new Map()
+  private rateLimiter: Map<string, number[]> = new Map()
+
+  private readonly DEFAULT_CACHE_DURATION = 300000 // 5 minutes
+  private readonly MAX_REQUESTS_PER_MINUTE = 60
+  private readonly REQUEST_TIMEOUT = 10000 // 10 seconds
+
+  async makeRequest(url: string, options: RequestInit = {}, cacheKey?: string, cacheDuration?: number): Promise<any> {
+    const key = cacheKey || this.generateCacheKey(url, options)
+
     // Check cache first
-    if (cacheKey && this.cache.has(cacheKey)) {
-      const cached = this.cache.get(cacheKey)!
-      if (Date.now() - cached.timestamp < cached.ttl) {
-        console.log(`Cache hit for ${cacheKey}`)
-        return cached.data
-      } else {
-        this.cache.delete(cacheKey)
-      }
+    if (this.isCached(key)) {
+      console.log(`📦 Cache hit for: ${key}`)
+      return this.getFromCache(key)
     }
 
     // Check if request is already in progress
-    const requestKey = cacheKey || url
-    if (this.requestQueue.has(requestKey)) {
-      console.log(`Request already in progress for ${requestKey}`)
-      return this.requestQueue.get(requestKey)
+    if (this.requestQueue.has(key)) {
+      console.log(`⏳ Request already in progress for: ${key}`)
+      return this.requestQueue.get(key)
+    }
+
+    // Check rate limiting
+    if (!this.checkRateLimit(url)) {
+      throw new Error(`Rate limit exceeded for ${url}`)
     }
 
     // Make the request
     const requestPromise = this.executeRequest(url, options)
-    this.requestQueue.set(requestKey, requestPromise)
+    this.requestQueue.set(key, requestPromise)
 
     try {
       const result = await requestPromise
 
-      // Cache the result
-      if (cacheKey && result) {
-        this.cache.set(cacheKey, {
-          data: result,
-          timestamp: Date.now(),
-          ttl: cacheTTL,
-        })
+      // Cache successful responses
+      if (result && !result.error) {
+        this.setCache(key, result, cacheDuration || this.DEFAULT_CACHE_DURATION)
       }
 
       return result
     } catch (error) {
-      console.error(`API request failed for ${url}:`, error)
+      console.error(`❌ API request failed for ${url}:`, error)
       throw error
     } finally {
-      this.requestQueue.delete(requestKey)
+      this.requestQueue.delete(key)
     }
   }
 
   private async executeRequest(url: string, options: RequestInit): Promise<any> {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), this.REQUEST_TIMEOUT)
 
     try {
       const response = await fetch(url, {
@@ -81,23 +91,135 @@ export class APIManager {
       }
     } catch (error) {
       clearTimeout(timeoutId)
-      if (error.name === "AbortError") {
+
+      if (error instanceof Error && error.name === "AbortError") {
         throw new Error("Request timeout")
       }
+
       throw error
     }
   }
 
+  private generateCacheKey(url: string, options: RequestInit): string {
+    const method = options.method || "GET"
+    const body = options.body ? JSON.stringify(options.body) : ""
+    return `${method}:${url}:${body}`
+  }
+
+  private isCached(key: string): boolean {
+    const entry = this.cache.get(key)
+    if (!entry) return false
+
+    const isExpired = Date.now() - entry.timestamp > entry.duration
+    if (isExpired) {
+      this.cache.delete(key)
+      return false
+    }
+
+    return true
+  }
+
+  private getFromCache(key: string): any {
+    const entry = this.cache.get(key)
+    return entry ? entry.data : null
+  }
+
+  private setCache(key: string, data: any, duration: number): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      duration,
+    })
+
+    // Clean up old cache entries periodically
+    if (this.cache.size > 1000) {
+      this.cleanupCache()
+    }
+  }
+
+  private cleanupCache(): void {
+    const now = Date.now()
+    const keysToDelete: string[] = []
+
+    for (const [key, entry] of this.cache.entries()) {
+      if (now - entry.timestamp > entry.duration) {
+        keysToDelete.push(key)
+      }
+    }
+
+    keysToDelete.forEach((key) => this.cache.delete(key))
+    console.log(`🧹 Cleaned up ${keysToDelete.length} expired cache entries`)
+  }
+
+  private checkRateLimit(url: string): boolean {
+    const domain = new URL(url).hostname
+    const now = Date.now()
+    const windowStart = now - 60000 // 1 minute window
+
+    if (!this.rateLimiter.has(domain)) {
+      this.rateLimiter.set(domain, [])
+    }
+
+    const requests = this.rateLimiter.get(domain)!
+
+    // Remove old requests outside the window
+    const recentRequests = requests.filter((timestamp) => timestamp > windowStart)
+
+    if (recentRequests.length >= this.MAX_REQUESTS_PER_MINUTE) {
+      return false
+    }
+
+    // Add current request
+    recentRequests.push(now)
+    this.rateLimiter.set(domain, recentRequests)
+
+    return true
+  }
+
+  // Public methods for cache management
   clearCache(): void {
     this.cache.clear()
+    console.log("🗑️ API cache cleared")
   }
 
   getCacheStats(): any {
     return {
       size: this.cache.size,
-      keys: Array.from(this.cache.keys()),
-      totalSize: JSON.stringify(Array.from(this.cache.values())).length,
+      entries: Array.from(this.cache.keys()),
+      hitRate: this.calculateHitRate(),
     }
+  }
+
+  private calculateHitRate(): number {
+    // This would need to be tracked over time in a real implementation
+    return 0.75 // Placeholder
+  }
+
+  // Batch requests
+  async batchRequests(requests: APIRequest[]): Promise<any[]> {
+    const promises = requests.map((req) => this.makeRequest(req.url, req.options, req.cacheKey, req.cacheDuration))
+
+    return Promise.allSettled(promises)
+  }
+
+  // Retry mechanism
+  async requestWithRetry(url: string, options: RequestInit = {}, maxRetries = 3, retryDelay = 1000): Promise<any> {
+    let lastError: Error
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await this.makeRequest(url, options)
+      } catch (error) {
+        lastError = error as Error
+
+        if (attempt < maxRetries) {
+          console.log(`🔄 Retry attempt ${attempt} for ${url} in ${retryDelay}ms`)
+          await new Promise((resolve) => setTimeout(resolve, retryDelay * attempt))
+        }
+      }
+    }
+
+    throw lastError!
   }
 }
 

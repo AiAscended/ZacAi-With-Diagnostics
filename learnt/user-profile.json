@@ -3,5 +3,10 @@
     "version": "1.0.0",
     "lastUpdated": 1704067200000
   },
-  "profile": null
+  "profile": {
+    "preferences": {},
+    "learningHistory": [],
+    "interests": [],
+    "skillLevel": {}
+  }
 }

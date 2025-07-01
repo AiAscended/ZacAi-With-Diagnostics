@@ -2,7 +2,13 @@
   "metadata": {
     "version": "1.0.0",
     "lastUpdated": 1704067200000,
-    "totalPatterns": 0
+    "totalPatterns": 0,
+    "learningEngineVersion": "2.0.0"
   },
-  "patterns": {}
+  "patterns": {},
+  "statistics": {
+    "totalLearningEntries": 0,
+    "averageConfidence": 0,
+    "patternTypes": []
+  }
 }

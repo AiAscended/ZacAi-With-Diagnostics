@@ -1,28 +1,4 @@
-export function formatNumber(num: number): string {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + "M"
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + "K"
-  }
-  return num.toString()
-}
-
-export function formatPercentage(value: number, total: number): string {
-  if (total === 0) return "0%"
-  return Math.round((value / total) * 100) + "%"
-}
-
-export function formatDuration(ms: number): string {
-  const seconds = Math.floor(ms / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-
-  if (hours > 0) return `${hours}h ${minutes % 60}m`
-  if (minutes > 0) return `${minutes}m ${seconds % 60}s`
-  return `${seconds}s`
-}
-
+// Formatting utilities for display and data presentation
 export function formatRelativeTime(timestamp: number): string {
   const now = Date.now()
   const diff = now - timestamp
@@ -31,21 +7,78 @@ export function formatRelativeTime(timestamp: number): string {
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
+  const weeks = Math.floor(days / 7)
+  const months = Math.floor(days / 30)
+  const years = Math.floor(days / 365)
 
   if (seconds < 60) return "just now"
   if (minutes < 60) return `${minutes}m ago`
   if (hours < 24) return `${hours}h ago`
   if (days < 7) return `${days}d ago`
+  if (weeks < 4) return `${weeks}w ago`
+  if (months < 12) return `${months}mo ago`
+  return `${years}y ago`
+}
 
-  return new Date(timestamp).toLocaleDateString()
+export function formatTimestamp(timestamp: number, format: "short" | "long" | "time" = "short"): string {
+  const date = new Date(timestamp)
+
+  switch (format) {
+    case "short":
+      return date.toLocaleDateString()
+    case "long":
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    case "time":
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    default:
+      return date.toLocaleDateString()
+  }
+}
+
+export function formatDuration(milliseconds: number): string {
+  const seconds = Math.floor(milliseconds / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+
+  if (hours > 0) {
+    return `${hours}h ${minutes % 60}m ${seconds % 60}s`
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${seconds % 60}s`
+  }
+  return `${seconds}s`
+}
+
+export function formatPercentage(value: number, total: number, decimals = 1): string {
+  if (total === 0) return "0%"
+  const percentage = (value / total) * 100
+  return `${percentage.toFixed(decimals)}%`
+}
+
+export function formatConfidence(confidence: number): string {
+  return `${Math.round(confidence * 100)}%`
 }
 
 export function formatFileSize(bytes: number): string {
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
-  if (bytes === 0) return "0 Bytes"
+  const units = ["B", "KB", "MB", "GB", "TB"]
+  let size = bytes
+  let unitIndex = 0
 
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + " " + sizes[i]
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024
+    unitIndex++
+  }
+
+  return `${size.toFixed(1)} ${units[unitIndex]}`
 }
 
 export function formatCurrency(amount: number, currency = "USD"): string {
@@ -55,134 +88,93 @@ export function formatCurrency(amount: number, currency = "USD"): string {
   }).format(amount)
 }
 
-export function formatDate(date: Date | number, format = "short"): string {
-  const d = typeof date === "number" ? new Date(date) : date
+export function formatLargeNumber(num: number): string {
+  if (num >= 1e9) return (num / 1e9).toFixed(1) + "B"
+  if (num >= 1e6) return (num / 1e6).toFixed(1) + "M"
+  if (num >= 1e3) return (num / 1e3).toFixed(1) + "K"
+  return num.toString()
+}
 
-  switch (format) {
-    case "short":
-      return d.toLocaleDateString()
-    case "long":
-      return d.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    case "time":
-      return d.toLocaleTimeString()
-    case "datetime":
-      return d.toLocaleString()
-    case "iso":
-      return d.toISOString()
-    default:
-      return d.toLocaleDateString()
-  }
+export function formatScore(score: number, maxScore = 100): string {
+  const percentage = (score / maxScore) * 100
+  return `${score}/${maxScore} (${percentage.toFixed(0)}%)`
+}
+
+export function formatList(items: string[], conjunction = "and"): string {
+  if (items.length === 0) return ""
+  if (items.length === 1) return items[0]
+  if (items.length === 2) return `${items[0]} ${conjunction} ${items[1]}`
+
+  const lastItem = items[items.length - 1]
+  const otherItems = items.slice(0, -1)
+  return `${otherItems.join(", ")}, ${conjunction} ${lastItem}`
 }
 
 export function formatPhoneNumber(phone: string): string {
   const cleaned = phone.replace(/\D/g, "")
-  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/)
 
-  if (match) {
-    return `(${match[1]}) ${match[2]}-${match[3]}`
+  if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`
+  }
+  if (cleaned.length === 11 && cleaned[0] === "1") {
+    return `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`
   }
 
   return phone
 }
 
-export function formatCamelCase(str: string): string {
-  return str.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())
+export function formatAddress(address: {
+  street?: string
+  city?: string
+  state?: string
+  zip?: string
+  country?: string
+}): string {
+  const parts = []
+
+  if (address.street) parts.push(address.street)
+  if (address.city) parts.push(address.city)
+  if (address.state) parts.push(address.state)
+  if (address.zip) parts.push(address.zip)
+  if (address.country) parts.push(address.country)
+
+  return parts.join(", ")
 }
 
-export function formatKebabCase(str: string): string {
-  return str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1-$2").toLowerCase()
+export function formatMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    .replace(/\n/g, "<br>")
 }
 
-export function formatSnakeCase(str: string): string {
-  return str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1_$2").toLowerCase()
+export function formatSearchQuery(query: string): string {
+  return query
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s+/g, " ")
 }
 
-export function formatTitleCase(str: string): string {
-  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
+export function formatSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 }
 
-export function formatPlural(count: number, singular: string, plural?: string): string {
-  if (count === 1) return `${count} ${singular}`
-  return `${count} ${plural || singular + "s"}`
+export function formatInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("")
+    .slice(0, 2)
 }
 
-export function formatOrdinal(num: number): string {
-  const suffixes = ["th", "st", "nd", "rd"]
-  const v = num % 100
-  return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0])
-}
-
-export function formatScore(score: number, maxScore: number): string {
-  const percentage = (score / maxScore) * 100
-  return `${score}/${maxScore} (${percentage.toFixed(1)}%)`
-}
-
-export function formatGrade(percentage: number): string {
-  if (percentage >= 97) return "A+"
-  if (percentage >= 93) return "A"
-  if (percentage >= 90) return "A-"
-  if (percentage >= 87) return "B+"
-  if (percentage >= 83) return "B"
-  if (percentage >= 80) return "B-"
-  if (percentage >= 77) return "C+"
-  if (percentage >= 73) return "C"
-  if (percentage >= 70) return "C-"
-  if (percentage >= 67) return "D+"
-  if (percentage >= 65) return "D"
-  return "F"
-}
-
-export function formatTemperature(temp: number, unit: "C" | "F" = "C"): string {
-  if (unit === "F") {
-    return `${temp}°F`
-  }
-  return `${temp}°C`
-}
-
-export function formatDistance(meters: number, unit: "metric" | "imperial" = "metric"): string {
-  if (unit === "imperial") {
-    const feet = meters * 3.28084
-    if (feet < 5280) {
-      return `${Math.round(feet)} ft`
-    }
-    const miles = feet / 5280
-    return `${miles.toFixed(1)} mi`
-  }
-
-  if (meters < 1000) {
-    return `${Math.round(meters)} m`
-  }
-  const km = meters / 1000
-  return `${km.toFixed(1)} km`
-}
-
-export function formatWeight(grams: number, unit: "metric" | "imperial" = "metric"): string {
-  if (unit === "imperial") {
-    const ounces = grams * 0.035274
-    if (ounces < 16) {
-      return `${ounces.toFixed(1)} oz`
-    }
-    const pounds = ounces / 16
-    return `${pounds.toFixed(1)} lbs`
-  }
-
-  if (grams < 1000) {
-    return `${Math.round(grams)} g`
-  }
-  const kg = grams / 1000
-  return `${kg.toFixed(1)} kg`
-}
-
-export function capitalizeFirst(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.substring(0, maxLength - 3) + "..."
+export function formatVersion(version: string): string {
+  const parts = version.split(".")
+  return parts.map((part) => Number.parseInt(part, 10)).join(".")
 }

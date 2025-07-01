@@ -2,69 +2,90 @@
   "metadata": {
     "version": "1.0.0",
     "lastUpdated": "2024-01-01T00:00:00Z",
-    "totalConcepts": 200,
-    "sources": ["Stanford Encyclopedia of Philosophy", "Philosophy Texts", "Academic Papers"]
+    "totalEntries": 200,
+    "schools": ["ancient", "modern", "contemporary", "eastern", "western"],
+    "categories": ["ethics", "metaphysics", "epistemology", "logic", "aesthetics"]
   },
-  "concepts": [
-    {
-      "id": "ethics_utilitarianism",
-      "name": "Utilitarianism",
-      "description": "A moral theory that judges the rightness of actions based on their consequences, specifically their ability to produce the greatest happiness for the greatest number of people.",
-      "philosopher": "Jeremy Bentham, John Stuart Mill",
-      "school": "Consequentialism",
-      "relatedConcepts": ["hedonism", "consequentialism", "moral_calculus"],
-      "arguments": [
-        "Actions should be judged by their outcomes, not intentions",
-        "The greatest good for the greatest number is the moral ideal",
-        "Happiness and pleasure are intrinsically valuable",
-        "Moral decisions can be calculated objectively"
-      ],
-      "counterArguments": [
-        "It can justify harmful actions if they benefit the majority",
-        "Difficult to measure and compare different types of happiness",
-        "Ignores individual rights and justice",
-        "May lead to tyranny of the majority"
-      ]
-    },
-    {
-      "id": "metaphysics_free_will",
-      "name": "Free Will",
-      "description": "The philosophical concept that humans have the ability to make choices that are genuinely their own, not entirely determined by prior causes.",
+  "concepts": {
+    "consciousness": {
+      "description": "The state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings",
       "philosopher": "Various",
-      "school": "Metaphysics",
-      "relatedConcepts": ["determinism", "moral_responsibility", "consciousness"],
+      "school": "philosophy of mind",
+      "relatedConcepts": ["awareness", "qualia", "self-awareness", "phenomenology"],
       "arguments": [
-        "We experience making genuine choices in our daily lives",
-        "Moral responsibility requires the ability to have acted differently",
-        "Quantum indeterminacy may provide room for free will",
-        "Agent causation allows for self-determined actions"
+        "Consciousness is fundamental to experience and cannot be reduced to physical processes",
+        "The hard problem of consciousness shows the explanatory gap between brain states and subjective experience",
+        "Consciousness exhibits unity and intentionality that distinguishes it from mere information processing"
       ],
       "counterArguments": [
-        "Physical determinism suggests all events are causally determined",
-        "Neuroscience shows brain activity precedes conscious decisions",
-        "Our choices are shaped by genetics and environment",
-        "Random events don't constitute free will"
+        "Consciousness emerges from complex neural activity and can be explained through materialism",
+        "Neuroscience shows that consciousness can be altered by brain changes, suggesting physical basis",
+        "The illusion of consciousness can be explained by cognitive mechanisms without requiring special properties"
       ]
     },
-    {
-      "id": "epistemology_skepticism",
-      "name": "Skepticism",
-      "description": "The philosophical position that questions the possibility of certain knowledge, arguing that we should suspend judgment on claims that cannot be proven with certainty.",
-      "philosopher": "Pyrrho, Sextus Empiricus, David Hume",
-      "school": "Epistemology",
-      "relatedConcepts": ["knowledge", "certainty", "doubt", "empiricism"],
+    "ethics": {
+      "description": "The branch of philosophy that deals with moral principles and values",
+      "philosopher": "Aristotle",
+      "school": "moral philosophy",
+      "relatedConcepts": ["morality", "virtue", "duty", "consequences", "rights"],
       "arguments": [
-        "Our senses can deceive us, making empirical knowledge uncertain",
-        "We cannot step outside our own perspective to verify truth",
-        "Infinite regress problem: every justification requires further justification",
-        "Dream argument: we cannot distinguish waking from dreaming"
+        "Moral principles are universal and can be discovered through reason",
+        "Ethics provide necessary guidelines for human behavior and social cooperation",
+        "Virtue ethics focuses on character development rather than just actions"
       ],
       "counterArguments": [
-        "Practical certainty is sufficient for knowledge",
-        "Skepticism is self-refuting if applied consistently",
-        "Common sense and successful predictions support our beliefs",
-        "Methodological doubt can lead to foundational truths"
+        "Moral relativism suggests that ethical principles vary across cultures and contexts",
+        "Evolutionary explanations show that moral intuitions may be biological rather than rational",
+        "The is-ought problem shows the difficulty of deriving moral conclusions from factual premises"
+      ]
+    },
+    "free will": {
+      "description": "The ability to make choices that are genuinely one's own and not determined by prior causes",
+      "philosopher": "Various",
+      "school": "philosophy of action",
+      "relatedConcepts": ["determinism", "choice", "responsibility", "agency", "causation"],
+      "arguments": [
+        "We have direct experience of making free choices in our daily lives",
+        "Moral responsibility requires that our actions be freely chosen",
+        "Quantum indeterminacy provides room for genuine choice in a physical world"
+      ],
+      "counterArguments": [
+        "Causal determinism suggests that all events, including human actions, are the result of prior causes",
+        "Neuroscience shows that brain activity precedes conscious decision-making",
+        "Random events are not the same as free choices, so indeterminacy doesn't help"
+      ]
+    },
+    "existence": {
+      "description": "The fact or state of being; the nature of what it means to exist",
+      "philosopher": "Heidegger",
+      "school": "existentialism",
+      "relatedConcepts": ["being", "essence", "reality", "ontology", "dasein"],
+      "arguments": [
+        "Existence precedes essence - we exist first and then create our meaning",
+        "Being-in-the-world is the fundamental structure of human existence",
+        "Authentic existence requires confronting anxiety and taking responsibility for our choices"
+      ],
+      "counterArguments": [
+        "Essence precedes existence - things have inherent natures that determine their existence",
+        "Existence is simply a property that some things have and others lack",
+        "Scientific materialism provides a complete account of existence without existentialist concepts"
+      ]
+    },
+    "knowledge": {
+      "description": "Justified true belief; the understanding of facts, information, and skills acquired through experience or education",
+      "philosopher": "Plato",
+      "school": "epistemology",
+      "relatedConcepts": ["truth", "belief", "justification", "skepticism", "empiricism"],
+      "arguments": [
+        "Knowledge requires justification beyond mere true belief (Gettier problem)",
+        "Rational intuition can provide certain knowledge of abstract truths",
+        "Empirical observation is the foundation of all genuine knowledge"
+      ],
+      "counterArguments": [
+        "Skeptical arguments show that we cannot have certain knowledge of the external world",
+        "All knowledge is theory-laden and influenced by our conceptual frameworks",
+        "Pragmatist approaches suggest that knowledge is what works rather than what corresponds to truth"
       ]
     }
-  ]
+  }
 }

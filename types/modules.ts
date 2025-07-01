@@ -1,4 +1,4 @@
-// Module-specific type definitions
+// Type definitions for all modules
 export interface VocabularyEntry {
   word: string
   definition: string
@@ -13,20 +13,22 @@ export interface VocabularyEntry {
 }
 
 export interface MathConcept {
+  id: string
   name: string
+  formula: string
   description: string
-  formula?: string
   category: string
   difficulty: number
-  examples: MathExample[]
+  prerequisites: string[]
   applications: string[]
+  examples: MathExample[]
 }
 
 export interface MathExample {
   problem: string
   solution: string
-  explanation: string
   steps: string[]
+  explanation: string
 }
 
 export interface FactEntry {
@@ -53,7 +55,6 @@ export interface CodeExample {
   title: string
   code: string
   explanation: string
-  output?: string
 }
 
 export interface PhilosophicalConcept {
@@ -67,17 +68,76 @@ export interface PhilosophicalConcept {
 }
 
 export interface UserProfile {
-  name?: string
   preferences: { [key: string]: any }
-  learningHistory: LearningRecord[]
+  learningHistory: LearningHistoryEntry[]
   interests: string[]
   skillLevel: { [domain: string]: number }
 }
 
-export interface LearningRecord {
+export interface LearningHistoryEntry {
   topic: string
   timestamp: number
   confidence: number
   source: string
   context: string
+}
+
+export interface ModuleConfig {
+  seedFile: string
+  learntFile: string
+  apiEndpoints: { [key: string]: string }
+  cacheTimeout: number
+}
+
+export interface ProcessingResult {
+  success: boolean
+  data: any
+  confidence: number
+  processingTime: number
+  sources: string[]
+  metadata?: any
+}
+
+export interface LearningPattern {
+  id: string
+  pattern: string
+  frequency: number
+  confidence: number
+  lastSeen: number
+  examples: string[]
+}
+
+export interface KnowledgeGraph {
+  nodes: KnowledgeNode[]
+  edges: KnowledgeEdge[]
+}
+
+export interface KnowledgeNode {
+  id: string
+  type: string
+  label: string
+  properties: { [key: string]: any }
+}
+
+export interface KnowledgeEdge {
+  id: string
+  source: string
+  target: string
+  relationship: string
+  weight: number
+}
+
+export interface SearchResult {
+  id: string
+  content: any
+  relevance: number
+  source: string
+  timestamp: number
+}
+
+export interface ValidationResult {
+  isValid: boolean
+  confidence: number
+  issues: string[]
+  suggestions: string[]
 }

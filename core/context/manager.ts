@@ -1,135 +1,321 @@
-// Context management for conversation flow
-import type { ContextMessage, ContextStats } from "@/types/global"
+// Context management for conversation flow and user state
+import type { ContextMessage } from "@/types/global"
+
+interface ConversationContext {
+  id: string
+  messages: ContextMessage[]
+  topics: string[]
+  entities: any[]
+  userPreferences: any
+  sessionStart: number
+  lastActivity: number
+  messageCount: number
+  conversationFlow: "new" | "continuing" | "follow_up" | "topic_change"
+}
 
 export class ContextManager {
-  private messages: ContextMessage[] = []
-  private maxMessages = 50
-  private currentContext: any = {}
+  private currentContext: ConversationContext | null = null
+  private contextHistory: ConversationContext[] = []
+  private readonly MAX_CONTEXT_MESSAGES = 50
+  private readonly MAX_CONTEXT_HISTORY = 10
+  private readonly SESSION_TIMEOUT = 1800000 // 30 minutes
 
-  createContext(): void {
-    this.currentContext = {
-      sessionId: Date.now().toString(),
-      startTime: Date.now(),
-      userProfile: {},
-      conversationFlow: [],
-      topics: new Set(),
-      entities: new Map(),
-      sentiment: "neutral",
+  createContext(userId?: string): ConversationContext {
+    const context: ConversationContext = {
+      id: this.generateContextId(),
+      messages: [],
+      topics: [],
+      entities: [],
+      userPreferences: {},
+      sessionStart: Date.now(),
+      lastActivity: Date.now(),
+      messageCount: 0,
+      conversationFlow: "new",
     }
+
+    this.currentContext = context
+    console.log(`🆕 Created new conversation context: ${context.id}`)
+
+    return context
   }
 
-  addMessage(message: ContextMessage): void {
+  addMessage(message: Omit<ContextMessage, "timestamp">): void {
+    if (!this.currentContext) {
+      this.createContext()
+    }
+
     const fullMessage: ContextMessage = {
       ...message,
-      timestamp: message.timestamp || Date.now(),
+      timestamp: Date.now(),
     }
 
-    this.messages.push(fullMessage)
-
-    // Keep only recent messages
-    if (this.messages.length > this.maxMessages) {
-      this.messages = this.messages.slice(-this.maxMessages)
-    }
-
-    // Update context
-    this.updateContext(fullMessage)
-  }
-
-  private updateContext(message: ContextMessage): void {
-    // Extract topics and entities
-    const words = message.content.toLowerCase().split(/\s+/)
-    words.forEach((word) => {
-      if (word.length > 3) {
-        this.currentContext.topics.add(word)
-      }
-    })
+    this.currentContext!.messages.push(fullMessage)
+    this.currentContext!.messageCount++
+    this.currentContext!.lastActivity = Date.now()
 
     // Update conversation flow
-    this.currentContext.conversationFlow.push({
-      role: message.role,
-      timestamp: message.timestamp,
-      length: message.content.length,
-    })
+    this.updateConversationFlow(fullMessage)
 
-    // Simple sentiment analysis
-    const positiveWords = ["good", "great", "excellent", "amazing", "wonderful", "fantastic"]
-    const negativeWords = ["bad", "terrible", "awful", "horrible", "disappointing"]
+    // Extract topics and entities
+    this.extractTopicsAndEntities(fullMessage.content)
 
-    const hasPositive = positiveWords.some((word) => message.content.toLowerCase().includes(word))
-    const hasNegative = negativeWords.some((word) => message.content.toLowerCase().includes(word))
-
-    if (hasPositive && !hasNegative) {
-      this.currentContext.sentiment = "positive"
-    } else if (hasNegative && !hasPositive) {
-      this.currentContext.sentiment = "negative"
-    } else {
-      this.currentContext.sentiment = "neutral"
+    // Trim old messages if needed
+    if (this.currentContext!.messages.length > this.MAX_CONTEXT_MESSAGES) {
+      this.currentContext!.messages = this.currentContext!.messages.slice(-this.MAX_CONTEXT_MESSAGES)
     }
+
+    console.log(`💬 Added ${message.role} message to context`)
   }
 
   extractContext(input: string): any {
-    const recentMessages = this.messages.slice(-10) // Last 10 messages
-    const topics = Array.from(this.currentContext.topics).slice(-20) // Recent topics
+    if (!this.currentContext) {
+      return {
+        topics: [],
+        entities: [],
+        conversationFlow: "new",
+        sessionDuration: 0,
+        messageCount: 0,
+        recentMessages: [],
+        userPreferences: {},
+      }
+    }
+
+    const sessionDuration = Date.now() - this.currentContext.sessionStart
+    const recentMessages = this.currentContext.messages.slice(-5)
 
     return {
+      topics: this.currentContext.topics,
+      entities: this.currentContext.entities,
+      conversationFlow: this.currentContext.conversationFlow,
+      sessionDuration,
+      messageCount: this.currentContext.messageCount,
       recentMessages,
-      topics,
-      sentiment: this.currentContext.sentiment,
-      sessionDuration: Date.now() - this.currentContext.startTime,
-      messageCount: this.messages.length,
-      userProfile: this.currentContext.userProfile,
-      conversationFlow: this.currentContext.conversationFlow.slice(-5),
+      userPreferences: this.currentContext.userPreferences,
+      contextId: this.currentContext.id,
     }
   }
 
-  getContextStats(): ContextStats {
-    const totalMessages = this.messages.length
-    const averageLength =
-      totalMessages > 0 ? this.messages.reduce((sum, msg) => sum + msg.content.length, 0) / totalMessages : 0
+  private updateConversationFlow(message: ContextMessage): void {
+    if (!this.currentContext) return
 
-    const topicDistribution: { [topic: string]: number } = {}
-    Array.from(this.currentContext.topics).forEach((topic: string) => {
-      topicDistribution[topic] = (topicDistribution[topic] || 0) + 1
+    const messages = this.currentContext.messages
+    const messageCount = messages.length
+
+    if (messageCount <= 2) {
+      this.currentContext.conversationFlow = "new"
+    } else if (message.role === "user") {
+      const lastUserMessage = messages
+        .slice(0, -1)
+        .reverse()
+        .find((m) => m.role === "user")
+
+      if (lastUserMessage) {
+        const timeDiff = message.timestamp! - lastUserMessage.timestamp!
+        const contentSimilarity = this.calculateContentSimilarity(message.content, lastUserMessage.content)
+
+        if (timeDiff < 30000 && contentSimilarity > 0.6) {
+          this.currentContext.conversationFlow = "follow_up"
+        } else if (this.hasTopicChange(message.content)) {
+          this.currentContext.conversationFlow = "topic_change"
+        } else {
+          this.currentContext.conversationFlow = "continuing"
+        }
+      }
+    }
+  }
+
+  private extractTopicsAndEntities(content: string): void {
+    if (!this.currentContext) return
+
+    // Simple topic extraction
+    const topics = this.extractTopics(content)
+    const entities = this.extractEntities(content)
+
+    // Add new topics
+    topics.forEach((topic) => {
+      if (!this.currentContext!.topics.includes(topic)) {
+        this.currentContext!.topics.push(topic)
+      }
     })
 
-    return {
-      totalMessages,
-      averageLength,
-      topicDistribution,
-      sentimentAnalysis: {
-        current: this.currentContext.sentiment,
-        distribution: this.calculateSentimentDistribution(),
-      },
+    // Add new entities
+    entities.forEach((entity) => {
+      const existing = this.currentContext!.entities.find((e) => e.value === entity.value)
+      if (!existing) {
+        this.currentContext!.entities.push(entity)
+      }
+    })
+
+    // Keep only recent topics and entities
+    if (this.currentContext.topics.length > 20) {
+      this.currentContext.topics = this.currentContext.topics.slice(-20)
+    }
+    if (this.currentContext.entities.length > 50) {
+      this.currentContext.entities = this.currentContext.entities.slice(-50)
     }
   }
 
-  private calculateSentimentDistribution(): any {
-    const distribution = { positive: 0, negative: 0, neutral: 0 }
-    // This would analyze all messages for sentiment distribution
-    // For now, return mock data
-    return { positive: 0.3, negative: 0.2, neutral: 0.5 }
+  private extractTopics(content: string): string[] {
+    const topics: string[] = []
+    const lowercaseContent = content.toLowerCase()
+
+    // Domain-specific keywords
+    const topicKeywords = {
+      mathematics: ["math", "calculate", "equation", "number", "formula", "algebra"],
+      science: ["science", "physics", "chemistry", "biology", "research"],
+      technology: ["code", "program", "computer", "software", "algorithm"],
+      philosophy: ["philosophy", "ethics", "moral", "meaning", "existence"],
+      vocabulary: ["define", "word", "meaning", "definition", "synonym"],
+    }
+
+    for (const [topic, keywords] of Object.entries(topicKeywords)) {
+      if (keywords.some((keyword) => lowercaseContent.includes(keyword))) {
+        topics.push(topic)
+      }
+    }
+
+    return topics
   }
 
+  private extractEntities(content: string): any[] {
+    const entities: any[] = []
+
+    // Extract numbers
+    const numbers = content.match(/\d+/g)
+    if (numbers) {
+      numbers.forEach((num) => {
+        entities.push({
+          type: "number",
+          value: num,
+          confidence: 0.9,
+        })
+      })
+    }
+
+    // Extract capitalized words (potential proper nouns)
+    const properNouns = content.match(/\b[A-Z][a-z]+\b/g)
+    if (properNouns) {
+      properNouns.forEach((noun) => {
+        entities.push({
+          type: "proper_noun",
+          value: noun,
+          confidence: 0.7,
+        })
+      })
+    }
+
+    return entities
+  }
+
+  private calculateContentSimilarity(content1: string, content2: string): number {
+    const words1 = new Set(content1.toLowerCase().split(/\s+/))
+    const words2 = new Set(content2.toLowerCase().split(/\s+/))
+
+    const intersection = new Set([...words1].filter((x) => words2.has(x)))
+    const union = new Set([...words1, ...words2])
+
+    return union.size > 0 ? intersection.size / union.size : 0
+  }
+
+  private hasTopicChange(content: string): boolean {
+    if (!this.currentContext) return false
+
+    const currentTopics = this.extractTopics(content)
+    const existingTopics = this.currentContext.topics
+
+    // If new topics are introduced that weren't in recent conversation
+    return currentTopics.some((topic) => !existingTopics.includes(topic))
+  }
+
+  private generateContextId(): string {
+    return `ctx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  }
+
+  // Session management
+  isSessionActive(): boolean {
+    if (!this.currentContext) return false
+
+    const timeSinceLastActivity = Date.now() - this.currentContext.lastActivity
+    return timeSinceLastActivity < this.SESSION_TIMEOUT
+  }
+
+  extendSession(): void {
+    if (this.currentContext) {
+      this.currentContext.lastActivity = Date.now()
+    }
+  }
+
+  endSession(): void {
+    if (this.currentContext) {
+      // Archive current context
+      this.contextHistory.push({ ...this.currentContext })
+
+      // Trim history
+      if (this.contextHistory.length > this.MAX_CONTEXT_HISTORY) {
+        this.contextHistory = this.contextHistory.slice(-this.MAX_CONTEXT_HISTORY)
+      }
+
+      console.log(`📝 Archived context session: ${this.currentContext.id}`)
+      this.currentContext = null
+    }
+  }
+
+  // Context retrieval and management
+  getCurrentContext(): ConversationContext | null {
+    return this.currentContext
+  }
+
+  getContextHistory(): ConversationContext[] {
+    return [...this.contextHistory]
+  }
+
+  getContextStats(): any {
+    return {
+      currentSession: this.currentContext
+        ? {
+            id: this.currentContext.id,
+            messageCount: this.currentContext.messageCount,
+            topicCount: this.currentContext.topics.length,
+            entityCount: this.currentContext.entities.length,
+            sessionDuration: Date.now() - this.currentContext.sessionStart,
+            conversationFlow: this.currentContext.conversationFlow,
+          }
+        : null,
+      historyCount: this.contextHistory.length,
+      isSessionActive: this.isSessionActive(),
+    }
+  }
+
+  // Import/Export for persistence
   exportContext(): any {
     return {
-      messages: this.messages,
-      context: this.currentContext,
-      stats: this.getContextStats(),
+      currentContext: this.currentContext,
+      contextHistory: this.contextHistory,
+      exportTimestamp: Date.now(),
     }
   }
 
   importContext(data: any): void {
-    if (data.messages) {
-      this.messages = data.messages
+    if (data.currentContext) {
+      this.currentContext = data.currentContext
     }
-    if (data.context) {
-      this.currentContext = data.context
+    if (data.contextHistory) {
+      this.contextHistory = data.contextHistory
     }
+    console.log("📥 Context data imported successfully")
   }
 
+  // Utility methods
   clearContext(): void {
-    this.messages = []
-    this.createContext()
+    this.currentContext = null
+    this.contextHistory = []
+    console.log("🗑️ Context cleared")
+  }
+
+  searchContextHistory(query: string): ConversationContext[] {
+    return this.contextHistory.filter((context) =>
+      context.messages.some((message) => message.content.toLowerCase().includes(query.toLowerCase())),
+    )
   }
 }
 
