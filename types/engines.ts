@@ -3,14 +3,14 @@ export interface ReasoningEngine {
   initialize(): Promise<void>
   createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain>
   analyzeIntent(input: string): Promise<IntentAnalysis>
-  getStats(): any
+  getStats(): EngineStats
 }
 
 export interface LearningEngine {
   initialize(): Promise<void>
   learnFromInteraction(input: string, response: string, confidence: number, source: string, context: any): Promise<void>
   identifyPatterns(): Promise<any[]>
-  getLearningStats(): any
+  getLearningStats(): EngineStats
   forceProcessQueue(): Promise<void>
   destroy(): void
 }
@@ -18,8 +18,9 @@ export interface LearningEngine {
 export interface CognitiveEngine {
   initialize(): Promise<void>
   registerModule(module: ModuleInterface): void
-  processInput(input: string): Promise<any>
-  getStats(): any
+  processInput(input: string): Promise<EngineResponse>
+  getStats(): EngineStats
+  config: CognitiveEngineConfig
 }
 
 export interface StorageEngine {
@@ -33,18 +34,18 @@ export interface StorageEngine {
 }
 
 export interface APIEngine {
-  makeRequest(url: string, options?: any, cacheKey?: string, cacheDuration?: number): Promise<any>
+  makeRequest(url: string, options?: any, cacheKey?: string, cacheDuration?: number): Promise<EngineResponse>
   getCachedResponse(key: string): any
   setCachedResponse(key: string, data: any, duration: number): void
   clearCache(): void
-  getStats(): any
+  getStats(): EngineStats
 }
 
 export interface ContextEngine {
   createContext(): void
   addMessage(message: ContextMessage): void
   extractContext(input: string): any
-  getContextStats(): any
+  getContextStats(): EngineStats
   exportContext(): any
   importContext(data: any): void
 }
@@ -181,6 +182,51 @@ export interface AdaptationRule {
   condition: (state: any) => boolean
   action: (state: any) => any
   priority: number
+}
+
+export interface CognitiveEngineConfig {
+  maxContextLength: number
+  confidenceThreshold: number
+  learningRate: number
+  memoryRetention: number
+}
+
+export interface ReasoningEngineConfig {
+  maxReasoningSteps: number
+  confidenceDecayRate: number
+  contextWeight: number
+  moduleWeight: number
+}
+
+export interface LearningEngineConfig {
+  batchSize: number
+  processingInterval: number
+  patternThreshold: number
+  retentionPeriod: number
+}
+
+export interface EngineStats {
+  initialized: boolean
+  totalProcessed: number
+  averageProcessingTime: number
+  successRate: number
+  lastActivity: number
+}
+
+export interface ProcessingContext {
+  sessionId: string
+  userId?: string
+  timestamp: number
+  metadata: Record<string, any>
+}
+
+export interface EngineResponse<T = any> {
+  success: boolean
+  data: T
+  confidence: number
+  processingTime: number
+  context: ProcessingContext
+  errors?: string[]
 }
 
 export type ModuleInterface = {}

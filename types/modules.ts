@@ -22,60 +22,59 @@ export interface MathConcept {
   }>
   difficulty: number
   category: string
+  prerequisites: string[]
 }
 
 export interface FactEntry {
-  id: string
   title: string
   content: string
   category: string
   source: string
-  confidence: number
-  lastVerified: number
+  verified: boolean
+  lastUpdated: number
   tags: string[]
+  relatedTopics: string[]
 }
 
-export interface CodeExample {
-  id: string
-  title: string
+export interface CodingConcept {
+  name: string
   language: string
-  code: string
-  explanation: string
+  description: string
+  syntax: string
+  examples: Array<{
+    code: string
+    explanation: string
+    output?: string
+  }>
   difficulty: number
-  tags: string[]
+  category: string
+  bestPractices: string[]
 }
 
 export interface PhilosophicalConcept {
-  id: string
   name: string
   description: string
   philosopher?: string
   school: string
+  keyIdeas: string[]
   relatedConcepts: string[]
-  arguments: Array<{
-    type: "for" | "against"
-    argument: string
-    source?: string
-  }>
+  historicalContext?: string
+  modernRelevance?: string
 }
 
-export interface UserProfile {
+export interface UserPreference {
+  key: string
+  value: any
+  category: string
+  lastUpdated: number
+  source: string
+}
+
+export interface LearningPattern {
   id: string
-  name?: string
-  preferences: {
-    learningStyle: string
-    interests: string[]
-    difficulty: number
-  }
-  history: Array<{
-    timestamp: number
-    query: string
-    response: string
-    satisfaction?: number
-  }>
-  stats: {
-    totalQueries: number
-    favoriteTopics: string[]
-    learningProgress: { [topic: string]: number }
-  }
+  pattern: string
+  frequency: number
+  confidence: number
+  context: string[]
+  timestamp: number
 }
