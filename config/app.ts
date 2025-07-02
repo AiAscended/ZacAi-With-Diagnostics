@@ -1,17 +1,22 @@
 export const APP_CONFIG = {
   name: "ZacAI Enhanced System",
   version: "2.0.0",
-  description: "Advanced AI Assistant with Modular Knowledge System",
+  description: "Advanced AI Assistant with Multiple Knowledge Modules",
   author: "ZacAI Development Team",
 
   // System Configuration
   system: {
-    maxContextLength: 50,
+    maxContextLength: 10,
     maxMessageAge: 24 * 60 * 60 * 1000, // 24 hours
     maxMessages: 100,
     processingTimeout: 30000, // 30 seconds
     retryAttempts: 3,
     retryDelay: 1000,
+    defaultConfidenceThreshold: 0.7,
+    learningRate: 0.1,
+    maxRetries: 3,
+    cacheExpiry: 86400000, // 24 hours
+    debugMode: false,
   },
 
   // Module Configuration
@@ -22,6 +27,12 @@ export const APP_CONFIG = {
       maxEntries: 10000,
       confidenceThreshold: 0.7,
       learningRate: 0.1,
+      seedFile: "/seed/vocabulary.json",
+      learntFile: "/learnt/vocabulary.json",
+      apiEndpoints: {
+        dictionary: "https://api.dictionaryapi.dev/api/v2/entries/en",
+      },
+      maxCacheSize: 1000,
     },
     mathematics: {
       enabled: true,
@@ -31,6 +42,10 @@ export const APP_CONFIG = {
       supportedOperations: ["+", "-", "*", "/", "^", "sqrt", "log"],
       teslaVortexEnabled: true,
       sacredGeometryEnabled: true,
+      confidenceThreshold: 0.8,
+      seedFile: "/seed/mathematics.json",
+      learntFile: "/learnt/mathematics.json",
+      maxCacheSize: 500,
     },
     facts: {
       enabled: true,
@@ -39,6 +54,13 @@ export const APP_CONFIG = {
       verificationRequired: true,
       sourceTracking: true,
       wikipediaIntegration: true,
+      confidenceThreshold: 0.6,
+      seedFile: "/seed/facts.json",
+      learntFile: "/learnt/facts.json",
+      apiEndpoints: {
+        wikipedia: "https://en.wikipedia.org/api/rest_v1/page/summary",
+      },
+      maxCacheSize: 2000,
     },
     coding: {
       enabled: true,
@@ -59,6 +81,10 @@ export const APP_CONFIG = {
       ],
       maxCodeLength: 10000,
       syntaxHighlighting: true,
+      confidenceThreshold: 0.7,
+      seedFile: "/seed/coding.json",
+      learntFile: "/learnt/coding.json",
+      maxCacheSize: 800,
     },
     philosophy: {
       enabled: true,
@@ -75,6 +101,10 @@ export const APP_CONFIG = {
         "continental",
       ],
       ethicsEnabled: true,
+      confidenceThreshold: 0.6,
+      seedFile: "/seed/philosophy.json",
+      learntFile: "/learnt/philosophy.json",
+      maxCacheSize: 600,
     },
     userInfo: {
       enabled: true,
@@ -82,6 +112,10 @@ export const APP_CONFIG = {
       personalDataEncryption: true,
       dataRetention: 365, // days
       privacyMode: true,
+      confidenceThreshold: 0.9,
+      seedFile: "/seed/user-info.json",
+      learntFile: "/learnt/user-profile.json",
+      maxCacheSize: 200,
     },
   },
 
@@ -153,6 +187,11 @@ export const APP_CONFIG = {
     enabled: true,
     timeout: 10000, // 10 seconds
     retries: 3,
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "",
+    rateLimit: {
+      requests: 100,
+      window: 60000, // 1 minute
+    },
 
     endpoints: {
       dictionary: "https://api.dictionaryapi.dev/api/v2/entries/en",
@@ -160,18 +199,22 @@ export const APP_CONFIG = {
       wolfram: null, // Would require API key
       openai: null, // Would require API key
     },
-
-    rateLimit: {
-      enabled: true,
-      requestsPerMinute: 60,
-      burstLimit: 10,
-    },
   },
 
   // UI Configuration
   ui: {
-    theme: "auto", // 'light', 'dark', 'auto'
-    animations: true,
+    theme: {
+      primary: "#667eea",
+      secondary: "#764ba2",
+      success: "#10b981",
+      warning: "#f59e0b",
+      error: "#ef4444",
+      info: "#3b82f6",
+    },
+    animations: {
+      duration: 300,
+      easing: "ease-in-out",
+    },
     soundEffects: false,
 
     chat: {
@@ -199,6 +242,11 @@ export const APP_CONFIG = {
         library: "recharts",
         animations: true,
       },
+    },
+    layout: {
+      sidebarWidth: 320,
+      headerHeight: 80,
+      maxChatWidth: 800,
     },
   },
 
@@ -246,65 +294,6 @@ export const APP_CONFIG = {
       errorBoundary: true,
       performanceProfiler: false,
     },
-  },
-}
-
-export const MODULE_CONFIG = {
-  vocabulary: {
-    seedFile: "/seed/vocabulary.json",
-    learntFile: "/learnt/vocabulary.json",
-    apiEndpoint: APP_CONFIG.api.endpoints.dictionary,
-  },
-  mathematics: {
-    seedFile: "/seed/mathematics.json",
-    learntFile: "/learnt/mathematics.json",
-    apiEndpoint: APP_CONFIG.api.endpoints.wolfram,
-  },
-  facts: {
-    seedFile: "/seed/facts.json",
-    learntFile: "/learnt/facts.json",
-    apiEndpoint: APP_CONFIG.api.endpoints.wikipedia,
-  },
-  coding: {
-    seedFile: "/seed/coding.json",
-    learntFile: "/learnt/coding.json",
-    apiEndpoint: null,
-  },
-  philosophy: {
-    seedFile: "/seed/philosophy.json",
-    learntFile: "/learnt/philosophy.json",
-    apiEndpoint: null,
-  },
-  userInfo: {
-    seedFile: null,
-    learntFile: "/learnt/user-profile.json",
-    apiEndpoint: null,
-  },
-}
-
-export const REASONING_CONFIG = {
-  maxChainLength: 10,
-  confidenceThreshold: 0.5,
-  timeoutMs: 30000,
-
-  strategies: {
-    deductive: { weight: 1.0, enabled: true },
-    inductive: { weight: 0.8, enabled: true },
-    abductive: { weight: 0.6, enabled: true },
-    analogical: { weight: 0.7, enabled: true },
-  },
-}
-
-export const LEARNING_CONFIG = {
-  queueSize: 100,
-  processingInterval: 5000,
-  batchSize: 5,
-  retentionPeriod: 30 * 24 * 60 * 60 * 1000, // 30 days
-
-  patterns: {
-    maxPatterns: 1000,
-    similarityThreshold: 0.7,
-    frequencyThreshold: 2,
   },
 }
 
