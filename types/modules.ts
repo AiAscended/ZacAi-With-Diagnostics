@@ -3,29 +3,25 @@ export interface VocabularyEntry {
   definition: string
   partOfSpeech: string
   examples: string[]
-  synonyms: string[]
-  antonyms: string[]
-  difficulty: number
-  frequency: number
   etymology?: string
-  pronunciation?: string
+  synonyms?: string[]
+  antonyms?: string[]
+  difficulty?: number
+  frequency?: number
 }
 
 export interface MathConcept {
   name: string
   description: string
   formula?: string
-  examples: MathExample[]
-  difficulty: number
+  examples: Array<{
+    problem: string
+    solution: string
+    explanation: string
+  }>
   category: string
-  prerequisites: string[]
-}
-
-export interface MathExample {
-  problem: string
-  solution: string
-  explanation: string
-  steps: string[]
+  difficulty: number
+  prerequisites?: string[]
 }
 
 export interface FactEntry {
@@ -37,17 +33,7 @@ export interface FactEntry {
   verified: boolean
   tags: string[]
   lastUpdated: number
-  references: string[]
-}
-
-export interface CodeConcept {
-  name: string
-  language: string
-  description: string
-  syntax: string
-  examples: CodeExample[]
-  difficulty: number
-  category: string
+  confidence: number
 }
 
 export interface CodeExample {
@@ -57,9 +43,9 @@ export interface CodeExample {
   language: string
   code: string
   explanation: string
-  output?: string
   difficulty: "beginner" | "intermediate" | "advanced"
   tags: string[]
+  category: string
 }
 
 export interface PhilosophicalConcept {
@@ -71,8 +57,11 @@ export interface PhilosophicalConcept {
   period?: string
   keyIdeas: string[]
   relatedConcepts: string[]
-  arguments: string[]
-  counterArguments: string[]
+  arguments: Array<{
+    premise: string
+    conclusion: string
+    type: "deductive" | "inductive" | "abductive"
+  }>
 }
 
 export interface UserProfile {
@@ -95,18 +84,6 @@ export interface UserProfile {
     notifications: boolean
     darkMode: boolean
     autoSave: boolean
-  }
-  progress: {
-    vocabulary: number
-    mathematics: number
-    facts: number
-    coding: number
-    philosophy: number
-  }
-  history: {
-    totalQueries: number
-    successfulLearning: number
-    lastActive: number
   }
 }
 

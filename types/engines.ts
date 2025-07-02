@@ -1,13 +1,11 @@
-import type { ModuleInterface } from "./moduleInterface" // Assuming ModuleInterface is declared in another file
-
 export interface ReasoningStep {
   step: number
-  type: string
+  reasoning: string
   input: any
   output: any
   confidence: number
-  reasoning: string
   timestamp: number
+  metadata?: Record<string, any>
 }
 
 export interface ReasoningChain {
@@ -17,7 +15,6 @@ export interface ReasoningChain {
   finalOutput: any
   totalConfidence: number
   processingTime: number
-  timestamp: number
   metadata?: Record<string, any>
 }
 
@@ -230,42 +227,4 @@ export interface TemporalReasoning {
   sequencing: (events: any[]) => any[]
   prediction: (currentState: any, timeHorizon: number) => any
   planning: (goal: any, constraints: any[]) => any[]
-}
-
-export interface ReasoningEngine {
-  initialize(): Promise<void>
-  createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain>
-  getStats(): any
-}
-
-export interface LearningEngine {
-  initialize(): Promise<void>
-  learnFromInteraction(input: string, output: string, confidence: number, source: string, context: any): Promise<void>
-  forceProcessQueue(): Promise<void>
-  getLearningStats(): any
-  destroy(): void
-}
-
-export interface CognitiveEngine {
-  initialize(): Promise<void>
-  registerModule(module: ModuleInterface): void
-  processInput(input: string): Promise<any>
-  getStats(): any
-}
-
-export interface LearningPattern {
-  id: string
-  pattern: string
-  frequency: number
-  confidence: number
-  lastSeen: number
-  examples: string[]
-}
-
-export interface LearningStats {
-  totalLearned: number
-  learningRate: number
-  retentionRate: number
-  patterns: number
-  lastUpdate: number
 }

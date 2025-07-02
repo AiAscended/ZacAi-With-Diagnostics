@@ -13,6 +13,7 @@ export class LearningEngine {
   }> = []
   private patterns: LearningPattern[] = []
   private isProcessing = false
+  private learningRate = 0.1
 
   async initialize(): Promise<void> {
     if (this.initialized) return
@@ -84,7 +85,7 @@ export class LearningEngine {
       // Update existing pattern
       const pattern = similarPatterns[0]
       pattern.frequency++
-      pattern.confidence = (pattern.confidence + interaction.confidence) / 2
+      pattern.confidence = (pattern.confidence + interaction.confidence) * this.learningRate
       pattern.timestamp = Date.now()
     } else {
       // Create new pattern
@@ -155,6 +156,8 @@ export class LearningEngine {
         frequency: p.frequency,
         confidence: p.confidence,
       })),
+      learningRate: this.learningRate,
+      totalLearned: this.patterns.length,
     }
   }
 

@@ -1,6 +1,6 @@
 export interface SystemConfig {
   version: string
-  environment: string
+  environment: "development" | "production" | "test"
   features: {
     vocabulary: boolean
     mathematics: boolean
@@ -45,14 +45,6 @@ export interface ModuleStats {
   lastUpdate: number
 }
 
-export interface IntentAnalysis {
-  intent: string
-  confidence: number
-  entities: string[]
-  context: any
-  suggestedModules: string[]
-}
-
 export interface SystemStats {
   initialized: boolean
   modules: { [key: string]: ModuleStats }
@@ -63,20 +55,7 @@ export interface SystemStats {
   averageResponseTime: number
 }
 
-export interface ChatMessage {
-  role: "user" | "assistant"
-  content: string
-  metadata?: any
-}
-
-export interface ContextData {
-  messages: ChatMessage[]
-  userProfile: any
-  sessionData: any
-  timestamp: number
-}
-
-export interface LearningEntry {
+export interface LearntDataEntry {
   id: string
   content: any
   confidence: number
@@ -90,21 +69,35 @@ export interface LearningEntry {
   relationships: string[]
 }
 
+export interface IntentAnalysis {
+  intent: string
+  confidence: number
+  entities: any[]
+  context: any
+  suggestedModules: string[]
+}
+
+export interface ContextMessage {
+  role: "user" | "assistant" | "system"
+  content: string
+  timestamp?: number
+  metadata?: any
+}
+
 export interface ReasoningStep {
   step: number
-  type: string
+  reasoning: string
   input: any
   output: any
   confidence: number
-  reasoning: string
   timestamp: number
 }
 
 export interface ReasoningChain {
   id: string
+  input: string
   steps: ReasoningStep[]
   finalOutput: any
   totalConfidence: number
   processingTime: number
-  timestamp: number
 }

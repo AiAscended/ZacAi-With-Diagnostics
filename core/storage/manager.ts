@@ -3,6 +3,12 @@ import type { LearntDataEntry } from "@/types/global"
 export class StorageManager {
   private cache: Map<string, any> = new Map()
   private readonly STORAGE_PREFIX = "zacai_"
+  private initialized = false
+
+  async initialize(): Promise<void> {
+    this.initialized = true
+    console.log("✅ Storage Manager initialized")
+  }
 
   async loadSeedData(filePath: string): Promise<any> {
     try {
@@ -135,6 +141,24 @@ export class StorageManager {
         totalEntries: 0,
       },
       data: {},
+    }
+  }
+
+  async save(key: string, data: any): Promise<void> {
+    try {
+      localStorage.setItem(key, JSON.stringify(data))
+    } catch (error) {
+      console.warn("Failed to save to localStorage:", error)
+    }
+  }
+
+  async load(key: string): Promise<any> {
+    try {
+      const data = localStorage.getItem(key)
+      return data ? JSON.parse(data) : null
+    } catch (error) {
+      console.warn("Failed to load from localStorage:", error)
+      return null
     }
   }
 }
