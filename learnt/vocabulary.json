@@ -4,14 +4,63 @@
     "lastUpdated": 1704067200000,
     "totalEntries": 0,
     "learningRate": 0.85,
-    "confidenceThreshold": 0.7
+    "confidenceThreshold": 0.7,
+    "averageRetention": 0.78,
+    "lastBackup": 1704067200000
   },
   "entries": {},
-  "patterns": {},
+  "patterns": {
+    "commonPrefixes": {
+      "un-": { "frequency": 0, "examples": [] },
+      "re-": { "frequency": 0, "examples": [] },
+      "pre-": { "frequency": 0, "examples": [] },
+      "dis-": { "frequency": 0, "examples": [] }
+    },
+    "commonSuffixes": {
+      "-ing": { "frequency": 0, "examples": [] },
+      "-ed": { "frequency": 0, "examples": [] },
+      "-ly": { "frequency": 0, "examples": [] },
+      "-tion": { "frequency": 0, "examples": [] }
+    },
+    "wordFamilies": {},
+    "semanticClusters": {}
+  },
   "statistics": {
     "learningVelocity": 0,
     "accuracyRate": 0,
     "retentionRate": 0,
-    "utilizationRate": 0
+    "utilizationRate": 0,
+    "difficultyDistribution": {
+      "beginner": 0,
+      "intermediate": 0,
+      "advanced": 0,
+      "expert": 0
+    },
+    "categoryDistribution": {
+      "noun": 0,
+      "verb": 0,
+      "adjective": 0,
+      "adverb": 0,
+      "other": 0
+    }
+  },
+  "userProgress": {
+    "totalWordsLearned": 0,
+    "currentStreak": 0,
+    "longestStreak": 0,
+    "averageSessionTime": 0,
+    "preferredDifficulty": "intermediate",
+    "strongCategories": [],
+    "weakCategories": [],
+    "recentMistakes": [],
+    "masteredWords": [],
+    "reviewQueue": []
+  },
+  "settings": {
+    "autoSave": true,
+    "spacedRepetition": true,
+    "difficultyAdaptation": true,
+    "contextualLearning": true,
+    "multimodalSupport": false
   }
 }

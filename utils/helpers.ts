@@ -1,20 +1,41 @@
 export function generateId(): string {
-  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 }
 
 export function calculateConfidence(confidences: number[]): number {
   if (confidences.length === 0) return 0
-  return confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
+  const sum = confidences.reduce((acc, conf) => acc + conf, 0)
+  return sum / confidences.length
 }
 
-export function calculateSimilarity(str1: string, str2: string): number {
-  const words1 = new Set(str1.toLowerCase().split(/\s+/))
-  const words2 = new Set(str2.toLowerCase().split(/\s+/))
+export function calculateSimilarity(text1: string, text2: string): number {
+  const words1 = text1.toLowerCase().split(/\s+/)
+  const words2 = text2.toLowerCase().split(/\s+/)
 
-  const intersection = new Set([...words1].filter((x) => words2.has(x)))
-  const union = new Set([...words1, ...words2])
+  const set1 = new Set(words1)
+  const set2 = new Set(words2)
 
-  return union.size > 0 ? intersection.size / union.size : 0
+  const intersection = new Set([...set1].filter((x) => set2.has(x)))
+  const union = new Set([...set1, ...set2])
+
+  return intersection.size / union.size
+}
+
+export function extractKeywords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .split(/\s+/)
+    .filter((word) => word.length > 2)
+    .slice(0, 10)
+}
+
+export function formatNumber(num: number, decimals = 2): string {
+  return num.toFixed(decimals)
+}
+
+export function sanitizeInput(input: string): string {
+  return input.trim().replace(/[<>]/g, "")
 }
 
 export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
@@ -36,48 +57,12 @@ export function throttle<T extends (...args: any[]) => any>(func: T, limit: numb
   }
 }
 
-export async function retry<T>(fn: () => Promise<T>, maxAttempts = 3, delay = 1000): Promise<T> {
-  let lastError: Error
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      return await fn()
-    } catch (error) {
-      lastError = error as Error
-      if (attempt < maxAttempts) {
-        await new Promise((resolve) => setTimeout(resolve, delay * attempt))
-      }
-    }
-  }
-
-  throw lastError!
-}
-
-export function sanitizeInput(input: string): string {
-  return input
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/[<>]/g, "")
-    .trim()
-}
-
-export function formatBytes(bytes: number, decimals = 2): string {
-  if (bytes === 0) return "0 Bytes"
-
-  const k = 1024
-  const dm = decimals < 0 ? 0 : decimals
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
-}
-
 export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") return obj
-  if (obj instanceof Date) return new Date(obj.getTime()) as any
-  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as any
+  if (obj instanceof Date) return new Date(obj.getTime()) as unknown as T
+  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as unknown as T
   if (typeof obj === "object") {
-    const clonedObj = {} as any
+    const clonedObj = {} as T
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
         clonedObj[key] = deepClone(obj[key])
@@ -93,85 +78,50 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email)
 }
 
-export function isValidUrl(url: string): boolean {
-  try {
-    new URL(url)
-    return true
-  } catch {
-    return false
-  }
-}
-
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.substring(0, maxLength - 3) + "..."
-}
-
 export function capitalizeFirst(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1)
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
-export function camelToKebab(str: string): string {
-  return str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1-$2").toLowerCase()
+export function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 Bytes"
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
 }
 
-export function kebabToCamel(str: string): string {
-  return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+export function randomBetween(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-export function getRandomElement<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)]
-}
-
-export function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+export function arrayChunk<T>(array: T[], size: number): T[][] {
+  const chunks: T[][] = []
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size))
   }
-  return shuffled
+  return chunks
 }
 
-export function groupBy<T, K extends keyof any>(array: T[], key: (item: T) => K): Record<K, T[]> {
-  return array.reduce(
-    (groups, item) => {
-      const group = key(item)
-      groups[group] = groups[group] || []
-      groups[group].push(item)
-      return groups
-    },
-    {} as Record<K, T[]>,
-  )
-}
-
-export function unique<T>(array: T[]): T[] {
-  return [...new Set(array)]
-}
-
-export function intersection<T>(arr1: T[], arr2: T[]): T[] {
-  return arr1.filter((x) => arr2.includes(x))
-}
-
-export function difference<T>(arr1: T[], arr2: T[]): T[] {
-  return arr1.filter((x) => !arr2.includes(x))
+export function removeEmptyValues<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Partial<T> = {}
+  for (const key in obj) {
+    if (obj[key] !== null && obj[key] !== undefined && obj[key] !== "") {
+      result[key] = obj[key]
+    }
+  }
+  return result
 }
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export function parseJSON<T>(str: string, fallback: T): T {
-  try {
-    return JSON.parse(str)
-  } catch {
-    return fallback
-  }
-}
-
-export function safeStringify(obj: any): string {
-  try {
-    return JSON.stringify(obj)
-  } catch {
-    return String(obj)
-  }
+export function retry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+  return fn().catch((err) => {
+    if (retries > 0) {
+      return sleep(delay).then(() => retry(fn, retries - 1, delay))
+    }
+    throw err
+  })
 }

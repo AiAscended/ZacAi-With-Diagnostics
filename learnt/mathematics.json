@@ -3,15 +3,86 @@
     "version": "1.0.0",
     "lastUpdated": 1704067200000,
     "totalEntries": 0,
-    "learningRate": 0.9,
-    "confidenceThreshold": 0.8
+    "learningRate": 0.82,
+    "confidenceThreshold": 0.75,
+    "averageAccuracy": 0.85,
+    "lastBackup": 1704067200000
   },
   "entries": {},
-  "patterns": {},
+  "calculations": {
+    "basic": {
+      "addition": { "count": 0, "accuracy": 0, "averageTime": 0 },
+      "subtraction": { "count": 0, "accuracy": 0, "averageTime": 0 },
+      "multiplication": { "count": 0, "accuracy": 0, "averageTime": 0 },
+      "division": { "count": 0, "accuracy": 0, "averageTime": 0 }
+    },
+    "advanced": {
+      "algebra": { "count": 0, "accuracy": 0, "averageTime": 0 },
+      "geometry": { "count": 0, "accuracy": 0, "averageTime": 0 },
+      "calculus": { "count": 0, "accuracy": 0, "averageTime": 0 },
+      "statistics": { "count": 0, "accuracy": 0, "averageTime": 0 }
+    },
+    "tesla": {
+      "digitalRoots": { "count": 0, "accuracy": 0, "patterns": [] },
+      "vortexMath": { "count": 0, "accuracy": 0, "sequences": [] },
+      "sacredGeometry": { "count": 0, "accuracy": 0, "ratios": [] }
+    }
+  },
+  "patterns": {
+    "numberPatterns": {},
+    "operationPreferences": {
+      "addition": 0,
+      "subtraction": 0,
+      "multiplication": 0,
+      "division": 0
+    },
+    "errorPatterns": [],
+    "learningCurves": {},
+    "conceptConnections": {}
+  },
   "statistics": {
     "learningVelocity": 0,
     "accuracyRate": 0,
     "retentionRate": 0,
-    "utilizationRate": 0
+    "utilizationRate": 0,
+    "difficultyDistribution": {
+      "basic": 0,
+      "intermediate": 0,
+      "advanced": 0,
+      "expert": 0
+    },
+    "topicDistribution": {
+      "arithmetic": 0,
+      "algebra": 0,
+      "geometry": 0,
+      "calculus": 0,
+      "statistics": 0,
+      "tesla": 0
+    }
+  },
+  "userProgress": {
+    "totalProblemsAttempted": 0,
+    "totalProblemsSolved": 0,
+    "currentLevel": "beginner",
+    "masteredConcepts": [],
+    "strugglingConcepts": [],
+    "preferredTopics": [],
+    "recentErrors": [],
+    "achievementUnlocked": [],
+    "studyStreak": 0
+  },
+  "teslaVortex": {
+    "digitalRootAnalyses": [],
+    "vortexSequences": [],
+    "sacredGeometryCalculations": [],
+    "numerologyInsights": [],
+    "patternDiscoveries": []
+  },
+  "settings": {
+    "showSteps": true,
+    "enableTeslaMode": true,
+    "precisionLevel": 6,
+    "unitConversion": true,
+    "graphicalOutput": false
   }
 }

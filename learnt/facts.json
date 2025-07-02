@@ -3,15 +3,100 @@
     "version": "1.0.0",
     "lastUpdated": 1704067200000,
     "totalEntries": 0,
-    "learningRate": 0.8,
-    "confidenceThreshold": 0.75
+    "learningRate": 0.79,
+    "confidenceThreshold": 0.8,
+    "verificationRate": 0.92,
+    "lastBackup": 1704067200000
   },
   "entries": {},
-  "patterns": {},
+  "categories": {
+    "science": {
+      "physics": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "chemistry": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "biology": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "astronomy": { "count": 0, "confidence": 0, "lastUpdated": 0 }
+    },
+    "history": {
+      "ancient": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "medieval": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "modern": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "contemporary": { "count": 0, "confidence": 0, "lastUpdated": 0 }
+    },
+    "geography": {
+      "countries": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "capitals": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "landmarks": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "climate": { "count": 0, "confidence": 0, "lastUpdated": 0 }
+    },
+    "technology": {
+      "computing": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "internet": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "ai": { "count": 0, "confidence": 0, "lastUpdated": 0 },
+      "robotics": { "count": 0, "confidence": 0, "lastUpdated": 0 }
+    }
+  },
+  "sources": {
+    "wikipedia": {
+      "queries": 0,
+      "successRate": 0,
+      "averageResponseTime": 0,
+      "lastUsed": 0,
+      "reliability": 0.85
+    },
+    "britannica": {
+      "queries": 0,
+      "successRate": 0,
+      "averageResponseTime": 0,
+      "lastUsed": 0,
+      "reliability": 0.95
+    },
+    "user_input": {
+      "submissions": 0,
+      "verified": 0,
+      "rejected": 0,
+      "pending": 0
+    }
+  },
+  "verification": {
+    "crossReferences": [],
+    "conflictingFacts": [],
+    "pendingVerification": [],
+    "verifiedFacts": [],
+    "flaggedContent": []
+  },
   "statistics": {
     "learningVelocity": 0,
     "accuracyRate": 0,
     "retentionRate": 0,
-    "utilizationRate": 0
+    "utilizationRate": 0,
+    "categoryDistribution": {},
+    "sourceDistribution": {},
+    "popularTopics": [],
+    "trendingQueries": []
+  },
+  "userInteractions": {
+    "totalQueries": 0,
+    "successfulResponses": 0,
+    "userFeedback": {
+      "helpful": 0,
+      "notHelpful": 0,
+      "corrections": []
+    },
+    "preferredCategories": [],
+    "searchHistory": [],
+    "bookmarkedFacts": []
+  },
+  "knowledgeGraph": {
+    "entities": {},
+    "relationships": [],
+    "clusters": {},
+    "pathways": []
+  },
+  "settings": {
+    "autoVerification": true,
+    "multipleSourceCheck": true,
+    "realTimeUpdates": false,
+    "userContributions": true,
+    "factChecking": true
   }
 }

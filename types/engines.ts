@@ -1,53 +1,11 @@
-// Type definitions for reasoning and learning engines
-export interface ReasoningEngine {
-  initialize(): Promise<void>
-  createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain>
-  analyzeIntent(input: string): Promise<IntentAnalysis>
-  getStats(): EngineStats
-}
-
-export interface LearningEngine {
-  initialize(): Promise<void>
-  learnFromInteraction(input: string, response: string, confidence: number, source: string, context: any): Promise<void>
-  identifyPatterns(): Promise<any[]>
-  getLearningStats(): EngineStats
-  forceProcessQueue(): Promise<void>
-  destroy(): void
-}
-
-export interface CognitiveEngine {
-  initialize(): Promise<void>
-  registerModule(module: ModuleInterface): void
-  processInput(input: string): Promise<EngineResponse>
-  getStats(): EngineStats
-  config: CognitiveEngineConfig
-}
-
-export interface StorageEngine {
-  loadSeedData(filePath: string): Promise<any>
-  loadLearntData(filePath: string): Promise<any>
-  saveLearntData(filePath: string, data: any): Promise<boolean>
-  addLearntEntry(filePath: string, entry: LearntDataEntry): Promise<boolean>
-  getCachedData(key: string): any
-  setCachedData(key: string, data: any): void
-  clearCache(): void
-}
-
-export interface APIEngine {
-  makeRequest(url: string, options?: any, cacheKey?: string, cacheDuration?: number): Promise<EngineResponse>
-  getCachedResponse(key: string): any
-  setCachedResponse(key: string, data: any, duration: number): void
-  clearCache(): void
-  getStats(): EngineStats
-}
-
-export interface ContextEngine {
-  createContext(): void
-  addMessage(message: ContextMessage): void
-  extractContext(input: string): any
-  getContextStats(): EngineStats
-  exportContext(): any
-  importContext(data: any): void
+export interface ReasoningStep {
+  step: number
+  reasoning: string
+  input: any
+  output: any
+  confidence: number
+  timestamp: number
+  metadata?: Record<string, any>
 }
 
 export interface ReasoningChain {
@@ -56,15 +14,8 @@ export interface ReasoningChain {
   steps: ReasoningStep[]
   finalOutput: any
   totalConfidence: number
-  timestamp: number
-}
-
-export interface ReasoningStep {
-  step: number
-  reasoning: string
-  confidence: number
-  output: any
-  timestamp: number
+  processingTime: number
+  metadata?: Record<string, any>
 }
 
 export interface IntentAnalysis {
@@ -73,53 +24,36 @@ export interface IntentAnalysis {
   entities: any[]
   context: any
   suggestedModules: string[]
-}
-
-export interface LearningPattern {
-  id: string
-  pattern: string
-  frequency: number
-  confidence: number
-  context: string[]
-  timestamp: number
-}
-
-export interface LearningEngineStats {
-  totalLearned: number
-  learningRate: number
-  retentionRate: number
-  averageConfidence: number
-  lastLearningSession: number
+  metadata?: Record<string, any>
 }
 
 export interface CognitiveState {
-  currentFocus: string[]
+  currentContext: any
   workingMemory: any[]
-  longTermMemory: any[]
-  attentionLevel: number
-  processingLoad: number
+  longTermMemory: Map<string, any>
+  attentionFocus: string[]
+  emotionalState: {
+    valence: number // -1 to 1 (negative to positive)
+    arousal: number // 0 to 1 (calm to excited)
+    confidence: number // 0 to 1
+  }
+  goals: string[]
+  beliefs: Map<string, any>
 }
 
-export interface DecisionTree {
+export interface LearningEvent {
   id: string
-  root: DecisionNode
+  type: "success" | "failure" | "partial" | "discovery"
+  input: string
+  output: string
   confidence: number
-  alternatives: DecisionPath[]
-}
-
-export interface DecisionNode {
-  id: string
-  condition: string
-  trueNode?: DecisionNode
-  falseNode?: DecisionNode
-  action?: string
-  confidence: number
-}
-
-export interface DecisionPath {
-  path: string[]
-  confidence: number
-  outcome: any
+  feedback?: {
+    rating: number
+    comments: string
+  }
+  context: any
+  timestamp: number
+  source: string
 }
 
 export interface MemoryTrace {
@@ -129,108 +63,168 @@ export interface MemoryTrace {
   lastAccessed: number
   accessCount: number
   associations: string[]
+  type: "episodic" | "semantic" | "procedural"
+  tags: string[]
 }
 
-export interface ConceptMap {
-  concepts: ConceptNode[]
-  relationships: ConceptRelationship[]
-  centrality: { [conceptId: string]: number }
+export interface AttentionMechanism {
+  focus: string[]
+  weights: Map<string, number>
+  threshold: number
+  decay: number
+  update(input: any): void
+  getRelevantItems(items: any[]): any[]
 }
 
-export interface ConceptNode {
+export interface DecisionNode {
   id: string
-  label: string
-  type: string
-  properties: any
-  activation: number
-}
-
-export interface ConceptRelationship {
-  id: string
-  source: string
-  target: string
-  type: string
-  strength: number
-}
-
-export interface InferenceRule {
-  id: string
-  condition: string
-  conclusion: string
+  condition: (input: any) => boolean
+  action: (input: any) => any
   confidence: number
-  domain: string
+  children: DecisionNode[]
+  parent?: DecisionNode
 }
 
-export interface ReasoningStrategy {
+export interface ProblemSolvingStrategy {
   name: string
   description: string
-  applicability: (context: any) => number
-  execute: (input: any, context: any) => Promise<any>
-}
-
-export interface LearningObjective {
-  id: string
-  description: string
-  domain: string
-  difficulty: number
-  prerequisites: string[]
-  success_criteria: string[]
-}
-
-export interface AdaptationRule {
-  trigger: string
-  condition: (state: any) => boolean
-  action: (state: any) => any
-  priority: number
-}
-
-export interface CognitiveEngineConfig {
-  maxContextLength: number
-  confidenceThreshold: number
-  learningRate: number
-  memoryRetention: number
-}
-
-export interface ReasoningEngineConfig {
-  maxReasoningSteps: number
-  confidenceDecayRate: number
-  contextWeight: number
-  moduleWeight: number
-}
-
-export interface LearningEngineConfig {
-  batchSize: number
-  processingInterval: number
-  patternThreshold: number
-  retentionPeriod: number
-}
-
-export interface EngineStats {
-  initialized: boolean
-  totalProcessed: number
-  averageProcessingTime: number
-  successRate: number
-  lastActivity: number
-}
-
-export interface ProcessingContext {
-  sessionId: string
-  userId?: string
-  timestamp: number
-  metadata: Record<string, any>
-}
-
-export interface EngineResponse<T = any> {
-  success: boolean
-  data: T
+  applicability: (problem: any) => number
+  solve: (problem: any) => any
   confidence: number
-  processingTime: number
-  context: ProcessingContext
-  errors?: string[]
+  steps: string[]
 }
 
-export type ModuleInterface = {}
+export interface MetaCognition {
+  selfAwareness: {
+    strengths: string[]
+    weaknesses: string[]
+    knowledge: Map<string, number>
+    confidence: Map<string, number>
+  }
+  monitoring: {
+    currentTask: string
+    progress: number
+    difficulty: number
+    timeSpent: number
+    effectiveness: number
+  }
+  control: {
+    strategies: ProblemSolvingStrategy[]
+    currentStrategy?: string
+    adaptations: string[]
+  }
+}
 
-export type LearntDataEntry = {}
+export interface EmotionalIntelligence {
+  selfAwareness: number
+  selfRegulation: number
+  motivation: number
+  empathy: number
+  socialSkills: number
+  currentEmotion: {
+    primary: string
+    intensity: number
+    triggers: string[]
+  }
+}
 
-export type ContextMessage = {}
+export interface CreativityEngine {
+  divergentThinking: {
+    fluency: number
+    flexibility: number
+    originality: number
+    elaboration: number
+  }
+  convergentThinking: {
+    analysis: number
+    synthesis: number
+    evaluation: number
+  }
+  ideaGeneration: (prompt: string) => string[]
+  conceptCombination: (concepts: string[]) => string[]
+}
+
+export interface LanguageProcessor {
+  tokenize: (text: string) => string[]
+  parse: (tokens: string[]) => any
+  semanticAnalysis: (parsed: any) => any
+  pragmaticAnalysis: (semantic: any, context: any) => any
+  generate: (meaning: any) => string
+  translate: (text: string, targetLanguage: string) => string
+}
+
+export interface KnowledgeIntegrator {
+  sources: Map<string, any>
+  conflicts: Array<{
+    source1: string
+    source2: string
+    conflictType: string
+    resolution?: string
+  }>
+  integrate: (newKnowledge: any) => void
+  resolve: (conflict: any) => any
+  validate: (knowledge: any) => boolean
+}
+
+export interface AdaptiveLearning {
+  learningRate: number
+  forgettingCurve: (time: number) => number
+  spacedRepetition: {
+    intervals: number[]
+    difficulty: Map<string, number>
+    nextReview: Map<string, number>
+  }
+  personalizedPath: {
+    currentLevel: number
+    nextTopics: string[]
+    adaptations: string[]
+  }
+}
+
+export interface ExplanationGenerator {
+  generateExplanation: (concept: any, audience: string) => string
+  simplify: (explanation: string, level: number) => string
+  addExamples: (explanation: string, count: number) => string
+  addAnalogies: (concept: any) => string[]
+  visualize: (concept: any) => any
+}
+
+export interface UncertaintyHandling {
+  confidenceCalibration: (prediction: any) => number
+  uncertaintyQuantification: (input: any) => {
+    epistemic: number // knowledge uncertainty
+    aleatoric: number // data uncertainty
+  }
+  riskAssessment: (decision: any) => {
+    probability: number
+    impact: number
+    mitigation: string[]
+  }
+}
+
+export interface CausalReasoning {
+  causalGraph: {
+    nodes: string[]
+    edges: Array<{
+      cause: string
+      effect: string
+      strength: number
+      type: "direct" | "indirect" | "confounding"
+    }>
+  }
+  interventions: Map<string, any>
+  counterfactuals: (scenario: any) => any[]
+  causalInference: (observation: any) => any[]
+}
+
+export interface TemporalReasoning {
+  timeline: Array<{
+    event: string
+    timestamp: number
+    duration?: number
+    relationships: string[]
+  }>
+  sequencing: (events: any[]) => any[]
+  prediction: (currentState: any, timeHorizon: number) => any
+  planning: (goal: any, constraints: any[]) => any[]
+}
