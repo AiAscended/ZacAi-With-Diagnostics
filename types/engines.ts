@@ -228,3 +228,30 @@ export interface TemporalReasoning {
   prediction: (currentState: any, timeHorizon: number) => any
   planning: (goal: any, constraints: any[]) => any[]
 }
+
+export interface CognitiveEngine {
+  initialize(): Promise<void>
+  process(input: string, context: any): Promise<any>
+  learn(data: any): Promise<void>
+  getStats(): any
+}
+
+export interface ReasoningEngine {
+  initialize(): Promise<void>
+  analyze(input: string): Promise<any>
+  synthesize(input: string, analysis: any, responses: any[]): Promise<any>
+  getStats(): any
+}
+
+export interface LearningEngine {
+  initialize(): Promise<void>
+  learn(input: string, response: any): Promise<void>
+  getStats(): any
+}
+
+export interface EngineStats {
+  initialized: boolean
+  totalProcessed: number
+  averageConfidence: number
+  processingTime: number
+}

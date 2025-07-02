@@ -1,190 +1,215 @@
-import { VocabularyModule } from "@/modules/vocabulary"
-import { MathematicsModule } from "@/modules/mathematics"
-import { FactsModule } from "@/modules/facts"
-import { CodingModule } from "@/modules/coding"
-import { PhilosophyModule } from "@/modules/philosophy"
-import { UserInfoModule } from "@/modules/user-info"
-import { ReasoningEngine } from "@/engines/reasoning"
-import { LearningEngine } from "@/engines/learning"
-import { StorageManager } from "@/core/storage/manager"
+import type { ModuleInterface, SystemStats, ModuleStats } from "@/types/global"
+import { vocabularyModule } from "@/modules/vocabulary"
+import { mathematicsModule } from "@/modules/mathematics"
+import { factsModule } from "@/modules/facts"
+import { codingModule } from "@/modules/coding"
+import { philosophyModule } from "@/modules/philosophy"
+import { userInfoModule } from "@/modules/user-info"
+import { reasoningEngine } from "@/engines/reasoning"
+import { learningEngine } from "@/engines/learning"
+import { contextManager } from "@/core/context/manager"
+import { storageManager } from "@/core/storage/manager"
 
-interface SystemResponse {
-  response: string
-  confidence: number
-  sources?: string[]
-  reasoning?: string[]
-  mathAnalysis?: any
-}
-
-class SystemManager {
-  private modules: Map<string, any> = new Map()
-  private reasoningEngine: ReasoningEngine
-  private learningEngine: LearningEngine
-  private storageManager: StorageManager
+export class SystemManager {
   private initialized = false
-
-  constructor() {
-    this.reasoningEngine = new ReasoningEngine()
-    this.learningEngine = new LearningEngine()
-    this.storageManager = new StorageManager()
-  }
+  private modules: Map<string, ModuleInterface> = new Map()
+  private startTime = Date.now()
+  private totalQueries = 0
+  private totalResponseTime = 0
 
   async initialize(): Promise<void> {
+    if (this.initialized) return
+
+    console.log("🚀 Initializing ZacAI System...")
+
     try {
-      console.log("🚀 Initializing ZacAI System Manager...")
-
-      // Initialize storage
-      await this.storageManager.initialize()
-
-      // Initialize modules
-      this.modules.set("vocabulary", new VocabularyModule())
-      this.modules.set("mathematics", new MathematicsModule())
-      this.modules.set("facts", new FactsModule())
-      this.modules.set("coding", new CodingModule())
-      this.modules.set("philosophy", new PhilosophyModule())
-      this.modules.set("user-info", new UserInfoModule())
-
-      // Initialize each module
-      for (const [name, module] of this.modules) {
-        await module.initialize()
-        console.log(`✅ ${name} module initialized`)
-      }
+      // Initialize core components
+      await storageManager.initialize()
+      await contextManager.createContext()
 
       // Initialize engines
-      await this.reasoningEngine.initialize()
-      await this.learningEngine.initialize()
+      await reasoningEngine.initialize()
+      await learningEngine.initialize()
+
+      // Initialize modules
+      await this.initializeModules()
 
       this.initialized = true
-      console.log("✅ ZacAI System Manager fully initialized")
+      console.log("✅ ZacAI System initialized successfully")
     } catch (error) {
       console.error("❌ System initialization failed:", error)
       throw error
     }
   }
 
-  async processInput(input: string): Promise<SystemResponse> {
+  private async initializeModules(): Promise<void> {
+    const moduleList = [
+      vocabularyModule,
+      mathematicsModule,
+      factsModule,
+      codingModule,
+      philosophyModule,
+      userInfoModule,
+    ]
+
+    for (const module of moduleList) {
+      try {
+        await module.initialize()
+        this.modules.set(module.name, module)
+        console.log(`✅ ${module.name} module initialized`)
+      } catch (error) {
+        console.error(`❌ Failed to initialize ${module.name} module:`, error)
+      }
+    }
+  }
+
+  async processInput(input: string, context?: any): Promise<any> {
     if (!this.initialized) {
       throw new Error("System not initialized")
     }
 
+    const startTime = Date.now()
+    this.totalQueries++
+
     try {
-      // Use reasoning engine to analyze input
-      const analysis = await this.reasoningEngine.analyze(input)
+      // Analyze intent
+      const analysis = await reasoningEngine.analyze(input)
 
-      // Determine which modules to query
-      const relevantModules = this.determineRelevantModules(input, analysis)
+      // Add to context
+      contextManager.addMessage({
+        role: "user",
+        content: input,
+        metadata: { timestamp: Date.now() },
+      })
 
-      // Query modules
-      const moduleResponses = await Promise.all(
-        relevantModules.map(async (moduleName) => {
-          const module = this.modules.get(moduleName)
-          if (module) {
-            return await module.process(input, analysis)
-          }
-          return null
-        }),
-      )
+      // Get context for processing
+      const currentContext = contextManager.extractContext(input)
 
-      // Combine responses using reasoning engine
-      const finalResponse = await this.reasoningEngine.synthesize(
-        input,
-        analysis,
-        moduleResponses.filter((r) => r !== null),
-      )
+      // Process with relevant modules
+      const moduleResponses = await this.processWithModules(input, analysis, currentContext)
+
+      // Synthesize response
+      const finalResponse = await reasoningEngine.synthesize(input, analysis, moduleResponses)
+
+      // Add response to context
+      contextManager.addMessage({
+        role: "assistant",
+        content: finalResponse.response,
+        metadata: {
+          confidence: finalResponse.confidence,
+          sources: finalResponse.sources,
+          timestamp: Date.now(),
+        },
+      })
 
       // Learn from interaction
-      await this.learningEngine.learn(input, finalResponse)
+      await learningEngine.learn(input, finalResponse)
 
-      return finalResponse
+      // Update stats
+      const responseTime = Date.now() - startTime
+      this.totalResponseTime += responseTime
+
+      return {
+        ...finalResponse,
+        processingTime: responseTime,
+        analysis,
+        moduleResponses: moduleResponses.length,
+      }
     } catch (error) {
       console.error("Error processing input:", error)
       return {
-        response: "I apologize, but I encountered an error processing your request. Please try again.",
+        response: "I encountered an error processing your request. Please try again.",
         confidence: 0.1,
-        sources: ["error-handler"],
+        sources: ["system-error"],
+        reasoning: ["System error occurred during processing"],
+        error: error.message,
       }
     }
   }
 
-  private determineRelevantModules(input: string, analysis: any): string[] {
-    const modules: string[] = []
-    const lowerInput = input.toLowerCase()
+  private async processWithModules(input: string, analysis: any, context: any): Promise<any[]> {
+    const responses = []
+    const suggestedModules = analysis.suggestedModules || []
 
-    // Math detection
-    if (/\d+\s*[+\-*/×÷]\s*\d+|calculate|math|multiply|divide|add|subtract/.test(lowerInput)) {
-      modules.push("mathematics")
+    // If no specific modules suggested, try all active modules
+    const modulesToTry = suggestedModules.length > 0 ? suggestedModules : Array.from(this.modules.keys())
+
+    for (const moduleName of modulesToTry) {
+      const module = this.modules.get(moduleName)
+      if (module) {
+        try {
+          const response = await module.process(input, context)
+          if (response && response.success) {
+            responses.push(response)
+          }
+        } catch (error) {
+          console.error(`Error in ${moduleName} module:`, error)
+        }
+      }
     }
 
-    // Vocabulary detection
-    if (/define|meaning|what is|etymology|synonym|antonym/.test(lowerInput)) {
-      modules.push("vocabulary")
-    }
-
-    // Facts detection
-    if (/who is|what is|when did|where is|tell me about/.test(lowerInput)) {
-      modules.push("facts")
-    }
-
-    // Coding detection
-    if (/code|function|programming|javascript|python|html|css/.test(lowerInput)) {
-      modules.push("coding")
-    }
-
-    // Philosophy detection
-    if (/philosophy|consciousness|meaning of life|ethics|morality/.test(lowerInput)) {
-      modules.push("philosophy")
-    }
-
-    // User info detection
-    if (/my name|i am|remember|personal/.test(lowerInput)) {
-      modules.push("user-info")
-    }
-
-    // Default to vocabulary if no specific module detected
-    if (modules.length === 0) {
-      modules.push("vocabulary", "facts")
-    }
-
-    return modules
+    return responses
   }
 
-  getSystemStats() {
-    const moduleStats: any = {}
+  getSystemStats(): SystemStats {
+    const moduleStats: { [key: string]: ModuleStats } = {}
 
     for (const [name, module] of this.modules) {
-      moduleStats[name] = {
-        learntEntries: module.getLearntCount ? module.getLearntCount() : 0,
-        totalQueries: module.getQueryCount ? module.getQueryCount() : 0,
-        successRate: module.getSuccessRate ? module.getSuccessRate() : 0.85,
-        averageResponseTime: module.getAvgResponseTime ? module.getAvgResponseTime() : 150,
-      }
+      moduleStats[name] = module.getStats()
     }
 
     return {
       initialized: this.initialized,
       modules: moduleStats,
-      learning: this.learningEngine.getStats(),
-      cognitive: this.reasoningEngine.getStats(),
-      uptime: Date.now(),
-      totalQueries: Object.values(moduleStats).reduce((sum: number, mod: any) => sum + mod.totalQueries, 0),
-      averageResponseTime: 150,
+      learning: learningEngine.getStats(),
+      cognitive: reasoningEngine.getStats(),
+      uptime: Date.now() - this.startTime,
+      totalQueries: this.totalQueries,
+      averageResponseTime: this.totalQueries > 0 ? this.totalResponseTime / this.totalQueries : 0,
     }
   }
 
-  async exportData() {
-    const data: any = {
-      timestamp: new Date().toISOString(),
-      version: "2.0.0",
-      modules: {},
-    }
+  getModule(name: string): ModuleInterface | undefined {
+    return this.modules.get(name)
+  }
 
-    for (const [name, module] of this.modules) {
-      if (module.exportData) {
-        data.modules[name] = await module.exportData()
+  getActiveModules(): string[] {
+    return Array.from(this.modules.keys())
+  }
+
+  async shutdown(): Promise<void> {
+    console.log("🔄 Shutting down ZacAI System...")
+
+    // Clean up modules
+    for (const module of this.modules.values()) {
+      try {
+        // If module has cleanup method, call it
+        if ("cleanup" in module && typeof module.cleanup === "function") {
+          await (module as any).cleanup()
+        }
+      } catch (error) {
+        console.error("Error during module cleanup:", error)
       }
     }
 
-    return data
+    // Clean up engines
+    if ("destroy" in learningEngine && typeof learningEngine.destroy === "function") {
+      learningEngine.destroy()
+    }
+
+    this.modules.clear()
+    this.initialized = false
+
+    console.log("✅ System shutdown complete")
+  }
+
+  isInitialized(): boolean {
+    return this.initialized
+  }
+
+  async reinitialize(): Promise<void> {
+    await this.shutdown()
+    await this.initialize()
   }
 }
 

@@ -125,3 +125,68 @@ export function retry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promi
     throw err
   })
 }
+
+export function parseJSON<T>(str: string, fallback: T): T {
+  try {
+    return JSON.parse(str)
+  } catch {
+    return fallback
+  }
+}
+
+export function safeStringify(obj: any): string {
+  try {
+    return JSON.stringify(obj, null, 2)
+  } catch {
+    return String(obj)
+  }
+}
+
+export function escapeHtml(text: string): string {
+  const div = document.createElement("div")
+  div.textContent = text
+  return div.innerHTML
+}
+
+export function unescapeHtml(html: string): string {
+  const div = document.createElement("div")
+  div.innerHTML = html
+  return div.textContent || div.innerText || ""
+}
+
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
+export function truncate(text: string, length: number, suffix = "..."): string {
+  if (text.length <= length) return text
+  return text.substring(0, length - suffix.length) + suffix
+}
+
+export function isObject(value: any): boolean {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+}
+
+export function isEmpty(value: any): boolean {
+  if (value == null) return true
+  if (Array.isArray(value) || typeof value === "string") return value.length === 0
+  if (isObject(value)) return Object.keys(value).length === 0
+  return false
+}
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
+}
+
+export function lerp(start: number, end: number, factor: number): number {
+  return start + (end - start) * factor
+}
+
+export function roundTo(value: number, decimals: number): number {
+  const factor = Math.pow(10, decimals)
+  return Math.round(value * factor) / factor
+}

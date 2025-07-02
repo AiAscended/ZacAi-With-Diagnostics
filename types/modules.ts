@@ -3,11 +3,12 @@ export interface VocabularyEntry {
   definition: string
   partOfSpeech: string
   examples: string[]
+  synonyms: string[]
+  antonyms: string[]
+  difficulty: number
+  frequency: number
   etymology?: string
-  synonyms?: string[]
-  antonyms?: string[]
-  difficulty?: number
-  frequency?: number
+  pronunciation?: string
 }
 
 export interface MathConcept {
@@ -34,6 +35,7 @@ export interface FactEntry {
   tags: string[]
   lastUpdated: number
   confidence: number
+  relatedTopics: string[]
 }
 
 export interface CodeExample {
@@ -48,6 +50,20 @@ export interface CodeExample {
   category: string
 }
 
+export interface CodingConcept {
+  name: string
+  language: string
+  description: string
+  syntax: string
+  examples: Array<{
+    title: string
+    code: string
+    explanation: string
+  }>
+  difficulty: number
+  category: string
+}
+
 export interface PhilosophicalConcept {
   id: string
   name: string
@@ -57,27 +73,20 @@ export interface PhilosophicalConcept {
   period?: string
   keyIdeas: string[]
   relatedConcepts: string[]
-  arguments: Array<{
-    premise: string
-    conclusion: string
-    type: "deductive" | "inductive" | "abductive"
-  }>
+  arguments: string[]
+  counterArguments: string[]
 }
 
 export interface UserProfile {
   id: string
   name?: string
-  preferences: {
-    learningStyle: "visual" | "auditory" | "kinesthetic" | "reading"
-    difficultyLevel: "beginner" | "intermediate" | "advanced"
-    interests: string[]
-    language: string
-  }
+  preferences: { [key: string]: any }
   learningHistory: Array<{
     topic: string
     timestamp: number
-    performance: number
-    timeSpent: number
+    confidence: number
+    source: string
+    context: string
   }>
   personalInfo: Record<string, any>
   settings: {
@@ -85,6 +94,8 @@ export interface UserProfile {
     darkMode: boolean
     autoSave: boolean
   }
+  interests: string[]
+  skillLevel: { [key: string]: number }
 }
 
 export interface LearningPattern {

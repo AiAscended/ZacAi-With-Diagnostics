@@ -1,3 +1,23 @@
+export interface SystemConfig {
+  version: string
+  environment: "development" | "production" | "test"
+  features: {
+    vocabulary: boolean
+    mathematics: boolean
+    coding: boolean
+    facts: boolean
+    philosophy: boolean
+    userInfo: boolean
+    web3: boolean
+  }
+  apis: {
+    dictionary: string
+    wikipedia: string
+    wolfram: string
+    github: string
+  }
+}
+
 export interface ModuleInterface {
   name: string
   version: string
@@ -25,14 +45,6 @@ export interface ModuleStats {
   lastUpdate: number
 }
 
-export interface IntentAnalysis {
-  intent: string
-  confidence: number
-  entities: string[]
-  context: any
-  suggestedModules: string[]
-}
-
 export interface SystemStats {
   initialized: boolean
   modules: { [key: string]: ModuleStats }
@@ -57,6 +69,50 @@ export interface LearntDataEntry {
   relationships: string[]
 }
 
+export interface IntentAnalysis {
+  intent: string
+  confidence: number
+  entities: any[]
+  context: any
+  suggestedModules: string[]
+}
+
+export interface ContextMessage {
+  role: "user" | "assistant" | "system"
+  content: string
+  timestamp?: number
+  metadata?: any
+}
+
+export interface ReasoningStep {
+  step: number
+  reasoning: string
+  input: any
+  output: any
+  confidence: number
+  timestamp: number
+}
+
+export interface ReasoningChain {
+  id: string
+  input: string
+  steps: ReasoningStep[]
+  finalOutput: any
+  totalConfidence: number
+  processingTime: number
+}
+
+export interface LearningPattern {
+  id: string
+  pattern: string
+  frequency: number
+  confidence: number
+  context: string[]
+  timestamp: number
+  category?: string
+  effectiveness?: number
+}
+
 export interface ChatMessage {
   id: string
   role: "user" | "assistant"
@@ -68,22 +124,20 @@ export interface ChatMessage {
   thinking?: string[]
 }
 
-export interface ContextMessage {
-  role: "user" | "assistant"
-  content: string
-  metadata?: any
-}
-
-export interface ReasoningStep {
-  step: number
-  reasoning: string
+export interface AIResponse {
+  response: string
   confidence: number
-  output: any
+  sources: string[]
+  reasoning: string[]
+  thinking?: string[]
+  timestamp: number
 }
 
-export interface ReasoningChain {
-  input: string
-  steps: ReasoningStep[]
-  finalOutput: any
-  totalConfidence: number
+export interface SystemState {
+  initialized: boolean
+  loading: boolean
+  error: string | null
+  modules: string[]
+  activeModules: string[]
+  stats: SystemStats
 }
