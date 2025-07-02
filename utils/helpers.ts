@@ -1,41 +1,35 @@
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  return Date.now().toString(36) + Math.random().toString(36).substr(2)
 }
 
 export function calculateConfidence(confidences: number[]): number {
   if (confidences.length === 0) return 0
-  const sum = confidences.reduce((acc, conf) => acc + conf, 0)
-  return sum / confidences.length
+  return confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
 }
 
-export function calculateSimilarity(text1: string, text2: string): number {
-  const words1 = text1.toLowerCase().split(/\s+/)
-  const words2 = text2.toLowerCase().split(/\s+/)
-
-  const set1 = new Set(words1)
-  const set2 = new Set(words2)
-
-  const intersection = new Set([...set1].filter((x) => set2.has(x)))
-  const union = new Set([...set1, ...set2])
-
-  return intersection.size / union.size
+export function sanitizeInput(input: string): string {
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/[<>]/g, "")
+    .trim()
 }
 
 export function extractKeywords(text: string): string[] {
   return text
     .toLowerCase()
-    .replace(/[^\w\s]/g, "")
-    .split(/\s+/)
+    .split(/\W+/)
     .filter((word) => word.length > 2)
     .slice(0, 10)
 }
 
-export function formatNumber(num: number, decimals = 2): string {
-  return num.toFixed(decimals)
-}
+export function calculateSimilarity(text1: string, text2: string): number {
+  const words1 = new Set(text1.toLowerCase().split(/\W+/))
+  const words2 = new Set(text2.toLowerCase().split(/\W+/))
 
-export function sanitizeInput(input: string): string {
-  return input.trim().replace(/[<>]/g, "")
+  const intersection = new Set([...words1].filter((x) => words2.has(x)))
+  const union = new Set([...words1, ...words2])
+
+  return intersection.size / union.size
 }
 
 export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
@@ -73,15 +67,6 @@ export function deepClone<T>(obj: T): T {
   return obj
 }
 
-export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-export function capitalizeFirst(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-}
-
 export function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes"
   const k = 1024
@@ -91,37 +76,16 @@ export function formatBytes(bytes: number, decimals = 2): string {
   return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
 }
 
-export function randomBetween(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
+export function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
 }
 
-export function arrayChunk<T>(array: T[], size: number): T[][] {
-  const chunks: T[][] = []
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size))
-  }
-  return chunks
+export function capitalizeFirst(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
-export function removeEmptyValues<T extends Record<string, any>>(obj: T): Partial<T> {
-  const result: Partial<T> = {}
-  for (const key in obj) {
-    if (obj[key] !== null && obj[key] !== undefined && obj[key] !== "") {
-      result[key] = obj[key]
-    }
-  }
-  return result
-}
-
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-export function retry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
-  return fn().catch((err) => {
-    if (retries > 0) {
-      return sleep(delay).then(() => retry(fn, retries - 1, delay))
-    }
-    throw err
-  })
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text
+  return text.substr(0, maxLength - 3) + "..."
 }
