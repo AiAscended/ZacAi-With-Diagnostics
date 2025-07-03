@@ -1,13 +1,13 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
 import type { VocabularyEntry } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
-import { apiManager } from "@/core/api/manager"
 import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
+import { DictionaryAPIClient } from "@/core/dictionary/api-client"
 
 export class VocabularyModule implements ModuleInterface {
   name = "vocabulary"
-  version = "1.0.0"
+  version = "2.0.0"
   initialized = false
 
   private seedData: any = null
@@ -26,10 +26,7 @@ export class VocabularyModule implements ModuleInterface {
     console.log("Initializing Vocabulary Module...")
 
     try {
-      // Load seed data
       this.seedData = await storageManager.loadSeedData(MODULE_CONFIG.vocabulary.seedFile)
-
-      // Load learnt data
       this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.vocabulary.learntFile)
 
       this.initialized = true
@@ -45,7 +42,6 @@ export class VocabularyModule implements ModuleInterface {
     this.stats.totalQueries++
 
     try {
-      // Extract words to define
       const wordsToDefine = this.extractWords(input)
 
       if (wordsToDefine.length === 0) {
@@ -58,7 +54,7 @@ export class VocabularyModule implements ModuleInterface {
         }
       }
 
-      const definitions: any[] = []
+      const definitions: VocabularyEntry[] = []
 
       for (const word of wordsToDefine) {
         const definition = await this.getWordDefinition(word)
@@ -77,11 +73,9 @@ export class VocabularyModule implements ModuleInterface {
         }
       }
 
-      // Build response
       const response = this.buildDefinitionResponse(definitions)
       const confidence = this.calculateResponseConfidence(definitions)
 
-      // Learn from this interaction
       await this.learn({
         input,
         definitions,
@@ -89,7 +83,6 @@ export class VocabularyModule implements ModuleInterface {
         timestamp: Date.now(),
       })
 
-      // Update stats
       this.updateStats(Date.now() - startTime, true)
 
       return {
@@ -120,7 +113,7 @@ export class VocabularyModule implements ModuleInterface {
   private extractWords(input: string): string[] {
     const words: string[] = []
 
-    // Look for "define X" or "what is X" patterns
+    // Look for explicit definition requests
     const defineMatch = input.match(/define\s+(\w+)/i)
     if (defineMatch) {
       words.push(defineMatch[1].toLowerCase())
@@ -142,12 +135,48 @@ export class VocabularyModule implements ModuleInterface {
         .toLowerCase()
         .split(/\W+/)
         .filter((word) => word.length > 3 && word.length < 20)
+        .filter((word) => !this.isCommonWord(word))
 
-      // Take first few words that might be vocabulary
       words.push(...potentialWords.slice(0, 3))
     }
 
-    return [...new Set(words)] // Remove duplicates
+    return [...new Set(words)]
+  }
+
+  private isCommonWord(word: string): boolean {
+    const commonWords = [
+      "this",
+      "that",
+      "with",
+      "have",
+      "will",
+      "from",
+      "they",
+      "know",
+      "want",
+      "been",
+      "good",
+      "much",
+      "some",
+      "time",
+      "very",
+      "when",
+      "come",
+      "here",
+      "just",
+      "like",
+      "long",
+      "make",
+      "many",
+      "over",
+      "such",
+      "take",
+      "than",
+      "them",
+      "well",
+      "were",
+    ]
+    return commonWords.includes(word)
   }
 
   private async getWordDefinition(word: string): Promise<VocabularyEntry | null> {
@@ -163,10 +192,9 @@ export class VocabularyModule implements ModuleInterface {
       return seedDefinition
     }
 
-    // Try API lookup
-    const apiDefinition = await this.lookupWordAPI(word)
+    // Try online API lookup
+    const apiDefinition = await this.lookupWordOnline(word)
     if (apiDefinition) {
-      // Save to learnt data
       await this.saveToLearntData(word, apiDefinition)
       return apiDefinition
     }
@@ -195,7 +223,7 @@ export class VocabularyModule implements ModuleInterface {
       return {
         word,
         definition: wordData.definition,
-        partOfSpeech: wordData.partOfSpeech || "unknown",
+        partOfSpeech: wordData.part_of_speech || wordData.partOfSpeech || "unknown",
         examples: wordData.examples || [],
         synonyms: wordData.synonyms || [],
         antonyms: wordData.antonyms || [],
@@ -209,42 +237,34 @@ export class VocabularyModule implements ModuleInterface {
     return null
   }
 
-  private async lookupWordAPI(word: string): Promise<VocabularyEntry | null> {
+  private async lookupWordOnline(word: string): Promise<VocabularyEntry | null> {
     try {
-      const url = `${MODULE_CONFIG.vocabulary.apiEndpoints.dictionary}/${word}`
-      const cacheKey = `vocab_${word}`
-
-      const response = await apiManager.makeRequest(url, {}, cacheKey, 86400000) // 24 hour cache
-
-      if (response && response.length > 0) {
-        const wordData = response[0]
-        const meaning = wordData.meanings && wordData.meanings[0]
-        const definition = meaning && meaning.definitions && meaning.definitions[0]
-
-        if (definition) {
+      const apiResponse = await DictionaryAPIClient.lookupWord(word)
+      if (apiResponse) {
+        const formatted = DictionaryAPIClient.formatDefinition(apiResponse)
+        if (formatted) {
           return {
-            word,
-            definition: definition.definition,
-            partOfSpeech: meaning.partOfSpeech || "unknown",
-            examples: definition.example ? [definition.example] : [],
-            synonyms: definition.synonyms || [],
-            antonyms: definition.antonyms || [],
-            difficulty: this.assessDifficulty(definition.definition),
+            word: formatted.word,
+            definition: formatted.definition,
+            partOfSpeech: formatted.partOfSpeech,
+            examples: formatted.example ? [formatted.example] : [],
+            synonyms: formatted.synonyms || [],
+            antonyms: formatted.antonyms || [],
+            difficulty: this.assessDifficulty(formatted.definition),
             frequency: 1,
-            etymology: wordData.origin,
-            pronunciation: wordData.phonetic,
+            etymology: formatted.origin,
+            pronunciation: formatted.phonetic,
           }
         }
       }
     } catch (error) {
-      console.error(`Error looking up word "${word}":`, error)
+      console.error(`Error looking up word "${word}" online:`, error)
     }
 
     return null
   }
 
   private assessDifficulty(definition: string): number {
-    // Simple difficulty assessment based on definition length and complexity
     const length = definition.length
     const complexWords = (definition.match(/\b\w{8,}\b/g) || []).length
 
@@ -259,9 +279,9 @@ export class VocabularyModule implements ModuleInterface {
     const learntEntry = {
       id: generateId(),
       content: definition,
-      confidence: 0.8, // API data is generally reliable
+      confidence: 0.8,
       source: "dictionary-api",
-      context: `Looked up definition for "${word}"`,
+      context: `Online lookup for "${word}"`,
       timestamp: Date.now(),
       usageCount: 1,
       lastUsed: Date.now(),
@@ -277,14 +297,24 @@ export class VocabularyModule implements ModuleInterface {
   private buildDefinitionResponse(definitions: VocabularyEntry[]): string {
     if (definitions.length === 1) {
       const def = definitions[0]
-      let response = `**${def.word}** (${def.partOfSpeech}): ${def.definition}`
+      let response = `**${def.word}**`
+
+      if (def.pronunciation) {
+        response += ` ${def.pronunciation}`
+      }
+
+      response += ` (${def.partOfSpeech}): ${def.definition}`
 
       if (def.examples && def.examples.length > 0) {
-        response += `\n\nExample: "${def.examples[0]}"`
+        response += `\n\n**Example:** "${def.examples[0]}"`
       }
 
       if (def.synonyms && def.synonyms.length > 0) {
-        response += `\n\nSynonyms: ${def.synonyms.slice(0, 3).join(", ")}`
+        response += `\n\n**Synonyms:** ${def.synonyms.slice(0, 3).join(", ")}`
+      }
+
+      if (def.etymology) {
+        response += `\n\n**Etymology:** ${def.etymology}`
       }
 
       return response
@@ -300,10 +330,7 @@ export class VocabularyModule implements ModuleInterface {
   private calculateResponseConfidence(definitions: VocabularyEntry[]): number {
     if (definitions.length === 0) return 0
 
-    // Higher confidence for more definitions found
     const baseConfidence = Math.min(0.9, 0.6 + definitions.length * 0.1)
-
-    // Adjust based on definition quality
     const avgDifficulty = definitions.reduce((sum, def) => sum + def.difficulty, 0) / definitions.length
     const difficultyBonus = avgDifficulty > 3 ? 0.1 : 0
 
@@ -311,7 +338,6 @@ export class VocabularyModule implements ModuleInterface {
   }
 
   async learn(data: any): Promise<void> {
-    // Learning is handled in the processing method
     this.stats.lastUpdate = Date.now()
   }
 

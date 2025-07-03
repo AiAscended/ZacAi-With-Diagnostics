@@ -2,11 +2,10 @@ import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/globa
 import type { CodingConcept } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
 import { MODULE_CONFIG } from "@/config/app"
-import { generateId } from "@/utils/helpers"
 
 export class CodingModule implements ModuleInterface {
   name = "coding"
-  version = "1.0.0"
+  version = "2.0.0"
   initialized = false
 
   private seedData: any = null
@@ -17,6 +16,35 @@ export class CodingModule implements ModuleInterface {
     averageResponseTime: 0,
     learntEntries: 0,
     lastUpdate: 0,
+  }
+
+  // Next.js and React knowledge base
+  private nextjsKnowledge = {
+    "app-router": {
+      description: "Next.js 13+ routing system using app directory",
+      files: {
+        "app/page.tsx": "Home page component",
+        "app/layout.tsx": "Root layout component",
+        "app/loading.tsx": "Loading UI component",
+        "app/error.tsx": "Error UI component",
+        "app/not-found.tsx": "404 page component",
+      },
+      routing: {
+        "dynamic-routes": "app/blog/[slug]/page.tsx",
+        "nested-routes": "app/dashboard/settings/page.tsx",
+        "route-groups": "app/(auth)/login/page.tsx",
+      },
+    },
+    "server-components": {
+      description: "Components that render on the server by default",
+      benefits: ["Better performance", "Smaller bundle size", "Direct database access", "Better SEO"],
+      restrictions: ["No useState", "No useEffect", "No browser APIs", "No event handlers"],
+    },
+    "client-components": {
+      description: "Components that render on the client, marked with 'use client'",
+      usage: "Add 'use client' directive at top of file",
+      when_to_use: ["Interactive elements", "State management", "Browser APIs", "Event handlers"],
+    },
   }
 
   async initialize(): Promise<void> {
@@ -59,6 +87,14 @@ export class CodingModule implements ModuleInterface {
         const concept = await this.getCodingConcept(query)
         if (concept) {
           concepts.push(concept)
+        }
+      }
+
+      if (concepts.length === 0) {
+        // Try online lookup for Next.js documentation
+        const onlineConcept = await this.lookupOnlineDocumentation(input)
+        if (onlineConcept) {
+          concepts.push(onlineConcept)
         }
       }
 
@@ -112,33 +148,54 @@ export class CodingModule implements ModuleInterface {
   private extractCodingQueries(input: string): string[] {
     const queries: string[] = []
 
-    // Look for programming language mentions
-    const languages = ["javascript", "python", "java", "c++", "html", "css", "react", "node"]
+    // Programming language mentions
+    const languages = ["javascript", "typescript", "python", "java", "react", "nextjs", "next.js", "html", "css"]
     for (const lang of languages) {
       if (input.toLowerCase().includes(lang)) {
         queries.push(lang)
       }
     }
 
-    // Look for coding concepts
-    const concepts = ["function", "variable", "loop", "array", "object", "class", "method", "algorithm"]
+    // Coding concepts
+    const concepts = ["function", "component", "hook", "state", "props", "api", "route", "middleware"]
     for (const concept of concepts) {
       if (input.toLowerCase().includes(concept)) {
         queries.push(concept)
       }
     }
 
-    // Look for "how to code" patterns
-    const howToMatch = input.match(/how to (?:code|program|write) (.+?)(?:\?|$)/i)
-    if (howToMatch) {
-      queries.push(howToMatch[1].trim())
+    // Next.js specific patterns
+    const nextjsPatterns = [
+      "app router",
+      "server component",
+      "client component",
+      "use client",
+      "page.tsx",
+      "layout.tsx",
+    ]
+    for (const pattern of nextjsPatterns) {
+      if (input.toLowerCase().includes(pattern)) {
+        queries.push(pattern)
+      }
     }
 
-    return [...new Set(queries)] // Remove duplicates
+    // File system queries
+    const fileMatch = input.match(/(\w+\.(tsx?|jsx?|css|json))/gi)
+    if (fileMatch) {
+      queries.push(...fileMatch)
+    }
+
+    return [...new Set(queries)]
   }
 
   private async getCodingConcept(query: string): Promise<CodingConcept | null> {
-    // Check learnt data first
+    // Check Next.js knowledge base first
+    const nextjsConcept = this.searchNextjsKnowledge(query)
+    if (nextjsConcept) {
+      return nextjsConcept
+    }
+
+    // Check learnt data
     const learntConcept = this.searchLearntData(query)
     if (learntConcept) {
       return learntConcept
@@ -150,11 +207,136 @@ export class CodingModule implements ModuleInterface {
       return seedConcept
     }
 
-    // Generate basic concept if it's a common programming term
-    const generatedConcept = this.generateBasicConcept(query)
-    if (generatedConcept) {
-      await this.saveToLearntData(query, generatedConcept)
-      return generatedConcept
+    return null
+  }
+
+  private searchNextjsKnowledge(query: string): CodingConcept | null {
+    const lowerQuery = query.toLowerCase()
+
+    // Check for Next.js specific concepts
+    if (lowerQuery.includes("app router") || lowerQuery.includes("app directory")) {
+      return {
+        name: "App Router",
+        language: "nextjs",
+        description: this.nextjsKnowledge["app-router"].description,
+        syntax: "app/page.tsx, app/layout.tsx, app/loading.tsx",
+        examples: [
+          {
+            title: "Basic Page Structure",
+            code: `// app/page.tsx
+export default function HomePage() {
+  return (
+    <div>
+      <h1>Welcome to Next.js App Router</h1>
+    </div>
+  )
+}`,
+            explanation: "Basic page component in the app directory",
+          },
+        ],
+        difficulty: 3,
+        category: "nextjs-routing",
+      }
+    }
+
+    if (lowerQuery.includes("server component")) {
+      return {
+        name: "Server Components",
+        language: "nextjs",
+        description: this.nextjsKnowledge["server-components"].description,
+        syntax: "Default in app directory - no 'use client' directive",
+        examples: [
+          {
+            title: "Server Component with Data Fetching",
+            code: `// app/posts/page.tsx
+async function PostsPage() {
+  const posts = await fetch('https://api.example.com/posts')
+  const data = await posts.json()
+  
+  return (
+    <div>
+      {data.map(post => (
+        <article key={post.id}>
+          <h2>{post.title}</h2>
+          <p>{post.content}</p>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+export default PostsPage`,
+            explanation: "Server component that fetches data directly",
+          },
+        ],
+        difficulty: 4,
+        category: "nextjs-components",
+      }
+    }
+
+    if (lowerQuery.includes("client component") || lowerQuery.includes("use client")) {
+      return {
+        name: "Client Components",
+        language: "nextjs",
+        description: this.nextjsKnowledge["client-components"].description,
+        syntax: "'use client' at the top of the file",
+        examples: [
+          {
+            title: "Interactive Client Component",
+            code: `'use client'
+import { useState } from 'react'
+
+export default function Counter() {
+  const [count, setCount] = useState(0)
+  
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </div>
+  )
+}`,
+            explanation: "Client component with state and interactivity",
+          },
+        ],
+        difficulty: 3,
+        category: "nextjs-components",
+      }
+    }
+
+    return null
+  }
+
+  private async lookupOnlineDocumentation(query: string): Promise<CodingConcept | null> {
+    // Simulate online documentation lookup
+    // In a real implementation, this would fetch from Next.js docs, MDN, etc.
+
+    if (query.toLowerCase().includes("nextjs") || query.toLowerCase().includes("next.js")) {
+      return {
+        name: "Next.js Framework",
+        language: "javascript",
+        description:
+          "A React framework for building full-stack web applications with server-side rendering and static site generation",
+        syntax: "npx create-next-app@latest my-app",
+        examples: [
+          {
+            title: "Getting Started",
+            code: `// pages/index.js or app/page.tsx
+export default function Home() {
+  return (
+    <div>
+      <h1>Hello Next.js!</h1>
+    </div>
+  )
+}`,
+            explanation: "Basic Next.js page component",
+          },
+        ],
+        difficulty: 3,
+        category: "framework",
+      }
     }
 
     return null
@@ -190,84 +372,6 @@ export class CodingModule implements ModuleInterface {
     }
 
     return null
-  }
-
-  private generateBasicConcept(query: string): CodingConcept | null {
-    const basicConcepts: { [key: string]: Partial<CodingConcept> } = {
-      function: {
-        description: "A reusable block of code that performs a specific task",
-        syntax: "function functionName() { /* code */ }",
-        examples: [
-          {
-            title: "Basic Function",
-            code: "function greet(name) {\n  return 'Hello, ' + name + '!';\n}",
-            explanation: "A simple function that takes a name parameter and returns a greeting",
-          },
-        ],
-        difficulty: 2,
-        category: "fundamentals",
-      },
-      variable: {
-        description: "A container that stores data values",
-        syntax: "let variableName = value;",
-        examples: [
-          {
-            title: "Variable Declaration",
-            code: "let message = 'Hello World';\nconst pi = 3.14159;",
-            explanation: "Examples of declaring variables with let and const",
-          },
-        ],
-        difficulty: 1,
-        category: "fundamentals",
-      },
-      loop: {
-        description: "A programming construct that repeats a block of code",
-        syntax: "for (let i = 0; i < length; i++) { /* code */ }",
-        examples: [
-          {
-            title: "For Loop",
-            code: "for (let i = 0; i < 5; i++) {\n  console.log(i);\n}",
-            explanation: "A for loop that prints numbers 0 through 4",
-          },
-        ],
-        difficulty: 2,
-        category: "control-flow",
-      },
-    }
-
-    const concept = basicConcepts[query.toLowerCase()]
-    if (concept) {
-      return {
-        name: query,
-        language: "javascript",
-        description: concept.description!,
-        syntax: concept.syntax!,
-        examples: concept.examples!,
-        difficulty: concept.difficulty!,
-        category: concept.category!,
-      }
-    }
-
-    return null
-  }
-
-  private async saveToLearntData(query: string, concept: CodingConcept): Promise<void> {
-    const learntEntry = {
-      id: generateId(),
-      content: concept,
-      confidence: 0.7,
-      source: "coding-module",
-      context: `Generated concept for "${query}"`,
-      timestamp: Date.now(),
-      usageCount: 1,
-      lastUsed: Date.now(),
-      verified: false,
-      tags: ["generated", concept.category],
-      relationships: [],
-    }
-
-    await storageManager.addLearntEntry(MODULE_CONFIG.coding.learntFile, learntEntry)
-    this.stats.learntEntries++
   }
 
   private buildCodingResponse(concepts: CodingConcept[]): string {

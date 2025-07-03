@@ -1,7 +1,21 @@
 export class TeslaMathCalculator {
-  // Tesla's 3-6-9 pattern and vortex mathematics
+  // Tesla 3-6-9 Pattern Analysis
+  static calculateTeslaPattern(number: number): any {
+    const digitalRoot = this.calculateDigitalRoot(number)
+    const teslaPattern = this.getTeslaPattern(digitalRoot)
+    const significance = this.getTeslaSignificance(digitalRoot)
 
-  calculateDigitalRoot(num: number): number {
+    return {
+      number,
+      digitalRoot,
+      teslaPattern,
+      significance,
+      isKeyNumber: [3, 6, 9].includes(digitalRoot),
+    }
+  }
+
+  // Digital Root Calculation
+  static calculateDigitalRoot(num: number): number {
     while (num >= 10) {
       num = num
         .toString()
@@ -11,27 +25,54 @@ export class TeslaMathCalculator {
     return num
   }
 
-  getTeslaPattern(number: number): any {
-    const digitalRoot = this.calculateDigitalRoot(number)
-    const vortexCycle = [1, 2, 4, 8, 7, 5]
-    const teslaNumbers = [3, 6, 9]
+  // Vortex Math Sequence
+  static generateVortexSequence(start = 1, length = 12): number[] {
+    const sequence = []
+    let current = start
 
-    const isTeslaNumber = teslaNumbers.includes(digitalRoot)
-    const isVortexNumber = vortexCycle.includes(digitalRoot)
+    for (let i = 0; i < length; i++) {
+      sequence.push(current)
+      current = (current * 2) % 9
+      if (current === 0) current = 9
+    }
+
+    return sequence
+  }
+
+  // Mirror Times Tables
+  static generateMirrorTimesTable(multiplier: number): any {
+    const standard = []
+    const mirror = []
+    const reduced = []
+
+    for (let i = 1; i <= 12; i++) {
+      const product = multiplier * i
+      standard.push(product)
+
+      const digitalRoot = this.calculateDigitalRoot(product)
+      mirror.push(digitalRoot)
+      reduced.push(digitalRoot)
+    }
 
     return {
-      originalNumber: number,
-      digitalRoot,
-      isTeslaNumber,
-      isVortexNumber,
-      type: isTeslaNumber ? "Tesla Number" : isVortexNumber ? "Vortex Cycle" : "Standard",
-      significance: this.getTeslaSignificance(digitalRoot),
-      analysis: this.getVortexAnalysis(digitalRoot),
-      steps: this.getCalculationSteps(number),
+      multiplier,
+      standard,
+      mirror,
+      reduced,
+      pattern: this.analyzePattern(reduced),
     }
   }
 
-  private getTeslaSignificance(digitalRoot: number): string {
+  private static getTeslaPattern(digitalRoot: number): string {
+    if ([3, 6, 9].includes(digitalRoot)) {
+      return "Tesla Key Number"
+    } else if ([1, 2, 4, 5, 7, 8].includes(digitalRoot)) {
+      return "Physical Realm Number"
+    }
+    return "Unknown Pattern"
+  }
+
+  private static getTeslaSignificance(digitalRoot: number): string {
     const significance: { [key: number]: string } = {
       1: "Unity, beginning, leadership",
       2: "Duality, cooperation, balance",
@@ -43,67 +84,16 @@ export class TeslaMathCalculator {
       8: "Material success, power, achievement",
       9: "Tesla Key - Completion, universal love, service",
     }
-
     return significance[digitalRoot] || "Unknown significance"
   }
 
-  private getVortexAnalysis(digitalRoot: number): string {
-    if ([3, 6, 9].includes(digitalRoot)) {
-      return `Tesla Number representing the key to the universe`
-    } else if ([1, 2, 4, 8, 7, 5].includes(digitalRoot)) {
-      return `Vortex Cycle number - part of the infinite loop`
+  private static analyzePattern(sequence: number[]): string {
+    const uniqueNumbers = [...new Set(sequence)]
+    if (uniqueNumbers.length <= 3) {
+      return "Simple repeating pattern"
+    } else if (uniqueNumbers.includes(3) && uniqueNumbers.includes(6) && uniqueNumbers.includes(9)) {
+      return "Contains Tesla key numbers (3, 6, 9)"
     }
-    return "Standard number"
-  }
-
-  private getCalculationSteps(number: number): string[] {
-    const steps: string[] = []
-    let current = number
-
-    steps.push(`Starting with: ${current}`)
-
-    while (current >= 10) {
-      const digits = current.toString().split("").map(Number)
-      const sum = digits.reduce((a, b) => a + b, 0)
-      steps.push(`${current} → ${digits.join(" + ")} = ${sum}`)
-      current = sum
-    }
-
-    steps.push(`Final digital root: ${current}`)
-    return steps
-  }
-
-  generateVortexSequence(startNumber: number, length = 12): number[] {
-    const sequence = []
-    let current = this.calculateDigitalRoot(startNumber)
-
-    for (let i = 0; i < length; i++) {
-      sequence.push(current)
-      current = (current * 2) % 9
-      if (current === 0) current = 9
-    }
-
-    return sequence
-  }
-
-  calculateSacredGeometry(): any {
-    const phi = (1 + Math.sqrt(5)) / 2 // Golden ratio
-    const fibonacci = this.generateFibonacci(10)
-
-    return {
-      goldenRatio: phi,
-      fibonacci,
-      explanation: "Sacred geometry reveals the mathematical patterns in nature",
-    }
-  }
-
-  private generateFibonacci(count: number): number[] {
-    const fib = [0, 1]
-    for (let i = 2; i < count; i++) {
-      fib[i] = fib[i - 1] + fib[i - 2]
-    }
-    return fib
+    return "Complex pattern"
   }
 }
-
-export const teslaMathCalculator = new TeslaMathCalculator()

@@ -1,15 +1,15 @@
 export class DictionaryAPIClient {
-  private baseUrl = "https://api.dictionaryapi.dev/api/v2/entries/en"
-  private cache: Map<string, any> = new Map()
+  private static readonly BASE_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
+  private static cache = new Map<string, any>()
 
-  async lookupWord(word: string): Promise<any> {
+  static async lookupWord(word: string): Promise<any> {
     // Check cache first
-    if (this.cache.has(word.toLowerCase())) {
-      return this.cache.get(word.toLowerCase())
+    if (this.cache.has(word)) {
+      return this.cache.get(word)
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/${encodeURIComponent(word)}`)
+      const response = await fetch(`${this.BASE_URL}/${word}`)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -17,46 +17,51 @@ export class DictionaryAPIClient {
 
       const data = await response.json()
 
-      if (data && data.length > 0) {
-        const wordData = this.parseWordData(data[0])
+      // Cache the result
+      this.cache.set(word, data)
 
-        // Cache the result
-        this.cache.set(word.toLowerCase(), wordData)
-
-        return wordData
-      }
+      return data
     } catch (error) {
       console.error(`Error looking up word "${word}":`, error)
       return null
     }
-
-    return null
   }
 
-  private parseWordData(apiData: any): any {
-    const meaning = apiData.meanings?.[0]
+  static async lookupMultipleWords(words: string[]): Promise<Map<string, any>> {
+    const results = new Map<string, any>()
+
+    for (const word of words) {
+      const result = await this.lookupWord(word)
+      if (result) {
+        results.set(word, result)
+      }
+    }
+
+    return results
+  }
+
+  static formatDefinition(wordData: any): any {
+    if (!wordData || !Array.isArray(wordData) || wordData.length === 0) {
+      return null
+    }
+
+    const entry = wordData[0]
+    const meaning = entry.meanings?.[0]
     const definition = meaning?.definitions?.[0]
 
+    if (!definition) {
+      return null
+    }
+
     return {
-      word: apiData.word,
-      phonetic: apiData.phonetic || apiData.phonetics?.[0]?.text,
-      definition: definition?.definition,
-      partOfSpeech: meaning?.partOfSpeech,
-      example: definition?.example,
-      synonyms: definition?.synonyms || [],
-      antonyms: definition?.antonyms || [],
-      origin: apiData.origin,
-      meanings: apiData.meanings,
+      word: entry.word,
+      phonetic: entry.phonetic || entry.phonetics?.[0]?.text,
+      partOfSpeech: meaning.partOfSpeech,
+      definition: definition.definition,
+      example: definition.example,
+      synonyms: definition.synonyms || [],
+      antonyms: definition.antonyms || [],
+      origin: entry.origin,
     }
   }
-
-  clearCache(): void {
-    this.cache.clear()
-  }
-
-  getCacheSize(): number {
-    return this.cache.size
-  }
 }
-
-export const dictionaryAPI = new DictionaryAPIClient()

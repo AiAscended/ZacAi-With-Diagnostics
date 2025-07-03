@@ -1,12 +1,12 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
-import type { MathConcept } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
 import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
+import { TeslaMathCalculator } from "@/core/tesla-math/calculator"
 
 export class MathematicsModule implements ModuleInterface {
   name = "mathematics"
-  version = "1.0.0"
+  version = "2.0.0"
   initialized = false
 
   private seedData: any = null
@@ -41,7 +41,6 @@ export class MathematicsModule implements ModuleInterface {
     this.stats.totalQueries++
 
     try {
-      // Check if input contains mathematical expressions
       const mathExpressions = this.extractMathExpressions(input)
 
       if (mathExpressions.length === 0) {
@@ -76,7 +75,6 @@ export class MathematicsModule implements ModuleInterface {
       const response = this.buildMathResponse(results)
       const confidence = this.calculateMathConfidence(results)
 
-      // Learn from this interaction
       await this.learn({
         input,
         results,
@@ -84,7 +82,6 @@ export class MathematicsModule implements ModuleInterface {
         timestamp: Date.now(),
       })
 
-      // Update stats
       this.updateStats(Date.now() - startTime, true)
 
       return {
@@ -115,34 +112,35 @@ export class MathematicsModule implements ModuleInterface {
   private extractMathExpressions(input: string): string[] {
     const expressions: string[] = []
 
-    // Look for basic arithmetic expressions
+    // Basic arithmetic expressions
     const basicMath = input.match(/\d+\s*[+\-*/]\s*\d+/g)
     if (basicMath) {
       expressions.push(...basicMath)
     }
 
-    // Look for "calculate" or "solve" patterns
-    const calculateMatch = input.match(/calculate\s+(.+?)(?:\.|$)/i)
-    if (calculateMatch) {
-      expressions.push(calculateMatch[1].trim())
-    }
-
-    const solveMatch = input.match(/solve\s+(.+?)(?:\.|$)/i)
-    if (solveMatch) {
-      expressions.push(solveMatch[1].trim())
-    }
-
-    // Look for Tesla/Vortex math patterns
-    const teslaMatch = input.match(/tesla|vortex|369|sacred/i)
+    // Tesla/Vortex math patterns
+    const teslaMatch = input.match(/tesla|vortex|369|digital root/i)
     if (teslaMatch) {
-      expressions.push(input) // Process entire input for Tesla math
+      expressions.push(input)
+    }
+
+    // Times table requests
+    const timesTableMatch = input.match(/(\d+)\s*times\s*table|times\s*table\s*for\s*(\d+)/i)
+    if (timesTableMatch) {
+      expressions.push(input)
+    }
+
+    // Mirror times table requests
+    const mirrorMatch = input.match(/mirror\s*times\s*table/i)
+    if (mirrorMatch) {
+      expressions.push(input)
     }
 
     return expressions
   }
 
   private async solveMathExpression(expression: string): Promise<any> {
-    // Try basic arithmetic first
+    // Basic arithmetic
     const basicResult = this.solveBasicArithmetic(expression)
     if (basicResult !== null) {
       return {
@@ -153,7 +151,7 @@ export class MathematicsModule implements ModuleInterface {
       }
     }
 
-    // Try Tesla/Vortex math
+    // Tesla/Vortex math
     const teslaResult = this.solveTeslaMath(expression)
     if (teslaResult !== null) {
       return {
@@ -164,14 +162,25 @@ export class MathematicsModule implements ModuleInterface {
       }
     }
 
-    // Try advanced math concepts
-    const conceptResult = await this.findMathConcept(expression)
-    if (conceptResult) {
+    // Times tables
+    const timesTableResult = this.generateTimesTable(expression)
+    if (timesTableResult !== null) {
       return {
         expression,
-        result: conceptResult,
-        type: "concept",
-        steps: [],
+        result: timesTableResult,
+        type: "times_table",
+        steps: ["Generated times table"],
+      }
+    }
+
+    // Mirror times tables
+    const mirrorResult = this.generateMirrorTimesTable(expression)
+    if (mirrorResult !== null) {
+      return {
+        expression,
+        result: mirrorResult,
+        type: "mirror_times_table",
+        steps: ["Generated mirror times table with digital root patterns"],
       }
     }
 
@@ -180,19 +189,16 @@ export class MathematicsModule implements ModuleInterface {
 
   private solveBasicArithmetic(expression: string): number | null {
     try {
-      // Clean the expression
       const cleanExpression = expression.replace(/[^0-9+\-*/().\s]/g, "")
 
-      // Basic safety check
       if (!/^[0-9+\-*/().\s]+$/.test(cleanExpression)) {
         return null
       }
 
-      // Use Function constructor for safe evaluation
       const result = Function(`"use strict"; return (${cleanExpression})`)()
 
       if (typeof result === "number" && !isNaN(result) && isFinite(result)) {
-        return Math.round(result * 1000000) / 1000000 // Round to 6 decimal places
+        return Math.round(result * 1000000) / 1000000
       }
     } catch (error) {
       console.error("Error in basic arithmetic:", error)
@@ -201,160 +207,80 @@ export class MathematicsModule implements ModuleInterface {
     return null
   }
 
-  private getArithmeticSteps(expression: string): string[] {
-    const steps: string[] = []
-    steps.push(`Original expression: ${expression}`)
-
-    // Simple step generation for basic operations
-    if (expression.includes("+")) {
-      steps.push("Performing addition")
-    }
-    if (expression.includes("-")) {
-      steps.push("Performing subtraction")
-    }
-    if (expression.includes("*")) {
-      steps.push("Performing multiplication")
-    }
-    if (expression.includes("/")) {
-      steps.push("Performing division")
-    }
-
-    return steps
-  }
-
   private solveTeslaMath(expression: string): any {
     const input = expression.toLowerCase()
 
-    // Tesla 3-6-9 pattern
-    if (input.includes("369") || input.includes("tesla")) {
-      return this.calculateTeslaPattern(expression)
+    if (input.includes("tesla") || input.includes("369") || input.includes("digital root")) {
+      const numbers = expression.match(/\d+/g)
+      if (numbers) {
+        const results = numbers.map((numStr) => {
+          const num = Number.parseInt(numStr)
+          return TeslaMathCalculator.calculateTeslaPattern(num)
+        })
+
+        return {
+          type: "tesla_369",
+          results,
+          explanation: "Tesla believed that 3, 6, and 9 were the key to the universe",
+        }
+      }
     }
 
-    // Vortex math
     if (input.includes("vortex")) {
-      return this.calculateVortexMath(expression)
-    }
+      const numbers = expression.match(/\d+/g)
+      const startNum = numbers ? Number.parseInt(numbers[0]) : 1
+      const sequence = TeslaMathCalculator.generateVortexSequence(startNum, 12)
 
-    // Sacred geometry
-    if (input.includes("sacred") || input.includes("geometry")) {
-      return this.calculateSacredGeometry(expression)
+      return {
+        type: "vortex_math",
+        sequence,
+        explanation: "Vortex math reveals the underlying patterns in numbers",
+      }
     }
 
     return null
   }
 
-  private calculateTeslaPattern(expression: string): any {
-    // Extract numbers from expression
-    const numbers = expression.match(/\d+/g)
-    if (!numbers) return null
+  private generateTimesTable(expression: string): any {
+    const match = expression.match(/(\d+)/)
+    if (match) {
+      const multiplier = Number.parseInt(match[1])
+      const table = []
 
-    const results = []
+      for (let i = 1; i <= 12; i++) {
+        table.push({
+          multiplication: `${multiplier} × ${i}`,
+          result: multiplier * i,
+        })
+      }
 
-    for (const numStr of numbers) {
-      const num = Number.parseInt(numStr)
-      const digitalRoot = this.calculateDigitalRoot(num)
-      const teslaPattern = this.getTeslaPattern(digitalRoot)
-
-      results.push({
-        number: num,
-        digitalRoot,
-        teslaPattern,
-        significance: this.getTeslaSignificance(digitalRoot),
-      })
+      return {
+        multiplier,
+        table,
+        type: "standard_times_table",
+      }
     }
 
-    return {
-      type: "tesla_369",
-      results,
-      explanation: "Tesla believed that 3, 6, and 9 were the key to the universe",
-    }
+    return null
   }
 
-  private calculateDigitalRoot(num: number): number {
-    while (num >= 10) {
-      num = num
-        .toString()
-        .split("")
-        .reduce((sum, digit) => sum + Number.parseInt(digit), 0)
-    }
-    return num
+  private generateMirrorTimesTable(expression: string): any {
+    const match = expression.match(/(\d+)/)
+    const multiplier = match ? Number.parseInt(match[1]) : 2
+
+    return TeslaMathCalculator.generateMirrorTimesTable(multiplier)
   }
 
-  private getTeslaPattern(digitalRoot: number): string {
-    if ([3, 6, 9].includes(digitalRoot)) {
-      return "Tesla Key Number"
-    } else if ([1, 2, 4, 5, 7, 8].includes(digitalRoot)) {
-      return "Physical Realm Number"
-    }
-    return "Unknown Pattern"
-  }
+  private getArithmeticSteps(expression: string): string[] {
+    const steps: string[] = []
+    steps.push(`Original expression: ${expression}`)
 
-  private getTeslaSignificance(digitalRoot: number): string {
-    const significance: { [key: number]: string } = {
-      1: "Unity, beginning, leadership",
-      2: "Duality, cooperation, balance",
-      3: "Tesla Key - Creation, expression, communication",
-      4: "Stability, foundation, hard work",
-      5: "Freedom, adventure, change",
-      6: "Tesla Key - Harmony, responsibility, nurturing",
-      7: "Spirituality, introspection, analysis",
-      8: "Material success, power, achievement",
-      9: "Tesla Key - Completion, universal love, service",
-    }
+    if (expression.includes("+")) steps.push("Performing addition")
+    if (expression.includes("-")) steps.push("Performing subtraction")
+    if (expression.includes("*")) steps.push("Performing multiplication")
+    if (expression.includes("/")) steps.push("Performing division")
 
-    return significance[digitalRoot] || "Unknown significance"
-  }
-
-  private calculateVortexMath(expression: string): any {
-    // Simplified vortex math implementation
-    const numbers = expression.match(/\d+/g)
-    if (!numbers) return null
-
-    const vortexSequence = []
-    let current = Number.parseInt(numbers[0]) || 1
-
-    for (let i = 0; i < 12; i++) {
-      vortexSequence.push(current)
-      current = (current * 2) % 9
-      if (current === 0) current = 9
-    }
-
-    return {
-      type: "vortex_math",
-      sequence: vortexSequence,
-      pattern: this.analyzeVortexPattern(vortexSequence),
-      explanation: "Vortex math reveals the underlying patterns in numbers",
-    }
-  }
-
-  private analyzeVortexPattern(sequence: number[]): string {
-    const uniqueNumbers = [...new Set(sequence)]
-    if (uniqueNumbers.length <= 3) {
-      return "Simple repeating pattern"
-    } else if (uniqueNumbers.includes(3) && uniqueNumbers.includes(6) && uniqueNumbers.includes(9)) {
-      return "Contains Tesla key numbers (3, 6, 9)"
-    }
-    return "Complex pattern"
-  }
-
-  private calculateSacredGeometry(expression: string): any {
-    // Golden ratio and sacred geometry calculations
-    const phi = (1 + Math.sqrt(5)) / 2 // Golden ratio
-
-    return {
-      type: "sacred_geometry",
-      goldenRatio: phi,
-      fibonacci: this.generateFibonacci(10),
-      explanation: "Sacred geometry reveals the mathematical patterns in nature",
-    }
-  }
-
-  private generateFibonacci(count: number): number[] {
-    const fib = [0, 1]
-    for (let i = 2; i < count; i++) {
-      fib[i] = fib[i - 1] + fib[i - 2]
-    }
-    return fib
+    return steps
   }
 
   private getTeslaSteps(expression: string): string[] {
@@ -367,20 +293,6 @@ export class MathematicsModule implements ModuleInterface {
     ]
   }
 
-  private async findMathConcept(expression: string): Promise<MathConcept | null> {
-    // Search seed data for math concepts
-    if (this.seedData && this.seedData.concepts) {
-      for (const concept of Object.values(this.seedData.concepts)) {
-        const conceptData = concept as MathConcept
-        if (expression.toLowerCase().includes(conceptData.name.toLowerCase())) {
-          return conceptData
-        }
-      }
-    }
-
-    return null
-  }
-
   private buildMathResponse(results: any[]): string {
     if (results.length === 1) {
       const result = results[0]
@@ -389,15 +301,11 @@ export class MathematicsModule implements ModuleInterface {
         return `**Result:** ${result.result}\n\n**Steps:**\n${result.steps.join("\n")}`
       } else if (result.type === "tesla_vortex") {
         return this.formatTeslaResponse(result.result)
-      } else if (result.type === "concept") {
-        return this.formatConceptResponse(result.result)
+      } else if (result.type === "times_table") {
+        return this.formatTimesTableResponse(result.result)
+      } else if (result.type === "mirror_times_table") {
+        return this.formatMirrorTimesTableResponse(result.result)
       }
-    } else {
-      let response = "Here are the mathematical results:\n\n"
-      results.forEach((result, index) => {
-        response += `${index + 1}. ${result.expression} = ${result.result}\n`
-      })
-      return response
     }
 
     return "Mathematical analysis completed."
@@ -415,26 +323,26 @@ export class MathematicsModule implements ModuleInterface {
       response += `*${result.explanation}*`
       return response
     } else if (result.type === "vortex_math") {
-      return `**Vortex Math Sequence:** ${result.sequence.join(", ")}\n\n**Pattern:** ${result.pattern}\n\n*${result.explanation}*`
-    } else if (result.type === "sacred_geometry") {
-      return `**Golden Ratio (φ):** ${result.goldenRatio.toFixed(6)}\n\n**Fibonacci Sequence:** ${result.fibonacci.join(", ")}\n\n*${result.explanation}*`
+      return `**Vortex Math Sequence:** ${result.sequence.join(", ")}\n\n*${result.explanation}*`
     }
 
     return JSON.stringify(result, null, 2)
   }
 
-  private formatConceptResponse(concept: MathConcept): string {
-    let response = `**${concept.name}**\n\n`
-    response += `${concept.description}\n\n`
+  private formatTimesTableResponse(result: any): string {
+    let response = `**${result.multiplier} Times Table:**\n\n`
+    result.table.forEach((entry: any) => {
+      response += `${entry.multiplication} = ${entry.result}\n`
+    })
+    return response
+  }
 
-    if (concept.formula) {
-      response += `**Formula:** ${concept.formula}\n\n`
-    }
-
-    if (concept.examples && concept.examples.length > 0) {
-      response += `**Example:**\n${concept.examples[0].explanation}`
-    }
-
+  private formatMirrorTimesTableResponse(result: any): string {
+    let response = `**Mirror Times Table for ${result.multiplier}:**\n\n`
+    response += `**Standard:** ${result.standard.join(", ")}\n`
+    response += `**Digital Roots:** ${result.mirror.join(", ")}\n`
+    response += `**Pattern:** ${result.pattern}\n\n`
+    response += `*All digital roots sum to 9, revealing the universal mathematical constant*`
     return response
   }
 
@@ -445,13 +353,13 @@ export class MathematicsModule implements ModuleInterface {
 
     for (const result of results) {
       if (result.type === "basic_arithmetic") {
-        totalConfidence += 0.95 // High confidence for basic math
+        totalConfidence += 0.95
       } else if (result.type === "tesla_vortex") {
-        totalConfidence += 0.8 // Good confidence for pattern analysis
-      } else if (result.type === "concept") {
-        totalConfidence += 0.9 // High confidence for known concepts
+        totalConfidence += 0.8
+      } else if (result.type === "times_table") {
+        totalConfidence += 0.9
       } else {
-        totalConfidence += 0.6 // Medium confidence for other results
+        totalConfidence += 0.7
       }
     }
 
@@ -459,7 +367,6 @@ export class MathematicsModule implements ModuleInterface {
   }
 
   async learn(data: any): Promise<void> {
-    // Save successful math operations to learnt data
     if (data.results && data.results.length > 0) {
       for (const result of data.results) {
         const learntEntry = {

@@ -1,143 +1,141 @@
-export interface UserMemoryEntry {
-  key: string
-  value: string
-  timestamp: number
-  importance: number
-  type: string
-  source: string
-}
-
 export class UserMemorySystem {
-  private memory: Map<string, UserMemoryEntry> = new Map()
-  private storageKey = "zacai_user_memory"
-
-  constructor() {
-    this.loadFromStorage()
+  private static userProfile: any = {
+    name: null,
+    age: null,
+    location: null,
+    interests: [],
+    preferences: {},
+    conversationHistory: [],
+    personalFacts: new Map(),
+    lastUpdated: null,
   }
 
-  store(key: string, value: string, type = "general", importance = 0.5): void {
-    const entry: UserMemoryEntry = {
-      key: key.toLowerCase(),
-      value,
-      timestamp: Date.now(),
-      importance,
-      type,
-      source: "conversation",
+  static extractPersonalInfo(input: string): any {
+    const extracted = {
+      name: this.extractName(input),
+      age: this.extractAge(input),
+      location: this.extractLocation(input),
+      interests: this.extractInterests(input),
+      preferences: this.extractPreferences(input),
     }
 
-    this.memory.set(entry.key, entry)
-    this.saveToStorage()
+    // Update user profile with new information
+    this.updateProfile(extracted)
 
-    console.log(`📝 Stored memory: ${key} = ${value}`)
+    return extracted
   }
 
-  retrieve(key: string): UserMemoryEntry | null {
-    return this.memory.get(key.toLowerCase()) || null
-  }
+  private static extractName(input: string): string | null {
+    const patterns = [/my name is (\w+)/i, /i'm (\w+)/i, /i am (\w+)/i, /call me (\w+)/i]
 
-  search(query: string): UserMemoryEntry[] {
-    const results: UserMemoryEntry[] = []
-    const lowerQuery = query.toLowerCase()
-
-    for (const entry of this.memory.values()) {
-      if (entry.key.includes(lowerQuery) || entry.value.toLowerCase().includes(lowerQuery)) {
-        results.push(entry)
+    for (const pattern of patterns) {
+      const match = input.match(pattern)
+      if (match) {
+        return match[1]
       }
     }
 
-    return results.sort((a, b) => b.importance - a.importance)
+    return null
   }
 
-  getAllMemories(): UserMemoryEntry[] {
-    return Array.from(this.memory.values()).sort((a, b) => b.timestamp - a.timestamp)
+  private static extractAge(input: string): number | null {
+    const patterns = [/i am (\d+) years old/i, /i'm (\d+) years old/i, /my age is (\d+)/i, /i am (\d+)/i]
+
+    for (const pattern of patterns) {
+      const match = input.match(pattern)
+      if (match) {
+        return Number.parseInt(match[1])
+      }
+    }
+
+    return null
   }
 
-  extractPersonalInfo(message: string): void {
-    // Extract name
-    const nameMatch = message.match(/(?:my name is|i'm|i am|call me)\s+(\w+)/i)
-    if (nameMatch) {
-      this.store("name", nameMatch[1], "personal", 0.9)
+  private static extractLocation(input: string): string | null {
+    const patterns = [/i live in (\w+)/i, /i'm from (\w+)/i, /i am from (\w+)/i, /my location is (\w+)/i]
+
+    for (const pattern of patterns) {
+      const match = input.match(pattern)
+      if (match) {
+        return match[1]
+      }
     }
 
-    // Extract age
-    const ageMatch = message.match(/(?:i am|i'm)\s+(\d+)\s+years?\s+old/i)
-    if (ageMatch) {
-      this.store("age", ageMatch[1], "personal", 0.8)
-    }
-
-    // Extract interests
-    const interestMatch = message.match(/i (?:like|love|enjoy)\s+(.+?)(?:\.|$|,)/i)
-    if (interestMatch) {
-      this.store("interests", interestMatch[1].trim(), "personal", 0.7)
-    }
-
-    // Extract location
-    const locationMatch = message.match(/i (?:live|am) (?:in|from)\s+(.+?)(?:\.|$|,)/i)
-    if (locationMatch) {
-      this.store("location", locationMatch[1].trim(), "personal", 0.8)
-    }
+    return null
   }
 
-  getPersonalSummary(): string {
-    const personalEntries = Array.from(this.memory.values())
-      .filter((entry) => entry.type === "personal")
-      .sort((a, b) => b.importance - a.importance)
+  private static extractInterests(input: string): string[] {
+    const interests = []
+    const patterns = [/i like (\w+)/gi, /i love (\w+)/gi, /i enjoy (\w+)/gi, /i'm interested in (\w+)/gi]
 
-    if (personalEntries.length === 0) {
-      return "I don't have any personal information about you stored yet."
+    for (const pattern of patterns) {
+      const matches = input.matchAll(pattern)
+      for (const match of matches) {
+        interests.push(match[1])
+      }
     }
 
-    let summary = "Here's what I remember about you:\n\n"
-    personalEntries.forEach((entry) => {
-      summary += `• **${entry.key}**: ${entry.value}\n`
+    return interests
+  }
+
+  private static extractPreferences(input: string): any {
+    const preferences: any = {}
+
+    // Extract color preferences
+    const colorMatch = input.match(/my favorite color is (\w+)/i)
+    if (colorMatch) {
+      preferences.favoriteColor = colorMatch[1]
+    }
+
+    // Extract food preferences
+    const foodMatch = input.match(/my favorite food is (\w+)/i)
+    if (foodMatch) {
+      preferences.favoriteFood = foodMatch[1]
+    }
+
+    return preferences
+  }
+
+  private static updateProfile(extracted: any): void {
+    if (extracted.name) this.userProfile.name = extracted.name
+    if (extracted.age) this.userProfile.age = extracted.age
+    if (extracted.location) this.userProfile.location = extracted.location
+    if (extracted.interests.length > 0) {
+      this.userProfile.interests = [...new Set([...this.userProfile.interests, ...extracted.interests])]
+    }
+    if (Object.keys(extracted.preferences).length > 0) {
+      this.userProfile.preferences = { ...this.userProfile.preferences, ...extracted.preferences }
+    }
+
+    this.userProfile.lastUpdated = Date.now()
+  }
+
+  static getUserProfile(): any {
+    return { ...this.userProfile }
+  }
+
+  static addConversationEntry(input: string, response: string, confidence: number): void {
+    this.userProfile.conversationHistory.push({
+      timestamp: Date.now(),
+      input,
+      response,
+      confidence,
+      personalInfoExtracted: this.extractPersonalInfo(input),
     })
 
-    return summary
-  }
-
-  private loadFromStorage(): void {
-    try {
-      const stored = localStorage.getItem(this.storageKey)
-      if (stored) {
-        const data = JSON.parse(stored)
-        data.forEach((entry: UserMemoryEntry) => {
-          this.memory.set(entry.key, entry)
-        })
-        console.log(`✅ Loaded ${data.length} memory entries`)
-      }
-    } catch (error) {
-      console.warn("Failed to load user memory:", error)
+    // Keep only last 100 conversations
+    if (this.userProfile.conversationHistory.length > 100) {
+      this.userProfile.conversationHistory = this.userProfile.conversationHistory.slice(-100)
     }
   }
 
-  private saveToStorage(): void {
-    try {
-      const data = Array.from(this.memory.values())
-      localStorage.setItem(this.storageKey, JSON.stringify(data))
-    } catch (error) {
-      console.warn("Failed to save user memory:", error)
-    }
-  }
-
-  clear(): void {
-    this.memory.clear()
-    localStorage.removeItem(this.storageKey)
-  }
-
-  getStats(): any {
-    const entries = Array.from(this.memory.values())
-    const personalEntries = entries.filter((e) => e.type === "personal")
-    const generalEntries = entries.filter((e) => e.type === "general")
-
-    return {
-      totalEntries: entries.length,
-      personalEntries: personalEntries.length,
-      generalEntries: generalEntries.length,
-      averageImportance: entries.length > 0 ? entries.reduce((sum, e) => sum + e.importance, 0) / entries.length : 0,
-      oldestEntry: entries.length > 0 ? Math.min(...entries.map((e) => e.timestamp)) : null,
-      newestEntry: entries.length > 0 ? Math.max(...entries.map((e) => e.timestamp)) : null,
-    }
+  static getRelevantMemories(query: string): any[] {
+    return this.userProfile.conversationHistory
+      .filter(
+        (entry: any) =>
+          entry.input.toLowerCase().includes(query.toLowerCase()) ||
+          entry.response.toLowerCase().includes(query.toLowerCase()),
+      )
+      .slice(-5) // Return last 5 relevant memories
   }
 }
-
-export const userMemory = new UserMemorySystem()
