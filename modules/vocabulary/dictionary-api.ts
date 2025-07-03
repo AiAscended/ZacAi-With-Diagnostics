@@ -1,4 +1,3 @@
-import { apiManager } from "@/core/api/manager"
 import type { VocabularyEntry } from "@/types/modules"
 
 export interface DictionaryEntry {
@@ -21,18 +20,26 @@ export interface DictionaryEntry {
   sourceUrls?: string[]
 }
 
-export class DictionaryAPI {
-  private baseUrl = "https://api.dictionaryapi.dev/api/v2/entries/en"
+export class DictionaryAPIClient {
+  private static readonly FREE_DICTIONARY_API = "https://api.dictionaryapi.dev/api/v2/entries/en"
+  private static readonly CACHE_DURATION = 86400000 // 24 hours
 
-  async lookupWord(word: string): Promise<VocabularyEntry | null> {
+  static async lookupWord(word: string): Promise<VocabularyEntry | null> {
     try {
-      const cacheKey = `dict_${word.toLowerCase()}`
-      const url = `${this.baseUrl}/${encodeURIComponent(word)}`
+      const cleanWord = word.toLowerCase().trim()
+      const url = `${this.FREE_DICTIONARY_API}/${encodeURIComponent(cleanWord)}`
 
-      const response = await apiManager.makeRequest(url, {}, cacheKey, 86400000) // 24 hour cache
+      const response = await fetch(url)
 
-      if (response && Array.isArray(response) && response.length > 0) {
-        return this.formatDictionaryResponse(word, response[0])
+      if (!response.ok) {
+        console.warn(`Dictionary API returned ${response.status} for word: ${word}`)
+        return null
+      }
+
+      const data = await response.json()
+
+      if (Array.isArray(data) && data.length > 0) {
+        return this.formatDictionaryResponse(cleanWord, data[0])
       }
 
       return null
@@ -42,7 +49,7 @@ export class DictionaryAPI {
     }
   }
 
-  private formatDictionaryResponse(word: string, data: any): VocabularyEntry {
+  private static formatDictionaryResponse(word: string, data: any): VocabularyEntry {
     const meanings = data.meanings || []
     const firstMeaning = meanings[0] || {}
     const definitions = firstMeaning.definitions || []
@@ -67,8 +74,7 @@ export class DictionaryAPI {
     }
   }
 
-  private calculateDifficulty(word: string): number {
-    // Simple difficulty calculation based on word length and complexity
+  private static calculateDifficulty(word: string): number {
     const length = word.length
     const hasComplexPatterns = /[^a-zA-Z]/.test(word)
 
@@ -79,8 +85,7 @@ export class DictionaryAPI {
     return hasComplexPatterns ? 5 : 4
   }
 
-  private calculateFrequency(word: string): number {
-    // Common words frequency estimation
+  private static calculateFrequency(word: string): number {
     const commonWords = [
       "the",
       "be",
@@ -110,6 +115,38 @@ export class DictionaryAPI {
     if (word.length <= 8) return 4
     return 2
   }
-}
 
-export const dictionaryAPI = new DictionaryAPI()
+  static formatForDisplay(entry: VocabularyEntry): string {
+    let formatted = `**${entry.word}**`
+
+    if (entry.pronunciation) {
+      formatted += ` /${entry.pronunciation}/`
+    }
+
+    formatted += "\n\n"
+
+    if (entry.partOfSpeech) {
+      formatted += `**${entry.partOfSpeech}**\n`
+    }
+
+    formatted += `${entry.definition}\n`
+
+    if (entry.examples && entry.examples.length > 0) {
+      formatted += `\n**Example:** "${entry.examples[0]}"\n`
+    }
+
+    if (entry.synonyms && entry.synonyms.length > 0) {
+      formatted += `\n**Synonyms:** ${entry.synonyms.slice(0, 5).join(", ")}`
+    }
+
+    if (entry.antonyms && entry.antonyms.length > 0) {
+      formatted += `\n**Antonyms:** ${entry.antonyms.slice(0, 5).join(", ")}`
+    }
+
+    if (entry.etymology) {
+      formatted += `\n\n**Etymology:** ${entry.etymology}`
+    }
+
+    return formatted
+  }
+}
