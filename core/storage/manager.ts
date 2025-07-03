@@ -1,107 +1,109 @@
+interface LearntEntry {
+  id: string
+  content: any
+  confidence: number
+  source: string
+  context: string
+  timestamp: number
+  usageCount: number
+  lastUsed: number
+  verified: boolean
+  tags: string[]
+  relationships: string[]
+}
+
 class StorageManager {
-  private initialized = false
+  private cache = new Map<string, any>()
+  private readonly STORAGE_PREFIX = "zacai_"
 
-  async initialize(): Promise<void> {
-    if (this.initialized) return
-
-    console.log("🚀 Initializing Storage Manager...")
-    this.initialized = true
-    console.log("✅ Storage Manager initialized")
-  }
-
-  async loadSeedData(filename: string): Promise<any> {
+  async loadLearntData(module: string): Promise<any> {
     try {
-      const response = await fetch(`/seed/${filename}.json`)
-      if (!response.ok) {
-        throw new Error(`Failed to load seed data: ${filename}`)
-      }
-      return await response.json()
-    } catch (error) {
-      console.error(`Error loading seed data ${filename}:`, error)
-      return this.getFallbackData(filename)
-    }
-  }
+      const key = `${this.STORAGE_PREFIX}learnt_${module}`
+      const cached = this.cache.get(key)
+      if (cached) return cached
 
-  async loadLearntData(filename: string): Promise<any> {
-    try {
-      const stored = localStorage.getItem(`zacai_learnt_${filename}`)
+      const stored = localStorage.getItem(key)
       if (stored) {
-        return JSON.parse(stored)
+        const data = JSON.parse(stored)
+        this.cache.set(key, data)
+        return data
       }
-      return { entries: {} }
+
+      // Try loading from public files as fallback
+      try {
+        const response = await fetch(`/learnt_${module}.json`)
+        if (response.ok) {
+          const data = await response.json()
+          this.cache.set(key, data)
+          return data
+        }
+      } catch (error) {
+        console.warn(`No public learnt data for ${module}`)
+      }
+
+      return { entries: {}, metadata: { version: "1.0.0", totalEntries: 0 } }
     } catch (error) {
-      console.error(`Error loading learnt data ${filename}:`, error)
-      return { entries: {} }
+      console.error(`Error loading learnt data for ${module}:`, error)
+      return { entries: {}, metadata: { version: "1.0.0", totalEntries: 0 } }
     }
   }
 
-  async addLearntEntry(filename: string, entry: any): Promise<void> {
+  async saveLearntData(module: string, data: any): Promise<void> {
     try {
-      const data = await this.loadLearntData(filename)
-      data.entries[entry.id] = entry
-      localStorage.setItem(`zacai_learnt_${filename}`, JSON.stringify(data))
+      const key = `${this.STORAGE_PREFIX}learnt_${module}`
+      localStorage.setItem(key, JSON.stringify(data))
+      this.cache.set(key, data)
+      console.log(`✅ Saved learnt data for ${module}`)
     } catch (error) {
-      console.error(`Error saving learnt entry to ${filename}:`, error)
+      console.error(`Error saving learnt data for ${module}:`, error)
     }
   }
 
-  private getFallbackData(filename: string): any {
-    switch (filename) {
-      case "vocabulary":
-        return {
-          metadata: { version: "1.0.0", totalEntries: 3 },
-          words: {
-            algorithm: {
-              definition:
-                "A process or set of rules to be followed in calculations or other problem-solving operations",
-              partOfSpeech: "noun",
-              phonetics: "/ˈælɡəˌrɪðəm/",
-              frequency: 4,
-              examples: ["The sorting algorithm efficiently organized the data"],
-              synonyms: ["procedure", "method", "process"],
-              difficulty: 4,
-            },
-            quantum: {
-              definition: "The minimum amount of any physical entity involved in an interaction",
-              partOfSpeech: "noun",
-              phonetics: "/ˈkwɒntəm/",
-              frequency: 3,
-              examples: ["Quantum mechanics describes behavior at atomic scales"],
-              synonyms: ["unit", "amount", "portion"],
-              difficulty: 5,
-            },
-            artificial: {
-              definition: "Made or produced by human beings rather than occurring naturally",
-              partOfSpeech: "adjective",
-              phonetics: "/ˌɑːtɪˈfɪʃəl/",
-              frequency: 4,
-              examples: ["Artificial intelligence mimics human cognitive functions"],
-              synonyms: ["synthetic", "man-made", "manufactured"],
-              antonyms: ["natural", "organic", "genuine"],
-              difficulty: 2,
-            },
-          },
-        }
-      case "mathematics":
-        return {
-          metadata: { version: "1.0.0", totalEntries: 2 },
-          concepts: {
-            basic_arithmetic: {
-              name: "Basic Arithmetic",
-              description: "Fundamental mathematical operations",
-              operations: ["+", "-", "*", "/"],
-              examples: ["2+2=4", "5*3=15", "10/2=5"],
-            },
-            order_of_operations: {
-              name: "Order of Operations",
-              description: "PEMDAS/BODMAS rule for mathematical expressions",
-              rule: "Parentheses, Exponents, Multiplication/Division, Addition/Subtraction",
-              examples: ["3+3*3=12", "(3+3)*3=18"],
-            },
-          },
-        }
-      default:
-        return { metadata: { version: "1.0.0", totalEntries: 0 }, entries: {} }
+  async addLearntEntry(module: string, entry: LearntEntry): Promise<void> {
+    try {
+      const data = await this.loadLearntData(module)
+
+      if (!data.entries) data.entries = {}
+      if (!data.metadata) data.metadata = { version: "1.0.0", totalEntries: 0 }
+
+      data.entries[entry.id] = entry
+      data.metadata.totalEntries = Object.keys(data.entries).length
+      data.metadata.lastUpdate = Date.now()
+
+      await this.saveLearntData(module, data)
+      console.log(`📚 Added learnt entry to ${module}: ${entry.id}`)
+    } catch (error) {
+      console.error(`Error adding learnt entry to ${module}:`, error)
+    }
+  }
+
+  async searchLearntEntries(module: string, query: string): Promise<LearntEntry[]> {
+    try {
+      const data = await this.loadLearntData(module)
+      const entries = Object.values(data.entries || {}) as LearntEntry[]
+
+      return entries
+        .filter(
+          (entry) =>
+            JSON.stringify(entry.content).toLowerCase().includes(query.toLowerCase()) ||
+            entry.context.toLowerCase().includes(query.toLowerCase()) ||
+            entry.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase())),
+        )
+        .sort((a, b) => b.confidence - a.confidence)
+    } catch (error) {
+      console.error(`Error searching learnt entries in ${module}:`, error)
+      return []
+    }
+  }
+
+  clearCache(): void {
+    this.cache.clear()
+  }
+
+  getStats(): any {
+    return {
+      cacheSize: this.cache.size,
+      cachedModules: Array.from(this.cache.keys()),
     }
   }
 }
