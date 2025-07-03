@@ -1,12 +1,6 @@
-import type { VocabularyEntry } from "@/types/modules"
-
-export interface DictionaryEntry {
+export interface WordDefinition {
   word: string
   phonetic?: string
-  phonetics: Array<{
-    text?: string
-    audio?: string
-  }>
   meanings: Array<{
     partOfSpeech: string
     definitions: Array<{
@@ -20,133 +14,177 @@ export interface DictionaryEntry {
   sourceUrls?: string[]
 }
 
+export interface DictionaryResponse {
+  success: boolean
+  data?: WordDefinition
+  error?: string
+  cached?: boolean
+  timestamp: number
+}
+
 export class DictionaryAPIClient {
-  private static readonly FREE_DICTIONARY_API = "https://api.dictionaryapi.dev/api/v2/entries/en"
+  private static readonly API_BASE = "https://api.dictionaryapi.dev/api/v2/entries/en"
   private static readonly CACHE_DURATION = 86400000 // 24 hours
+  private cache = new Map<string, { data: WordDefinition; timestamp: number }>()
 
-  static async lookupWord(word: string): Promise<VocabularyEntry | null> {
+  async lookupWord(word: string): Promise<DictionaryResponse> {
+    const normalizedWord = word.toLowerCase().trim()
+
+    if (!normalizedWord) {
+      return {
+        success: false,
+        error: "Word cannot be empty",
+        timestamp: Date.now(),
+      }
+    }
+
+    // Check cache first
+    const cached = this.getCachedWord(normalizedWord)
+    if (cached) {
+      return {
+        success: true,
+        data: cached,
+        cached: true,
+        timestamp: Date.now(),
+      }
+    }
+
     try {
-      const cleanWord = word.toLowerCase().trim()
-      const url = `${this.FREE_DICTIONARY_API}/${encodeURIComponent(cleanWord)}`
-
-      const response = await fetch(url)
+      const response = await fetch(`${DictionaryAPIClient.API_BASE}/${encodeURIComponent(normalizedWord)}`)
 
       if (!response.ok) {
-        console.warn(`Dictionary API returned ${response.status} for word: ${word}`)
-        return null
+        if (response.status === 404) {
+          return {
+            success: false,
+            error: `Word "${word}" not found in dictionary`,
+            timestamp: Date.now(),
+          }
+        }
+        throw new Error(`API request failed: ${response.status}`)
       }
 
       const data = await response.json()
 
-      if (Array.isArray(data) && data.length > 0) {
-        return this.formatDictionaryResponse(cleanWord, data[0])
+      if (!Array.isArray(data) || data.length === 0) {
+        return {
+          success: false,
+          error: "Invalid response format from dictionary API",
+          timestamp: Date.now(),
+        }
       }
 
-      return null
+      const wordData = this.parseAPIResponse(data[0])
+
+      // Cache the result
+      this.cacheWord(normalizedWord, wordData)
+
+      return {
+        success: true,
+        data: wordData,
+        cached: false,
+        timestamp: Date.now(),
+      }
     } catch (error) {
-      console.error(`Dictionary lookup failed for "${word}":`, error)
+      console.error("Dictionary API error:", error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+        timestamp: Date.now(),
+      }
+    }
+  }
+
+  private parseAPIResponse(apiData: any): WordDefinition {
+    return {
+      word: apiData.word || "",
+      phonetic: apiData.phonetic || apiData.phonetics?.[0]?.text || "",
+      meanings: (apiData.meanings || []).map((meaning: any) => ({
+        partOfSpeech: meaning.partOfSpeech || "",
+        definitions: (meaning.definitions || []).map((def: any) => ({
+          definition: def.definition || "",
+          example: def.example || undefined,
+          synonyms: def.synonyms || [],
+          antonyms: def.antonyms || [],
+        })),
+      })),
+      origin: apiData.origin || undefined,
+      sourceUrls: apiData.sourceUrls || [],
+    }
+  }
+
+  private getCachedWord(word: string): WordDefinition | null {
+    const cached = this.cache.get(word)
+    if (!cached) return null
+
+    const isExpired = Date.now() - cached.timestamp > DictionaryAPIClient.CACHE_DURATION
+    if (isExpired) {
+      this.cache.delete(word)
       return null
     }
+
+    return cached.data
   }
 
-  private static formatDictionaryResponse(word: string, data: any): VocabularyEntry {
-    const meanings = data.meanings || []
-    const firstMeaning = meanings[0] || {}
-    const definitions = firstMeaning.definitions || []
-    const firstDefinition = definitions[0] || {}
-
-    return {
-      word: word.toLowerCase(),
-      definition: firstDefinition.definition || "No definition available",
-      pronunciation: data.phonetic || "",
-      partOfSpeech: firstMeaning.partOfSpeech || "unknown",
-      examples: definitions
-        .filter((def: any) => def.example)
-        .map((def: any) => def.example)
-        .slice(0, 3),
-      synonyms: firstDefinition.synonyms || [],
-      antonyms: firstDefinition.antonyms || [],
-      etymology: data.origin || "",
-      difficulty: this.calculateDifficulty(word),
-      frequency: this.calculateFrequency(word),
+  private cacheWord(word: string, data: WordDefinition): void {
+    this.cache.set(word, {
+      data,
       timestamp: Date.now(),
-      source: "dictionary-api",
+    })
+  }
+
+  getCacheStats(): { size: number; words: string[] } {
+    return {
+      size: this.cache.size,
+      words: Array.from(this.cache.keys()),
     }
   }
 
-  private static calculateDifficulty(word: string): number {
-    const length = word.length
-    const hasComplexPatterns = /[^a-zA-Z]/.test(word)
-
-    if (length <= 4) return 1
-    if (length <= 6) return 2
-    if (length <= 8) return 3
-    if (length <= 10) return 4
-    return hasComplexPatterns ? 5 : 4
+  clearCache(): void {
+    this.cache.clear()
   }
 
-  private static calculateFrequency(word: string): number {
-    const commonWords = [
-      "the",
-      "be",
-      "to",
-      "of",
-      "and",
-      "a",
-      "in",
-      "that",
-      "have",
-      "i",
-      "it",
-      "for",
-      "not",
-      "on",
-      "with",
-      "he",
-      "as",
-      "you",
-      "do",
-      "at",
-    ]
+  // Helper method to extract key information from a word definition
+  getWordSummary(definition: WordDefinition): string {
+    if (!definition.meanings || definition.meanings.length === 0) {
+      return "No definition available"
+    }
 
-    if (commonWords.includes(word.toLowerCase())) return 10
-    if (word.length <= 4) return 8
-    if (word.length <= 6) return 6
-    if (word.length <= 8) return 4
-    return 2
+    const firstMeaning = definition.meanings[0]
+    const firstDefinition = firstMeaning.definitions?.[0]?.definition || "No definition available"
+
+    return `${definition.word} (${firstMeaning.partOfSpeech}): ${firstDefinition}`
   }
 
-  static formatForDisplay(entry: VocabularyEntry): string {
-    let formatted = `**${entry.word}**`
+  // Method to get all parts of speech for a word
+  getPartsOfSpeech(definition: WordDefinition): string[] {
+    return definition.meanings?.map((m) => m.partOfSpeech).filter(Boolean) || []
+  }
 
-    if (entry.pronunciation) {
-      formatted += ` /${entry.pronunciation}/`
-    }
+  // Method to get all synonyms for a word
+  getAllSynonyms(definition: WordDefinition): string[] {
+    const synonyms = new Set<string>()
 
-    formatted += "\n\n"
+    definition.meanings?.forEach((meaning) => {
+      meaning.definitions?.forEach((def) => {
+        def.synonyms?.forEach((synonym) => synonyms.add(synonym))
+      })
+    })
 
-    if (entry.partOfSpeech) {
-      formatted += `**${entry.partOfSpeech}**\n`
-    }
+    return Array.from(synonyms)
+  }
 
-    formatted += `${entry.definition}\n`
+  // Method to get all antonyms for a word
+  getAllAntonyms(definition: WordDefinition): string[] {
+    const antonyms = new Set<string>()
 
-    if (entry.examples && entry.examples.length > 0) {
-      formatted += `\n**Example:** "${entry.examples[0]}"\n`
-    }
+    definition.meanings?.forEach((meaning) => {
+      meaning.definitions?.forEach((def) => {
+        def.antonyms?.forEach((antonym) => antonyms.add(antonym))
+      })
+    })
 
-    if (entry.synonyms && entry.synonyms.length > 0) {
-      formatted += `\n**Synonyms:** ${entry.synonyms.slice(0, 5).join(", ")}`
-    }
-
-    if (entry.antonyms && entry.antonyms.length > 0) {
-      formatted += `\n**Antonyms:** ${entry.antonyms.slice(0, 5).join(", ")}`
-    }
-
-    if (entry.etymology) {
-      formatted += `\n\n**Etymology:** ${entry.etymology}`
-    }
-
-    return formatted
+    return Array.from(antonyms)
   }
 }
+
+export const dictionaryAPI = new DictionaryAPIClient()

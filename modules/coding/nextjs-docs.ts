@@ -1,199 +1,418 @@
-import type { CodingConcept } from "@/types/modules"
+export interface NextJSConcept {
+  name: string
+  category: string
+  description: string
+  syntax?: string
+  examples: Array<{
+    title: string
+    code: string
+    explanation: string
+  }>
+  relatedConcepts: string[]
+  officialDocs?: string
+  difficulty: number
+}
 
-export class NextJSDocsAPI {
-  private baseUrl = "https://nextjs.org/docs"
-  private systemKnowledge: { [key: string]: CodingConcept } = {}
+export class NextJSDocsClient {
+  private static readonly NEXTJS_DOCS_BASE = "https://nextjs.org/docs"
+  private static readonly CACHE_DURATION = 3600000 // 1 hour
 
-  constructor() {
-    this.initializeSystemKnowledge()
-  }
-
-  private initializeSystemKnowledge(): void {
-    this.systemKnowledge = {
-      "app-router": {
-        name: "App Router",
-        language: "typescript",
-        description: "Next.js App Router for file-based routing with app directory",
-        syntax: "app/page.tsx, app/layout.tsx, app/loading.tsx",
-        examples: [
-          {
-            title: "Basic Page Component",
-            code: `export default function Page() {
-  return <div>Hello World</div>
-}`,
-            explanation: "Simple page component in app directory",
-          },
-          {
-            title: "Layout Component",
-            code: `export default function Layout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+  // Built-in Next.js knowledge base
+  private static readonly NEXTJS_KNOWLEDGE: { [key: string]: NextJSConcept } = {
+    "app-router": {
+      name: "App Router",
+      category: "routing",
+      description: "Next.js 13+ file-system based router built on React Server Components",
+      syntax: "app/page.tsx, app/layout.tsx, app/loading.tsx, app/error.tsx",
+      examples: [
+        {
+          title: "Basic Page Component",
+          code: `// app/page.tsx
+export default function HomePage() {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <div>
+      <h1>Welcome to Next.js App Router</h1>
+      <p>This is a server component by default</p>
+    </div>
   )
 }`,
-            explanation: "Root layout component that wraps all pages",
-          },
-        ],
-        difficulty: 3,
-        category: "routing",
-      },
-      "server-components": {
-        name: "Server Components",
-        language: "typescript",
-        description: "React Server Components that render on the server",
-        syntax: "async function Component() { ... }",
-        examples: [
-          {
-            title: "Server Component with Data Fetching",
-            code: `async function ServerComponent() {
-  const data = await fetch('https://api.example.com/data')
-  const json = await data.json()
-  
-  return <div>{json.title}</div>
-}`,
-            explanation: "Server component that fetches data at build time",
-          },
-        ],
-        difficulty: 4,
-        category: "components",
-      },
-      "client-components": {
-        name: "Client Components",
-        language: "typescript",
-        description: "React components that run in the browser with 'use client' directive",
-        syntax: "'use client'\n\nexport default function Component() { ... }",
-        examples: [
-          {
-            title: "Interactive Client Component",
-            code: `'use client'
+          explanation: "Basic page component in the app directory - renders on server by default",
+        },
+        {
+          title: "Dynamic Route",
+          code: `// app/blog/[slug]/page.tsx
+interface PageProps {
+  params: { slug: string }
+}
 
+export default function BlogPost({ params }: PageProps) {
+  return (
+    <div>
+      <h1>Blog Post: {params.slug}</h1>
+    </div>
+  )
+}`,
+          explanation: "Dynamic route using square brackets for URL parameters",
+        },
+      ],
+      relatedConcepts: ["server-components", "layouts", "loading-ui"],
+      officialDocs: "https://nextjs.org/docs/app",
+      difficulty: 3,
+    },
+    "server-components": {
+      name: "Server Components",
+      category: "components",
+      description: "React components that render on the server, reducing client-side JavaScript",
+      syntax: "Default in app directory - no 'use client' directive needed",
+      examples: [
+        {
+          title: "Server Component with Data Fetching",
+          code: `// app/posts/page.tsx
+async function PostsPage() {
+  // This runs on the server
+  const response = await fetch('https://api.example.com/posts', {
+    cache: 'force-cache' // Next.js caching
+  })
+  const posts = await response.json()
+  
+  return (
+    <div>
+      <h1>Latest Posts</h1>
+      {posts.map(post => (
+        <article key={post.id}>
+          <h2>{post.title}</h2>
+          <p>{post.excerpt}</p>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+export default PostsPage`,
+          explanation: "Server component that fetches data directly - no useEffect needed",
+        },
+      ],
+      relatedConcepts: ["client-components", "data-fetching", "caching"],
+      officialDocs: "https://nextjs.org/docs/app/building-your-application/rendering/server-components",
+      difficulty: 4,
+    },
+    "client-components": {
+      name: "Client Components",
+      category: "components",
+      description: "React components that render on the client, enabling interactivity",
+      syntax: "'use client' directive at the top of the file",
+      examples: [
+        {
+          title: "Interactive Counter Component",
+          code: `'use client'
 import { useState } from 'react'
 
 export default function Counter() {
   const [count, setCount] = useState(0)
   
   return (
-    <button onClick={() => setCount(count + 1)}>
-      Count: {count}
-    </button>
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+      <button onClick={() => setCount(count - 1)}>
+        Decrement
+      </button>
+    </div>
   )
 }`,
-            explanation: "Client component with state and interactivity",
-          },
-        ],
-        difficulty: 2,
-        category: "components",
-      },
-      "server-actions": {
-        name: "Server Actions",
-        language: "typescript",
-        description: "Functions that run on the server and can be called from client components",
-        syntax: "'use server'\n\nexport async function action() { ... }",
-        examples: [
-          {
-            title: "Form Server Action",
-            code: `'use server'
+          explanation: "Client component with state and event handlers - requires 'use client'",
+        },
+      ],
+      relatedConcepts: ["server-components", "hooks", "interactivity"],
+      officialDocs: "https://nextjs.org/docs/app/building-your-application/rendering/client-components",
+      difficulty: 3,
+    },
+    layouts: {
+      name: "Layouts",
+      category: "routing",
+      description: "Shared UI components that wrap pages and maintain state across navigation",
+      syntax: "layout.tsx files in app directory",
+      examples: [
+        {
+          title: "Root Layout",
+          code: `// app/layout.tsx
+import './globals.css'
 
-export async function createUser(formData: FormData) {
-  const name = formData.get('name')
-  // Save to database
-  return { success: true }
+export const metadata = {
+  title: 'My Next.js App',
+  description: 'Built with App Router',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <header>
+          <nav>My App Navigation</nav>
+        </header>
+        <main>{children}</main>
+        <footer>© 2024 My App</footer>
+      </body>
+    </html>
+  )
 }`,
-            explanation: "Server action for handling form submissions",
-          },
-        ],
-        difficulty: 4,
-        category: "server",
-      },
-    }
+          explanation: "Root layout wraps all pages and defines HTML structure",
+        },
+      ],
+      relatedConcepts: ["app-router", "metadata", "nested-layouts"],
+      officialDocs: "https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts",
+      difficulty: 2,
+    },
   }
 
-  async lookupConcept(query: string): Promise<CodingConcept | null> {
-    // First check system knowledge
-    const systemConcept = this.findSystemConcept(query)
-    if (systemConcept) {
-      return systemConcept
+  /**
+   * Look up Next.js concept from built-in knowledge base
+   */
+  static async lookupNextJSConcept(concept: string): Promise<NextJSConcept | null> {
+    const normalizedConcept = concept.toLowerCase().replace(/\s+/g, "-")
+
+    if (this.NEXTJS_KNOWLEDGE[normalizedConcept]) {
+      return this.NEXTJS_KNOWLEDGE[normalizedConcept]
     }
 
-    // If not found in system knowledge, could extend to fetch from docs
-    // For now, return null for concepts not in our knowledge base
-    return null
-  }
-
-  private findSystemConcept(query: string): CodingConcept | null {
-    const lowerQuery = query.toLowerCase()
-
-    // Direct match
-    if (this.systemKnowledge[lowerQuery]) {
-      return this.systemKnowledge[lowerQuery]
-    }
-
-    // Partial match
-    for (const [key, concept] of Object.entries(this.systemKnowledge)) {
-      if (
-        key.includes(lowerQuery) ||
-        concept.name.toLowerCase().includes(lowerQuery) ||
-        concept.description.toLowerCase().includes(lowerQuery)
-      ) {
-        return concept
+    // Try partial matches
+    for (const [key, value] of Object.entries(this.NEXTJS_KNOWLEDGE)) {
+      if (key.includes(normalizedConcept) || normalizedConcept.includes(key)) {
+        return value
       }
     }
 
     return null
   }
 
-  getSystemFileAnalysis(filename: string): any {
-    const fileAnalysis: { [key: string]: any } = {
-      "app/page.tsx": {
-        purpose: "Main page component for the root route",
-        type: "Page Component",
-        framework: "Next.js App Router",
-        contains: ["React component", "Default export", "JSX return"],
-      },
+  /**
+   * Get system file knowledge - what each file in our system does
+   */
+  static getSystemFileKnowledge(filePath: string): any {
+    const systemFiles: { [key: string]: any } = {
       "app/layout.tsx": {
         purpose: "Root layout component that wraps all pages",
-        type: "Layout Component",
-        framework: "Next.js App Router",
-        contains: ["HTML structure", "Body wrapper", "Children prop"],
+        contains: "HTML structure, global navigation, metadata",
+        type: "Server Component",
+        importance: "Critical - defines app structure",
       },
-      "components/ui/button.tsx": {
-        purpose: "Reusable button component with variants",
-        type: "UI Component",
-        framework: "shadcn/ui",
-        contains: ["Button variants", "Tailwind classes", "forwardRef"],
+      "app/page.tsx": {
+        purpose: "Home page component",
+        contains: "Main landing page content and navigation",
+        type: "Server Component",
+        importance: "High - main entry point",
+      },
+      "components/ui/*": {
+        purpose: "Reusable UI components from shadcn/ui",
+        contains: "Button, Card, Input, Dialog, and other UI primitives",
+        type: "Mixed - some client, some server compatible",
+        importance: "High - core UI building blocks",
+      },
+      "modules/*/index.ts": {
+        purpose: "AI module implementations (vocabulary, math, coding, etc.)",
+        contains: "Module logic, processing, learning capabilities",
+        type: "Server-side TypeScript classes",
+        importance: "Critical - core AI functionality",
       },
       "core/system/manager.ts": {
-        purpose: "Central system manager for coordinating modules",
-        type: "Core System",
-        framework: "ZacAI Architecture",
-        contains: ["Module initialization", "Request processing", "System stats"],
+        purpose: "Central system manager coordinating all modules",
+        contains: "Module initialization, request routing, response synthesis",
+        type: "Server-side TypeScript class",
+        importance: "Critical - system orchestration",
       },
-      "modules/mathematics/index.ts": {
-        purpose: "Mathematics module for calculations and Tesla math",
-        type: "AI Module",
-        framework: "ZacAI Architecture",
-        contains: ["Tesla calculations", "Digital roots", "Pattern analysis"],
+      "types/global.ts": {
+        purpose: "TypeScript type definitions for the entire system",
+        contains: "Interfaces for modules, responses, system state",
+        type: "TypeScript definitions",
+        importance: "High - type safety and documentation",
       },
     }
 
-    return (
-      fileAnalysis[filename] || {
-        purpose: "Unknown file",
-        type: "Unknown",
-        framework: "Unknown",
-        contains: [],
-      }
-    )
+    return systemFiles[filePath] || null
   }
 
-  getAllSystemConcepts(): CodingConcept[] {
-    return Object.values(this.systemKnowledge)
+  /**
+   * Get Next.js best practices for specific scenarios
+   */
+  static getBestPractices(scenario: string): string[] {
+    const practices: { [key: string]: string[] } = {
+      "data-fetching": [
+        "Use Server Components for data fetching when possible",
+        "Implement proper error boundaries",
+        "Use Next.js caching strategies (force-cache, no-store, revalidate)",
+        "Handle loading states with loading.tsx files",
+        "Use TypeScript for API response types",
+      ],
+      performance: [
+        "Minimize client-side JavaScript with Server Components",
+        "Use Next.js Image component for optimized images",
+        "Implement proper code splitting",
+        "Use dynamic imports for heavy components",
+        "Optimize fonts with next/font",
+      ],
+      routing: [
+        "Use file-system based routing in app directory",
+        "Implement proper error.tsx and not-found.tsx pages",
+        "Use route groups for organization without affecting URL structure",
+        "Implement proper metadata for SEO",
+        "Use parallel routes for complex layouts",
+      ],
+      "state-management": [
+        "Use Server Components to reduce client-side state",
+        "Implement proper client/server component boundaries",
+        "Use React Context sparingly and only for client components",
+        "Consider server actions for form handling",
+        "Use URL state for shareable application state",
+      ],
+    }
+
+    return practices[scenario] || []
+  }
+
+  /**
+   * Analyze code and provide Next.js specific suggestions
+   */
+  static analyzeCode(code: string): any {
+    const analysis = {
+      issues: [] as string[],
+      suggestions: [] as string[],
+      componentType: "unknown",
+      nextjsFeatures: [] as string[],
+    }
+
+    // Detect component type
+    if (code.includes("'use client'")) {
+      analysis.componentType = "client"
+    } else if (code.includes("async function") || code.includes("await fetch")) {
+      analysis.componentType = "server"
+    }
+
+    // Check for common issues
+    if (code.includes("useEffect") && !code.includes("'use client'")) {
+      analysis.issues.push("useEffect requires 'use client' directive")
+    }
+
+    if (code.includes("useState") && !code.includes("'use client'")) {
+      analysis.issues.push("useState requires 'use client' directive")
+    }
+
+    if (code.includes("fetch") && code.includes("useEffect")) {
+      analysis.suggestions.push("Consider using Server Component for data fetching instead of useEffect")
+    }
+
+    // Detect Next.js features
+    if (code.includes("next/image")) {
+      analysis.nextjsFeatures.push("Next.js Image optimization")
+    }
+
+    if (code.includes("next/link")) {
+      analysis.nextjsFeatures.push("Next.js client-side navigation")
+    }
+
+    if (code.includes("metadata")) {
+      analysis.nextjsFeatures.push("Next.js metadata API")
+    }
+
+    return analysis
+  }
+
+  /**
+   * Get debugging help for common Next.js issues
+   */
+  static getDebuggingHelp(error: string): any {
+    const debuggingGuide: { [key: string]: any } = {
+      hydration: {
+        description: "Hydration errors occur when server and client render differently",
+        solutions: [
+          "Ensure server and client render the same content",
+          "Use useEffect for client-only code",
+          "Check for browser-only APIs in server components",
+          "Use suppressHydrationWarning sparingly for unavoidable differences",
+        ],
+        prevention: [
+          "Avoid using Date.now() or Math.random() in render",
+          "Use proper client/server component boundaries",
+          "Test with JavaScript disabled to verify server rendering",
+        ],
+      },
+      "use client": {
+        description: "Issues with client component directive",
+        solutions: [
+          "Add 'use client' at the top of files using browser APIs",
+          "Move interactive logic to client components",
+          "Keep data fetching in server components when possible",
+        ],
+        prevention: [
+          "Understand the client/server component boundary",
+          "Use server components by default",
+          "Only use client components when necessary",
+        ],
+      },
+      routing: {
+        description: "App Router navigation and routing issues",
+        solutions: [
+          "Check file naming conventions (page.tsx, layout.tsx)",
+          "Verify folder structure in app directory",
+          "Use proper dynamic route syntax [param]",
+          "Implement error.tsx for error handling",
+        ],
+        prevention: ["Follow Next.js file conventions", "Test routes thoroughly", "Implement proper error boundaries"],
+      },
+    }
+
+    const errorKey = Object.keys(debuggingGuide).find((key) => error.toLowerCase().includes(key))
+
+    return errorKey ? debuggingGuide[errorKey] : null
+  }
+
+  /**
+   * Get migration guide from Pages Router to App Router
+   */
+  static getMigrationGuide(): any {
+    return {
+      overview: "Migrating from Pages Router to App Router",
+      steps: [
+        {
+          step: 1,
+          title: "Create app directory",
+          description: "Create app/ directory alongside pages/",
+          code: "mkdir app",
+        },
+        {
+          step: 2,
+          title: "Move pages to app directory",
+          description: "Convert pages to page.tsx files in app directory",
+          before: "pages/index.tsx",
+          after: "app/page.tsx",
+        },
+        {
+          step: 3,
+          title: "Update layouts",
+          description: "Convert _app.tsx to layout.tsx",
+          before: "pages/_app.tsx",
+          after: "app/layout.tsx",
+        },
+        {
+          step: 4,
+          title: "Handle data fetching",
+          description: "Replace getServerSideProps with Server Components",
+          migration: "Use async Server Components instead of getServerSideProps",
+        },
+      ],
+      considerations: [
+        "Server Components are the default in App Router",
+        "Client Components require 'use client' directive",
+        "Data fetching happens directly in Server Components",
+        "Layouts are nested and persistent",
+      ],
+    }
   }
 }
 
-export const nextjsDocsAPI = new NextJSDocsAPI()
+export const nextjsDocsAPI = new NextJSDocsClient()
