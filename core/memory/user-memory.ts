@@ -1,141 +1,279 @@
+export interface UserMemoryEntry {
+  key: string
+  value: string
+  timestamp: number
+  importance: number
+  type: string
+  source: string
+  context?: string
+}
+
 export class UserMemorySystem {
-  private static userProfile: any = {
-    name: null,
-    age: null,
-    location: null,
-    interests: [],
-    preferences: {},
-    conversationHistory: [],
-    personalFacts: new Map(),
-    lastUpdated: null,
+  private memory: Map<string, UserMemoryEntry> = new Map()
+  private storageKey = "zacai_user_memory"
+  private conversationHistory: Array<{
+    input: string
+    response: string
+    timestamp: number
+    personalInfo: any
+  }> = []
+
+  constructor() {
+    this.loadFromStorage()
   }
 
-  static extractPersonalInfo(input: string): any {
-    const extracted = {
-      name: this.extractName(input),
-      age: this.extractAge(input),
-      location: this.extractLocation(input),
-      interests: this.extractInterests(input),
-      preferences: this.extractPreferences(input),
+  store(key: string, value: string, type = "general", importance = 0.5, context = ""): void {
+    const entry: UserMemoryEntry = {
+      key: key.toLowerCase(),
+      value,
+      timestamp: Date.now(),
+      importance,
+      type,
+      source: "conversation",
+      context,
     }
 
-    // Update user profile with new information
-    this.updateProfile(extracted)
+    this.memory.set(entry.key, entry)
+    this.saveToStorage()
+
+    console.log(`📝 Stored memory: ${key} = ${value}`)
+  }
+
+  retrieve(key: string): UserMemoryEntry | null {
+    return this.memory.get(key.toLowerCase()) || null
+  }
+
+  search(query: string): UserMemoryEntry[] {
+    const results: UserMemoryEntry[] = []
+    const lowerQuery = query.toLowerCase()
+
+    for (const entry of this.memory.values()) {
+      if (
+        entry.key.includes(lowerQuery) ||
+        entry.value.toLowerCase().includes(lowerQuery) ||
+        entry.context?.toLowerCase().includes(lowerQuery)
+      ) {
+        results.push(entry)
+      }
+    }
+
+    return results.sort((a, b) => b.importance - a.importance)
+  }
+
+  extractPersonalInfo(message: string): any {
+    const extracted = {
+      name: null as string | null,
+      age: null as number | null,
+      location: null as string | null,
+      interests: [] as string[],
+      preferences: {} as any,
+      facts: [] as string[],
+    }
+
+    // Extract name
+    const namePatterns = [/(?:my name is|i'm|i am|call me)\s+([a-zA-Z]+)/i, /(?:i'm|i am)\s+([a-zA-Z]+)(?:\s|$)/i]
+
+    for (const pattern of namePatterns) {
+      const match = message.match(pattern)
+      if (match && match[1].length > 1) {
+        extracted.name = match[1]
+        this.store("name", match[1], "personal", 0.9, message)
+        break
+      }
+    }
+
+    // Extract age
+    const ageMatch = message.match(/(?:i am|i'm)\s+(\d+)\s+years?\s+old/i)
+    if (ageMatch) {
+      extracted.age = Number.parseInt(ageMatch[1])
+      this.store("age", ageMatch[1], "personal", 0.8, message)
+    }
+
+    // Extract interests
+    const interestPatterns = [
+      /i (?:like|love|enjoy)\s+(.+?)(?:\.|$|,|\sand\s)/i,
+      /my (?:hobby|hobbies|interest|interests) (?:is|are)\s+(.+?)(?:\.|$|,)/i,
+    ]
+
+    for (const pattern of interestPatterns) {
+      const match = message.match(pattern)
+      if (match) {
+        const interest = match[1].trim()
+        extracted.interests.push(interest)
+        this.store("interests", interest, "personal", 0.7, message)
+      }
+    }
+
+    // Extract location
+    const locationPatterns = [
+      /i (?:live|am) (?:in|from)\s+([a-zA-Z\s]+?)(?:\.|$|,)/i,
+      /my (?:city|town|country) is\s+([a-zA-Z\s]+?)(?:\.|$|,)/i,
+    ]
+
+    for (const pattern of locationPatterns) {
+      const match = message.match(pattern)
+      if (match) {
+        extracted.location = match[1].trim()
+        this.store("location", match[1].trim(), "personal", 0.8, message)
+        break
+      }
+    }
+
+    // Extract preferences
+    const preferencePatterns = [/my favorite (\w+) is\s+(.+?)(?:\.|$|,)/i, /i prefer\s+(.+?)(?:\.|$|,)/i]
+
+    for (const pattern of preferencePatterns) {
+      const match = message.match(pattern)
+      if (match) {
+        const prefType = match[1]
+        const prefValue = match[2]
+        extracted.preferences[prefType] = prefValue
+        this.store(`favorite_${prefType}`, prefValue, "preference", 0.6, message)
+      }
+    }
+
+    // Extract general facts
+    const factPatterns = [
+      /i (?:work|study|go)\s+(.+?)(?:\.|$|,)/i,
+      /i have\s+(.+?)(?:\.|$|,)/i,
+      /i can\s+(.+?)(?:\.|$|,)/i,
+    ]
+
+    for (const pattern of factPatterns) {
+      const match = message.match(pattern)
+      if (match) {
+        const fact = match[1].trim()
+        extracted.facts.push(fact)
+        this.store("personal_fact", fact, "fact", 0.5, message)
+      }
+    }
 
     return extracted
   }
 
-  private static extractName(input: string): string | null {
-    const patterns = [/my name is (\w+)/i, /i'm (\w+)/i, /i am (\w+)/i, /call me (\w+)/i]
+  addConversation(input: string, response: string): void {
+    const personalInfo = this.extractPersonalInfo(input)
 
-    for (const pattern of patterns) {
-      const match = input.match(pattern)
-      if (match) {
-        return match[1]
-      }
-    }
-
-    return null
-  }
-
-  private static extractAge(input: string): number | null {
-    const patterns = [/i am (\d+) years old/i, /i'm (\d+) years old/i, /my age is (\d+)/i, /i am (\d+)/i]
-
-    for (const pattern of patterns) {
-      const match = input.match(pattern)
-      if (match) {
-        return Number.parseInt(match[1])
-      }
-    }
-
-    return null
-  }
-
-  private static extractLocation(input: string): string | null {
-    const patterns = [/i live in (\w+)/i, /i'm from (\w+)/i, /i am from (\w+)/i, /my location is (\w+)/i]
-
-    for (const pattern of patterns) {
-      const match = input.match(pattern)
-      if (match) {
-        return match[1]
-      }
-    }
-
-    return null
-  }
-
-  private static extractInterests(input: string): string[] {
-    const interests = []
-    const patterns = [/i like (\w+)/gi, /i love (\w+)/gi, /i enjoy (\w+)/gi, /i'm interested in (\w+)/gi]
-
-    for (const pattern of patterns) {
-      const matches = input.matchAll(pattern)
-      for (const match of matches) {
-        interests.push(match[1])
-      }
-    }
-
-    return interests
-  }
-
-  private static extractPreferences(input: string): any {
-    const preferences: any = {}
-
-    // Extract color preferences
-    const colorMatch = input.match(/my favorite color is (\w+)/i)
-    if (colorMatch) {
-      preferences.favoriteColor = colorMatch[1]
-    }
-
-    // Extract food preferences
-    const foodMatch = input.match(/my favorite food is (\w+)/i)
-    if (foodMatch) {
-      preferences.favoriteFood = foodMatch[1]
-    }
-
-    return preferences
-  }
-
-  private static updateProfile(extracted: any): void {
-    if (extracted.name) this.userProfile.name = extracted.name
-    if (extracted.age) this.userProfile.age = extracted.age
-    if (extracted.location) this.userProfile.location = extracted.location
-    if (extracted.interests.length > 0) {
-      this.userProfile.interests = [...new Set([...this.userProfile.interests, ...extracted.interests])]
-    }
-    if (Object.keys(extracted.preferences).length > 0) {
-      this.userProfile.preferences = { ...this.userProfile.preferences, ...extracted.preferences }
-    }
-
-    this.userProfile.lastUpdated = Date.now()
-  }
-
-  static getUserProfile(): any {
-    return { ...this.userProfile }
-  }
-
-  static addConversationEntry(input: string, response: string, confidence: number): void {
-    this.userProfile.conversationHistory.push({
-      timestamp: Date.now(),
+    this.conversationHistory.push({
       input,
       response,
-      confidence,
-      personalInfoExtracted: this.extractPersonalInfo(input),
+      timestamp: Date.now(),
+      personalInfo,
     })
 
     // Keep only last 100 conversations
-    if (this.userProfile.conversationHistory.length > 100) {
-      this.userProfile.conversationHistory = this.userProfile.conversationHistory.slice(-100)
+    if (this.conversationHistory.length > 100) {
+      this.conversationHistory = this.conversationHistory.slice(-100)
+    }
+
+    this.saveToStorage()
+  }
+
+  getPersonalSummary(): string {
+    const personalEntries = Array.from(this.memory.values())
+      .filter((entry) => entry.type === "personal" || entry.type === "preference")
+      .sort((a, b) => b.importance - a.importance)
+
+    if (personalEntries.length === 0) {
+      return "I don't have any personal information about you stored yet. Feel free to tell me about yourself!"
+    }
+
+    let summary = "Here's what I remember about you:\n\n"
+
+    const name = this.retrieve("name")
+    if (name) {
+      summary += `• **Name**: ${name.value}\n`
+    }
+
+    const age = this.retrieve("age")
+    if (age) {
+      summary += `• **Age**: ${age.value} years old\n`
+    }
+
+    const location = this.retrieve("location")
+    if (location) {
+      summary += `• **Location**: ${location.value}\n`
+    }
+
+    // Group interests
+    const interests = personalEntries.filter((e) => e.key === "interests")
+    if (interests.length > 0) {
+      summary += `• **Interests**: ${interests.map((i) => i.value).join(", ")}\n`
+    }
+
+    // Group preferences
+    const preferences = personalEntries.filter((e) => e.type === "preference")
+    if (preferences.length > 0) {
+      summary += `• **Preferences**: ${preferences.map((p) => `${p.key.replace("favorite_", "")}: ${p.value}`).join(", ")}\n`
+    }
+
+    summary += `\n*Based on ${this.conversationHistory.length} conversations*`
+
+    return summary
+  }
+
+  getRelevantMemories(query: string, limit = 5): UserMemoryEntry[] {
+    return this.search(query).slice(0, limit)
+  }
+
+  private loadFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(this.storageKey)
+      if (stored) {
+        const data = JSON.parse(stored)
+
+        if (data.memory) {
+          data.memory.forEach((entry: UserMemoryEntry) => {
+            this.memory.set(entry.key, entry)
+          })
+        }
+
+        if (data.conversations) {
+          this.conversationHistory = data.conversations
+        }
+
+        console.log(`✅ Loaded ${this.memory.size} memory entries and ${this.conversationHistory.length} conversations`)
+      }
+    } catch (error) {
+      console.warn("Failed to load user memory:", error)
     }
   }
 
-  static getRelevantMemories(query: string): any[] {
-    return this.userProfile.conversationHistory
-      .filter(
-        (entry: any) =>
-          entry.input.toLowerCase().includes(query.toLowerCase()) ||
-          entry.response.toLowerCase().includes(query.toLowerCase()),
-      )
-      .slice(-5) // Return last 5 relevant memories
+  private saveToStorage(): void {
+    try {
+      const data = {
+        memory: Array.from(this.memory.values()),
+        conversations: this.conversationHistory,
+      }
+      localStorage.setItem(this.storageKey, JSON.stringify(data))
+    } catch (error) {
+      console.warn("Failed to save user memory:", error)
+    }
+  }
+
+  clear(): void {
+    this.memory.clear()
+    this.conversationHistory = []
+    localStorage.removeItem(this.storageKey)
+  }
+
+  getStats(): any {
+    const entries = Array.from(this.memory.values())
+    const personalEntries = entries.filter((e) => e.type === "personal")
+    const preferenceEntries = entries.filter((e) => e.type === "preference")
+    const factEntries = entries.filter((e) => e.type === "fact")
+
+    return {
+      totalEntries: entries.length,
+      personalEntries: personalEntries.length,
+      preferenceEntries: preferenceEntries.length,
+      factEntries: factEntries.length,
+      conversationCount: this.conversationHistory.length,
+      averageImportance: entries.length > 0 ? entries.reduce((sum, e) => sum + e.importance, 0) / entries.length : 0,
+      oldestEntry: entries.length > 0 ? Math.min(...entries.map((e) => e.timestamp)) : null,
+      newestEntry: entries.length > 0 ? Math.max(...entries.map((e) => e.timestamp)) : null,
+    }
   }
 }
+
+export const userMemory = new UserMemorySystem()

@@ -2,10 +2,10 @@ import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/globa
 import { storageManager } from "@/core/storage/manager"
 import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
-import { UserMemorySystem } from "@/core/memory/user-memory"
+import { userMemory } from "@/core/memory/user-memory"
 
 export class UserInfoModule implements ModuleInterface {
-  name = "userInfo"
+  name = "user-info"
   version = "2.0.0"
   initialized = false
 
@@ -21,14 +21,14 @@ export class UserInfoModule implements ModuleInterface {
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log("Initializing User Info Module...")
+    console.log("👤 Initializing User Info Module...")
 
     try {
       this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.userInfo.learntFile)
       this.initialized = true
-      console.log("User Info Module initialized successfully")
+      console.log("✅ User Info Module initialized successfully")
     } catch (error) {
-      console.error("Error initializing User Info Module:", error)
+      console.error("❌ Error initializing User Info Module:", error)
       throw error
     }
   }
@@ -39,37 +39,33 @@ export class UserInfoModule implements ModuleInterface {
 
     try {
       // Extract personal information from input
-      const personalInfo = UserMemorySystem.extractPersonalInfo(input)
+      const personalInfo = userMemory.extractPersonalInfo(input)
 
       // Check if any personal information was found
-      const hasPersonalInfo =
-        personalInfo.name ||
-        personalInfo.age ||
-        personalInfo.location ||
-        personalInfo.interests.length > 0 ||
-        Object.keys(personalInfo.preferences).length > 0
+      const hasPersonalInfo = this.hasExtractedInfo(personalInfo)
+
+      // Check if user is asking about themselves
+      const isPersonalQuery = this.isPersonalQuery(input)
+
+      if (isPersonalQuery) {
+        const summary = userMemory.getPersonalSummary()
+
+        this.updateStats(Date.now() - startTime, true)
+
+        return {
+          success: true,
+          data: summary,
+          confidence: 0.9,
+          source: this.name,
+          timestamp: Date.now(),
+          metadata: {
+            queryType: "personal_summary",
+            memoryStats: userMemory.getStats(),
+          },
+        }
+      }
 
       if (!hasPersonalInfo) {
-        // Check if user is asking about themselves
-        const isPersonalQuery = this.isPersonalQuery(input)
-        if (isPersonalQuery) {
-          const userProfile = UserMemorySystem.getUserProfile()
-          const response = this.buildProfileResponse(userProfile, input)
-
-          this.updateStats(Date.now() - startTime, true)
-
-          return {
-            success: true,
-            data: response,
-            confidence: 0.8,
-            source: this.name,
-            timestamp: Date.now(),
-            metadata: {
-              profileData: userProfile,
-            },
-          }
-        }
-
         return {
           success: false,
           data: null,
@@ -95,10 +91,11 @@ export class UserInfoModule implements ModuleInterface {
         timestamp: Date.now(),
         metadata: {
           extractedInfo: personalInfo,
+          queryType: "personal_extraction",
         },
       }
     } catch (error) {
-      console.error("Error in User Info Module processing:", error)
+      console.error("❌ Error in User Info Module processing:", error)
       this.updateStats(Date.now() - startTime, false)
 
       return {
@@ -111,6 +108,17 @@ export class UserInfoModule implements ModuleInterface {
     }
   }
 
+  private hasExtractedInfo(personalInfo: any): boolean {
+    return (
+      personalInfo.name ||
+      personalInfo.age ||
+      personalInfo.location ||
+      personalInfo.interests.length > 0 ||
+      Object.keys(personalInfo.preferences).length > 0 ||
+      personalInfo.facts.length > 0
+    )
+  }
+
   private isPersonalQuery(input: string): boolean {
     const personalQueries = [
       /what.*my name/i,
@@ -120,6 +128,9 @@ export class UserInfoModule implements ModuleInterface {
       /my profile/i,
       /my information/i,
       /remember.*about me/i,
+      /what.*remember.*me/i,
+      /my details/i,
+      /personal information/i,
     ]
 
     return personalQueries.some((pattern) => pattern.test(input))
@@ -129,71 +140,36 @@ export class UserInfoModule implements ModuleInterface {
     let response = "I've learned some information about you:\n\n"
 
     if (personalInfo.name) {
-      response += `• Your name is ${personalInfo.name}\n`
+      response += `• Your name is **${personalInfo.name}**\n`
     }
 
     if (personalInfo.age) {
-      response += `• You are ${personalInfo.age} years old\n`
+      response += `• You are **${personalInfo.age} years old**\n`
     }
 
     if (personalInfo.location) {
-      response += `• You live in ${personalInfo.location}\n`
+      response += `• You live in **${personalInfo.location}**\n`
     }
 
     if (personalInfo.interests.length > 0) {
-      response += `• You're interested in: ${personalInfo.interests.join(", ")}\n`
+      response += `• You're interested in: **${personalInfo.interests.join(", ")}**\n`
     }
 
     if (Object.keys(personalInfo.preferences).length > 0) {
-      response += `• Your preferences: ${Object.entries(personalInfo.preferences)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(", ")}\n`
-    }
-
-    response += "\nI'll remember this information for our future conversations!"
-
-    return response
-  }
-
-  private buildProfileResponse(userProfile: any, query: string): string {
-    if (
-      !userProfile.name &&
-      !userProfile.age &&
-      !userProfile.location &&
-      userProfile.interests.length === 0 &&
-      Object.keys(userProfile.preferences).length === 0
-    ) {
-      return "I don't have any personal information about you yet. Feel free to tell me about yourself!"
-    }
-
-    let response = "Here's what I know about you:\n\n"
-
-    if (userProfile.name) {
-      response += `**Name:** ${userProfile.name}\n`
-    }
-
-    if (userProfile.age) {
-      response += `**Age:** ${userProfile.age}\n`
-    }
-
-    if (userProfile.location) {
-      response += `**Location:** ${userProfile.location}\n`
-    }
-
-    if (userProfile.interests.length > 0) {
-      response += `**Interests:** ${userProfile.interests.join(", ")}\n`
-    }
-
-    if (Object.keys(userProfile.preferences).length > 0) {
-      response += `**Preferences:**\n`
-      Object.entries(userProfile.preferences).forEach(([key, value]) => {
-        response += `  • ${key}: ${value}\n`
+      response += `• Your preferences:\n`
+      Object.entries(personalInfo.preferences).forEach(([key, value]) => {
+        response += `  - ${key}: **${value}**\n`
       })
     }
 
-    if (userProfile.conversationHistory.length > 0) {
-      response += `\n**Conversation History:** ${userProfile.conversationHistory.length} previous interactions`
+    if (personalInfo.facts.length > 0) {
+      response += `• Additional facts:\n`
+      personalInfo.facts.forEach((fact: string) => {
+        response += `  - ${fact}\n`
+      })
     }
+
+    response += "\n✅ I'll remember this information for our future conversations!"
 
     return response
   }
@@ -201,7 +177,11 @@ export class UserInfoModule implements ModuleInterface {
   private async savePersonalInfo(personalInfo: any, context: string): Promise<void> {
     const learntEntry = {
       id: generateId(),
-      content: personalInfo,
+      content: {
+        type: "personal_info_extraction",
+        data: personalInfo,
+        extractedFrom: context,
+      },
       confidence: 0.9,
       source: "user-input",
       context: context,
@@ -209,12 +189,14 @@ export class UserInfoModule implements ModuleInterface {
       usageCount: 1,
       lastUsed: Date.now(),
       verified: false,
-      tags: ["personal-info", "user-data"],
+      tags: ["personal-info", "user-data", "extraction"],
       relationships: [],
     }
 
     await storageManager.addLearntEntry(MODULE_CONFIG.userInfo.learntFile, learntEntry)
     this.stats.learntEntries++
+
+    console.log(`💾 Saved personal info extraction to learnt data`)
   }
 
   async learn(data: any): Promise<void> {
@@ -233,7 +215,18 @@ export class UserInfoModule implements ModuleInterface {
   }
 
   getStats(): ModuleStats {
-    return { ...this.stats }
+    return {
+      ...this.stats,
+      memoryStats: userMemory.getStats(),
+    }
+  }
+
+  getUserProfile(): any {
+    return {
+      summary: userMemory.getPersonalSummary(),
+      stats: userMemory.getStats(),
+      recentMemories: userMemory.search("").slice(0, 10),
+    }
   }
 }
 
