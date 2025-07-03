@@ -1,10 +1,8 @@
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  return Math.random().toString(36).substr(2, 9) + Date.now().toString(36)
 }
 
 export function calculateSimilarity(text1: string, text2: string): number {
-  if (!text1 || !text2) return 0
-
   const words1 = text1.toLowerCase().split(/\s+/)
   const words2 = text2.toLowerCase().split(/\s+/)
 
@@ -17,35 +15,46 @@ export function calculateSimilarity(text1: string, text2: string): number {
   return intersection.size / union.size
 }
 
+export function calculateConfidence(values: number[]): number {
+  if (values.length === 0) return 0
+  const sum = values.reduce((a, b) => a + b, 0)
+  return sum / values.length
+}
+
 export function sanitizeInput(input: string): string {
   return input
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
     .replace(/[<>]/g, "")
     .trim()
+    .substring(0, 10000)
 }
 
-export function extractEntities(text: string): string[] {
-  const entities: string[] = []
-
-  // Extract numbers
-  const numbers = text.match(/\d+(?:\.\d+)?/g)
-  if (numbers) entities.push(...numbers.map((n) => `number:${n}`))
-
-  // Extract capitalized words (potential names/places)
-  const capitalWords = text.match(/\b[A-Z][a-z]+\b/g)
-  if (capitalWords) entities.push(...capitalWords.map((w) => `name:${w}`))
-
-  // Extract mathematical operators
-  const mathOps = text.match(/[+\-*/=]/g)
-  if (mathOps) entities.push(...mathOps.map((op) => `operator:${op}`))
-
-  return [...new Set(entities)]
+export function formatTimestamp(timestamp: number): string {
+  return new Date(timestamp).toLocaleString()
 }
 
-export function calculateConfidence(factors: number[]): number {
-  if (factors.length === 0) return 0
-  const average = factors.reduce((sum, factor) => sum + factor, 0) / factors.length
-  return Math.max(0, Math.min(1, average))
+export function extractKeywords(text: string): string[] {
+  const words = text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 2)
+
+  return [...new Set(words)]
+}
+
+export function calculateRelevance(query: string, content: string): number {
+  const queryWords = extractKeywords(query)
+  const contentWords = extractKeywords(content)
+
+  let matches = 0
+  for (const word of queryWords) {
+    if (contentWords.includes(word)) {
+      matches++
+    }
+  }
+
+  return queryWords.length > 0 ? matches / queryWords.length : 0
 }
 
 export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
@@ -69,16 +78,16 @@ export function throttle<T extends (...args: any[]) => any>(func: T, limit: numb
 
 export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") return obj
-  if (obj instanceof Date) return new Date(obj.getTime()) as unknown as T
-  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as unknown as T
+  if (obj instanceof Date) return new Date(obj.getTime()) as any
+  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as any
   if (typeof obj === "object") {
-    const clonedObj = {} as { [key: string]: any }
+    const clonedObj: any = {}
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
         clonedObj[key] = deepClone(obj[key])
       }
     }
-    return clonedObj as T
+    return clonedObj
   }
   return obj
 }
@@ -88,37 +97,86 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email)
 }
 
-export function formatBytes(bytes: number, decimals = 2): string {
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength - 3) + "..."
+}
+
+export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes"
   const k = 1024
-  const dm = decimals < 0 ? 0 : decimals
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
+  const sizes = ["Bytes", "KB", "MB", "GB"]
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
+  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+}
+
+export function parseJSON<T>(jsonString: string, fallback: T): T {
+  try {
+    return JSON.parse(jsonString)
+  } catch {
+    return fallback
+  }
 }
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export function retry<T>(fn: () => Promise<T>, maxAttempts = 3, delay = 1000): Promise<T> {
-  return new Promise((resolve, reject) => {
-    let attempts = 0
+export function randomChoice<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)]
+}
 
-    const attempt = async () => {
-      try {
-        const result = await fn()
-        resolve(result)
-      } catch (error) {
-        attempts++
-        if (attempts >= maxAttempts) {
-          reject(error)
-        } else {
-          setTimeout(attempt, delay * attempts)
-        }
-      }
-    }
+export function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
 
-    attempt()
-  })
+export function groupBy<T, K extends keyof any>(array: T[], key: (item: T) => K): Record<K, T[]> {
+  return array.reduce(
+    (groups, item) => {
+      const group = key(item)
+      groups[group] = groups[group] || []
+      groups[group].push(item)
+      return groups
+    },
+    {} as Record<K, T[]>,
+  )
+}
+
+export function unique<T>(array: T[]): T[] {
+  return [...new Set(array)]
+}
+
+export function chunk<T>(array: T[], size: number): T[][] {
+  const chunks: T[][] = []
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size))
+  }
+  return chunks
+}
+
+export function flatten<T>(array: (T | T[])[]): T[] {
+  return array.reduce<T[]>((flat, item) => {
+    return flat.concat(Array.isArray(item) ? flatten(item) : item)
+  }, [])
+}
+
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
+
+export function camelCase(str: string): string {
+  return str.replace(/[-_\s]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ""))
+}
+
+export function kebabCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()
+}
+
+export function snakeCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase()
 }

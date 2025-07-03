@@ -1,27 +1,26 @@
 import type { ContextMessage } from "@/types/global"
+import { generateId, calculateSimilarity } from "@/utils/helpers"
 
 export class ContextManager {
   private context: ContextMessage[] = []
   private maxContextLength = 10
-  private currentSessionId = ""
+  private currentSessionId = generateId()
 
-  createContext(sessionId?: string): void {
-    this.currentSessionId = sessionId || `session_${Date.now()}`
+  createContext(): void {
     this.context = []
-    console.log(`✅ Context created for session: ${this.currentSessionId}`)
+    this.currentSessionId = generateId()
+    console.log("🧠 Context created")
   }
 
   addMessage(message: ContextMessage): void {
-    this.context.push({
+    const contextMessage: ContextMessage = {
       ...message,
-      metadata: {
-        ...message.metadata,
-        timestamp: Date.now(),
-        sessionId: this.currentSessionId,
-      },
-    })
+      timestamp: Date.now(),
+    }
 
-    // Trim context if it exceeds max length
+    this.context.push(contextMessage)
+
+    // Keep context within limits
     if (this.context.length > this.maxContextLength) {
       this.context = this.context.slice(-this.maxContextLength)
     }
@@ -31,46 +30,132 @@ export class ContextManager {
     return [...this.context]
   }
 
-  getLastMessage(): ContextMessage | null {
-    return this.context.length > 0 ? this.context[this.context.length - 1] : null
+  getRecentMessages(count = 5): ContextMessage[] {
+    return this.context.slice(-count)
   }
 
-  getLastUserMessage(): ContextMessage | null {
-    for (let i = this.context.length - 1; i >= 0; i--) {
-      if (this.context[i].role === "user") {
-        return this.context[i]
-      }
-    }
-    return null
-  }
+  extractContext(currentInput: string): any {
+    const recentMessages = this.getRecentMessages(5)
 
-  extractContext(input: string): any {
-    const recentMessages = this.context.slice(-5) // Last 5 messages
-    const userMessages = this.context.filter((msg) => msg.role === "user")
-    const assistantMessages = this.context.filter((msg) => msg.role === "assistant")
+    // Extract topics from recent conversation
+    const topics = this.extractTopics(recentMessages)
+
+    // Find related previous messages
+    const relatedMessages = this.findRelatedMessages(currentInput)
+
+    // Extract user preferences from conversation
+    const preferences = this.extractUserPreferences(recentMessages)
 
     return {
-      currentInput: input,
-      recentMessages,
-      userMessageCount: userMessages.length,
-      assistantMessageCount: assistantMessages.length,
       sessionId: this.currentSessionId,
-      contextLength: this.context.length,
-      lastInteraction: this.getLastMessage()?.metadata?.timestamp || 0,
+      messageCount: this.context.length,
+      recentMessages,
+      topics,
+      relatedMessages,
+      preferences,
+      timestamp: Date.now(),
     }
+  }
+
+  private extractTopics(messages: ContextMessage[]): string[] {
+    const topics: string[] = []
+
+    for (const message of messages) {
+      const words = message.content
+        .toLowerCase()
+        .replace(/[^\w\s]/g, " ")
+        .split(/\s+/)
+        .filter((word) => word.length > 3)
+
+      // Simple topic extraction - look for repeated important words
+      const wordCounts: { [key: string]: number } = {}
+      for (const word of words) {
+        wordCounts[word] = (wordCounts[word] || 0) + 1
+      }
+
+      // Add words that appear multiple times
+      for (const [word, count] of Object.entries(wordCounts)) {
+        if (count > 1 && !topics.includes(word)) {
+          topics.push(word)
+        }
+      }
+    }
+
+    return topics.slice(0, 10) // Limit to top 10 topics
+  }
+
+  private findRelatedMessages(currentInput: string): ContextMessage[] {
+    const related: Array<{ message: ContextMessage; similarity: number }> = []
+
+    for (const message of this.context) {
+      const similarity = calculateSimilarity(currentInput, message.content)
+      if (similarity > 0.3) {
+        // Threshold for relevance
+        related.push({ message, similarity })
+      }
+    }
+
+    // Sort by similarity and return top 3
+    return related
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 3)
+      .map((item) => item.message)
+  }
+
+  private extractUserPreferences(messages: ContextMessage[]): any {
+    const preferences: any = {
+      interests: [],
+      learningStyle: "mixed",
+      difficulty: "medium",
+    }
+
+    for (const message of messages) {
+      if (message.role === "user") {
+        const content = message.content.toLowerCase()
+
+        // Extract interests
+        if (content.includes("i like") || content.includes("i love")) {
+          const match = content.match(/i (?:like|love) (.+?)(?:\.|$|,)/i)
+          if (match) {
+            preferences.interests.push(match[1].trim())
+          }
+        }
+
+        // Extract difficulty preference
+        if (content.includes("simple") || content.includes("easy")) {
+          preferences.difficulty = "easy"
+        } else if (content.includes("advanced") || content.includes("complex")) {
+          preferences.difficulty = "hard"
+        }
+
+        // Extract learning style hints
+        if (content.includes("show me") || content.includes("example")) {
+          preferences.learningStyle = "visual"
+        } else if (content.includes("explain") || content.includes("tell me")) {
+          preferences.learningStyle = "auditory"
+        }
+      }
+    }
+
+    return preferences
   }
 
   clearContext(): void {
     this.context = []
+    this.currentSessionId = generateId()
   }
 
-  getContextStats() {
+  getContextStats(): any {
+    const userMessages = this.context.filter((m) => m.role === "user").length
+    const assistantMessages = this.context.filter((m) => m.role === "assistant").length
+
     return {
-      messageCount: this.context.length,
-      userMessages: this.context.filter((msg) => msg.role === "user").length,
-      assistantMessages: this.context.filter((msg) => msg.role === "assistant").length,
+      totalMessages: this.context.length,
+      userMessages,
+      assistantMessages,
       sessionId: this.currentSessionId,
-      maxLength: this.maxContextLength,
+      oldestMessage: this.context.length > 0 ? this.context[0].timestamp : null,
+      newestMessage: this.context.length > 0 ? this.context[this.context.length - 1].timestamp : null,
     }
   }
 
@@ -79,22 +164,21 @@ export class ContextManager {
       sessionId: this.currentSessionId,
       messages: this.context,
       stats: this.getContextStats(),
-      exportTimestamp: Date.now(),
+      exportTime: Date.now(),
     }
   }
 
   importContext(data: any): void {
-    if (data && data.messages) {
-      this.currentSessionId = data.sessionId || `imported_${Date.now()}`
+    if (data.messages && Array.isArray(data.messages)) {
       this.context = data.messages
-      console.log(`✅ Context imported for session: ${this.currentSessionId}`)
+      this.currentSessionId = data.sessionId || generateId()
     }
   }
 
   setMaxContextLength(length: number): void {
-    this.maxContextLength = length
+    this.maxContextLength = Math.max(1, Math.min(100, length))
 
-    // Trim current context if needed
+    // Trim context if needed
     if (this.context.length > this.maxContextLength) {
       this.context = this.context.slice(-this.maxContextLength)
     }
