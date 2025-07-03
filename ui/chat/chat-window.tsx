@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { systemManager } from "@/core/system/manager"
@@ -16,12 +16,11 @@ import {
   Zap,
   ThumbsUp,
   ThumbsDown,
-  ChevronDown,
-  ChevronUp,
   Calculator,
   BookOpen,
   Globe,
   User,
+  Loader2,
 } from "lucide-react"
 
 interface ChatMessage {
@@ -46,8 +45,6 @@ export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
   const [isInitializing, setIsInitializing] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showThinking, setShowThinking] = useState<{ [key: string]: boolean }>({})
-  const [currentThinking, setCurrentThinking] = useState("")
-  const [isThinking, setIsThinking] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -56,7 +53,7 @@ export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages, currentThinking])
+  }, [messages])
 
   const initializeSystem = async () => {
     try {
@@ -76,19 +73,20 @@ export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
 
 I'm your advanced AI assistant with comprehensive knowledge modules:
 
-📚 **Vocabulary** - Dictionary, definitions, etymology
-🧮 **Mathematics** - Basic arithmetic to Tesla/Vortex math  
+📚 **Vocabulary** - Dictionary definitions and word analysis
+🧮 **Mathematics** - Basic arithmetic to Tesla/Vortex mathematics  
 🌍 **Facts** - Wikipedia integration and verified information
-💻 **Coding** - Programming concepts and examples
-🤔 **Philosophy** - Philosophical concepts and arguments
-👤 **User Info** - Personal preferences and learning tracking
+💻 **Coding** - Programming concepts and Next.js examples
+🤔 **Philosophy** - Philosophical concepts and discussions
+👤 **User Memory** - Personal preferences and conversation history
 
 **Try asking me:**
 • "Define quantum physics"
 • "Calculate 15 × 23"
 • "Tell me about artificial intelligence"
-• "How do I code a function?"
+• "How do I create a React component?"
 • "What is consciousness?"
+• "My name is [your name]"
 
 What would you like to explore today?`,
         timestamp: Date.now(),
@@ -108,27 +106,6 @@ What would you like to explore today?`,
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const simulateThinking = async (userInput: string): Promise<string[]> => {
-    const thinkingSteps = [
-      "🧠 Analyzing input with reasoning engine...",
-      "🔍 Determining intent and extracting entities...",
-      "📚 Consulting knowledge modules...",
-      "🔗 Cross-referencing information...",
-      "💭 Generating response with confidence scoring...",
-      "✨ Finalizing answer...",
-    ]
-
-    const finalThinking: string[] = []
-
-    for (let i = 0; i < thinkingSteps.length; i++) {
-      setCurrentThinking(thinkingSteps[i])
-      finalThinking.push(thinkingSteps[i])
-      await new Promise((resolve) => setTimeout(resolve, 300))
-    }
-
-    return finalThinking
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
@@ -136,8 +113,6 @@ What would you like to explore today?`,
     const userInput = input.trim()
     setInput("")
     setIsLoading(true)
-    setIsThinking(true)
-    setCurrentThinking("")
     setError(null)
 
     try {
@@ -152,13 +127,8 @@ What would you like to explore today?`,
 
       console.log("🤖 Processing message:", userInput)
 
-      const thinkingSteps = await simulateThinking(userInput)
-
       const response = await systemManager.processInput(userInput)
       console.log("✅ System Response:", response)
-
-      setIsThinking(false)
-      setCurrentThinking("")
 
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -168,7 +138,6 @@ What would you like to explore today?`,
         confidence: response.confidence,
         sources: response.sources || [],
         reasoning: response.reasoning || [],
-        thinking: thinkingSteps,
       }
 
       setMessages((prev) => [...prev, aiMessage])
@@ -176,8 +145,6 @@ What would you like to explore today?`,
       console.error("Error processing message:", error)
       setError("Failed to process message. Please try again.")
       setInput(userInput)
-      setIsThinking(false)
-      setCurrentThinking("")
     } finally {
       setIsLoading(false)
     }
@@ -195,15 +162,14 @@ What would you like to explore today?`,
 
   if (isInitializing) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full flex items-center justify-center bg-gray-50">
         <Card className="w-96">
           <CardContent className="p-8 text-center">
             <Brain className="w-12 h-12 mx-auto mb-4 animate-pulse text-blue-600" />
             <h2 className="text-xl font-bold mb-2">Initializing ZacAI System</h2>
             <p className="text-gray-600 mb-4">Loading knowledge modules and AI engines...</p>
-            <div className="animate-pulse">
-              <div className="h-2 bg-blue-200 rounded mb-2"></div>
-              <div className="h-2 bg-blue-300 rounded w-3/4"></div>
+            <div className="flex items-center justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -212,42 +178,43 @@ What would you like to explore today?`,
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <CardHeader className="flex-shrink-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Brain className="w-6 h-6" />
+            <Brain className="w-8 h-8 text-blue-600" />
             <div>
-              <CardTitle className="text-lg">ZacAI Enhanced System</CardTitle>
-              <p className="text-sm text-white/80">Advanced AI Assistant v2.0</p>
+              <h1 className="text-xl font-bold text-gray-900">ZacAI Enhanced System</h1>
+              <p className="text-sm text-gray-600">Advanced AI Assistant v2.0</p>
             </div>
-            <Badge variant="outline" className="bg-white/20 border-white/30 text-white">
-              Enhanced
+            <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
+              Online
             </Badge>
-            <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
           </div>
 
-          <Button variant="ghost" size="sm" onClick={onToggleAdmin} className="text-white hover:bg-white/20">
-            <Settings className="w-4 h-4" />
+          <Button variant="outline" size="sm" onClick={onToggleAdmin}>
+            <Settings className="w-4 h-4 mr-2" />
+            Admin
           </Button>
         </div>
-      </CardHeader>
+      </div>
 
       {/* Messages */}
-      <CardContent className="flex-1 p-0 overflow-hidden">
-        <ScrollArea className="h-full p-4">
-          <div className="space-y-4">
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full px-6 py-4">
+          <div className="space-y-6 max-w-4xl mx-auto">
             {messages.length === 0 && (
-              <div className="text-center text-gray-500 mt-8">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Brain className="w-12 h-12 opacity-50" />
-                  <Calculator className="w-8 h-8 opacity-30" />
+              <div className="text-center py-12">
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <Brain className="w-16 h-16 text-blue-600 opacity-50" />
+                  <Calculator className="w-12 h-12 text-green-600 opacity-30" />
+                  <BookOpen className="w-12 h-12 text-purple-600 opacity-30" />
                 </div>
-                <p className="text-lg font-medium mb-2">Hello! I'm ZacAI 🧠</p>
-                <p className="mb-4">I'm an enhanced AI system with advanced knowledge modules!</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Hello! I'm ZacAI 🧠</h2>
+                <p className="text-gray-600 mb-8">I'm an enhanced AI system with advanced knowledge modules!</p>
 
-                <div className="grid grid-cols-2 gap-2 text-sm max-w-md mx-auto">
+                <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
                   <Button
                     variant="outline"
                     size="sm"
@@ -278,11 +245,11 @@ What would you like to explore today?`,
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setInput("System diagnostics")}
+                    onClick={() => setInput("Tell me about AI")}
                     className="text-left justify-start"
                   >
-                    <Settings className="w-4 h-4 mr-2" />
-                    System diagnostics
+                    <Globe className="w-4 h-4 mr-2" />
+                    Tell me about AI
                   </Button>
                 </div>
               </div>
@@ -292,40 +259,13 @@ What would you like to explore today?`,
               <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[80%] rounded-lg p-4 ${
-                    message.role === "user" ? "bg-blue-600 text-white" : "bg-gray-100 border border-gray-200"
+                    message.role === "user" ? "bg-blue-600 text-white" : "bg-gray-50 border border-gray-200"
                   }`}
                 >
                   <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
 
                   {message.role === "assistant" && (
-                    <div className="space-y-3 mt-3">
-                      {message.thinking && message.thinking.length > 0 && (
-                        <div className="border-l-2 border-blue-300 pl-3">
-                          <button
-                            onClick={() => setShowThinking((prev) => ({ ...prev, [message.id]: !prev[message.id] }))}
-                            className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700"
-                          >
-                            {showThinking[message.id] ? (
-                              <ChevronUp className="w-3 h-3" />
-                            ) : (
-                              <ChevronDown className="w-3 h-3" />
-                            )}
-                            <Brain className="w-3 h-3" />
-                            <span>AI Thinking Process</span>
-                          </button>
-                          {showThinking[message.id] && (
-                            <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded space-y-1">
-                              {message.thinking.map((step, idx) => (
-                                <div key={idx} className="flex items-start gap-2">
-                                  <div className="w-1 h-1 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
-                                  <span>{step}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
+                    <div className="space-y-3 mt-4">
                       {message.sources && message.sources.length > 0 && (
                         <div className="space-y-2">
                           <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -342,7 +282,7 @@ What would you like to explore today?`,
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-xs opacity-70">
+                      <div className="flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center gap-2">
                           <span>{formatTimestamp(message.timestamp)}</span>
                           {message.confidence && (
@@ -359,7 +299,7 @@ What would you like to explore today?`,
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0"
+                            className="h-6 w-6 p-0 hover:bg-gray-200"
                             onClick={() => console.log("Positive feedback")}
                           >
                             <ThumbsUp className="w-3 h-3" />
@@ -367,7 +307,7 @@ What would you like to explore today?`,
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0"
+                            className="h-6 w-6 p-0 hover:bg-gray-200"
                             onClick={() => console.log("Negative feedback")}
                           >
                             <ThumbsDown className="w-3 h-3" />
@@ -384,24 +324,12 @@ What would you like to explore today?`,
               </div>
             ))}
 
-            {isThinking && currentThinking && (
+            {isLoading && (
               <div className="flex justify-start">
-                <div className="max-w-[80%] bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="max-w-[80%] bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center gap-2">
-                    <div className="animate-spin w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full" />
-                    <Brain className="w-4 h-4 text-orange-600 animate-pulse" />
-                    <span className="text-sm text-orange-700 italic">{currentThinking}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {isLoading && !isThinking && (
-              <div className="flex justify-start">
-                <div className="max-w-[80%] bg-gray-100 border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
-                    <span className="text-sm text-gray-500">ZacAI is processing...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                    <span className="text-sm text-gray-600">ZacAI is thinking...</span>
                     <MessageCircle className="w-4 h-4 text-gray-400 animate-pulse" />
                   </div>
                 </div>
@@ -411,11 +339,11 @@ What would you like to explore today?`,
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
-      </CardContent>
+      </div>
 
       {/* Input */}
-      <div className="flex-shrink-0 p-4 border-t">
-        <form onSubmit={handleSubmit} className="flex gap-3">
+      <div className="flex-shrink-0 border-t border-gray-200 px-6 py-4 bg-white">
+        <form onSubmit={handleSubmit} className="flex gap-3 max-w-4xl mx-auto">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -428,8 +356,12 @@ What would you like to explore today?`,
           </Button>
         </form>
 
-        {error && <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>}
+        {error && (
+          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm max-w-4xl mx-auto">
+            {error}
+          </div>
+        )}
       </div>
-    </Card>
+    </div>
   )
 }
