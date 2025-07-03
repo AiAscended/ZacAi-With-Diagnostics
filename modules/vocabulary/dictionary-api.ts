@@ -143,7 +143,6 @@ export class DictionaryAPIClient {
     this.cache.clear()
   }
 
-  // Helper method to extract key information from a word definition
   getWordSummary(definition: WordDefinition): string {
     if (!definition.meanings || definition.meanings.length === 0) {
       return "No definition available"
@@ -155,12 +154,10 @@ export class DictionaryAPIClient {
     return `${definition.word} (${firstMeaning.partOfSpeech}): ${firstDefinition}`
   }
 
-  // Method to get all parts of speech for a word
   getPartsOfSpeech(definition: WordDefinition): string[] {
     return definition.meanings?.map((m) => m.partOfSpeech).filter(Boolean) || []
   }
 
-  // Method to get all synonyms for a word
   getAllSynonyms(definition: WordDefinition): string[] {
     const synonyms = new Set<string>()
 
@@ -173,7 +170,6 @@ export class DictionaryAPIClient {
     return Array.from(synonyms)
   }
 
-  // Method to get all antonyms for a word
   getAllAntonyms(definition: WordDefinition): string[] {
     const antonyms = new Set<string>()
 
