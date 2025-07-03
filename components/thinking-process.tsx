@@ -1,7 +1,10 @@
 "use client"
+
+import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
   Brain,
   Search,
@@ -9,13 +12,9 @@ import {
   CheckCircle,
   AlertCircle,
   Clock,
-  Zap,
-  Target,
-  BookOpen,
-  Calculator,
-  Code,
-  Globe,
-  User,
+  ChevronDown,
+  ChevronRight,
+  Loader2,
 } from "lucide-react"
 
 export interface ThinkingStep {
@@ -27,7 +26,6 @@ export interface ThinkingStep {
   confidence?: number
   duration?: number
   module?: string
-  details?: any
 }
 
 interface ThinkingProcessProps {
@@ -37,49 +35,35 @@ interface ThinkingProcessProps {
   currentStep?: number
 }
 
-export function ThinkingProcess({ steps, isActive, totalSteps, currentStep }: ThinkingProcessProps) {
-  const getStepIcon = (type: string, status: string) => {
-    const iconProps = { className: "w-4 h-4" }
+export function ThinkingProcess({ steps, isActive, totalSteps = 4, currentStep = 1 }: ThinkingProcessProps) {
+  const [isExpanded, setIsExpanded] = useState(isActive)
 
-    if (status === "error") return <AlertCircle {...iconProps} className="w-4 h-4 text-red-500" />
-    if (status === "completed") return <CheckCircle {...iconProps} className="w-4 h-4 text-green-500" />
+  const getStepIcon = (type: ThinkingStep["type"], status: ThinkingStep["status"]) => {
+    if (status === "processing") {
+      return <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+    }
 
     switch (type) {
       case "analysis":
-        return <Brain {...iconProps} className="w-4 h-4 text-blue-500" />
+        return <Brain className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
       case "search":
-        return <Search {...iconProps} className="w-4 h-4 text-purple-500" />
+        return <Search className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
       case "reasoning":
-        return <Lightbulb {...iconProps} className="w-4 h-4 text-yellow-500" />
+        return <Lightbulb className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
       case "synthesis":
-        return <Zap {...iconProps} className="w-4 h-4 text-orange-500" />
+        return <CheckCircle className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
       case "validation":
-        return <Target {...iconProps} className="w-4 h-4 text-green-500" />
+        return status === "error" ? (
+          <AlertCircle className="w-4 h-4 text-red-600" />
+        ) : (
+          <CheckCircle className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
+        )
       default:
-        return <Brain {...iconProps} />
+        return <Brain className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
     }
   }
 
-  const getModuleIcon = (module: string) => {
-    const iconProps = { className: "w-3 h-3" }
-
-    switch (module) {
-      case "vocabulary":
-        return <BookOpen {...iconProps} />
-      case "mathematics":
-        return <Calculator {...iconProps} />
-      case "coding":
-        return <Code {...iconProps} />
-      case "facts":
-        return <Globe {...iconProps} />
-      case "user-info":
-        return <User {...iconProps} />
-      default:
-        return <Brain {...iconProps} />
-    }
-  }
-
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: ThinkingStep["status"]) => {
     switch (status) {
       case "completed":
         return "bg-green-100 text-green-800 border-green-200"
@@ -92,109 +76,83 @@ export function ThinkingProcess({ steps, isActive, totalSteps, currentStep }: Th
     }
   }
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return "bg-green-500"
-    if (confidence >= 0.6) return "bg-yellow-500"
-    return "bg-red-500"
-  }
-
-  if (!isActive && steps.length === 0) return null
+  if (steps.length === 0) return null
 
   return (
-    <Card className="mb-4 border-dashed border-2 border-blue-200 bg-blue-50/30">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Brain className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-blue-900">AI Thinking Process</h3>
-          {isActive && (
-            <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-              Processing...
-            </Badge>
-          )}
-        </div>
-
-        {totalSteps && currentStep && (
-          <div className="mb-4">
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>Progress</span>
-              <span>
-                {currentStep} of {totalSteps} steps
+    <Card className="mb-4 border-dashed border-blue-200 bg-blue-50/30">
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="w-full justify-between p-4 h-auto">
+            <div className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-blue-600" />
+              <span className="font-medium">
+                {isActive ? "Thinking Process" : "View Thinking Process"}
+                {isActive && totalSteps && ` (${currentStep}/${totalSteps})`}
               </span>
-            </div>
-            <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
-          </div>
-        )}
-
-        <div className="space-y-3">
-          {steps.map((step, index) => (
-            <div
-              key={step.id}
-              className={`flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 ${
-                step.status === "processing" ? "bg-blue-50 border-blue-200 shadow-sm" : "bg-white border-gray-200"
-              }`}
-            >
-              <div className="flex-shrink-0 mt-0.5">
-                {step.status === "processing" ? (
-                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  getStepIcon(step.type, step.status)
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium text-sm text-gray-900">{step.title}</h4>
-
-                  {step.module && (
-                    <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                      <span className="mr-1">{getModuleIcon(step.module)}</span>
-                      {step.module}
-                    </Badge>
-                  )}
-
-                  <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${getStatusColor(step.status)}`}>
-                    {step.status}
-                  </Badge>
+              {isActive && (
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+                  <span className="text-sm text-blue-600">Processing...</span>
                 </div>
+              )}
+            </div>
+            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </Button>
+        </CollapsibleTrigger>
 
-                <p className="text-xs text-gray-600 mb-2">{step.description}</p>
+        <CollapsibleContent>
+          <CardContent className="pt-0 pb-4">
+            <div className="space-y-3">
+              {steps.map((step, index) => (
+                <div key={step.id} className="flex items-start gap-3 p-3 bg-white rounded-lg border">
+                  <div className="flex-shrink-0 mt-0.5">{getStepIcon(step.type, step.status)}</div>
 
-                <div className="flex items-center gap-3 text-xs text-gray-500">
-                  {step.duration && (
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{step.duration}ms</span>
-                    </div>
-                  )}
-
-                  {step.confidence !== undefined && (
-                    <div className="flex items-center gap-1">
-                      <div className="flex items-center gap-1">
-                        <div className={`w-2 h-2 rounded-full ${getConfidenceColor(step.confidence)}`} />
-                        <span>{Math.round(step.confidence * 100)}% confidence</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-sm">{step.title}</h4>
+                      <div className="flex items-center gap-2">
+                        {step.duration && (
+                          <Badge variant="outline" className="text-xs">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {step.duration}ms
+                          </Badge>
+                        )}
+                        <Badge variant="outline" className={`text-xs ${getStatusColor(step.status)}`}>
+                          {step.status}
+                        </Badge>
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {step.details && step.status === "completed" && (
-                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                    <pre className="whitespace-pre-wrap text-gray-700">
-                      {typeof step.details === "string" ? step.details : JSON.stringify(step.details, null, 2)}
-                    </pre>
+                    <p className="text-sm text-gray-600 mb-2">{step.description}</p>
+
+                    <div className="flex items-center gap-2">
+                      {step.confidence !== undefined && (
+                        <Badge variant="outline" className="text-xs">
+                          {Math.round(step.confidence * 100)}% confidence
+                        </Badge>
+                      )}
+                      {step.module && (
+                        <Badge variant="outline" className="text-xs">
+                          {step.module} module
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                </div>
+              ))}
 
-        {isActive && (
-          <div className="mt-3 text-xs text-gray-500 italic">
-            AI is analyzing your request and determining the best approach...
-          </div>
-        )}
-      </CardContent>
+              {isActive && (
+                <div className="text-center py-2">
+                  <div className="inline-flex items-center gap-2 text-sm text-blue-600">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Processing your request...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   )
 }

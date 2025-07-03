@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { systemManager } from "@/core/system/manager"
 import { vocabularyModule } from "@/modules/vocabulary"
 import { mathematicsModule } from "@/modules/mathematics"
+import { userMemory } from "@/core/memory/user-memory"
 import {
   Brain,
   BookOpen,
@@ -25,23 +25,41 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
+  Home,
+  Cog,
+  Menu,
+  X,
 } from "lucide-react"
 
 interface AdminDashboardProps {
   onToggleChat: () => void
 }
 
+type AdminPage =
+  | "overview"
+  | "vocabulary"
+  | "maths"
+  | "facts"
+  | "coding"
+  | "philosophy"
+  | "user-memory"
+  | "chat-log"
+  | "settings"
+
 export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
+  const [currentPage, setCurrentPage] = useState<AdminPage>("overview")
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [systemStats, setSystemStats] = useState<any>(null)
   const [chatLog, setChatLog] = useState<any[]>([])
   const [vocabData, setVocabData] = useState<any>(null)
   const [mathData, setMathData] = useState<any>(null)
+  const [userMemoryData, setUserMemoryData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     loadSystemData()
-    const interval = setInterval(loadSystemData, 5000)
+    const interval = setInterval(loadSystemData, 10000) // Refresh every 10 seconds
     return () => clearInterval(interval)
   }, [])
 
@@ -56,7 +74,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
       setSystemStats(stats)
       setChatLog(log)
 
-      // Load vocab data
+      // Load vocabulary data
       try {
         const seedWords = vocabularyModule.getSeedWords()
         const learntWords = vocabularyModule.getLearntWords()
@@ -65,12 +83,23 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
         console.error("Failed to load vocab data:", error)
       }
 
-      // Load math data
+      // Load maths data
       try {
+        const seedConcepts = mathematicsModule.getSeedConcepts()
+        const learntConcepts = mathematicsModule.getLearntConcepts()
         const mathStats = mathematicsModule.getStats()
-        setMathData(mathStats)
+        setMathData({ seedConcepts, learntConcepts, stats: mathStats })
       } catch (error) {
-        console.error("Failed to load math data:", error)
+        console.error("Failed to load maths data:", error)
+      }
+
+      // Load user memory data
+      try {
+        const memoryStats = userMemory.getStats()
+        const personalInfo = userMemory.getPersonalInfo()
+        setUserMemoryData({ stats: memoryStats, personalInfo })
+      } catch (error) {
+        console.error("Failed to load user memory data:", error)
       }
 
       setLoading(false)
@@ -114,6 +143,18 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
     return new Date(timestamp).toLocaleString()
   }
 
+  const sidebarItems = [
+    { id: "overview", label: "Overview", icon: Home },
+    { id: "vocabulary", label: "Vocabulary", icon: BookOpen },
+    { id: "maths", label: "Maths", icon: Calculator },
+    { id: "facts", label: "Facts", icon: Globe },
+    { id: "coding", label: "Coding", icon: Code },
+    { id: "philosophy", label: "Philosophy", icon: Lightbulb },
+    { id: "user-memory", label: "User Memory", icon: User },
+    { id: "chat-log", label: "Chat Log", icon: MessageSquare },
+    { id: "settings", label: "Settings", icon: Cog },
+  ]
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center bg-gray-50">
@@ -129,381 +170,267 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
   }
 
   return (
-    <div className="h-full bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Brain className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">ZacAI Admin Dashboard</h1>
-              <p className="text-sm text-gray-600">System Management & Analytics</p>
-            </div>
-            <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
-              {systemStats?.initialized ? "Online" : "Offline"}
-            </Badge>
+    <div className="h-full flex bg-gray-50">
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? "w-64" : "w-16"} transition-all duration-300 bg-white border-r border-gray-200`}>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-6">
+            {sidebarOpen && (
+              <div className="flex items-center gap-2">
+                <Brain className="w-6 h-6 text-blue-600" />
+                <span className="font-bold text-gray-900">ZacAI Admin</span>
+              </div>
+            )}
+            <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)}>
+              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </Button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadSystemData} disabled={refreshing}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportData}>
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
-            <Button variant="outline" size="sm" onClick={onToggleChat}>
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Chat
-            </Button>
-          </div>
+          <nav className="space-y-2">
+            {sidebarItems.map((item) => {
+              const Icon = item.icon
+              const isActive = currentPage === item.id
+              return (
+                <Button
+                  key={item.id}
+                  variant={isActive ? "default" : "ghost"}
+                  className={`w-full justify-start ${!sidebarOpen && "px-2"}`}
+                  onClick={() => setCurrentPage(item.id as AdminPage)}
+                >
+                  <Icon className="w-4 h-4" />
+                  {sidebarOpen && <span className="ml-2">{item.label}</span>}
+                </Button>
+              )
+            })}
+          </nav>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="vocab">Vocab</TabsTrigger>
-            <TabsTrigger value="mathematics">Mathematics</TabsTrigger>
-            <TabsTrigger value="facts">Facts</TabsTrigger>
-            <TabsTrigger value="coding">Coding</TabsTrigger>
-            <TabsTrigger value="philosophy">Philosophy</TabsTrigger>
-            <TabsTrigger value="chat-log">Chat Log</TabsTrigger>
-          </TabsList>
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold text-gray-900">
+                {sidebarItems.find((item) => item.id === currentPage)?.label || "Dashboard"}
+              </h1>
+              <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
+                {systemStats?.initialized ? "Online" : "Offline"}
+              </Badge>
+            </div>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-green-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Uptime</p>
-                      <p className="text-lg font-bold">{formatUptime(systemStats?.uptime || 0)}</p>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={loadSystemData} disabled={refreshing}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+              <Button variant="outline" size="sm" onClick={exportData}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="outline" size="sm" onClick={onToggleChat}>
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Chat
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Page Content */}
+        <div className="flex-1 overflow-auto p-6">
+          {currentPage === "overview" && (
+            <div className="space-y-6">
+              {/* System Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-green-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Uptime</p>
+                        <p className="text-lg font-bold">{formatUptime(systemStats?.uptime || 0)}</p>
+                      </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Total Queries</p>
+                        <p className="text-lg font-bold">{systemStats?.totalQueries || 0}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-purple-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Success Rate</p>
+                        <p className="text-lg font-bold">{Math.round((systemStats?.successRate || 0) * 100)}%</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-orange-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Avg Response</p>
+                        <p className="text-lg font-bold">{Math.round(systemStats?.averageResponseTime || 0)}ms</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Module Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="w-5 h-5" />
+                    Module Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {systemStats?.modules &&
+                      Object.entries(systemStats.modules).map(([name, stats]: [string, any]) => (
+                        <div key={name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            {name === "vocabulary" && <BookOpen className="w-4 h-4 text-blue-600" />}
+                            {name === "mathematics" && <Calculator className="w-4 h-4 text-green-600" />}
+                            <span className="font-medium capitalize">{name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">{stats?.totalQueries || 0} queries</span>
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          )}
 
+          {currentPage === "vocabulary" && (
+            <div className="space-y-6">
               <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Total Queries</p>
-                      <p className="text-lg font-bold">{systemStats?.totalQueries || 0}</p>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-blue-600" />
+                    Vocabulary Module
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <p className="text-2xl font-bold text-blue-600">
+                        {systemStats?.modules?.vocabulary?.totalQueries || 0}
+                      </p>
+                      <p className="text-sm text-gray-600">Word Lookups</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <p className="text-2xl font-bold text-green-600">
+                        {Object.keys(vocabData?.seedWords || {}).length}
+                      </p>
+                      <p className="text-sm text-gray-600">Seed Words</p>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <p className="text-2xl font-bold text-purple-600">
+                        {Object.keys(vocabData?.learntWords || {}).length}
+                      </p>
+                      <p className="text-sm text-gray-600">Learnt Words</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-purple-600" />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Seed Words */}
                     <div>
-                      <p className="text-sm text-gray-600">Success Rate</p>
-                      <p className="text-lg font-bold">{Math.round((systemStats?.successRate || 0) * 100)}%</p>
+                      <h3 className="font-semibold mb-3">Seed Words</h3>
+                      <ScrollArea className="h-96 border rounded-lg p-3">
+                        <div className="space-y-3">
+                          {vocabData?.seedWords &&
+                            Object.entries(vocabData.seedWords).map(([word, data]: [string, any]) => (
+                              <div key={word} className="p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="font-medium text-blue-600">{word.toUpperCase()}</h4>
+                                  <Badge variant="outline">{data.partOfSpeech}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-700 mb-2">{data.definition}</p>
+                                {data.phonetics && (
+                                  <p className="text-xs text-gray-500">Pronunciation: {data.phonetics}</p>
+                                )}
+                                {data.frequency && (
+                                  <p className="text-xs text-gray-500">Frequency: {data.frequency}/5</p>
+                                )}
+                                {data.synonyms && data.synonyms.length > 0 && (
+                                  <p className="text-xs text-gray-500">
+                                    Synonyms: {data.synonyms.slice(0, 3).join(", ")}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      </ScrollArea>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-orange-600" />
+                    {/* Learnt Words */}
                     <div>
-                      <p className="text-sm text-gray-600">Avg Response</p>
-                      <p className="text-lg font-bold">{Math.round(systemStats?.averageResponseTime || 0)}ms</p>
+                      <h3 className="font-semibold mb-3">Recently Learnt Words</h3>
+                      <ScrollArea className="h-96 border rounded-lg p-3">
+                        <div className="space-y-3">
+                          {vocabData?.learntWords &&
+                            Object.entries(vocabData.learntWords).map(([id, entry]: [string, any]) => (
+                              <div key={id} className="p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="font-medium text-green-600">
+                                    {entry.content?.word?.toUpperCase()}
+                                  </h4>
+                                  <Badge variant="outline">{entry.content?.partOfSpeech}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-700 mb-2">{entry.content?.definition}</p>
+                                <p className="text-xs text-gray-500">Added: {formatTimestamp(entry.timestamp)}</p>
+                                <p className="text-xs text-gray-500">Confidence: {Math.round(entry.confidence * 100)}%</p>
+                              </div>
+                            ))}
+                          {(!vocabData?.learntWords || Object.keys(vocabData.learntWords).length === 0) && (
+                            <p className="text-gray-500 text-center py-8">
+                              No learnt words yet. Try asking me to define a word!
+                            </p>
+                          )}
+                        </div>
+                      </ScrollArea>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+          )}
 
-            {/* Module Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="w-5 h-5" />
-                  Module Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {systemStats?.modules &&
-                    Object.entries(systemStats.modules).map(([name, stats]: [string, any]) => (
-                      <div key={name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          {name === "vocab" && <BookOpen className="w-4 h-4 text-blue-600" />}
-                          {name === "mathematics" && <Calculator className="w-4 h-4 text-green-600" />}
-                          {name === "facts" && <Globe className="w-4 h-4 text-purple-600" />}
-                          {name === "coding" && <Code className="w-4 h-4 text-orange-600" />}
-                          {name === "philosophy" && <Lightbulb className="w-4 h-4 text-yellow-600" />}
-                          {name === "user-info" && <User className="w-4 h-4 text-pink-600" />}
-                          <span className="font-medium capitalize">{name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600">{stats?.totalQueries || 0} queries</span>
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Vocab Tab */}
-          <TabsContent value="vocab" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-blue-600" />
-                  Vocabulary Module
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">{systemStats?.modules?.vocab?.totalQueries || 0}</p>
-                    <p className="text-sm text-gray-600">Word Lookups</p>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">
-                      {Object.keys(vocabData?.seedWords || {}).length}
-                    </p>
-                    <p className="text-sm text-gray-600">Seed Words</p>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <p className="text-2xl font-bold text-purple-600">
-                      {Object.keys(vocabData?.learntWords || {}).length}
-                    </p>
-                    <p className="text-sm text-gray-600">Learnt Words</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Seed Words */}
-                  <div>
-                    <h3 className="font-semibold mb-3">Seed Words</h3>
-                    <ScrollArea className="h-64 border rounded-lg p-3">
-                      <div className="space-y-3">
-                        {vocabData?.seedWords &&
-                          Object.entries(vocabData.seedWords).map(([word, data]: [string, any]) => (
-                            <div key={word} className="p-3 bg-gray-50 rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium text-blue-600">{word.toUpperCase()}</h4>
-                                <Badge variant="outline">{data.partOfSpeech}</Badge>
-                              </div>
-                              <p className="text-sm text-gray-700 mb-2">{data.definition}</p>
-                              {data.phonetics && (
-                                <p className="text-xs text-gray-500">Pronunciation: {data.phonetics}</p>
-                              )}
-                              {data.frequency && <p className="text-xs text-gray-500">Frequency: {data.frequency}/5</p>}
-                            </div>
-                          ))}
-                      </div>
-                    </ScrollArea>
-                  </div>
-
-                  {/* Learnt Words */}
-                  <div>
-                    <h3 className="font-semibold mb-3">Recently Learnt Words</h3>
-                    <ScrollArea className="h-64 border rounded-lg p-3">
-                      <div className="space-y-3">
-                        {vocabData?.learntWords &&
-                          Object.entries(vocabData.learntWords).map(([id, entry]: [string, any]) => (
-                            <div key={id} className="p-3 bg-gray-50 rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium text-green-600">{entry.content?.word?.toUpperCase()}</h4>
-                                <Badge variant="outline">{entry.content?.partOfSpeech}</Badge>
-                              </div>
-                              <p className="text-sm text-gray-700 mb-2">{entry.content?.definition}</p>
-                              <p className="text-xs text-gray-500">Added: {formatTimestamp(entry.timestamp)}</p>
-                            </div>
-                          ))}
-                        {(!vocabData?.learntWords || Object.keys(vocabData.learntWords).length === 0) && (
-                          <p className="text-gray-500 text-center py-8">
-                            No learnt words yet. Try asking me to define a word!
-                          </p>
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Mathematics Tab */}
-          <TabsContent value="mathematics" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="w-5 h-5 text-green-600" />
-                  Mathematics Module
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">
-                      {systemStats?.modules?.mathematics?.totalQueries || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Calculations</p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">
-                      {systemStats?.modules?.mathematics?.learntEntries || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Patterns Learned</p>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <p className="text-2xl font-bold text-purple-600">
-                      {Math.round((systemStats?.modules?.mathematics?.successRate || 0) * 100)}%
-                    </p>
-                    <p className="text-sm text-gray-600">Accuracy Rate</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Recent Calculations</h3>
-                  <div className="space-y-2">
-                    {chatLog
-                      .filter((entry) => entry.sources?.includes("mathematics"))
-                      .slice(0, 10)
-                      .map((entry, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{entry.input}</p>
-                            <p className="text-sm text-gray-600">{formatTimestamp(entry.timestamp)}</p>
-                          </div>
-                          <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
-                            {entry.processingTime}ms
-                          </Badge>
-                        </div>
-                      ))}
-                    {chatLog.filter((entry) => entry.sources?.includes("mathematics")).length === 0 && (
-                      <p className="text-gray-500 text-center py-8">
-                        No calculations yet. Try asking me to solve a math problem!
+          {currentPage === "maths" && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calculator className="w-5 h-5 text-green-600" />
+                    Maths Module
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <p className="text-2xl font-bold text-green-600">
+                        {systemStats?.modules?.mathematics?.totalQueries || 0}
                       </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Other tabs remain the same... */}
-          <TabsContent value="facts" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-purple-600" />
-                  Facts Module
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-gray-500 py-8">Facts module coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="coding" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code className="w-5 h-5 text-orange-600" />
-                  Coding Module
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-gray-500 py-8">Coding module coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="philosophy" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-yellow-600" />
-                  Philosophy Module
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-gray-500 py-8">Philosophy module coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Chat Log Tab */}
-          <TabsContent value="chat-log" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5" />
-                  Chat Log ({chatLog.length} entries)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-96">
-                  <div className="space-y-3">
-                    {chatLog.map((entry, idx) => (
-                      <div key={idx} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="text-xs">
-                            {formatTimestamp(entry.timestamp)}
-                          </Badge>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {Math.round(entry.confidence * 100)}% confidence
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {entry.processingTime}ms
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div>
-                            <p className="text-sm font-medium text-blue-600">User:</p>
-                            <p className="text-sm">{entry.input}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-green-600">Assistant:</p>
-                            <p className="text-sm">
-                              {entry.response.substring(0, 200)}
-                              {entry.response.length > 200 ? "..." : ""}
-                            </p>
-                          </div>
-                          {entry.sources && entry.sources.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {entry.sources.map((source, sourceIdx) => (
-                                <Badge key={sourceIdx} variant="outline" className="text-xs">
-                                  {source}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {chatLog.length === 0 && (
-                      <p className="text-gray-500 text-center py-8">No chat history yet. Start a conversation!</p>
-                    )}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  )
-}
+                      <p className="text-sm text-gray-600">Calculations</p>
+                    </div>\
