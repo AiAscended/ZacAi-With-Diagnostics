@@ -1,11 +1,11 @@
 export interface ReasoningStep {
-  step: number
-  reasoning: string
+  id: string
+  type: ReasoningType
   input: any
   output: any
+  reasoning: string
   confidence: number
   timestamp: number
-  metadata?: Record<string, any>
 }
 
 export interface ReasoningChain {
@@ -230,23 +230,125 @@ export interface TemporalReasoning {
 }
 
 export interface CognitiveEngine {
+  name: string
+  version: string
+  initialized: boolean
   initialize(): Promise<void>
-  process(input: string, context: any): Promise<any>
-  learn(data: any): Promise<void>
-  getStats(): any
+  process(input: string, context?: any): Promise<CognitiveResult>
+  getStats(): CognitiveStats
+}
+
+export interface CognitiveResult {
+  response: string
+  confidence: number
+  reasoning: string[]
+  emotions?: string[]
+  intent: string
+  entities: string[]
+  timestamp: number
+}
+
+export interface CognitiveStats {
+  totalProcessed: number
+  averageConfidence: number
+  intentsRecognized: { [key: string]: number }
+  entitiesExtracted: number
+  processingTime: number
 }
 
 export interface ReasoningEngine {
+  name: string
+  version: string
+  initialized: boolean
   initialize(): Promise<void>
-  analyze(input: string): Promise<any>
-  synthesize(input: string, analysis: any, responses: any[]): Promise<any>
-  getStats(): any
+  reason(input: string, context?: any): Promise<ReasoningResult>
+  getStats(): ReasoningStats
+}
+
+export interface ReasoningResult {
+  conclusion: string
+  confidence: number
+  steps: ReasoningStep[]
+  strategy: string
+  evidence: string[]
+  assumptions: string[]
+  timestamp: number
+}
+
+export interface ReasoningStats {
+  totalReasoningChains: number
+  averageSteps: number
+  averageConfidence: number
+  successRate: number
+  strategiesUsed: { [key: string]: number }
+  processingTime: number
 }
 
 export interface LearningEngine {
+  name: string
+  version: string
+  initialized: boolean
   initialize(): Promise<void>
-  learn(input: string, response: any): Promise<void>
-  getStats(): any
+  learn(data: LearningData): Promise<LearningResult>
+  recall(query: string): Promise<RecallResult>
+  getPatterns(): LearningPattern[]
+  getStats(): LearningStats
+}
+
+export interface LearningData {
+  id: string
+  content: any
+  context: string
+  source: string
+  timestamp: number
+  metadata?: any
+}
+
+export interface LearningResult {
+  success: boolean
+  confidence: number
+  patterns: string[]
+  connections: string[]
+  timestamp: number
+}
+
+export interface RecallResult {
+  data: any[]
+  confidence: number
+  relevance: number
+  patterns: string[]
+  timestamp: number
+}
+
+export interface LearningPattern {
+  id: string
+  pattern: string
+  frequency: number
+  confidence: number
+  context: string[]
+  timestamp: number
+  category?: string
+  effectiveness?: number
+}
+
+export interface LearningStats {
+  totalLearned: number
+  patternsIdentified: number
+  averageConfidence: number
+  retentionRate: number
+  processingTime: number
+}
+
+export type ReasoningType = "deductive" | "inductive" | "abductive" | "analogical" | "causal" | "temporal"
+
+export interface EngineConfig {
+  name: string
+  enabled: boolean
+  priority: number
+  timeout: number
+  retries: number
+  cacheEnabled: boolean
+  debugMode: boolean
 }
 
 export interface EngineStats {

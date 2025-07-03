@@ -1,164 +1,188 @@
 import type { LearntDataEntry } from "@/types/global"
 
 export class StorageManager {
+  private readonly prefix = "zacai_"
   private cache: Map<string, any> = new Map()
-  private readonly STORAGE_PREFIX = "zacai_"
-  private initialized = false
 
   async initialize(): Promise<void> {
-    this.initialized = true
-    console.log("✅ Storage Manager initialized")
-  }
-
-  async loadSeedData(filePath: string): Promise<any> {
     try {
-      const response = await fetch(filePath)
-      if (!response.ok) {
-        console.warn(`Seed data not found at ${filePath}, using empty structure`)
-        return this.createEmptySeedStructure()
-      }
-
-      const text = await response.text()
-      if (!text.trim()) {
-        console.warn(`Seed data file ${filePath} is empty`)
-        return this.createEmptySeedStructure()
-      }
-
-      const data = JSON.parse(text)
-      this.cache.set(`seed_${filePath}`, data)
-      return data
+      // Test localStorage availability
+      const testKey = this.prefix + "test"
+      localStorage.setItem(testKey, "test")
+      localStorage.removeItem(testKey)
+      console.log("✅ Storage Manager initialized")
     } catch (error) {
-      console.error("Error loading seed data:", error)
-      return this.createEmptySeedStructure()
-    }
-  }
-
-  async loadLearntData(filePath: string): Promise<any> {
-    try {
-      // Try to load from localStorage first
-      const localData = localStorage.getItem(`${this.STORAGE_PREFIX}${filePath}`)
-      if (localData) {
-        try {
-          const data = JSON.parse(localData)
-          this.cache.set(`learnt_${filePath}`, data)
-          return data
-        } catch (parseError) {
-          console.warn(`Invalid JSON in localStorage for ${filePath}, clearing...`)
-          localStorage.removeItem(`${this.STORAGE_PREFIX}${filePath}`)
-        }
-      }
-
-      // Try to load from file system
-      try {
-        const response = await fetch(filePath)
-        if (response.ok) {
-          const text = await response.text()
-          if (text.trim()) {
-            const data = JSON.parse(text)
-            this.cache.set(`learnt_${filePath}`, data)
-            return data
-          }
-        }
-      } catch (fetchError) {
-        console.warn(`Could not fetch learnt data from ${filePath}:`, fetchError)
-      }
-
-      // Return empty structure if file doesn't exist or is invalid
-      const emptyStructure = this.createEmptyLearntStructure()
-      this.cache.set(`learnt_${filePath}`, emptyStructure)
-      return emptyStructure
-    } catch (error) {
-      console.error("Error loading learnt data:", error)
-      return this.createEmptyLearntStructure()
-    }
-  }
-
-  async saveLearntData(filePath: string, data: any): Promise<boolean> {
-    try {
-      const serializedData = JSON.stringify(data, null, 2)
-      localStorage.setItem(`${this.STORAGE_PREFIX}${filePath}`, serializedData)
-      this.cache.set(`learnt_${filePath}`, data)
-      return true
-    } catch (error) {
-      console.error("Error saving learnt data:", error)
-      return false
-    }
-  }
-
-  async addLearntEntry(filePath: string, entry: LearntDataEntry): Promise<boolean> {
-    try {
-      const data = await this.loadLearntData(filePath)
-      if (!data.entries) data.entries = {}
-
-      data.entries[entry.id] = entry
-      data.metadata.totalEntries = Object.keys(data.entries).length
-      data.metadata.lastUpdated = Date.now()
-
-      return await this.saveLearntData(filePath, data)
-    } catch (error) {
-      console.error("Error adding learnt entry:", error)
-      return false
-    }
-  }
-
-  getCachedData(key: string): any {
-    return this.cache.get(key)
-  }
-
-  setCachedData(key: string, data: any): void {
-    this.cache.set(key, data)
-  }
-
-  clearCache(): void {
-    this.cache.clear()
-  }
-
-  private createEmptyLearntStructure(): any {
-    return {
-      metadata: {
-        version: "1.0.0",
-        lastUpdated: Date.now(),
-        totalEntries: 0,
-        learningRate: 0,
-        confidenceThreshold: 0.7,
-      },
-      entries: {},
-      patterns: {},
-      statistics: {
-        learningVelocity: 0,
-        accuracyRate: 0,
-        retentionRate: 0,
-        utilizationRate: 0,
-      },
-    }
-  }
-
-  private createEmptySeedStructure(): any {
-    return {
-      metadata: {
-        version: "1.0.0",
-        lastUpdated: Date.now(),
-        totalEntries: 0,
-      },
-      data: {},
+      console.error("❌ Storage not available:", error)
+      throw new Error("Storage initialization failed")
     }
   }
 
   async save(key: string, data: any): Promise<void> {
     try {
-      localStorage.setItem(key, JSON.stringify(data))
+      const fullKey = this.prefix + key
+      const serialized = JSON.stringify(data)
+      localStorage.setItem(fullKey, serialized)
+      this.cache.set(key, data)
     } catch (error) {
-      console.warn("Failed to save to localStorage:", error)
+      console.error("Failed to save data:", error)
+      throw error
     }
   }
 
   async load(key: string): Promise<any> {
     try {
-      const data = localStorage.getItem(key)
-      return data ? JSON.parse(data) : null
+      // Check cache first
+      if (this.cache.has(key)) {
+        return this.cache.get(key)
+      }
+
+      const fullKey = this.prefix + key
+      const serialized = localStorage.getItem(fullKey)
+
+      if (!serialized) {
+        return null
+      }
+
+      const data = JSON.parse(serialized)
+      this.cache.set(key, data)
+      return data
     } catch (error) {
-      console.warn("Failed to load from localStorage:", error)
+      console.error("Failed to load data:", error)
       return null
+    }
+  }
+
+  async delete(key: string): Promise<void> {
+    try {
+      const fullKey = this.prefix + key
+      localStorage.removeItem(fullKey)
+      this.cache.delete(key)
+    } catch (error) {
+      console.error("Failed to delete data:", error)
+      throw error
+    }
+  }
+
+  async exists(key: string): Promise<boolean> {
+    const fullKey = this.prefix + key
+    return localStorage.getItem(fullKey) !== null
+  }
+
+  async clear(): Promise<void> {
+    try {
+      const keys = Object.keys(localStorage)
+      for (const key of keys) {
+        if (key.startsWith(this.prefix)) {
+          localStorage.removeItem(key)
+        }
+      }
+      this.cache.clear()
+    } catch (error) {
+      console.error("Failed to clear storage:", error)
+      throw error
+    }
+  }
+
+  async saveLearntData(module: string, entry: LearntDataEntry): Promise<void> {
+    const key = `learnt_${module}`
+    const existing = (await this.load(key)) || []
+
+    // Remove existing entry with same ID
+    const filtered = existing.filter((e: LearntDataEntry) => e.id !== entry.id)
+    filtered.push(entry)
+
+    await this.save(key, filtered)
+  }
+
+  async loadLearntData(module: string): Promise<LearntDataEntry[]> {
+    const key = `learnt_${module}`
+    return (await this.load(key)) || []
+  }
+
+  async searchLearntData(module: string, query: string): Promise<LearntDataEntry[]> {
+    const data = await this.loadLearntData(module)
+    const lowerQuery = query.toLowerCase()
+
+    return data.filter(
+      (entry) =>
+        JSON.stringify(entry.content).toLowerCase().includes(lowerQuery) ||
+        entry.context.toLowerCase().includes(lowerQuery) ||
+        entry.tags.some((tag) => tag.toLowerCase().includes(lowerQuery)),
+    )
+  }
+
+  async getStorageStats(): Promise<any> {
+    try {
+      const keys = Object.keys(localStorage)
+      const ourKeys = keys.filter((key) => key.startsWith(this.prefix))
+
+      let totalSize = 0
+      const moduleStats: any = {}
+
+      for (const key of ourKeys) {
+        const value = localStorage.getItem(key)
+        if (value) {
+          const size = new Blob([value]).size
+          totalSize += size
+
+          const moduleName = key.replace(this.prefix, "").split("_")[0]
+          if (!moduleStats[moduleName]) {
+            moduleStats[moduleName] = { count: 0, size: 0 }
+          }
+          moduleStats[moduleName].count++
+          moduleStats[moduleName].size += size
+        }
+      }
+
+      return {
+        totalKeys: ourKeys.length,
+        totalSize,
+        moduleStats,
+        cacheSize: this.cache.size,
+      }
+    } catch (error) {
+      console.error("Failed to get storage stats:", error)
+      return { totalKeys: 0, totalSize: 0, moduleStats: {}, cacheSize: 0 }
+    }
+  }
+
+  async exportData(): Promise<any> {
+    try {
+      const keys = Object.keys(localStorage)
+      const ourKeys = keys.filter((key) => key.startsWith(this.prefix))
+      const data: any = {}
+
+      for (const key of ourKeys) {
+        const value = localStorage.getItem(key)
+        if (value) {
+          const cleanKey = key.replace(this.prefix, "")
+          data[cleanKey] = JSON.parse(value)
+        }
+      }
+
+      return {
+        timestamp: Date.now(),
+        version: "2.0.0",
+        data,
+      }
+    } catch (error) {
+      console.error("Failed to export data:", error)
+      throw error
+    }
+  }
+
+  async importData(importData: any): Promise<void> {
+    try {
+      if (!importData.data) {
+        throw new Error("Invalid import data format")
+      }
+
+      for (const [key, value] of Object.entries(importData.data)) {
+        await this.save(key, value)
+      }
+    } catch (error) {
+      console.error("Failed to import data:", error)
+      throw error
     }
   }
 }

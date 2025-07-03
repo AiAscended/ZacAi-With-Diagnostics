@@ -1,28 +1,36 @@
 export interface VocabularyEntry {
   word: string
   definition: string
+  pronunciation?: string
   partOfSpeech: string
   examples: string[]
   synonyms: string[]
   antonyms: string[]
+  etymology?: string
   difficulty: number
   frequency: number
-  etymology?: string
-  pronunciation?: string
+  timestamp: number
+  source: string
 }
 
 export interface MathConcept {
+  id: string
   name: string
+  category: string
   description: string
   formula?: string
-  examples: Array<{
-    problem: string
-    solution: string
-    explanation: string
-  }>
-  category: string
+  examples: MathExample[]
   difficulty: number
-  prerequisites?: string[]
+  prerequisites: string[]
+  applications: string[]
+  timestamp: number
+}
+
+export interface MathExample {
+  problem: string
+  solution: string
+  steps: string[]
+  explanation: string
 }
 
 export interface FactEntry {
@@ -30,196 +38,94 @@ export interface FactEntry {
   title: string
   content: string
   category: string
+  tags: string[]
   source: string
   verified: boolean
-  tags: string[]
-  lastUpdated: number
   confidence: number
-  relatedTopics: string[]
+  timestamp: number
+  lastUpdated: number
+  references: string[]
+}
+
+export interface CodeConcept {
+  id: string
+  name: string
+  language: string
+  category: string
+  description: string
+  syntax: string
+  examples: CodeExample[]
+  bestPractices: string[]
+  commonMistakes: string[]
+  difficulty: number
+  timestamp: number
 }
 
 export interface CodeExample {
-  id: string
   title: string
-  description: string
-  language: string
   code: string
   explanation: string
-  difficulty: "beginner" | "intermediate" | "advanced"
-  tags: string[]
-  category: string
+  output?: string
 }
 
-export interface CodingConcept {
-  name: string
-  language: string
-  description: string
-  syntax: string
-  examples: Array<{
-    title: string
-    code: string
-    explanation: string
-  }>
-  difficulty: number
-  category: string
-}
-
-export interface PhilosophicalConcept {
+export interface PhilosophyConcept {
   id: string
   name: string
-  description: string
+  school: string
   philosopher?: string
-  school?: string
-  period?: string
+  era: string
+  description: string
   keyIdeas: string[]
-  relatedConcepts: string[]
   arguments: string[]
   counterArguments: string[]
+  relatedConcepts: string[]
+  timestamp: number
 }
 
 export interface UserProfile {
   id: string
   name?: string
-  preferences: { [key: string]: any }
-  learningHistory: Array<{
-    topic: string
-    timestamp: number
-    confidence: number
-    source: string
-    context: string
-  }>
-  personalInfo: Record<string, any>
-  settings: {
-    notifications: boolean
-    darkMode: boolean
-    autoSave: boolean
+  preferences: {
+    learningStyle: string
+    interests: string[]
+    difficulty: string
+    language: string
   }
-  interests: string[]
-  skillLevel: { [key: string]: number }
-}
-
-export interface LearningPattern {
-  id: string
-  pattern: string
-  frequency: number
-  confidence: number
-  context: string[]
+  history: {
+    topics: string[]
+    strengths: string[]
+    weaknesses: string[]
+    progress: { [key: string]: number }
+  }
+  personalInfo: {
+    age?: number
+    occupation?: string
+    education?: string
+    goals: string[]
+  }
   timestamp: number
-  category?: string
-  effectiveness?: number
-}
-
-export interface KnowledgeGraph {
-  nodes: Array<{
-    id: string
-    label: string
-    type: string
-    properties: Record<string, any>
-  }>
-  edges: Array<{
-    source: string
-    target: string
-    relationship: string
-    weight: number
-  }>
-}
-
-export interface SearchResult {
-  id: string
-  title: string
-  content: string
-  relevance: number
-  source: string
-  type: "vocabulary" | "math" | "fact" | "code" | "philosophy"
-  metadata: Record<string, any>
-}
-
-export interface LearningObjective {
-  id: string
-  title: string
-  description: string
-  targetSkills: string[]
-  prerequisites: string[]
-  estimatedTime: number
-  difficulty: number
-  progress: number
-  completed: boolean
-}
-
-export interface AssessmentResult {
-  id: string
-  userId: string
-  topic: string
-  score: number
-  maxScore: number
-  timeSpent: number
-  answers: Array<{
-    question: string
-    userAnswer: string
-    correctAnswer: string
-    isCorrect: boolean
-    explanation: string
-  }>
-  strengths: string[]
-  weaknesses: string[]
-  recommendations: string[]
-  timestamp: number
+  lastActive: number
 }
 
 export interface ModuleConfig {
   name: string
   enabled: boolean
   priority: number
-  settings: Record<string, any>
-  dependencies: string[]
-  version: string
+  confidenceThreshold: number
+  maxEntries: number
+  cacheSize: number
+  seedFile?: string
+  learntFile?: string
+  apiEndpoints?: { [key: string]: string }
 }
 
-export interface LearningPath {
-  id: string
-  title: string
-  description: string
-  modules: string[]
-  estimatedDuration: number
-  difficulty: number
-  prerequisites: string[]
-  objectives: LearningObjective[]
-  progress: number
-}
-
-export interface ContentRecommendation {
-  id: string
-  type: "vocabulary" | "math" | "fact" | "code" | "philosophy"
-  title: string
-  description: string
-  relevance: number
-  difficulty: number
-  estimatedTime: number
-  reason: string
-}
-
-export interface PerformanceMetrics {
-  accuracy: number
-  speed: number
-  retention: number
-  engagement: number
-  improvement: number
-  consistency: number
-}
-
-export interface LearningSession {
-  id: string
-  userId: string
-  startTime: number
-  endTime?: number
-  topics: string[]
-  activities: Array<{
-    type: string
-    content: string
-    duration: number
-    performance: number
-  }>
-  totalTime: number
-  performance: PerformanceMetrics
-  notes?: string
+export interface LearningMetrics {
+  totalLearned: number
+  accuracyRate: number
+  retentionRate: number
+  improvementRate: number
+  timeSpent: number
+  sessionsCompleted: number
+  streakDays: number
+  lastSession: number
 }

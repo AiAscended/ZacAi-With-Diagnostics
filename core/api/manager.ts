@@ -1,5 +1,3 @@
-import { API_CONFIG } from "@/config/app"
-
 interface RequestOptions {
   method?: string
   headers?: Record<string, string>
@@ -7,10 +5,20 @@ interface RequestOptions {
   timeout?: number
 }
 
+interface CacheEntry {
+  data: any
+  timestamp: number
+  ttl: number
+}
+
 export class APIManager {
-  private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map()
+  private cache: Map<string, CacheEntry> = new Map()
   private requestCount = 0
   private lastRequestTime = 0
+  private readonly rateLimit = {
+    requests: 60,
+    window: 60000, // 1 minute
+  }
 
   async makeRequest(url: string, options: RequestOptions = {}, cacheKey?: string, cacheTTL = 300000): Promise<any> {
     // Check rate limiting
@@ -30,7 +38,7 @@ export class APIManager {
 
     try {
       const controller = new AbortController()
-      const timeout = options.timeout || API_CONFIG.timeout
+      const timeout = options.timeout || 10000
 
       const timeoutId = setTimeout(() => controller.abort(), timeout)
 
@@ -38,6 +46,7 @@ export class APIManager {
         method: options.method || "GET",
         headers: {
           "Content-Type": "application/json",
+          "User-Agent": "ZacAI/2.0",
           ...options.headers,
         },
         body: options.body ? JSON.stringify(options.body) : undefined,
@@ -81,31 +90,16 @@ export class APIManager {
     })
   }
 
-  async put(url: string, data: any, options: RequestOptions = {}): Promise<any> {
-    return this.makeRequest(url, {
-      ...options,
-      method: "PUT",
-      body: data,
-    })
-  }
-
-  async delete(url: string, options: RequestOptions = {}): Promise<any> {
-    return this.makeRequest(url, {
-      ...options,
-      method: "DELETE",
-    })
-  }
-
   private isRateLimited(): boolean {
     const now = Date.now()
-    const windowStart = now - API_CONFIG.rateLimit.window
+    const windowStart = now - this.rateLimit.window
 
     // Reset counter if we're in a new window
     if (this.lastRequestTime < windowStart) {
       this.requestCount = 0
     }
 
-    return this.requestCount >= API_CONFIG.rateLimit.requests
+    return this.requestCount >= this.rateLimit.requests
   }
 
   private updateRequestStats(): void {
