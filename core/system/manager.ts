@@ -1,215 +1,305 @@
-import type { ModuleInterface, SystemStats, ModuleStats } from "@/types/global"
+import type { ModuleInterface, SystemResponse } from "@/types/global"
 import { vocabularyModule } from "@/modules/vocabulary"
 import { mathematicsModule } from "@/modules/mathematics"
 import { factsModule } from "@/modules/facts"
 import { codingModule } from "@/modules/coding"
 import { philosophyModule } from "@/modules/philosophy"
 import { userInfoModule } from "@/modules/user-info"
-import { reasoningEngine } from "@/engines/reasoning"
-import { learningEngine } from "@/engines/learning"
-import { contextManager } from "@/core/context/manager"
-import { storageManager } from "@/core/storage/manager"
+import { userMemory } from "@/core/memory/user-memory"
 
 export class SystemManager {
-  private initialized = false
   private modules: Map<string, ModuleInterface> = new Map()
-  private startTime = Date.now()
-  private totalQueries = 0
-  private totalResponseTime = 0
+  private initialized = false
+  private systemStats = {
+    startTime: Date.now(),
+    totalQueries: 0,
+    averageResponseTime: 0,
+    successfulResponses: 0,
+    failedResponses: 0,
+  }
+  private chatLog: Array<{
+    id: string
+    timestamp: number
+    input: string
+    response: string
+    confidence: number
+    sources: string[]
+    processingTime: number
+  }> = []
 
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log("🚀 Initializing ZacAI System...")
+    console.log("🚀 Initializing ZacAI System Manager...")
 
     try {
-      // Initialize core components
-      await storageManager.initialize()
-      await contextManager.createContext()
+      // Register modules
+      this.modules.set("vocabulary", vocabularyModule)
+      this.modules.set("mathematics", mathematicsModule)
+      this.modules.set("facts", factsModule)
+      this.modules.set("coding", codingModule)
+      this.modules.set("philosophy", philosophyModule)
+      this.modules.set("user-info", userInfoModule)
 
-      // Initialize engines
-      await reasoningEngine.initialize()
-      await learningEngine.initialize()
-
-      // Initialize modules
-      await this.initializeModules()
+      // Initialize all modules
+      const initPromises = Array.from(this.modules.values()).map((module) => module.initialize())
+      await Promise.all(initPromises)
 
       this.initialized = true
-      console.log("✅ ZacAI System initialized successfully")
+      console.log("✅ ZacAI System Manager initialized successfully")
+
+      // Load chat log from storage
+      this.loadChatLog()
     } catch (error) {
-      console.error("❌ System initialization failed:", error)
+      console.error("❌ Failed to initialize System Manager:", error)
       throw error
     }
   }
 
-  private async initializeModules(): Promise<void> {
-    const moduleList = [
-      vocabularyModule,
-      mathematicsModule,
-      factsModule,
-      codingModule,
-      philosophyModule,
-      userInfoModule,
-    ]
-
-    for (const module of moduleList) {
-      try {
-        await module.initialize()
-        this.modules.set(module.name, module)
-        console.log(`✅ ${module.name} module initialized`)
-      } catch (error) {
-        console.error(`❌ Failed to initialize ${module.name} module:`, error)
-      }
-    }
-  }
-
-  async processInput(input: string, context?: any): Promise<any> {
-    if (!this.initialized) {
-      throw new Error("System not initialized")
-    }
-
+  async processInput(input: string): Promise<SystemResponse> {
     const startTime = Date.now()
-    this.totalQueries++
+    this.systemStats.totalQueries++
 
     try {
-      // Analyze intent
-      const analysis = await reasoningEngine.analyze(input)
+      // Extract personal information first
+      userMemory.extractPersonalInfo(input)
 
-      // Add to context
-      contextManager.addMessage({
-        role: "user",
-        content: input,
-        metadata: { timestamp: Date.now() },
-      })
+      // Process input through all modules
+      const moduleResponses = await this.processWithModules(input)
 
-      // Get context for processing
-      const currentContext = contextManager.extractContext(input)
+      // Filter successful responses
+      const successfulResponses = moduleResponses.filter((response) => response.success && response.confidence > 0.3)
 
-      // Process with relevant modules
-      const moduleResponses = await this.processWithModules(input, analysis, currentContext)
+      if (successfulResponses.length === 0) {
+        const fallbackResponse = this.generateFallbackResponse(input)
+        const processingTime = Date.now() - startTime
 
-      // Synthesize response
-      const finalResponse = await reasoningEngine.synthesize(input, analysis, moduleResponses)
+        this.updateStats(processingTime, false)
+        this.addToChatLog(input, fallbackResponse.response, fallbackResponse.confidence, [], processingTime)
 
-      // Add response to context
-      contextManager.addMessage({
-        role: "assistant",
-        content: finalResponse.response,
-        metadata: {
-          confidence: finalResponse.confidence,
-          sources: finalResponse.sources,
-          timestamp: Date.now(),
-        },
-      })
+        return fallbackResponse
+      }
 
-      // Learn from interaction
-      await learningEngine.learn(input, finalResponse)
+      // Combine responses intelligently
+      const combinedResponse = this.combineResponses(successfulResponses)
+      const processingTime = Date.now() - startTime
 
-      // Update stats
-      const responseTime = Date.now() - startTime
-      this.totalResponseTime += responseTime
+      // Add to user memory
+      userMemory.addConversation(input, combinedResponse.response)
+
+      this.updateStats(processingTime, true)
+      this.addToChatLog(
+        input,
+        combinedResponse.response,
+        combinedResponse.confidence,
+        combinedResponse.sources,
+        processingTime,
+      )
+
+      return combinedResponse
+    } catch (error) {
+      console.error("❌ Error processing input:", error)
+      const processingTime = Date.now() - startTime
+      this.updateStats(processingTime, false)
+
+      const errorResponse = {
+        response: "I encountered an error processing your request. Please try again.",
+        confidence: 0,
+        sources: ["system-error"],
+        reasoning: [`Error: ${error}`],
+        timestamp: Date.now(),
+      }
+
+      this.addToChatLog(input, errorResponse.response, errorResponse.confidence, errorResponse.sources, processingTime)
+      return errorResponse
+    }
+  }
+
+  private async processWithModules(input: string): Promise<any[]> {
+    const promises = Array.from(this.modules.entries()).map(async ([name, module]) => {
+      try {
+        const response = await module.process(input)
+        return { ...response, moduleName: name }
+      } catch (error) {
+        console.error(`Module ${name} failed:`, error)
+        return { success: false, moduleName: name, error }
+      }
+    })
+
+    return await Promise.all(promises)
+  }
+
+  private combineResponses(responses: any[]): SystemResponse {
+    // Sort by confidence
+    responses.sort((a, b) => b.confidence - a.confidence)
+
+    const primaryResponse = responses[0]
+    const sources = responses.map((r) => r.moduleName)
+    const reasoning = responses
+      .filter((r) => r.data)
+      .map(
+        (r) => `${r.moduleName}: ${typeof r.data === "string" ? r.data.substring(0, 100) : "Processed successfully"}`,
+      )
+
+    // If we have multiple high-confidence responses, combine them
+    if (responses.length > 1 && responses[1].confidence > 0.7) {
+      const combinedData = responses
+        .filter((r) => r.confidence > 0.7)
+        .map((r) => r.data)
+        .join("\n\n---\n\n")
 
       return {
-        ...finalResponse,
-        processingTime: responseTime,
-        analysis,
-        moduleResponses: moduleResponses.length,
+        response: combinedData,
+        confidence: Math.min(1, responses.reduce((sum, r) => sum + r.confidence, 0) / responses.length),
+        sources,
+        reasoning,
+        timestamp: Date.now(),
+      }
+    }
+
+    return {
+      response: primaryResponse.data || "I processed your request but couldn't generate a response.",
+      confidence: primaryResponse.confidence,
+      sources,
+      reasoning,
+      timestamp: Date.now(),
+    }
+  }
+
+  private generateFallbackResponse(input: string): SystemResponse {
+    const suggestions = [
+      "Try asking about vocabulary, mathematics, coding, or general facts",
+      "You can ask me to define words, solve math problems, or explain concepts",
+      "I can help with Next.js coding questions and Tesla mathematics",
+      "Ask me about scientific facts or philosophical concepts",
+    ]
+
+    return {
+      response: `I'm not sure how to help with that specific request. Here are some things I can help you with:\n\n• ${suggestions.join("\n• ")}\n\nFeel free to ask me anything about these topics!`,
+      confidence: 0.3,
+      sources: ["system-fallback"],
+      reasoning: ["No modules provided confident responses", "Generated helpful suggestions"],
+      timestamp: Date.now(),
+    }
+  }
+
+  private updateStats(processingTime: number, success: boolean): void {
+    this.systemStats.averageResponseTime =
+      (this.systemStats.averageResponseTime * (this.systemStats.totalQueries - 1) + processingTime) /
+      this.systemStats.totalQueries
+
+    if (success) {
+      this.systemStats.successfulResponses++
+    } else {
+      this.systemStats.failedResponses++
+    }
+  }
+
+  private addToChatLog(
+    input: string,
+    response: string,
+    confidence: number,
+    sources: string[],
+    processingTime: number,
+  ): void {
+    const logEntry = {
+      id: `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+      input,
+      response,
+      confidence,
+      sources,
+      processingTime,
+    }
+
+    this.chatLog.push(logEntry)
+
+    // Keep only last 1000 entries
+    if (this.chatLog.length > 1000) {
+      this.chatLog = this.chatLog.slice(-1000)
+    }
+
+    // Save to localStorage
+    this.saveChatLog()
+  }
+
+  private loadChatLog(): void {
+    try {
+      const stored = localStorage.getItem("zacai_chat_log")
+      if (stored) {
+        this.chatLog = JSON.parse(stored)
+        console.log(`✅ Loaded ${this.chatLog.length} chat log entries`)
       }
     } catch (error) {
-      console.error("Error processing input:", error)
-      return {
-        response: "I encountered an error processing your request. Please try again.",
-        confidence: 0.1,
-        sources: ["system-error"],
-        reasoning: ["System error occurred during processing"],
-        error: error.message,
-      }
+      console.warn("Failed to load chat log:", error)
     }
   }
 
-  private async processWithModules(input: string, analysis: any, context: any): Promise<any[]> {
-    const responses = []
-    const suggestedModules = analysis.suggestedModules || []
-
-    // If no specific modules suggested, try all active modules
-    const modulesToTry = suggestedModules.length > 0 ? suggestedModules : Array.from(this.modules.keys())
-
-    for (const moduleName of modulesToTry) {
-      const module = this.modules.get(moduleName)
-      if (module) {
-        try {
-          const response = await module.process(input, context)
-          if (response && response.success) {
-            responses.push(response)
-          }
-        } catch (error) {
-          console.error(`Error in ${moduleName} module:`, error)
-        }
-      }
+  private saveChatLog(): void {
+    try {
+      localStorage.setItem("zacai_chat_log", JSON.stringify(this.chatLog))
+    } catch (error) {
+      console.warn("Failed to save chat log:", error)
     }
-
-    return responses
   }
 
-  getSystemStats(): SystemStats {
-    const moduleStats: { [key: string]: ModuleStats } = {}
+  getSystemStats(): any {
+    const moduleStats: { [key: string]: any } = {}
 
-    for (const [name, module] of this.modules) {
-      moduleStats[name] = module.getStats()
+    for (const [name, module] of this.modules.entries()) {
+      try {
+        moduleStats[name] = module.getStats()
+      } catch (error) {
+        moduleStats[name] = { error: "Failed to get stats" }
+      }
     }
 
     return {
       initialized: this.initialized,
+      uptime: Date.now() - this.systemStats.startTime,
+      totalQueries: this.systemStats.totalQueries,
+      successfulResponses: this.systemStats.successfulResponses,
+      failedResponses: this.systemStats.failedResponses,
+      averageResponseTime: this.systemStats.averageResponseTime,
+      successRate:
+        this.systemStats.totalQueries > 0 ? this.systemStats.successfulResponses / this.systemStats.totalQueries : 0,
       modules: moduleStats,
-      learning: learningEngine.getStats(),
-      cognitive: reasoningEngine.getStats(),
-      uptime: Date.now() - this.startTime,
-      totalQueries: this.totalQueries,
-      averageResponseTime: this.totalQueries > 0 ? this.totalResponseTime / this.totalQueries : 0,
+      chatLogEntries: this.chatLog.length,
+      memoryStats: userMemory.getStats(),
     }
   }
 
-  getModule(name: string): ModuleInterface | undefined {
-    return this.modules.get(name)
+  getChatLog(): any[] {
+    return [...this.chatLog].reverse() // Most recent first
   }
 
-  getActiveModules(): string[] {
-    return Array.from(this.modules.keys())
-  }
+  async exportData(): Promise<any> {
+    const exportData = {
+      timestamp: Date.now(),
+      systemStats: this.getSystemStats(),
+      chatLog: this.chatLog,
+      userMemory: userMemory.getStats(),
+      modules: {},
+    }
 
-  async shutdown(): Promise<void> {
-    console.log("🔄 Shutting down ZacAI System...")
-
-    // Clean up modules
-    for (const module of this.modules.values()) {
+    // Export module-specific data
+    for (const [name, module] of this.modules.entries()) {
       try {
-        // If module has cleanup method, call it
-        if ("cleanup" in module && typeof module.cleanup === "function") {
-          await (module as any).cleanup()
+        exportData.modules[name] = {
+          stats: module.getStats(),
+          // Add module-specific export data if available
         }
       } catch (error) {
-        console.error("Error during module cleanup:", error)
+        exportData.modules[name] = { error: "Export failed" }
       }
     }
 
-    // Clean up engines
-    if ("destroy" in learningEngine && typeof learningEngine.destroy === "function") {
-      learningEngine.destroy()
-    }
-
-    this.modules.clear()
-    this.initialized = false
-
-    console.log("✅ System shutdown complete")
+    return exportData
   }
 
-  isInitialized(): boolean {
-    return this.initialized
-  }
-
-  async reinitialize(): Promise<void> {
-    await this.shutdown()
-    await this.initialize()
+  clearChatLog(): void {
+    this.chatLog = []
+    localStorage.removeItem("zacai_chat_log")
   }
 }
 
