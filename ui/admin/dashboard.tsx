@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { systemManager } from "@/core/system/manager"
+import { vocabularyModule } from "@/modules/vocabulary"
+import { mathematicsModule } from "@/modules/mathematics"
 import {
   Brain,
   BookOpen,
@@ -32,23 +34,45 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
   const [systemStats, setSystemStats] = useState<any>(null)
   const [chatLog, setChatLog] = useState<any[]>([])
+  const [vocabData, setVocabData] = useState<any>(null)
+  const [mathData, setMathData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     loadSystemData()
-    const interval = setInterval(loadSystemData, 5000) // Refresh every 5 seconds
+    const interval = setInterval(loadSystemData, 5000)
     return () => clearInterval(interval)
   }, [])
 
   const loadSystemData = async () => {
     try {
       setRefreshing(true)
+
+      // Load system stats
       const stats = systemManager.getSystemStats()
       const log = systemManager.getChatLog()
 
       setSystemStats(stats)
       setChatLog(log)
+
+      // Load vocab data
+      try {
+        const seedWords = vocabularyModule.getSeedWords()
+        const learntWords = vocabularyModule.getLearntWords()
+        setVocabData({ seedWords, learntWords })
+      } catch (error) {
+        console.error("Failed to load vocab data:", error)
+      }
+
+      // Load math data
+      try {
+        const mathStats = mathematicsModule.getStats()
+        setMathData(mathStats)
+      } catch (error) {
+        console.error("Failed to load math data:", error)
+      }
+
       setLoading(false)
     } catch (error) {
       console.error("Failed to load system data:", error)
@@ -142,7 +166,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="vocabulary">Vocabulary</TabsTrigger>
+            <TabsTrigger value="vocab">Vocab</TabsTrigger>
             <TabsTrigger value="mathematics">Mathematics</TabsTrigger>
             <TabsTrigger value="facts">Facts</TabsTrigger>
             <TabsTrigger value="coding">Coding</TabsTrigger>
@@ -152,7 +176,6 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* System Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="p-4">
@@ -217,7 +240,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                     Object.entries(systemStats.modules).map(([name, stats]: [string, any]) => (
                       <div key={name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-2">
-                          {name === "vocabulary" && <BookOpen className="w-4 h-4 text-blue-600" />}
+                          {name === "vocab" && <BookOpen className="w-4 h-4 text-blue-600" />}
                           {name === "mathematics" && <Calculator className="w-4 h-4 text-green-600" />}
                           {name === "facts" && <Globe className="w-4 h-4 text-purple-600" />}
                           {name === "coding" && <Code className="w-4 h-4 text-orange-600" />}
@@ -236,8 +259,8 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
             </Card>
           </TabsContent>
 
-          {/* Vocabulary Tab */}
-          <TabsContent value="vocabulary" className="space-y-6">
+          {/* Vocab Tab */}
+          <TabsContent value="vocab" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -248,42 +271,70 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">
-                      {systemStats?.modules?.vocabulary?.totalQueries || 0}
-                    </p>
+                    <p className="text-2xl font-bold text-blue-600">{systemStats?.modules?.vocab?.totalQueries || 0}</p>
                     <p className="text-sm text-gray-600">Word Lookups</p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <p className="text-2xl font-bold text-green-600">
-                      {systemStats?.modules?.vocabulary?.learntEntries || 0}
+                      {Object.keys(vocabData?.seedWords || {}).length}
                     </p>
-                    <p className="text-sm text-gray-600">Words Learned</p>
+                    <p className="text-sm text-gray-600">Seed Words</p>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <p className="text-2xl font-bold text-purple-600">
-                      {Math.round((systemStats?.modules?.vocabulary?.successRate || 0) * 100)}%
+                      {Object.keys(vocabData?.learntWords || {}).length}
                     </p>
-                    <p className="text-sm text-gray-600">Success Rate</p>
+                    <p className="text-sm text-gray-600">Learnt Words</p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Recent Word Lookups</h3>
-                  <div className="space-y-2">
-                    {chatLog
-                      .filter((entry) => entry.sources?.includes("vocabulary"))
-                      .slice(0, 5)
-                      .map((entry, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{entry.input}</p>
-                            <p className="text-sm text-gray-600">{formatTimestamp(entry.timestamp)}</p>
-                          </div>
-                          <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
-                            {Math.round(entry.confidence * 100)}%
-                          </Badge>
-                        </div>
-                      ))}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Seed Words */}
+                  <div>
+                    <h3 className="font-semibold mb-3">Seed Words</h3>
+                    <ScrollArea className="h-64 border rounded-lg p-3">
+                      <div className="space-y-3">
+                        {vocabData?.seedWords &&
+                          Object.entries(vocabData.seedWords).map(([word, data]: [string, any]) => (
+                            <div key={word} className="p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium text-blue-600">{word.toUpperCase()}</h4>
+                                <Badge variant="outline">{data.partOfSpeech}</Badge>
+                              </div>
+                              <p className="text-sm text-gray-700 mb-2">{data.definition}</p>
+                              {data.phonetics && (
+                                <p className="text-xs text-gray-500">Pronunciation: {data.phonetics}</p>
+                              )}
+                              {data.frequency && <p className="text-xs text-gray-500">Frequency: {data.frequency}/5</p>}
+                            </div>
+                          ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+
+                  {/* Learnt Words */}
+                  <div>
+                    <h3 className="font-semibold mb-3">Recently Learnt Words</h3>
+                    <ScrollArea className="h-64 border rounded-lg p-3">
+                      <div className="space-y-3">
+                        {vocabData?.learntWords &&
+                          Object.entries(vocabData.learntWords).map(([id, entry]: [string, any]) => (
+                            <div key={id} className="p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium text-green-600">{entry.content?.word?.toUpperCase()}</h4>
+                                <Badge variant="outline">{entry.content?.partOfSpeech}</Badge>
+                              </div>
+                              <p className="text-sm text-gray-700 mb-2">{entry.content?.definition}</p>
+                              <p className="text-xs text-gray-500">Added: {formatTimestamp(entry.timestamp)}</p>
+                            </div>
+                          ))}
+                        {(!vocabData?.learntWords || Object.keys(vocabData.learntWords).length === 0) && (
+                          <p className="text-gray-500 text-center py-8">
+                            No learnt words yet. Try asking me to define a word!
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
                   </div>
                 </div>
               </CardContent>
@@ -326,7 +377,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                   <div className="space-y-2">
                     {chatLog
                       .filter((entry) => entry.sources?.includes("mathematics"))
-                      .slice(0, 5)
+                      .slice(0, 10)
                       .map((entry, idx) => (
                         <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div>
@@ -338,13 +389,18 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                           </Badge>
                         </div>
                       ))}
+                    {chatLog.filter((entry) => entry.sources?.includes("mathematics")).length === 0 && (
+                      <p className="text-gray-500 text-center py-8">
+                        No calculations yet. Try asking me to solve a math problem!
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Facts Tab */}
+          {/* Other tabs remain the same... */}
           <TabsContent value="facts" className="space-y-6">
             <Card>
               <CardHeader>
@@ -354,51 +410,11 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <p className="text-2xl font-bold text-purple-600">
-                      {systemStats?.modules?.facts?.totalQueries || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Fact Lookups</p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">
-                      {systemStats?.modules?.facts?.learntEntries || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Facts Cached</p>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">
-                      {Math.round((systemStats?.modules?.facts?.successRate || 0) * 100)}%
-                    </p>
-                    <p className="text-sm text-gray-600">Success Rate</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Recent Fact Queries</h3>
-                  <div className="space-y-2">
-                    {chatLog
-                      .filter((entry) => entry.sources?.includes("facts"))
-                      .slice(0, 5)
-                      .map((entry, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{entry.input}</p>
-                            <p className="text-sm text-gray-600">{formatTimestamp(entry.timestamp)}</p>
-                          </div>
-                          <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-700">
-                            Wikipedia
-                          </Badge>
-                        </div>
-                      ))}
-                  </div>
-                </div>
+                <p className="text-center text-gray-500 py-8">Facts module coming soon...</p>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Coding Tab */}
           <TabsContent value="coding" className="space-y-6">
             <Card>
               <CardHeader>
@@ -408,51 +424,11 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <p className="text-2xl font-bold text-orange-600">
-                      {systemStats?.modules?.coding?.totalQueries || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Code Queries</p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">
-                      {systemStats?.modules?.coding?.learntEntries || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Examples Learned</p>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">
-                      {Math.round((systemStats?.modules?.coding?.successRate || 0) * 100)}%
-                    </p>
-                    <p className="text-sm text-gray-600">Help Rate</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Recent Coding Questions</h3>
-                  <div className="space-y-2">
-                    {chatLog
-                      .filter((entry) => entry.sources?.includes("coding"))
-                      .slice(0, 5)
-                      .map((entry, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{entry.input}</p>
-                            <p className="text-sm text-gray-600">{formatTimestamp(entry.timestamp)}</p>
-                          </div>
-                          <Badge variant="outline" className="bg-orange-50 border-orange-200 text-orange-700">
-                            Next.js
-                          </Badge>
-                        </div>
-                      ))}
-                  </div>
-                </div>
+                <p className="text-center text-gray-500 py-8">Coding module coming soon...</p>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Philosophy Tab */}
           <TabsContent value="philosophy" className="space-y-6">
             <Card>
               <CardHeader>
@@ -462,46 +438,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                    <p className="text-2xl font-bold text-yellow-600">
-                      {systemStats?.modules?.philosophy?.totalQueries || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Philosophy Queries</p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">
-                      {systemStats?.modules?.philosophy?.learntEntries || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Concepts Learned</p>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">
-                      {Math.round((systemStats?.modules?.philosophy?.successRate || 0) * 100)}%
-                    </p>
-                    <p className="text-sm text-gray-600">Reasoning Rate</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Recent Philosophy Discussions</h3>
-                  <div className="space-y-2">
-                    {chatLog
-                      .filter((entry) => entry.sources?.includes("philosophy"))
-                      .slice(0, 5)
-                      .map((entry, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{entry.input}</p>
-                            <p className="text-sm text-gray-600">{formatTimestamp(entry.timestamp)}</p>
-                          </div>
-                          <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-700">
-                            Reasoning
-                          </Badge>
-                        </div>
-                      ))}
-                  </div>
-                </div>
+                <p className="text-center text-gray-500 py-8">Philosophy module coming soon...</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -557,6 +494,9 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                         </div>
                       </div>
                     ))}
+                    {chatLog.length === 0 && (
+                      <p className="text-gray-500 text-center py-8">No chat history yet. Start a conversation!</p>
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>

@@ -1,5 +1,5 @@
 export function generateId(): string {
-  return Math.random().toString(36).substr(2, 9) + Date.now().toString(36)
+  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 }
 
 export function calculateSimilarity(text1: string, text2: string): number {
@@ -15,22 +15,33 @@ export function calculateSimilarity(text1: string, text2: string): number {
   return intersection.size / union.size
 }
 
-export function calculateConfidence(values: number[]): number {
-  if (values.length === 0) return 0
-  const sum = values.reduce((a, b) => a + b, 0)
-  return sum / values.length
+export function calculateConfidence(factors: number[]): number {
+  if (factors.length === 0) return 0
+  const average = factors.reduce((sum, factor) => sum + factor, 0) / factors.length
+  return Math.min(1, Math.max(0, average))
 }
 
 export function sanitizeInput(input: string): string {
-  return input
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/[<>]/g, "")
-    .trim()
-    .substring(0, 10000)
+  return input.trim().replace(/[<>]/g, "")
 }
 
 export function formatTimestamp(timestamp: number): string {
   return new Date(timestamp).toLocaleString()
+}
+
+export function formatRelativeTime(timestamp: number): string {
+  const now = Date.now()
+  const diff = now - timestamp
+
+  const seconds = Math.floor(diff / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`
+  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`
+  return `${seconds} second${seconds > 1 ? "s" : ""} ago`
 }
 
 export function extractKeywords(text: string): string[] {
@@ -179,4 +190,13 @@ export function kebabCase(str: string): string {
 
 export function snakeCase(str: string): string {
   return str.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase()
+}
+
+export function extractNumbers(text: string): number[] {
+  const matches = text.match(/\d+(?:\.\d+)?/g)
+  return matches ? matches.map(Number) : []
+}
+
+export function isValidMathExpression(expression: string): boolean {
+  return /^[0-9+\-*/().\s]+$/.test(expression.trim())
 }
