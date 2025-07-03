@@ -1,9 +1,8 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
-import type { VocabularyEntry } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
 import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
-import { DictionaryAPIClient } from "./dictionary-api"
+import { DictionaryAPIClient, type DictionaryEntry } from "./dictionary-api"
 
 export class VocabularyModule implements ModuleInterface {
   name = "vocabulary"
@@ -42,9 +41,9 @@ export class VocabularyModule implements ModuleInterface {
     this.stats.totalQueries++
 
     try {
-      const wordsToDefine = this.extractWords(input)
+      const vocabularyQueries = this.extractVocabularyQueries(input)
 
-      if (wordsToDefine.length === 0) {
+      if (vocabularyQueries.length === 0) {
         return {
           success: false,
           data: null,
@@ -54,16 +53,16 @@ export class VocabularyModule implements ModuleInterface {
         }
       }
 
-      const definitions: VocabularyEntry[] = []
+      const results: any[] = []
 
-      for (const word of wordsToDefine) {
-        const definition = await this.getWordDefinition(word)
-        if (definition) {
-          definitions.push(definition)
+      for (const query of vocabularyQueries) {
+        const result = await this.processVocabularyQuery(query)
+        if (result) {
+          results.push(result)
         }
       }
 
-      if (definitions.length === 0) {
+      if (results.length === 0) {
         return {
           success: false,
           data: null,
@@ -73,12 +72,12 @@ export class VocabularyModule implements ModuleInterface {
         }
       }
 
-      const response = this.buildDefinitionResponse(definitions)
-      const confidence = this.calculateResponseConfidence(definitions)
+      const response = this.buildVocabularyResponse(results)
+      const confidence = this.calculateVocabularyConfidence(results)
 
       await this.learn({
         input,
-        definitions,
+        results,
         context,
         timestamp: Date.now(),
       })
@@ -92,8 +91,8 @@ export class VocabularyModule implements ModuleInterface {
         source: this.name,
         timestamp: Date.now(),
         metadata: {
-          wordsProcessed: wordsToDefine.length,
-          definitionsFound: definitions.length,
+          queriesProcessed: vocabularyQueries.length,
+          resultsFound: results.length,
         },
       }
     } catch (error) {
@@ -110,104 +109,114 @@ export class VocabularyModule implements ModuleInterface {
     }
   }
 
-  private extractWords(input: string): string[] {
-    const words: string[] = []
+  private extractVocabularyQueries(input: string): string[] {
+    const queries: string[] = []
 
-    // Look for explicit definition requests
-    const defineMatch = input.match(/define\s+(\w+)/i)
+    // Look for definition requests
+    const defineMatch = input.match(/define\s+(\w+)|what\s+(?:is|does)\s+(\w+)\s+mean|meaning\s+of\s+(\w+)/gi)
     if (defineMatch) {
-      words.push(defineMatch[1].toLowerCase())
+      defineMatch.forEach((match) => {
+        const word = match.replace(/define\s+|what\s+(?:is|does)\s+|meaning\s+of\s+|\s+mean/gi, "").trim()
+        if (word) queries.push(word)
+      })
     }
 
-    const whatIsMatch = input.match(/what\s+is\s+(\w+)/i)
-    if (whatIsMatch) {
-      words.push(whatIsMatch[1].toLowerCase())
+    // Look for spelling requests
+    const spellMatch = input.match(/spell\s+(\w+)|how\s+to\s+spell\s+(\w+)/gi)
+    if (spellMatch) {
+      spellMatch.forEach((match) => {
+        const word = match.replace(/spell\s+|how\s+to\s+spell\s+/gi, "").trim()
+        if (word) queries.push(word)
+      })
     }
 
-    const meaningMatch = input.match(/meaning\s+of\s+(\w+)/i)
-    if (meaningMatch) {
-      words.push(meaningMatch[1].toLowerCase())
+    // Look for pronunciation requests
+    const pronounceMatch = input.match(/pronounce\s+(\w+)|pronunciation\s+of\s+(\w+)/gi)
+    if (pronounceMatch) {
+      pronounceMatch.forEach((match) => {
+        const word = match.replace(/pronounce\s+|pronunciation\s+of\s+/gi, "").trim()
+        if (word) queries.push(word)
+      })
     }
 
-    // If no specific patterns, extract potential vocabulary words
-    if (words.length === 0) {
-      const potentialWords = input
-        .toLowerCase()
-        .split(/\W+/)
-        .filter((word) => word.length > 3 && word.length < 20)
-        .filter((word) => !this.isCommonWord(word))
-
-      words.push(...potentialWords.slice(0, 3))
+    // Look for synonym/antonym requests
+    const synonymMatch = input.match(/synonym(?:s)?\s+(?:for|of)\s+(\w+)|(\w+)\s+synonym(?:s)?/gi)
+    if (synonymMatch) {
+      synonymMatch.forEach((match) => {
+        const word = match.replace(/synonym(?:s)?\s+(?:for|of)\s+|\s+synonym(?:s)?/gi, "").trim()
+        if (word) queries.push(word)
+      })
     }
 
-    return [...new Set(words)]
+    return [...new Set(queries)] // Remove duplicates
   }
 
-  private isCommonWord(word: string): boolean {
-    const commonWords = [
-      "this",
-      "that",
-      "with",
-      "have",
-      "will",
-      "from",
-      "they",
-      "know",
-      "want",
-      "been",
-      "good",
-      "much",
-      "some",
-      "time",
-      "very",
-      "when",
-      "come",
-      "here",
-      "just",
-      "like",
-      "long",
-      "make",
-      "many",
-      "over",
-      "such",
-      "take",
-      "than",
-      "them",
-      "well",
-      "were",
-    ]
-    return commonWords.includes(word)
-  }
-
-  private async getWordDefinition(word: string): Promise<VocabularyEntry | null> {
-    // Check learnt data first
-    const learntDefinition = this.searchLearntData(word)
-    if (learntDefinition) {
-      return learntDefinition
+  private async processVocabularyQuery(word: string): Promise<any> {
+    // First check local seed data
+    const seedResult = this.searchSeedData(word)
+    if (seedResult) {
+      return {
+        word,
+        source: "seed",
+        data: seedResult,
+        confidence: 0.9,
+      }
     }
 
-    // Check seed data
-    const seedDefinition = this.searchSeedData(word)
-    if (seedDefinition) {
-      return seedDefinition
+    // Check learnt data
+    const learntResult = this.searchLearntData(word)
+    if (learntResult) {
+      return {
+        word,
+        source: "learnt",
+        data: learntResult,
+        confidence: 0.85,
+      }
     }
 
-    // Try online API lookup
-    const apiDefinition = await this.lookupWordOnline(word)
-    if (apiDefinition) {
-      await this.saveToLearntData(word, apiDefinition)
-      return apiDefinition
+    // Look up online using Dictionary API
+    const onlineResult = await DictionaryAPIClient.lookupWord(word)
+    if (onlineResult) {
+      // Save to learnt data for future use
+      await this.saveToLearntData(word, onlineResult)
+
+      return {
+        word,
+        source: "online",
+        data: onlineResult,
+        confidence: 0.8,
+      }
     }
 
     return null
   }
 
-  private searchLearntData(word: string): VocabularyEntry | null {
+  private searchSeedData(word: string): any {
+    if (!this.seedData || !this.seedData.words) return null
+
+    const wordData = this.seedData.words[word.toLowerCase()]
+    if (wordData) {
+      return {
+        word: word,
+        definition: wordData.definition,
+        partOfSpeech: wordData.partOfSpeech || "unknown",
+        examples: wordData.examples || [],
+        synonyms: wordData.synonyms || [],
+        antonyms: wordData.antonyms || [],
+        difficulty: wordData.difficulty || 1,
+        frequency: wordData.frequency || 1,
+      }
+    }
+
+    return null
+  }
+
+  private searchLearntData(word: string): DictionaryEntry | null {
     if (!this.learntData || !this.learntData.entries) return null
 
     for (const entry of Object.values(this.learntData.entries)) {
       const entryData = entry as any
-      if (entryData.content && entryData.content.word === word) {
+      if (entryData.content && entryData.content.word === word.toLowerCase()) {
         return entryData.content
       }
     }
@@ -215,78 +224,18 @@ export class VocabularyModule implements ModuleInterface {
     return null
   }
 
-  private searchSeedData(word: string): VocabularyEntry | null {
-    if (!this.seedData || !this.seedData.words) return null
-
-    const wordData = this.seedData.words[word]
-    if (wordData) {
-      return {
-        word,
-        definition: wordData.definition,
-        partOfSpeech: wordData.part_of_speech || wordData.partOfSpeech || "unknown",
-        examples: wordData.examples || [],
-        synonyms: wordData.synonyms || [],
-        antonyms: wordData.antonyms || [],
-        difficulty: wordData.difficulty || 1,
-        frequency: wordData.frequency || 1,
-        etymology: wordData.etymology,
-        pronunciation: wordData.pronunciation,
-      }
-    }
-
-    return null
-  }
-
-  private async lookupWordOnline(word: string): Promise<VocabularyEntry | null> {
-    try {
-      const apiResponse = await DictionaryAPIClient.lookupWord(word)
-      if (apiResponse) {
-        const formatted = DictionaryAPIClient.formatDefinition(apiResponse)
-        if (formatted) {
-          return {
-            word: formatted.word,
-            definition: formatted.definition,
-            partOfSpeech: formatted.partOfSpeech,
-            examples: formatted.example ? [formatted.example] : [],
-            synonyms: formatted.synonyms || [],
-            antonyms: formatted.antonyms || [],
-            difficulty: this.assessDifficulty(formatted.definition),
-            frequency: 1,
-            etymology: formatted.origin,
-            pronunciation: formatted.phonetic,
-          }
-        }
-      }
-    } catch (error) {
-      console.error(`Error looking up word "${word}" online:`, error)
-    }
-
-    return null
-  }
-
-  private assessDifficulty(definition: string): number {
-    const length = definition.length
-    const complexWords = (definition.match(/\b\w{8,}\b/g) || []).length
-
-    if (length > 200 || complexWords > 3) return 5
-    if (length > 150 || complexWords > 2) return 4
-    if (length > 100 || complexWords > 1) return 3
-    if (length > 50) return 2
-    return 1
-  }
-
-  private async saveToLearntData(word: string, definition: VocabularyEntry): Promise<void> {
+  private async saveToLearntData(word: string, entry: DictionaryEntry): Promise<void> {
     const learntEntry = {
       id: generateId(),
-      content: definition,
+      content: entry,
       confidence: 0.8,
       source: "dictionary-api",
-      context: `Online lookup for "${word}"`,
+      context: `Looked up definition for "${word}"`,
       timestamp: Date.now(),
       usageCount: 1,
       lastUsed: Date.now(),
       verified: true,
-      tags: ["api-lookup", definition.partOfSpeech],
+      tags: ["dictionary", "online-lookup"],
       relationships: [],
     }
 
@@ -294,50 +243,62 @@ export class VocabularyModule implements ModuleInterface {
     this.stats.learntEntries++
   }
 
-  private buildDefinitionResponse(definitions: VocabularyEntry[]): string {
-    if (definitions.length === 1) {
-      const def = definitions[0]
-      let response = `**${def.word}**`
+  private buildVocabularyResponse(results: any[]): string {
+    if (results.length === 1) {
+      const result = results[0]
 
-      if (def.pronunciation) {
-        response += ` ${def.pronunciation}`
+      if (result.source === "online") {
+        return DictionaryAPIClient.formatForDisplay(result.data)
+      } else {
+        // Format seed/learnt data
+        const data = result.data
+        let response = `**${data.word}**\n\n`
+
+        if (data.partOfSpeech) {
+          response += `**${data.partOfSpeech}**\n`
+        }
+
+        response += `${data.definition}\n`
+
+        if (data.examples && data.examples.length > 0) {
+          response += `\n**Example:** "${data.examples[0]}"\n`
+        }
+
+        if (data.synonyms && data.synonyms.length > 0) {
+          response += `\n**Synonyms:** ${data.synonyms.slice(0, 5).join(", ")}`
+        }
+
+        if (data.antonyms && data.antonyms.length > 0) {
+          response += `\n**Antonyms:** ${data.antonyms.slice(0, 5).join(", ")}`
+        }
+
+        response += `\n\n*Source: ${result.source} data*`
+        return response
       }
-
-      response += ` (${def.partOfSpeech}): ${def.definition}`
-
-      if (def.examples && def.examples.length > 0) {
-        response += `\n\n**Example:** "${def.examples[0]}"`
-      }
-
-      if (def.synonyms && def.synonyms.length > 0) {
-        response += `\n\n**Synonyms:** ${def.synonyms.slice(0, 3).join(", ")}`
-      }
-
-      if (def.etymology) {
-        response += `\n\n**Etymology:** ${def.etymology}`
-      }
-
-      return response
     } else {
-      let response = "Here are the definitions:\n\n"
-      definitions.forEach((def, index) => {
-        response += `${index + 1}. **${def.word}** (${def.partOfSpeech}): ${def.definition}\n`
+      let response = "Here are the vocabulary definitions:\n\n"
+      results.forEach((result, index) => {
+        const data = result.data
+        response += `**${index + 1}. ${data.word}**\n`
+        response += `${data.definition || DictionaryAPIClient.getPrimaryDefinition(data)}\n\n`
       })
       return response
     }
   }
 
-  private calculateResponseConfidence(definitions: VocabularyEntry[]): number {
-    if (definitions.length === 0) return 0
+  private calculateVocabularyConfidence(results: any[]): number {
+    if (results.length === 0) return 0
 
-    const baseConfidence = Math.min(0.9, 0.6 + definitions.length * 0.1)
-    const avgDifficulty = definitions.reduce((sum, def) => sum + def.difficulty, 0) / definitions.length
-    const difficultyBonus = avgDifficulty > 3 ? 0.1 : 0
+    let totalConfidence = 0
+    for (const result of results) {
+      totalConfidence += result.confidence
+    }
 
-    return Math.min(1, baseConfidence + difficultyBonus)
+    return Math.min(1, totalConfidence / results.length)
   }
 
   async learn(data: any): Promise<void> {
+    // Learning happens automatically when we save online lookups
     this.stats.lastUpdate = Date.now()
   }
 

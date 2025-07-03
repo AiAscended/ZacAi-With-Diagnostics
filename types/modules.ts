@@ -34,31 +34,23 @@ export interface MathExample {
 }
 
 export interface FactEntry {
-  id: string
-  title: string
+  topic: string
   content: string
-  category: string
-  tags: string[]
   source: string
+  category: string
   verified: boolean
-  confidence: number
-  timestamp: number
   lastUpdated: number
-  references: string[]
+  relatedTopics: string[]
 }
 
-export interface CodeConcept {
-  id: string
+export interface CodingConcept {
   name: string
   language: string
-  category: string
   description: string
   syntax: string
   examples: CodeExample[]
-  bestPractices: string[]
-  commonMistakes: string[]
   difficulty: number
-  timestamp: number
+  category: string
 }
 
 export interface CodeExample {
@@ -68,18 +60,14 @@ export interface CodeExample {
   output?: string
 }
 
-export interface PhilosophyConcept {
-  id: string
+export interface PhilosophicalConcept {
   name: string
-  school: string
-  philosopher?: string
-  era: string
   description: string
-  keyIdeas: string[]
+  philosopher?: string
+  school: string
+  relatedConcepts: string[]
   arguments: string[]
   counterArguments: string[]
-  relatedConcepts: string[]
-  timestamp: number
 }
 
 export interface UserProfile {
