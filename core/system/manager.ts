@@ -1,11 +1,20 @@
-import type { ModuleInterface, SystemResponse } from "@/types/global"
+import type { ModuleInterface, ModuleResponse, SystemStats } from "@/types/global"
 import { vocabularyModule } from "@/modules/vocabulary"
 import { mathematicsModule } from "@/modules/mathematics"
 import { factsModule } from "@/modules/facts"
 import { codingModule } from "@/modules/coding"
 import { philosophyModule } from "@/modules/philosophy"
 import { userInfoModule } from "@/modules/user-info"
-import { userMemory } from "@/core/memory/user-memory"
+
+interface ChatLogEntry {
+  id: string
+  input: string
+  response: string
+  confidence: number
+  sources: string[]
+  processingTime: number
+  timestamp: number
+}
 
 interface ModuleHealth {
   name: string
@@ -16,500 +25,288 @@ interface ModuleHealth {
   consecutiveFailures: number
 }
 
-export class SystemManager {
+class SystemManager {
   private modules: Map<string, ModuleInterface> = new Map()
-  private moduleHealth: Map<string, ModuleHealth> = new Map()
-  private initialized = false
-  private systemStats = {
-    startTime: Date.now(),
+  private chatLog: ChatLogEntry[] = []
+  private systemStats: SystemStats = {
+    initialized: false,
     totalQueries: 0,
+    successRate: 0,
     averageResponseTime: 0,
-    successfulResponses: 0,
-    failedResponses: 0,
+    uptime: Date.now(),
+    modules: {},
   }
-  private chatLog: Array<{
-    id: string
-    timestamp: number
-    input: string
+  private moduleHealth: Map<string, { status: string; lastCheck: number; failures: number }> = new Map()
+
+  async initialize(): Promise<void> {
+    console.log("🚀 Initializing ZacAI System Manager...")
+
+    try {
+      // Register modules with proper error handling
+      await this.registerModule("vocab", vocabularyModule)
+      await this.registerModule("mathematics", mathematicsModule)
+      await this.registerModule("facts", factsModule)
+      await this.registerModule("coding", codingModule)
+      await this.registerModule("philosophy", philosophyModule)
+      await this.registerModule("user-info", userInfoModule)
+
+      this.systemStats.initialized = true
+      this.startHealthMonitoring()
+
+      console.log("✅ ZacAI System Manager initialized successfully")
+    } catch (error) {
+      console.error("❌ System Manager initialization failed:", error)
+      // System can still run with partial functionality
+      this.systemStats.initialized = true
+    }
+  }
+
+  private async registerModule(name: string, module: ModuleInterface): Promise<void> {
+    try {
+      await module.initialize()
+      this.modules.set(name, module)
+      this.moduleHealth.set(name, { status: "healthy", lastCheck: Date.now(), failures: 0 })
+      this.systemStats.modules[name] = module.getStats()
+      console.log(`✅ Module '${name}' registered successfully`)
+    } catch (error) {
+      console.error(`❌ Failed to register module '${name}':`, error)
+      this.moduleHealth.set(name, { status: "failed", lastCheck: Date.now(), failures: 1 })
+      // Continue with other modules
+    }
+  }
+
+  async processInput(input: string): Promise<{
     response: string
     confidence: number
     sources: string[]
+    reasoning?: string[]
     processingTime: number
-    errors?: string[]
-  }> = []
-
-  // Self-healing and fallback responses
-  private fallbackResponses = {
-    vocabulary: "I'm having trouble accessing the dictionary right now, but I can still help with other topics.",
-    mathematics: "The math module is temporarily unavailable, but I can assist with other subjects.",
-    facts: "I can't access external fact sources at the moment, but I can help with other questions.",
-    coding: "The coding assistance is temporarily down, but I'm still here to help with other topics.",
-    philosophy: "Philosophy discussions are temporarily unavailable, but I can help with other subjects.",
-    "user-info": "Personal memory is temporarily unavailable, but I can still assist you.",
-  }
-
-  async initialize(): Promise<void> {
-    if (this.initialized) return
-
-    console.log("🚀 Initializing ZacAI System Manager with fault tolerance...")
+  }> {
+    const startTime = Date.now()
+    this.systemStats.totalQueries++
 
     try {
-      // Register modules with health monitoring
-      const moduleList = [
-        { name: "vocabulary", module: vocabularyModule },
-        { name: "mathematics", module: mathematicsModule },
-        { name: "facts", module: factsModule },
-        { name: "coding", module: codingModule },
-        { name: "philosophy", module: philosophyModule },
-        { name: "user-info", module: userInfoModule },
-      ]
+      const responses: ModuleResponse[] = []
+      const activeModules = Array.from(this.modules.entries()).filter(
+        ([name]) => this.moduleHealth.get(name)?.status !== "failed",
+      )
 
-      // Initialize modules with individual error handling
-      for (const { name, module } of moduleList) {
+      // Process input through all healthy modules
+      for (const [name, module] of activeModules) {
         try {
-          this.modules.set(name, module)
-          this.moduleHealth.set(name, {
-            name,
-            status: "healthy",
-            failureCount: 0,
-            consecutiveFailures: 0,
-          })
+          const response = await Promise.race([
+            module.process(input),
+            new Promise<ModuleResponse>((_, reject) => setTimeout(() => reject(new Error("Module timeout")), 10000)),
+          ])
 
-          await module.initialize()
-          console.log(`✅ ${name} module initialized successfully`)
+          if (response.success && response.confidence > 0.3) {
+            responses.push({ ...response, source: name })
+          }
+
+          // Update module health
+          const health = this.moduleHealth.get(name)!
+          health.status = "healthy"
+          health.failures = 0
+          health.lastCheck = Date.now()
         } catch (error) {
-          console.error(`⚠️ Failed to initialize ${name} module:`, error)
-          this.moduleHealth.set(name, {
-            name,
-            status: "failed",
-            lastError: error instanceof Error ? error.message : String(error),
-            failureCount: 1,
-            consecutiveFailures: 1,
-          })
-          // Continue with other modules - don't let one failure stop the system
+          console.error(`Module '${name}' failed:`, error)
+          this.handleModuleFailure(name)
         }
       }
 
-      this.initialized = true
-      console.log("✅ ZacAI System Manager initialized with fault tolerance")
+      const processingTime = Date.now() - startTime
+      let finalResponse: string
+      let confidence: number
+      let sources: string[]
 
-      // Load chat log from storage
-      this.loadChatLog()
+      if (responses.length > 0) {
+        // Find best response
+        const bestResponse = responses.reduce((best, current) =>
+          current.confidence > best.confidence ? current : best,
+        )
 
-      // Start health monitoring
-      this.startHealthMonitoring()
+        finalResponse = bestResponse.data
+        confidence = bestResponse.confidence
+        sources = responses.map((r) => r.source)
+
+        this.updateSuccessStats(processingTime, true)
+      } else {
+        // Fallback response
+        finalResponse = this.generateFallbackResponse(input)
+        confidence = 0.1
+        sources = ["fallback"]
+
+        this.updateSuccessStats(processingTime, false)
+      }
+
+      // Log the interaction
+      this.logInteraction({
+        id: Date.now().toString(),
+        input,
+        response: finalResponse,
+        confidence,
+        sources,
+        processingTime,
+        timestamp: Date.now(),
+      })
+
+      return {
+        response: finalResponse,
+        confidence,
+        sources,
+        processingTime,
+      }
     } catch (error) {
-      console.error("❌ Critical system initialization failure:", error)
-      // Even if initialization fails, mark as initialized so the system can still respond
-      this.initialized = true
-      throw error
+      console.error("System processing error:", error)
+      const processingTime = Date.now() - startTime
+      this.updateSuccessStats(processingTime, false)
+
+      return {
+        response: "I apologize, but I'm experiencing technical difficulties. Please try again.",
+        confidence: 0,
+        sources: ["error"],
+        processingTime,
+      }
+    }
+  }
+
+  // Alias for backward compatibility
+  async processQuery(input: string) {
+    return this.processInput(input)
+  }
+
+  private handleModuleFailure(moduleName: string): void {
+    const health = this.moduleHealth.get(moduleName)
+    if (health) {
+      health.failures++
+      health.lastCheck = Date.now()
+
+      if (health.failures >= 3) {
+        health.status = "failed"
+        console.warn(`⚠️ Module '${moduleName}' marked as failed after ${health.failures} consecutive failures`)
+      } else {
+        health.status = "degraded"
+      }
+    }
+  }
+
+  private generateFallbackResponse(input: string): string {
+    const lowerInput = input.toLowerCase()
+
+    if (lowerInput.includes("define") || lowerInput.includes("meaning")) {
+      return "I'm having trouble accessing my vocabulary module right now. Please try again in a moment, or check the admin panel for system status."
+    }
+
+    if (lowerInput.match(/\d+\s*[+\-*/]\s*\d+/)) {
+      return "My mathematics module is currently unavailable. Please try again shortly, or check the admin panel for system diagnostics."
+    }
+
+    if (lowerInput.includes("what is") || lowerInput.includes("tell me about")) {
+      return "I'm experiencing connectivity issues with my knowledge modules. Please try again in a moment."
+    }
+
+    return "I'm currently experiencing some technical difficulties. Please try rephrasing your question or check the admin panel for system status."
+  }
+
+  private logInteraction(entry: ChatLogEntry): void {
+    this.chatLog.unshift(entry) // Add to beginning for recent-first order
+
+    // Keep only last 100 entries
+    if (this.chatLog.length > 100) {
+      this.chatLog = this.chatLog.slice(0, 100)
+    }
+  }
+
+  private updateSuccessStats(responseTime: number, success: boolean): void {
+    // Update average response time
+    this.systemStats.averageResponseTime =
+      (this.systemStats.averageResponseTime * (this.systemStats.totalQueries - 1) + responseTime) /
+      this.systemStats.totalQueries
+
+    // Update success rate
+    const currentSuccesses = Math.round(this.systemStats.successRate * (this.systemStats.totalQueries - 1))
+    const newSuccesses = success ? currentSuccesses + 1 : currentSuccesses
+    this.systemStats.successRate = newSuccesses / this.systemStats.totalQueries
+
+    // Update module stats
+    for (const [name, module] of this.modules) {
+      this.systemStats.modules[name] = module.getStats()
     }
   }
 
   private startHealthMonitoring(): void {
-    // Check module health every 30 seconds
     setInterval(() => {
       this.performHealthCheck()
-    }, 30000)
+    }, 30000) // Check every 30 seconds
   }
 
   private async performHealthCheck(): Promise<void> {
-    for (const [name, module] of this.modules.entries()) {
+    for (const [name, module] of this.modules) {
       const health = this.moduleHealth.get(name)
-      if (!health) continue
-
-      try {
-        // Simple health check - try to process a basic query
-        const testInput = name === "mathematics" ? "1+1" : `test ${name}`
-        await module.process(testInput)
-
-        // Reset health if it was previously failed
-        if (health.status !== "healthy") {
-          health.status = "healthy"
-          health.consecutiveFailures = 0
-          health.lastSuccess = Date.now()
-          console.log(`✅ ${name} module recovered`)
-        }
-      } catch (error) {
-        health.failureCount++
-        health.consecutiveFailures++
-        health.lastError = error instanceof Error ? error.message : String(error)
-
-        if (health.consecutiveFailures >= 3) {
-          health.status = "failed"
-          console.error(`❌ ${name} module marked as failed after ${health.consecutiveFailures} consecutive failures`)
-        } else {
-          health.status = "degraded"
-          console.warn(`⚠️ ${name} module degraded (${health.consecutiveFailures} failures)`)
-        }
-      }
-    }
-  }
-
-  async processInput(input: string): Promise<SystemResponse> {
-    const startTime = Date.now()
-    this.systemStats.totalQueries++
-    const errors: string[] = []
-
-    try {
-      // Always try to extract personal information (this should never fail)
-      try {
-        userMemory.extractPersonalInfo(input)
-      } catch (error) {
-        errors.push(`Memory extraction failed: ${error}`)
-      }
-
-      // Process input through healthy modules only
-      const moduleResponses = await this.processWithHealthyModules(input, errors)
-
-      // Always provide some response, even if all modules fail
-      if (moduleResponses.length === 0) {
-        const fallbackResponse = this.generateSystemFallbackResponse(input, errors)
-        const processingTime = Date.now() - startTime
-
-        this.updateStats(processingTime, false)
-        this.addToChatLog(input, fallbackResponse.response, fallbackResponse.confidence, [], processingTime, errors)
-
-        return fallbackResponse
-      }
-
-      // Combine successful responses
-      const combinedResponse = this.combineResponses(moduleResponses)
-      const processingTime = Date.now() - startTime
-
-      // Add to user memory (with error handling)
-      try {
-        userMemory.addConversation(input, combinedResponse.response)
-      } catch (error) {
-        errors.push(`Memory storage failed: ${error}`)
-      }
-
-      this.updateStats(processingTime, true)
-      this.addToChatLog(
-        input,
-        combinedResponse.response,
-        combinedResponse.confidence,
-        combinedResponse.sources,
-        processingTime,
-        errors,
-      )
-
-      return combinedResponse
-    } catch (error) {
-      console.error("❌ Critical error in processInput:", error)
-      const processingTime = Date.now() - startTime
-      this.updateStats(processingTime, false)
-      errors.push(`System error: ${error}`)
-
-      const criticalFallback = {
-        response:
-          "I'm experiencing some technical difficulties, but I'm still here to help. Please try rephrasing your question or ask about something else.",
-        confidence: 0.1,
-        sources: ["system-fallback"],
-        reasoning: ["Critical system error occurred", "Using emergency fallback response"],
-        timestamp: Date.now(),
-      }
-
-      this.addToChatLog(
-        input,
-        criticalFallback.response,
-        criticalFallback.confidence,
-        criticalFallback.sources,
-        processingTime,
-        errors,
-      )
-      return criticalFallback
-    }
-  }
-
-  private async processWithHealthyModules(input: string, errors: string[]): Promise<any[]> {
-    const responses: any[] = []
-
-    for (const [name, module] of this.modules.entries()) {
-      const health = this.moduleHealth.get(name)
-
-      // Skip failed modules
-      if (health?.status === "failed") {
-        errors.push(`${name} module is currently unavailable`)
-        continue
-      }
-
-      try {
-        const response = await Promise.race([
-          module.process(input),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Module timeout")), 10000)),
-        ])
-
-        if (response && response.success && response.confidence > 0.1) {
-          responses.push({ ...response, moduleName: name })
-
-          // Update health on success
-          if (health) {
-            health.consecutiveFailures = 0
-            health.lastSuccess = Date.now()
-            if (health.status !== "healthy") {
-              health.status = "healthy"
-              console.log(`✅ ${name} module recovered during processing`)
-            }
+      if (health && health.status === "degraded") {
+        try {
+          // Try a simple test query
+          const testResponse = await module.process("test")
+          if (testResponse.success) {
+            health.status = "healthy"
+            health.failures = 0
+            console.log(`✅ Module '${name}' recovered`)
           }
+        } catch (error) {
+          console.log(`⚠️ Module '${name}' still degraded`)
         }
-      } catch (error) {
-        console.error(`Module ${name} failed during processing:`, error)
-        errors.push(`${name} module error: ${error}`)
-
-        // Update health on failure
-        if (health) {
-          health.failureCount++
-          health.consecutiveFailures++
-          health.lastError = error instanceof Error ? error.message : String(error)
-
-          if (health.consecutiveFailures >= 2) {
-            health.status = health.consecutiveFailures >= 3 ? "failed" : "degraded"
-          }
-        }
+        health.lastCheck = Date.now()
       }
     }
-
-    return responses
   }
 
-  private generateSystemFallbackResponse(input: string, errors: string[]): SystemResponse {
-    // Analyze input to provide contextual fallback
-    const lowerInput = input.toLowerCase()
-    let fallbackMessage =
-      "I'm having some technical difficulties with my modules right now, but I'm still here to help. "
-
-    // Provide specific fallbacks based on input type
-    if (lowerInput.match(/define|meaning|what is/)) {
-      fallbackMessage += "For word definitions, you might try searching online dictionaries while I recover."
-    } else if (lowerInput.match(/\d+|\+|-|\*|\/|calculate/)) {
-      fallbackMessage += "For calculations, you can use a calculator app while my math module recovers."
-    } else if (lowerInput.match(/code|program|function/)) {
-      fallbackMessage += "For coding help, you might check documentation sites while my coding module recovers."
-    } else {
-      fallbackMessage += "Please try asking a different type of question, or try again in a few moments."
-    }
-
-    // Add system status info
-    const healthyModules = Array.from(this.moduleHealth.values()).filter((h) => h.status === "healthy")
-    if (healthyModules.length > 0) {
-      fallbackMessage += `\n\nCurrently available: ${healthyModules.map((h) => h.name).join(", ")}`
-    }
-
+  getSystemStats(): SystemStats {
     return {
-      response: fallbackMessage,
-      confidence: 0.3,
-      sources: ["system-fallback"],
-      reasoning: [
-        "Multiple module failures detected",
-        `Errors: ${errors.slice(0, 3).join(", ")}`,
-        "Using intelligent fallback response",
-      ],
-      timestamp: Date.now(),
+      ...this.systemStats,
+      uptime: Date.now() - this.systemStats.uptime,
+      moduleHealth: Object.fromEntries(this.moduleHealth),
     }
   }
 
-  private combineResponses(responses: any[]): SystemResponse {
-    if (responses.length === 0) {
-      return this.generateSystemFallbackResponse("", ["No module responses"])
-    }
-
-    // Sort by confidence
-    responses.sort((a, b) => b.confidence - a.confidence)
-
-    const primaryResponse = responses[0]
-    const sources = responses.map((r) => r.moduleName)
-    const reasoning = responses
-      .filter((r) => r.data)
-      .map(
-        (r) => `${r.moduleName}: ${typeof r.data === "string" ? r.data.substring(0, 100) : "Processed successfully"}`,
-      )
-
-    // Combine high-confidence responses
-    if (responses.length > 1 && responses[1].confidence > 0.6) {
-      const combinedData = responses
-        .filter((r) => r.confidence > 0.6)
-        .map((r) => r.data)
-        .join("\n\n---\n\n")
-
-      return {
-        response: combinedData,
-        confidence: Math.min(1, responses.reduce((sum, r) => sum + r.confidence, 0) / responses.length),
-        sources,
-        reasoning,
-        timestamp: Date.now(),
-      }
-    }
-
-    return {
-      response: primaryResponse.data || "I processed your request but couldn't generate a proper response.",
-      confidence: primaryResponse.confidence,
-      sources,
-      reasoning,
-      timestamp: Date.now(),
-    }
-  }
-
-  private updateStats(processingTime: number, success: boolean): void {
-    this.systemStats.averageResponseTime =
-      (this.systemStats.averageResponseTime * (this.systemStats.totalQueries - 1) + processingTime) /
-      this.systemStats.totalQueries
-
-    if (success) {
-      this.systemStats.successfulResponses++
-    } else {
-      this.systemStats.failedResponses++
-    }
-  }
-
-  private addToChatLog(
-    input: string,
-    response: string,
-    confidence: number,
-    sources: string[],
-    processingTime: number,
-    errors?: string[],
-  ): void {
-    const logEntry = {
-      id: `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: Date.now(),
-      input,
-      response,
-      confidence,
-      sources,
-      processingTime,
-      errors: errors && errors.length > 0 ? errors : undefined,
-    }
-
-    this.chatLog.push(logEntry)
-
-    // Keep only last 1000 entries
-    if (this.chatLog.length > 1000) {
-      this.chatLog = this.chatLog.slice(-1000)
-    }
-
-    this.saveChatLog()
-  }
-
-  private loadChatLog(): void {
-    try {
-      const stored = localStorage.getItem("zacai_chat_log")
-      if (stored) {
-        this.chatLog = JSON.parse(stored)
-        console.log(`✅ Loaded ${this.chatLog.length} chat log entries`)
-      }
-    } catch (error) {
-      console.warn("Failed to load chat log:", error)
-    }
-  }
-
-  private saveChatLog(): void {
-    try {
-      localStorage.setItem("zacai_chat_log", JSON.stringify(this.chatLog))
-    } catch (error) {
-      console.warn("Failed to save chat log:", error)
-    }
-  }
-
-  // Public methods for system diagnostics
-  getSystemHealth(): any {
-    const moduleHealthStatus = Array.from(this.moduleHealth.entries()).map(([name, health]) => ({
-      name,
-      status: health.status,
-      failureCount: health.failureCount,
-      consecutiveFailures: health.consecutiveFailures,
-      lastError: health.lastError,
-      lastSuccess: health.lastSuccess,
-    }))
-
-    return {
-      systemStatus: this.initialized ? "online" : "offline",
-      totalModules: this.modules.size,
-      healthyModules: moduleHealthStatus.filter((m) => m.status === "healthy").length,
-      degradedModules: moduleHealthStatus.filter((m) => m.status === "degraded").length,
-      failedModules: moduleHealthStatus.filter((m) => m.status === "failed").length,
-      modules: moduleHealthStatus,
-      uptime: Date.now() - this.systemStats.startTime,
-    }
-  }
-
-  getSystemStats(): any {
-    const moduleStats: { [key: string]: any } = {}
-
-    for (const [name, module] of this.modules.entries()) {
-      try {
-        moduleStats[name] = {
-          ...module.getStats(),
-          health: this.moduleHealth.get(name),
-        }
-      } catch (error) {
-        moduleStats[name] = {
-          error: "Failed to get stats",
-          health: this.moduleHealth.get(name),
-        }
-      }
-    }
-
-    return {
-      initialized: this.initialized,
-      uptime: Date.now() - this.systemStats.startTime,
-      totalQueries: this.systemStats.totalQueries,
-      successfulResponses: this.systemStats.successfulResponses,
-      failedResponses: this.systemStats.failedResponses,
-      averageResponseTime: this.systemStats.averageResponseTime,
-      successRate:
-        this.systemStats.totalQueries > 0 ? this.systemStats.successfulResponses / this.systemStats.totalQueries : 0,
-      modules: moduleStats,
-      chatLogEntries: this.chatLog.length,
-      systemHealth: this.getSystemHealth(),
-      memoryStats: this.getMemoryStats(),
-    }
-  }
-
-  private getMemoryStats(): any {
-    try {
-      return userMemory.getStats()
-    } catch (error) {
-      return { error: "Memory stats unavailable" }
-    }
-  }
-
-  getChatLog(): any[] {
-    return [...this.chatLog].reverse()
-  }
-
-  async exportData(): Promise<any> {
-    return {
-      timestamp: Date.now(),
-      systemStats: this.getSystemStats(),
-      systemHealth: this.getSystemHealth(),
-      chatLog: this.chatLog,
-      moduleHealth: Array.from(this.moduleHealth.entries()),
-    }
+  getChatLog(): ChatLogEntry[] {
+    return [...this.chatLog]
   }
 
   clearChatLog(): void {
     this.chatLog = []
-    localStorage.removeItem("zacai_chat_log")
   }
 
-  // Manual module recovery
+  async exportData(): Promise<any> {
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      systemStats: this.getSystemStats(),
+      chatLog: this.getChatLog(),
+      moduleData: {},
+    }
+
+    // Export data from each module
+    for (const [name, module] of this.modules) {
+      try {
+        exportData.moduleData[name] = module.getStats()
+      } catch (error) {
+        console.error(`Failed to export data from module '${name}':`, error)
+      }
+    }
+
+    return exportData
+  }
+
   async recoverModule(moduleName: string): Promise<boolean> {
     const module = this.modules.get(moduleName)
-    const health = this.moduleHealth.get(moduleName)
-
-    if (!module || !health) return false
+    if (!module) return false
 
     try {
       await module.initialize()
-      health.status = "healthy"
-      health.consecutiveFailures = 0
-      health.lastSuccess = Date.now()
-      console.log(`✅ Manually recovered ${moduleName} module`)
+      this.moduleHealth.set(moduleName, { status: "healthy", lastCheck: Date.now(), failures: 0 })
+      console.log(`✅ Module '${moduleName}' recovered manually`)
       return true
     } catch (error) {
-      health.lastError = error instanceof Error ? error.message : String(error)
-      console.error(`❌ Failed to recover ${moduleName} module:`, error)
+      console.error(`❌ Failed to recover module '${moduleName}':`, error)
       return false
     }
   }

@@ -1,8 +1,6 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
 import { storageManager } from "@/core/storage/manager"
-import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
-import { TeslaMathCalculator } from "./tesla-vortex"
 
 export class MathematicsModule implements ModuleInterface {
   name = "mathematics"
@@ -25,14 +23,58 @@ export class MathematicsModule implements ModuleInterface {
     console.log("Initializing Mathematics Module...")
 
     try {
-      this.seedData = await storageManager.loadSeedData(MODULE_CONFIG.mathematics.seedFile)
-      this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.mathematics.learntFile)
+      this.seedData = await this.loadSeedData()
+      this.learntData = await this.loadLearntData()
 
       this.initialized = true
-      console.log("Mathematics Module initialized successfully")
+      console.log("✅ Mathematics Module initialized successfully")
     } catch (error) {
-      console.error("Error initializing Mathematics Module:", error)
+      console.error("❌ Error initializing Mathematics Module:", error)
       throw error
+    }
+  }
+
+  private async loadSeedData(): Promise<any> {
+    try {
+      const response = await fetch("/seed_maths.json")
+      if (!response.ok) throw new Error("Failed to load seed math data")
+      return await response.json()
+    } catch (error) {
+      console.warn("Using fallback math data")
+      return this.getFallbackMathData()
+    }
+  }
+
+  private async loadLearntData(): Promise<any> {
+    try {
+      return await storageManager.loadLearntData("mathematics")
+    } catch (error) {
+      console.warn("No learnt math data found, starting fresh")
+      return { entries: {} }
+    }
+  }
+
+  private getFallbackMathData(): any {
+    return {
+      metadata: {
+        version: "1.0.0",
+        totalEntries: 5,
+        source: "fallback-math",
+      },
+      concepts: {
+        basic_arithmetic: {
+          name: "Basic Arithmetic",
+          description: "Fundamental mathematical operations",
+          operations: ["+", "-", "*", "/"],
+          examples: ["2+2=4", "5*3=15", "10/2=5"],
+        },
+        order_of_operations: {
+          name: "Order of Operations",
+          description: "PEMDAS/BODMAS rule for mathematical expressions",
+          rule: "Parentheses, Exponents, Multiplication/Division, Addition/Subtraction",
+          examples: ["3+3*3=12", "(3+3)*3=18"],
+        },
+      },
     }
   }
 
@@ -75,12 +117,7 @@ export class MathematicsModule implements ModuleInterface {
       const response = this.buildMathResponse(results)
       const confidence = this.calculateMathConfidence(results)
 
-      await this.learn({
-        input,
-        results,
-        context,
-        timestamp: Date.now(),
-      })
+      await this.learn({ input, results, context, timestamp: Date.now() })
 
       this.updateStats(Date.now() - startTime, true)
 
@@ -112,295 +149,174 @@ export class MathematicsModule implements ModuleInterface {
   private extractMathExpressions(input: string): string[] {
     const expressions: string[] = []
 
-    // Basic arithmetic expressions
-    const basicMath = input.match(/\d+\s*[+\-*/]\s*\d+/g)
+    // Basic arithmetic expressions with order of operations
+    const basicMath = input.match(/\d+(?:\.\d+)?\s*[+\-*/()]\s*\d+(?:\.\d+)?(?:\s*[+\-*/()]\s*\d+(?:\.\d+)?)*/g)
     if (basicMath) {
       expressions.push(...basicMath)
     }
 
-    // Tesla/Vortex math patterns
-    const teslaMatch = input.match(/tesla|vortex|369|digital root/i)
-    if (teslaMatch) {
-      expressions.push(input)
-    }
-
-    // Times table requests
-    const timesTableMatch = input.match(/(\d+)\s*times\s*table|times\s*table\s*for\s*(\d+)/i)
-    if (timesTableMatch) {
-      expressions.push(input)
-    }
-
-    // Mirror times table requests
-    const mirrorMatch = input.match(/mirror\s*times\s*table/i)
-    if (mirrorMatch) {
-      expressions.push(input)
-    }
-
-    // Sacred geometry
-    const sacredMatch = input.match(/sacred\s*geometry|golden\s*ratio|fibonacci/i)
-    if (sacredMatch) {
-      expressions.push(input)
+    // Simple equals expressions
+    const equalsMatch = input.match(/\d+(?:\.\d+)?\s*[+\-*/]\s*\d+(?:\.\d+)?\s*=/g)
+    if (equalsMatch) {
+      equalsMatch.forEach((expr) => {
+        expressions.push(expr.replace("=", ""))
+      })
     }
 
     return expressions
   }
 
   private async solveMathExpression(expression: string): Promise<any> {
-    // Basic arithmetic
-    const basicResult = this.solveBasicArithmetic(expression)
-    if (basicResult !== null) {
-      return {
-        expression,
-        result: basicResult,
-        type: "basic_arithmetic",
-        steps: this.getArithmeticSteps(expression),
-      }
+    // Clean and validate expression
+    const cleanExpression = expression.replace(/[^0-9+\-*/().\s]/g, "").trim()
+
+    if (!cleanExpression || !/^[0-9+\-*/().\s]+$/.test(cleanExpression)) {
+      return null
     }
 
-    // Tesla/Vortex math
-    const teslaResult = this.solveTeslaMath(expression)
-    if (teslaResult !== null) {
-      return {
-        expression,
-        result: teslaResult,
-        type: "tesla_vortex",
-        steps: this.getTeslaSteps(expression),
-      }
-    }
-
-    // Times tables
-    const timesTableResult = this.generateTimesTable(expression)
-    if (timesTableResult !== null) {
-      return {
-        expression,
-        result: timesTableResult,
-        type: "times_table",
-        steps: ["Generated times table"],
-      }
-    }
-
-    // Mirror times tables
-    const mirrorResult = this.generateMirrorTimesTable(expression)
-    if (mirrorResult !== null) {
-      return {
-        expression,
-        result: mirrorResult,
-        type: "mirror_times_table",
-        steps: ["Generated mirror times table with digital root patterns"],
-      }
-    }
-
-    // Sacred geometry
-    const sacredResult = this.calculateSacredGeometry(expression)
-    if (sacredResult !== null) {
-      return {
-        expression,
-        result: sacredResult,
-        type: "sacred_geometry",
-        steps: ["Calculated sacred geometry patterns"],
-      }
-    }
-
-    return null
-  }
-
-  private solveBasicArithmetic(expression: string): number | null {
     try {
-      const cleanExpression = expression.replace(/[^0-9+\-*/().\s]/g, "")
-
-      if (!/^[0-9+\-*/().\s]+$/.test(cleanExpression)) {
-        return null
-      }
-
-      const result = Function(`"use strict"; return (${cleanExpression})`)()
+      // Safe evaluation using Function constructor
+      const result = this.evaluateExpression(cleanExpression)
 
       if (typeof result === "number" && !isNaN(result) && isFinite(result)) {
-        return Math.round(result * 1000000) / 1000000
+        return {
+          expression: cleanExpression,
+          result: Math.round(result * 1000000) / 1000000, // Round to 6 decimal places
+          type: "arithmetic",
+          steps: this.getCalculationSteps(cleanExpression, result),
+        }
       }
     } catch (error) {
-      console.error("Error in basic arithmetic:", error)
+      console.error("Error evaluating expression:", error)
     }
 
     return null
   }
 
-  private solveTeslaMath(expression: string): any {
-    const input = expression.toLowerCase()
+  private evaluateExpression(expression: string): number {
+    // Simple recursive descent parser for basic arithmetic
+    const tokens = this.tokenize(expression)
+    let index = 0
 
-    if (input.includes("tesla") || input.includes("369") || input.includes("digital root")) {
-      const numbers = expression.match(/\d+/g)
-      if (numbers) {
-        const results = numbers.map((numStr) => {
-          const num = Number.parseInt(numStr)
-          return TeslaMathCalculator.calculateTeslaPattern(num)
-        })
+    const parseExpression = (): number => {
+      let result = parseTerm()
 
-        return {
-          type: "tesla_369",
-          results,
-          explanation: "Tesla believed that 3, 6, and 9 were the key to the universe",
+      while (index < tokens.length && (tokens[index] === "+" || tokens[index] === "-")) {
+        const operator = tokens[index++]
+        const term = parseTerm()
+        result = operator === "+" ? result + term : result - term
+      }
+
+      return result
+    }
+
+    const parseTerm = (): number => {
+      let result = parseFactor()
+
+      while (index < tokens.length && (tokens[index] === "*" || tokens[index] === "/")) {
+        const operator = tokens[index++]
+        const factor = parseFactor()
+        result = operator === "*" ? result * factor : result / factor
+      }
+
+      return result
+    }
+
+    const parseFactor = (): number => {
+      if (tokens[index] === "(") {
+        index++ // skip '('
+        const result = parseExpression()
+        index++ // skip ')'
+        return result
+      }
+
+      if (tokens[index] === "-") {
+        index++
+        return -parseFactor()
+      }
+
+      return Number.parseFloat(tokens[index++])
+    }
+
+    return parseExpression()
+  }
+
+  private tokenize(expression: string): string[] {
+    const tokens: string[] = []
+    let current = ""
+
+    for (let i = 0; i < expression.length; i++) {
+      const char = expression[i]
+
+      if (/\d|\./.test(char)) {
+        current += char
+      } else if (/[+\-*/()]/.test(char)) {
+        if (current) {
+          tokens.push(current)
+          current = ""
+        }
+        tokens.push(char)
+      } else if (char === " ") {
+        if (current) {
+          tokens.push(current)
+          current = ""
         }
       }
     }
 
-    if (input.includes("vortex")) {
-      const numbers = expression.match(/\d+/g)
-      const startNum = numbers ? Number.parseInt(numbers[0]) : 1
-      const sequence = TeslaMathCalculator.generateVortexSequence(startNum, 12)
-
-      return {
-        type: "vortex_math",
-        sequence,
-        explanation: "Vortex math reveals the underlying patterns in numbers",
-      }
+    if (current) {
+      tokens.push(current)
     }
 
-    return null
+    return tokens
   }
 
-  private generateTimesTable(expression: string): any {
-    const match = expression.match(/(\d+)/)
-    if (match) {
-      const multiplier = Number.parseInt(match[1])
-      const table = []
-
-      for (let i = 1; i <= 12; i++) {
-        table.push({
-          multiplication: `${multiplier} × ${i}`,
-          result: multiplier * i,
-        })
-      }
-
-      return {
-        multiplier,
-        table,
-        type: "standard_times_table",
-      }
-    }
-
-    return null
-  }
-
-  private generateMirrorTimesTable(expression: string): any {
-    const match = expression.match(/(\d+)/)
-    const multiplier = match ? Number.parseInt(match[1]) : 2
-
-    return TeslaMathCalculator.generateMirrorTimesTable(multiplier)
-  }
-
-  private calculateSacredGeometry(expression: string): any {
-    return TeslaMathCalculator.calculateSacredGeometry()
-  }
-
-  private getArithmeticSteps(expression: string): string[] {
+  private getCalculationSteps(expression: string, result: number): string[] {
     const steps: string[] = []
     steps.push(`Original expression: ${expression}`)
 
-    if (expression.includes("+")) steps.push("Performing addition")
-    if (expression.includes("-")) steps.push("Performing subtraction")
-    if (expression.includes("*")) steps.push("Performing multiplication")
-    if (expression.includes("/")) steps.push("Performing division")
+    // Check for order of operations
+    if (expression.includes("*") || expression.includes("/")) {
+      if (expression.includes("+") || expression.includes("-")) {
+        steps.push("Following order of operations (PEMDAS/BODMAS)")
+        steps.push("First: Multiplication and Division (left to right)")
+        steps.push("Then: Addition and Subtraction (left to right)")
+      }
+    }
 
+    steps.push(`Final result: ${result}`)
     return steps
-  }
-
-  private getTeslaSteps(expression: string): string[] {
-    return [
-      "Analyzing input for Tesla/Vortex math patterns",
-      "Calculating digital roots",
-      "Identifying Tesla key numbers (3, 6, 9)",
-      "Determining pattern significance",
-      "Generating mathematical insights",
-    ]
   }
 
   private buildMathResponse(results: any[]): string {
     if (results.length === 1) {
       const result = results[0]
+      let response = `**Mathematical Calculation:**\n\n`
+      response += `**Expression:** ${result.expression}\n`
+      response += `**Result:** ${result.result}\n\n`
 
-      if (result.type === "basic_arithmetic") {
-        return `**Result:** ${result.result}\n\n**Steps:**\n${result.steps.join("\n")}`
-      } else if (result.type === "tesla_vortex") {
-        return this.formatTeslaResponse(result.result)
-      } else if (result.type === "times_table") {
-        return this.formatTimesTableResponse(result.result)
-      } else if (result.type === "mirror_times_table") {
-        return this.formatMirrorTimesTableResponse(result.result)
-      } else if (result.type === "sacred_geometry") {
-        return this.formatSacredGeometryResponse(result.result)
+      if (result.steps && result.steps.length > 0) {
+        response += `**Steps:**\n`
+        result.steps.forEach((step: string, index: number) => {
+          response += `${index + 1}. ${step}\n`
+        })
       }
-    }
 
-    return "Mathematical analysis completed."
-  }
-
-  private formatTeslaResponse(result: any): string {
-    if (result.type === "tesla_369") {
-      let response = "**Tesla 3-6-9 Analysis:**\n\n"
-      result.results.forEach((item: any) => {
-        response += `Number: ${item.number}\n`
-        response += `Digital Root: ${item.digitalRoot}\n`
-        response += `Pattern: ${item.teslaPattern}\n`
-        response += `Significance: ${item.significance}\n\n`
-      })
-      response += `*${result.explanation}*`
       return response
-    } else if (result.type === "vortex_math") {
-      return `**Vortex Math Sequence:** ${result.sequence.join(", ")}\n\n*${result.explanation}*`
+    } else {
+      let response = "**Mathematical Calculations:**\n\n"
+      results.forEach((result, index) => {
+        response += `**${index + 1}.** ${result.expression} = ${result.result}\n`
+      })
+      return response
     }
-
-    return JSON.stringify(result, null, 2)
-  }
-
-  private formatTimesTableResponse(result: any): string {
-    let response = `**${result.multiplier} Times Table:**\n\n`
-    result.table.forEach((entry: any) => {
-      response += `${entry.multiplication} = ${entry.result}\n`
-    })
-    return response
-  }
-
-  private formatMirrorTimesTableResponse(result: any): string {
-    let response = `**Mirror Times Table for ${result.multiplier}:**\n\n`
-    response += `**Standard:** ${result.standard.join(", ")}\n`
-    response += `**Digital Roots:** ${result.mirror.join(", ")}\n`
-    response += `**Sum Check:** ${result.sumCheck} (Digital Root: ${TeslaMathCalculator.calculateDigitalRoot(result.sumCheck)})\n`
-    response += `**Pattern:** ${result.pattern}\n\n`
-    response += `*All digital roots sum to 45, which reduces to 9 - the universal mathematical constant*`
-    return response
-  }
-
-  private formatSacredGeometryResponse(result: any): string {
-    let response = `**Sacred Geometry:**\n\n`
-    response += `**Golden Ratio (φ):** ${result.goldenRatio.toFixed(6)}\n`
-    response += `**Fibonacci Sequence:** ${result.fibonacci.join(", ")}\n`
-    response += `**Phi Digital Root:** ${result.phiDigitalRoot}\n\n`
-    response += `*${result.explanation}*`
-    return response
   }
 
   private calculateMathConfidence(results: any[]): number {
     if (results.length === 0) return 0
 
-    let totalConfidence = 0
-
-    for (const result of results) {
-      if (result.type === "basic_arithmetic") {
-        totalConfidence += 0.95
-      } else if (result.type === "tesla_vortex") {
-        totalConfidence += 0.8
-      } else if (result.type === "times_table") {
-        totalConfidence += 0.9
-      } else if (result.type === "mirror_times_table") {
-        totalConfidence += 0.85
-      } else if (result.type === "sacred_geometry") {
-        totalConfidence += 0.8
-      } else {
-        totalConfidence += 0.7
-      }
-    }
-
-    return Math.min(1, totalConfidence / results.length)
+    // Math calculations have high confidence when successful
+    return 0.95
   }
 
   async learn(data: any): Promise<void> {
@@ -425,7 +341,7 @@ export class MathematicsModule implements ModuleInterface {
           relationships: [],
         }
 
-        await storageManager.addLearntEntry(MODULE_CONFIG.mathematics.learntFile, learntEntry)
+        await storageManager.addLearntEntry("mathematics", learntEntry)
         this.stats.learntEntries++
       }
     }
