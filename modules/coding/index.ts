@@ -1,7 +1,8 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
-import type { CodingConcept } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
 import { MODULE_CONFIG } from "@/config/app"
+import { generateId } from "@/utils/helpers"
+import { NextJSDocsClient } from "./nextjs-docs"
 
 export class CodingModule implements ModuleInterface {
   name = "coding"
@@ -16,35 +17,6 @@ export class CodingModule implements ModuleInterface {
     averageResponseTime: 0,
     learntEntries: 0,
     lastUpdate: 0,
-  }
-
-  // Next.js and React knowledge base
-  private nextjsKnowledge = {
-    "app-router": {
-      description: "Next.js 13+ routing system using app directory",
-      files: {
-        "app/page.tsx": "Home page component",
-        "app/layout.tsx": "Root layout component",
-        "app/loading.tsx": "Loading UI component",
-        "app/error.tsx": "Error UI component",
-        "app/not-found.tsx": "404 page component",
-      },
-      routing: {
-        "dynamic-routes": "app/blog/[slug]/page.tsx",
-        "nested-routes": "app/dashboard/settings/page.tsx",
-        "route-groups": "app/(auth)/login/page.tsx",
-      },
-    },
-    "server-components": {
-      description: "Components that render on the server by default",
-      benefits: ["Better performance", "Smaller bundle size", "Direct database access", "Better SEO"],
-      restrictions: ["No useState", "No useEffect", "No browser APIs", "No event handlers"],
-    },
-    "client-components": {
-      description: "Components that render on the client, marked with 'use client'",
-      usage: "Add 'use client' directive at top of file",
-      when_to_use: ["Interactive elements", "State management", "Browser APIs", "Event handlers"],
-    },
   }
 
   async initialize(): Promise<void> {
@@ -81,24 +53,16 @@ export class CodingModule implements ModuleInterface {
         }
       }
 
-      const concepts: CodingConcept[] = []
+      const results: any[] = []
 
       for (const query of codingQueries) {
-        const concept = await this.getCodingConcept(query)
-        if (concept) {
-          concepts.push(concept)
+        const result = await this.processCodingQuery(query)
+        if (result) {
+          results.push(result)
         }
       }
 
-      if (concepts.length === 0) {
-        // Try online lookup for Next.js documentation
-        const onlineConcept = await this.lookupOnlineDocumentation(input)
-        if (onlineConcept) {
-          concepts.push(onlineConcept)
-        }
-      }
-
-      if (concepts.length === 0) {
+      if (results.length === 0) {
         return {
           success: false,
           data: null,
@@ -108,12 +72,12 @@ export class CodingModule implements ModuleInterface {
         }
       }
 
-      const response = this.buildCodingResponse(concepts)
-      const confidence = this.calculateCodingConfidence(concepts)
+      const response = this.buildCodingResponse(results)
+      const confidence = this.calculateCodingConfidence(results)
 
       await this.learn({
         input,
-        concepts,
+        results,
         context,
         timestamp: Date.now(),
       })
@@ -128,7 +92,7 @@ export class CodingModule implements ModuleInterface {
         timestamp: Date.now(),
         metadata: {
           queriesProcessed: codingQueries.length,
-          conceptsFound: concepts.length,
+          resultsFound: results.length,
         },
       }
     } catch (error) {
@@ -148,270 +112,167 @@ export class CodingModule implements ModuleInterface {
   private extractCodingQueries(input: string): string[] {
     const queries: string[] = []
 
-    // Programming language mentions
-    const languages = ["javascript", "typescript", "python", "java", "react", "nextjs", "next.js", "html", "css"]
-    for (const lang of languages) {
-      if (input.toLowerCase().includes(lang)) {
-        queries.push(lang)
-      }
+    // Next.js specific queries
+    if (input.match(/next\.?js|app router|server component|client component/i)) {
+      queries.push("nextjs")
     }
 
-    // Coding concepts
-    const concepts = ["function", "component", "hook", "state", "props", "api", "route", "middleware"]
-    for (const concept of concepts) {
-      if (input.toLowerCase().includes(concept)) {
-        queries.push(concept)
-      }
+    // React queries
+    if (input.match(/react|jsx|tsx|component|hook/i)) {
+      queries.push("react")
     }
 
-    // Next.js specific patterns
-    const nextjsPatterns = [
-      "app router",
-      "server component",
-      "client component",
-      "use client",
-      "page.tsx",
-      "layout.tsx",
-    ]
-    for (const pattern of nextjsPatterns) {
-      if (input.toLowerCase().includes(pattern)) {
-        queries.push(pattern)
-      }
+    // System file queries
+    if (input.match(/layout\.tsx|page\.tsx|components\/ui/i)) {
+      queries.push("system_files")
     }
 
-    // File system queries
-    const fileMatch = input.match(/(\w+\.(tsx?|jsx?|css|json))/gi)
-    if (fileMatch) {
-      queries.push(...fileMatch)
+    // General coding queries
+    if (input.match(/how to|code|function|debug|error/i)) {
+      queries.push("general_coding")
     }
 
-    return [...new Set(queries)]
+    return queries
   }
 
-  private async getCodingConcept(query: string): Promise<CodingConcept | null> {
-    // Check Next.js knowledge base first
-    const nextjsConcept = this.searchNextjsKnowledge(query)
-    if (nextjsConcept) {
-      return nextjsConcept
+  private async processCodingQuery(query: string): Promise<any> {
+    switch (query) {
+      case "nextjs":
+        return await this.processNextJSQuery()
+      case "react":
+        return await this.processReactQuery()
+      case "system_files":
+        return await this.processSystemFilesQuery()
+      case "general_coding":
+        return await this.processGeneralCodingQuery()
+      default:
+        return null
     }
-
-    // Check learnt data
-    const learntConcept = this.searchLearntData(query)
-    if (learntConcept) {
-      return learntConcept
-    }
-
-    // Check seed data
-    const seedConcept = this.searchSeedData(query)
-    if (seedConcept) {
-      return seedConcept
-    }
-
-    return null
   }
 
-  private searchNextjsKnowledge(query: string): CodingConcept | null {
-    const lowerQuery = query.toLowerCase()
+  private async processNextJSQuery(): Promise<any> {
+    const nextjsKnowledge = await NextJSDocsClient.lookupNextJSConcept("app router")
 
-    // Check for Next.js specific concepts
-    if (lowerQuery.includes("app router") || lowerQuery.includes("app directory")) {
-      return {
-        name: "App Router",
-        language: "nextjs",
-        description: this.nextjsKnowledge["app-router"].description,
-        syntax: "app/page.tsx, app/layout.tsx, app/loading.tsx",
-        examples: [
-          {
-            title: "Basic Page Structure",
-            code: `// app/page.tsx
-export default function HomePage() {
-  return (
-    <div>
-      <h1>Welcome to Next.js App Router</h1>
-    </div>
-  )
-}`,
-            explanation: "Basic page component in the app directory",
-          },
+    return {
+      type: "nextjs_knowledge",
+      data: nextjsKnowledge,
+      source: "nextjs_docs",
+    }
+  }
+
+  private async processReactQuery(): Promise<any> {
+    return {
+      type: "react_knowledge",
+      data: {
+        description: "React library for building user interfaces",
+        concepts: ["Components", "Props", "State", "Hooks", "JSX"],
+        hooks: ["useState", "useEffect", "useContext", "useReducer"],
+      },
+      source: "react_docs",
+    }
+  }
+
+  private async processSystemFilesQuery(): Promise<any> {
+    const systemKnowledge = {
+      "app/layout.tsx": NextJSDocsClient.getSystemFileKnowledge("app/layout.tsx"),
+      "app/page.tsx": NextJSDocsClient.getSystemFileKnowledge("app/page.tsx"),
+      "components/ui/*": NextJSDocsClient.getSystemFileKnowledge("components/ui/*"),
+      "modules/*/index.ts": NextJSDocsClient.getSystemFileKnowledge("modules/*/index.ts"),
+    }
+
+    return {
+      type: "system_knowledge",
+      data: systemKnowledge,
+      source: "system_analysis",
+    }
+  }
+
+  private async processGeneralCodingQuery(): Promise<any> {
+    return {
+      type: "general_coding",
+      data: {
+        bestPractices: [
+          "Use TypeScript for type safety",
+          "Follow component composition patterns",
+          "Implement proper error boundaries",
+          "Use proper naming conventions",
         ],
-        difficulty: 3,
-        category: "nextjs-routing",
-      }
-    }
-
-    if (lowerQuery.includes("server component")) {
-      return {
-        name: "Server Components",
-        language: "nextjs",
-        description: this.nextjsKnowledge["server-components"].description,
-        syntax: "Default in app directory - no 'use client' directive",
-        examples: [
-          {
-            title: "Server Component with Data Fetching",
-            code: `// app/posts/page.tsx
-async function PostsPage() {
-  const posts = await fetch('https://api.example.com/posts')
-  const data = await posts.json()
-  
-  return (
-    <div>
-      {data.map(post => (
-        <article key={post.id}>
-          <h2>{post.title}</h2>
-          <p>{post.content}</p>
-        </article>
-      ))}
-    </div>
-  )
-}
-
-export default PostsPage`,
-            explanation: "Server component that fetches data directly",
-          },
-        ],
-        difficulty: 4,
-        category: "nextjs-components",
-      }
-    }
-
-    if (lowerQuery.includes("client component") || lowerQuery.includes("use client")) {
-      return {
-        name: "Client Components",
-        language: "nextjs",
-        description: this.nextjsKnowledge["client-components"].description,
-        syntax: "'use client' at the top of the file",
-        examples: [
-          {
-            title: "Interactive Client Component",
-            code: `'use client'
-import { useState } from 'react'
-
-export default function Counter() {
-  const [count, setCount] = useState(0)
-  
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={() => setCount(count + 1)}>
-        Increment
-      </button>
-    </div>
-  )
-}`,
-            explanation: "Client component with state and interactivity",
-          },
-        ],
-        difficulty: 3,
-        category: "nextjs-components",
-      }
-    }
-
-    return null
-  }
-
-  private async lookupOnlineDocumentation(query: string): Promise<CodingConcept | null> {
-    // Simulate online documentation lookup
-    // In a real implementation, this would fetch from Next.js docs, MDN, etc.
-
-    if (query.toLowerCase().includes("nextjs") || query.toLowerCase().includes("next.js")) {
-      return {
-        name: "Next.js Framework",
-        language: "javascript",
-        description:
-          "A React framework for building full-stack web applications with server-side rendering and static site generation",
-        syntax: "npx create-next-app@latest my-app",
-        examples: [
-          {
-            title: "Getting Started",
-            code: `// pages/index.js or app/page.tsx
-export default function Home() {
-  return (
-    <div>
-      <h1>Hello Next.js!</h1>
-    </div>
-  )
-}`,
-            explanation: "Basic Next.js page component",
-          },
-        ],
-        difficulty: 3,
-        category: "framework",
-      }
-    }
-
-    return null
-  }
-
-  private searchLearntData(query: string): CodingConcept | null {
-    if (!this.learntData || !this.learntData.entries) return null
-
-    for (const entry of Object.values(this.learntData.entries)) {
-      const entryData = entry as any
-      if (entryData.content && entryData.content.name === query) {
-        return entryData.content
-      }
-    }
-
-    return null
-  }
-
-  private searchSeedData(query: string): CodingConcept | null {
-    if (!this.seedData || !this.seedData.concepts) return null
-
-    const conceptData = this.seedData.concepts[query.toLowerCase()]
-    if (conceptData) {
-      return {
-        name: query,
-        language: conceptData.language || "general",
-        description: conceptData.description,
-        syntax: conceptData.syntax || "",
-        examples: conceptData.examples || [],
-        difficulty: conceptData.difficulty || 1,
-        category: conceptData.category || "general",
-      }
-    }
-
-    return null
-  }
-
-  private buildCodingResponse(concepts: CodingConcept[]): string {
-    if (concepts.length === 1) {
-      const concept = concepts[0]
-      let response = `**${concept.name}** (${concept.language})\n\n${concept.description}`
-
-      if (concept.syntax) {
-        response += `\n\n**Syntax:**\n\`\`\`${concept.language}\n${concept.syntax}\n\`\`\``
-      }
-
-      if (concept.examples && concept.examples.length > 0) {
-        const example = concept.examples[0]
-        response += `\n\n**Example:**\n\`\`\`${concept.language}\n${example.code}\n\`\`\``
-        response += `\n\n${example.explanation}`
-      }
-
-      return response
-    } else {
-      let response = "Here are the coding concepts:\n\n"
-      concepts.forEach((concept, index) => {
-        response += `**${index + 1}. ${concept.name}** (${concept.language})\n${concept.description}\n\n`
-      })
-      return response
+        debugging: ["Check console for errors", "Use React DevTools", "Verify prop types and data flow"],
+      },
+      source: "coding_best_practices",
     }
   }
 
-  private calculateCodingConfidence(concepts: CodingConcept[]): number {
-    if (concepts.length === 0) return 0
+  private buildCodingResponse(results: any[]): string {
+    let response = "## Coding Knowledge\n\n"
+
+    for (const result of results) {
+      if (result.type === "nextjs_knowledge") {
+        response += `**Next.js App Router:**\n${result.data.description}\n\n`
+        response += `**Features:** ${result.data.features.join(", ")}\n\n`
+      } else if (result.type === "system_knowledge") {
+        response += `**System Files:**\n`
+        for (const [file, info] of Object.entries(result.data)) {
+          if (info) {
+            response += `- **${file}:** ${(info as any).purpose}\n`
+          }
+        }
+        response += "\n"
+      } else if (result.type === "general_coding") {
+        response += `**Best Practices:**\n`
+        result.data.bestPractices.forEach((practice: string) => {
+          response += `- ${practice}\n`
+        })
+        response += "\n"
+      }
+    }
+
+    return response
+  }
+
+  private calculateCodingConfidence(results: any[]): number {
+    if (results.length === 0) return 0
 
     let totalConfidence = 0
-    for (const concept of concepts) {
-      if (concept.examples && concept.examples.length > 0) totalConfidence += 0.9
-      else totalConfidence += 0.6
+    for (const result of results) {
+      if (result.type === "nextjs_knowledge") {
+        totalConfidence += 0.9
+      } else if (result.type === "system_knowledge") {
+        totalConfidence += 0.95
+      } else {
+        totalConfidence += 0.7
+      }
     }
 
-    return Math.min(1, totalConfidence / concepts.length)
+    return Math.min(1, totalConfidence / results.length)
   }
 
   async learn(data: any): Promise<void> {
+    if (data.results && data.results.length > 0) {
+      for (const result of data.results) {
+        const learntEntry = {
+          id: generateId(),
+          content: {
+            query: result.type,
+            data: result.data,
+            source: result.source,
+          },
+          confidence: 0.8,
+          source: "coding-module",
+          context: data.input,
+          timestamp: Date.now(),
+          usageCount: 1,
+          lastUsed: Date.now(),
+          verified: true,
+          tags: [result.type, "coding"],
+          relationships: [],
+        }
+
+        await storageManager.addLearntEntry(MODULE_CONFIG.coding.learntFile, learntEntry)
+        this.stats.learntEntries++
+      }
+    }
+
     this.stats.lastUpdate = Date.now()
   }
 

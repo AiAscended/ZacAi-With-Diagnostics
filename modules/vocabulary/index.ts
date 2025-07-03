@@ -3,7 +3,7 @@ import type { VocabularyEntry } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
 import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
-import { DictionaryAPIClient } from "@/core/dictionary/api-client"
+import { DictionaryAPIClient } from "./dictionary-api"
 
 export class VocabularyModule implements ModuleInterface {
   name = "vocabulary"

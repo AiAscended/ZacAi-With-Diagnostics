@@ -1,26 +1,19 @@
+import { apiManager } from "@/core/api/manager"
+
 export class DictionaryAPIClient {
   private static readonly BASE_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
-  private static cache = new Map<string, any>()
 
   static async lookupWord(word: string): Promise<any> {
-    // Check cache first
-    if (this.cache.has(word)) {
-      return this.cache.get(word)
-    }
-
     try {
-      const response = await fetch(`${this.BASE_URL}/${word}`)
+      const cacheKey = `vocab_${word.toLowerCase()}`
+      const response = await apiManager.makeRequest(
+        `${this.BASE_URL}/${encodeURIComponent(word)}`,
+        {},
+        cacheKey,
+        86400000, // 24 hour cache
+      )
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      // Cache the result
-      this.cache.set(word, data)
-
-      return data
+      return response
     } catch (error) {
       console.error(`Error looking up word "${word}":`, error)
       return null

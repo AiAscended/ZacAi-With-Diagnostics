@@ -2,7 +2,7 @@ import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/globa
 import { storageManager } from "@/core/storage/manager"
 import { MODULE_CONFIG } from "@/config/app"
 import { generateId } from "@/utils/helpers"
-import { TeslaMathCalculator } from "@/core/tesla-math/calculator"
+import { TeslaMathCalculator } from "./tesla-vortex"
 
 export class MathematicsModule implements ModuleInterface {
   name = "mathematics"
@@ -136,6 +136,12 @@ export class MathematicsModule implements ModuleInterface {
       expressions.push(input)
     }
 
+    // Sacred geometry
+    const sacredMatch = input.match(/sacred\s*geometry|golden\s*ratio|fibonacci/i)
+    if (sacredMatch) {
+      expressions.push(input)
+    }
+
     return expressions
   }
 
@@ -181,6 +187,17 @@ export class MathematicsModule implements ModuleInterface {
         result: mirrorResult,
         type: "mirror_times_table",
         steps: ["Generated mirror times table with digital root patterns"],
+      }
+    }
+
+    // Sacred geometry
+    const sacredResult = this.calculateSacredGeometry(expression)
+    if (sacredResult !== null) {
+      return {
+        expression,
+        result: sacredResult,
+        type: "sacred_geometry",
+        steps: ["Calculated sacred geometry patterns"],
       }
     }
 
@@ -271,6 +288,10 @@ export class MathematicsModule implements ModuleInterface {
     return TeslaMathCalculator.generateMirrorTimesTable(multiplier)
   }
 
+  private calculateSacredGeometry(expression: string): any {
+    return TeslaMathCalculator.calculateSacredGeometry()
+  }
+
   private getArithmeticSteps(expression: string): string[] {
     const steps: string[] = []
     steps.push(`Original expression: ${expression}`)
@@ -305,6 +326,8 @@ export class MathematicsModule implements ModuleInterface {
         return this.formatTimesTableResponse(result.result)
       } else if (result.type === "mirror_times_table") {
         return this.formatMirrorTimesTableResponse(result.result)
+      } else if (result.type === "sacred_geometry") {
+        return this.formatSacredGeometryResponse(result.result)
       }
     }
 
@@ -341,8 +364,18 @@ export class MathematicsModule implements ModuleInterface {
     let response = `**Mirror Times Table for ${result.multiplier}:**\n\n`
     response += `**Standard:** ${result.standard.join(", ")}\n`
     response += `**Digital Roots:** ${result.mirror.join(", ")}\n`
+    response += `**Sum Check:** ${result.sumCheck} (Digital Root: ${TeslaMathCalculator.calculateDigitalRoot(result.sumCheck)})\n`
     response += `**Pattern:** ${result.pattern}\n\n`
-    response += `*All digital roots sum to 9, revealing the universal mathematical constant*`
+    response += `*All digital roots sum to 45, which reduces to 9 - the universal mathematical constant*`
+    return response
+  }
+
+  private formatSacredGeometryResponse(result: any): string {
+    let response = `**Sacred Geometry:**\n\n`
+    response += `**Golden Ratio (φ):** ${result.goldenRatio.toFixed(6)}\n`
+    response += `**Fibonacci Sequence:** ${result.fibonacci.join(", ")}\n`
+    response += `**Phi Digital Root:** ${result.phiDigitalRoot}\n\n`
+    response += `*${result.explanation}*`
     return response
   }
 
@@ -358,6 +391,10 @@ export class MathematicsModule implements ModuleInterface {
         totalConfidence += 0.8
       } else if (result.type === "times_table") {
         totalConfidence += 0.9
+      } else if (result.type === "mirror_times_table") {
+        totalConfidence += 0.85
+      } else if (result.type === "sacred_geometry") {
+        totalConfidence += 0.8
       } else {
         totalConfidence += 0.7
       }
