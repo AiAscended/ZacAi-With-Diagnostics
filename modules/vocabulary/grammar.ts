@@ -5,19 +5,23 @@ export interface GrammarRule {
   exceptions?: string[]
 }
 
-export interface GrammarAnalysis {
+export interface WordForm {
   word: string
-  partOfSpeech: string
-  grammarRules: GrammarRule[]
-  conjugations?: string[]
-  plurals?: string[]
-  comparatives?: string[]
-  usage: string[]
+  plural?: string
+  pastTense?: string
+  presentParticiple?: string
+  pastParticiple?: string
+  comparative?: string
+  superlative?: string
 }
 
 export interface GrammarResponse {
   success: boolean
-  data?: GrammarAnalysis
+  data?: {
+    wordForms: WordForm
+    rules: GrammarRule[]
+    suggestions: string[]
+  }
   error?: string
   cached?: boolean
   timestamp: number
@@ -25,9 +29,9 @@ export interface GrammarResponse {
 
 export class GrammarClient {
   private static readonly CACHE_DURATION = 86400000 // 24 hours
-  private cache = new Map<string, { data: GrammarAnalysis; timestamp: number }>()
+  private cache = new Map<string, { data: any; timestamp: number }>()
 
-  async analyzeGrammar(word: string, partOfSpeech?: string): Promise<GrammarResponse> {
+  async analyzeGrammar(word: string, context?: string): Promise<GrammarResponse> {
     const normalizedWord = word.toLowerCase().trim()
 
     if (!normalizedWord) {
@@ -39,7 +43,7 @@ export class GrammarClient {
     }
 
     // Check cache first
-    const cached = this.getCachedAnalysis(normalizedWord)
+    const cached = this.getCachedEntry(normalizedWord)
     if (cached) {
       return {
         success: true,
@@ -50,14 +54,21 @@ export class GrammarClient {
     }
 
     try {
-      const grammarData = await this.performGrammarAnalysis(normalizedWord, partOfSpeech)
+      const grammarData = await this.getGrammarAnalysis(normalizedWord, context)
 
-      this.cacheAnalysis(normalizedWord, grammarData)
+      if (grammarData) {
+        this.cacheEntry(normalizedWord, grammarData)
+        return {
+          success: true,
+          data: grammarData,
+          cached: false,
+          timestamp: Date.now(),
+        }
+      }
 
       return {
-        success: true,
-        data: grammarData,
-        cached: false,
+        success: false,
+        error: `No grammar analysis available for "${word}"`,
         timestamp: Date.now(),
       }
     } catch (error) {
@@ -70,200 +81,205 @@ export class GrammarClient {
     }
   }
 
-  private async performGrammarAnalysis(word: string, partOfSpeech?: string): Promise<GrammarAnalysis> {
-    // Determine part of speech if not provided
-    const pos = partOfSpeech || this.guessPartOfSpeech(word)
+  private async getGrammarAnalysis(word: string, context?: string): Promise<any> {
+    const wordForms = this.generateWordForms(word)
+    const rules = this.getRelevantRules(word)
+    const suggestions = this.generateSuggestions(word, context)
 
-    const analysis: GrammarAnalysis = {
-      word,
-      partOfSpeech: pos,
-      grammarRules: this.getGrammarRules(pos),
-      usage: this.getUsageExamples(word, pos),
+    return {
+      wordForms,
+      rules,
+      suggestions,
     }
-
-    // Add specific forms based on part of speech
-    switch (pos) {
-      case "noun":
-        analysis.plurals = this.generatePlurals(word)
-        break
-      case "verb":
-        analysis.conjugations = this.generateConjugations(word)
-        break
-      case "adjective":
-        analysis.comparatives = this.generateComparatives(word)
-        break
-    }
-
-    return analysis
   }
 
-  private guessPartOfSpeech(word: string): string {
-    // Simple heuristics to guess part of speech
-    if (word.endsWith("ing")) return "verb"
-    if (word.endsWith("ed")) return "verb"
-    if (word.endsWith("ly")) return "adverb"
-    if (word.endsWith("tion") || word.endsWith("sion")) return "noun"
-    if (word.endsWith("ful") || word.endsWith("less")) return "adjective"
+  private generateWordForms(word: string): WordForm {
+    const forms: WordForm = { word }
 
-    // Default to noun
-    return "noun"
-  }
-
-  private getGrammarRules(partOfSpeech: string): GrammarRule[] {
-    const rules: { [key: string]: GrammarRule[] } = {
-      noun: [
-        {
-          rule: "Plural Formation",
-          description: "Most nouns form plurals by adding -s or -es",
-          examples: ["cat → cats", "box → boxes", "child → children"],
-          exceptions: ["man → men", "foot → feet", "mouse → mice"],
-        },
-        {
-          rule: "Possessive Form",
-          description: "Add 's to show possession",
-          examples: ["the cat's toy", "James's book", "the children's games"],
-        },
-      ],
-      verb: [
-        {
-          rule: "Present Tense",
-          description: "Third person singular adds -s",
-          examples: ["I walk, he walks", "I try, she tries"],
-        },
-        {
-          rule: "Past Tense",
-          description: "Regular verbs add -ed",
-          examples: ["walk → walked", "try → tried"],
-          exceptions: ["go → went", "see → saw", "be → was/were"],
-        },
-        {
-          rule: "Present Participle",
-          description: "Add -ing for continuous tenses",
-          examples: ["walk → walking", "run → running", "die → dying"],
-        },
-      ],
-      adjective: [
-        {
-          rule: "Comparative Form",
-          description: "Add -er or use 'more' for comparison",
-          examples: ["tall → taller", "beautiful → more beautiful"],
-        },
-        {
-          rule: "Superlative Form",
-          description: "Add -est or use 'most' for superlative",
-          examples: ["tall → tallest", "beautiful → most beautiful"],
-        },
-      ],
-      adverb: [
-        {
-          rule: "Formation",
-          description: "Many adverbs are formed by adding -ly to adjectives",
-          examples: ["quick → quickly", "careful → carefully"],
-        },
-        {
-          rule: "Position",
-          description: "Adverbs can modify verbs, adjectives, or other adverbs",
-          examples: ["He runs quickly", "Very tall", "Quite slowly"],
-        },
-      ],
+    // Generate plural
+    if (this.isNoun(word)) {
+      forms.plural = this.makePlural(word)
     }
 
-    return rules[partOfSpeech] || []
+    // Generate verb forms
+    if (this.isVerb(word)) {
+      forms.pastTense = this.makePastTense(word)
+      forms.presentParticiple = this.makePresentParticiple(word)
+      forms.pastParticiple = this.makePastParticiple(word)
+    }
+
+    // Generate adjective forms
+    if (this.isAdjective(word)) {
+      forms.comparative = this.makeComparative(word)
+      forms.superlative = this.makeSuperlative(word)
+    }
+
+    return forms
   }
 
-  private generatePlurals(word: string): string[] {
-    const plurals: string[] = []
-
-    // Regular plurals
+  private makePlural(word: string): string {
     if (word.endsWith("s") || word.endsWith("sh") || word.endsWith("ch") || word.endsWith("x") || word.endsWith("z")) {
-      plurals.push(word + "es")
-    } else if (word.endsWith("y") && !"aeiou".includes(word[word.length - 2])) {
-      plurals.push(word.slice(0, -1) + "ies")
-    } else if (word.endsWith("f")) {
-      plurals.push(word.slice(0, -1) + "ves")
-    } else if (word.endsWith("fe")) {
-      plurals.push(word.slice(0, -2) + "ves")
-    } else {
-      plurals.push(word + "s")
+      return word + "es"
     }
-
-    return plurals
+    if (word.endsWith("y") && !this.isVowel(word[word.length - 2])) {
+      return word.slice(0, -1) + "ies"
+    }
+    if (word.endsWith("f")) {
+      return word.slice(0, -1) + "ves"
+    }
+    if (word.endsWith("fe")) {
+      return word.slice(0, -2) + "ves"
+    }
+    return word + "s"
   }
 
-  private generateConjugations(word: string): string[] {
-    const conjugations: string[] = []
-
-    // Present tense (3rd person singular)
-    if (word.endsWith("s") || word.endsWith("sh") || word.endsWith("ch") || word.endsWith("x") || word.endsWith("z")) {
-      conjugations.push(word + "es")
-    } else if (word.endsWith("y") && !"aeiou".includes(word[word.length - 2])) {
-      conjugations.push(word.slice(0, -1) + "ies")
-    } else {
-      conjugations.push(word + "s")
-    }
-
-    // Past tense
+  private makePastTense(word: string): string {
     if (word.endsWith("e")) {
-      conjugations.push(word + "d")
-    } else if (word.endsWith("y") && !"aeiou".includes(word[word.length - 2])) {
-      conjugations.push(word.slice(0, -1) + "ied")
-    } else {
-      conjugations.push(word + "ed")
+      return word + "d"
     }
-
-    // Present participle
-    if (word.endsWith("e") && word.length > 2) {
-      conjugations.push(word.slice(0, -1) + "ing")
-    } else {
-      conjugations.push(word + "ing")
+    if (word.endsWith("y") && !this.isVowel(word[word.length - 2])) {
+      return word.slice(0, -1) + "ied"
     }
-
-    return conjugations
+    if (this.shouldDoubleConsonant(word)) {
+      return word + word[word.length - 1] + "ed"
+    }
+    return word + "ed"
   }
 
-  private generateComparatives(word: string): string[] {
-    const comparatives: string[] = []
+  private makePresentParticiple(word: string): string {
+    if (word.endsWith("e") && !word.endsWith("ee")) {
+      return word.slice(0, -1) + "ing"
+    }
+    if (this.shouldDoubleConsonant(word)) {
+      return word + word[word.length - 1] + "ing"
+    }
+    return word + "ing"
+  }
 
-    if (word.length <= 6) {
-      // Short adjectives
-      if (word.endsWith("e")) {
-        comparatives.push(word + "r", word + "st")
-      } else if (word.endsWith("y")) {
-        comparatives.push(word.slice(0, -1) + "ier", word.slice(0, -1) + "iest")
-      } else {
-        comparatives.push(word + "er", word + "est")
+  private makePastParticiple(word: string): string {
+    // For regular verbs, past participle is same as past tense
+    return this.makePastTense(word)
+  }
+
+  private makeComparative(word: string): string {
+    if (word.length <= 2 || (word.length === 3 && this.countVowels(word) === 1)) {
+      if (word.endsWith("y")) {
+        return word.slice(0, -1) + "ier"
       }
-    } else {
-      // Long adjectives
-      comparatives.push(`more ${word}`, `most ${word}`)
+      if (this.shouldDoubleConsonant(word)) {
+        return word + word[word.length - 1] + "er"
+      }
+      return word + "er"
     }
-
-    return comparatives
+    return "more " + word
   }
 
-  private getUsageExamples(word: string, partOfSpeech: string): string[] {
-    // Generate basic usage examples
-    const examples: string[] = []
-
-    switch (partOfSpeech) {
-      case "noun":
-        examples.push(`The ${word} is important.`, `I need a ${word}.`)
-        break
-      case "verb":
-        examples.push(`I ${word} every day.`, `She ${word}s well.`)
-        break
-      case "adjective":
-        examples.push(`It is very ${word}.`, `A ${word} example.`)
-        break
-      case "adverb":
-        examples.push(`He works ${word}.`, `She speaks ${word}.`)
-        break
+  private makeSuperlative(word: string): string {
+    if (word.length <= 2 || (word.length === 3 && this.countVowels(word) === 1)) {
+      if (word.endsWith("y")) {
+        return word.slice(0, -1) + "iest"
+      }
+      if (this.shouldDoubleConsonant(word)) {
+        return word + word[word.length - 1] + "est"
+      }
+      return word + "est"
     }
-
-    return examples
+    return "most " + word
   }
 
-  private getCachedAnalysis(word: string): GrammarAnalysis | null {
+  private isVowel(char: string): boolean {
+    return "aeiouAEIOU".includes(char)
+  }
+
+  private countVowels(word: string): number {
+    return word.split("").filter((char) => this.isVowel(char)).length
+  }
+
+  private shouldDoubleConsonant(word: string): boolean {
+    if (word.length < 3) return false
+    const lastThree = word.slice(-3)
+    return (
+      !this.isVowel(lastThree[0]) &&
+      this.isVowel(lastThree[1]) &&
+      !this.isVowel(lastThree[2]) &&
+      lastThree[2] !== "w" &&
+      lastThree[2] !== "x" &&
+      lastThree[2] !== "y"
+    )
+  }
+
+  private isNoun(word: string): boolean {
+    const nounSuffixes = ["tion", "sion", "ness", "ment", "ity", "er", "or", "ist"]
+    return nounSuffixes.some((suffix) => word.endsWith(suffix))
+  }
+
+  private isVerb(word: string): boolean {
+    const verbSuffixes = ["ate", "ify", "ize", "ise"]
+    return verbSuffixes.some((suffix) => word.endsWith(suffix))
+  }
+
+  private isAdjective(word: string): boolean {
+    const adjSuffixes = ["able", "ible", "ful", "less", "ous", "ive", "al", "ic"]
+    return adjSuffixes.some((suffix) => word.endsWith(suffix))
+  }
+
+  private getRelevantRules(word: string): GrammarRule[] {
+    const rules: GrammarRule[] = []
+
+    if (this.isNoun(word)) {
+      rules.push({
+        rule: "Plural Formation",
+        description: "Most nouns form plurals by adding -s or -es",
+        examples: ["cat → cats", "box → boxes", "baby → babies"],
+        exceptions: ["child → children", "mouse → mice", "foot → feet"],
+      })
+    }
+
+    if (this.isVerb(word)) {
+      rules.push({
+        rule: "Past Tense Formation",
+        description: "Regular verbs form past tense by adding -ed",
+        examples: ["walk → walked", "dance → danced", "study → studied"],
+        exceptions: ["go → went", "see → saw", "have → had"],
+      })
+    }
+
+    if (this.isAdjective(word)) {
+      rules.push({
+        rule: "Comparative and Superlative",
+        description: "Short adjectives add -er/-est, long adjectives use more/most",
+        examples: ["big → bigger → biggest", "beautiful → more beautiful → most beautiful"],
+        exceptions: ["good → better → best", "bad → worse → worst"],
+      })
+    }
+
+    return rules
+  }
+
+  private generateSuggestions(word: string, context?: string): string[] {
+    const suggestions: string[] = []
+
+    if (context) {
+      if (context.includes("plural") || context.includes("multiple")) {
+        const plural = this.makePlural(word)
+        suggestions.push(`Use "${plural}" for plural form`)
+      }
+
+      if (context.includes("past") || context.includes("yesterday")) {
+        const pastTense = this.makePastTense(word)
+        suggestions.push(`Use "${pastTense}" for past tense`)
+      }
+
+      if (context.includes("compare") || context.includes("more")) {
+        const comparative = this.makeComparative(word)
+        suggestions.push(`Use "${comparative}" for comparison`)
+      }
+    }
+
+    return suggestions
+  }
+
+  private getCachedEntry(word: string): any {
     const cached = this.cache.get(word)
     if (!cached) return null
 
@@ -276,7 +292,7 @@ export class GrammarClient {
     return cached.data
   }
 
-  private cacheAnalysis(word: string, data: GrammarAnalysis): void {
+  private cacheEntry(word: string, data: any): void {
     this.cache.set(word, {
       data,
       timestamp: Date.now(),
@@ -294,38 +310,35 @@ export class GrammarClient {
     this.cache.clear()
   }
 
-  formatGrammarResponse(analysis: GrammarAnalysis): string {
-    let response = `**${analysis.word.toUpperCase()}** Grammar Analysis\n\n`
+  formatGrammarResponse(data: any): string {
+    let response = `**${data.wordForms.word.toUpperCase()}** Grammar Analysis\n\n`
 
-    response += `**Part of Speech:** ${analysis.partOfSpeech}\n\n`
+    // Word forms
+    response += "**Word Forms:**\n"
+    if (data.wordForms.plural) response += `• Plural: ${data.wordForms.plural}\n`
+    if (data.wordForms.pastTense) response += `• Past Tense: ${data.wordForms.pastTense}\n`
+    if (data.wordForms.presentParticiple) response += `• Present Participle: ${data.wordForms.presentParticiple}\n`
+    if (data.wordForms.pastParticiple) response += `• Past Participle: ${data.wordForms.pastParticiple}\n`
+    if (data.wordForms.comparative) response += `• Comparative: ${data.wordForms.comparative}\n`
+    if (data.wordForms.superlative) response += `• Superlative: ${data.wordForms.superlative}\n`
 
-    if (analysis.plurals && analysis.plurals.length > 0) {
-      response += `**Plural Forms:** ${analysis.plurals.join(", ")}\n\n`
-    }
-
-    if (analysis.conjugations && analysis.conjugations.length > 0) {
-      response += `**Conjugations:** ${analysis.conjugations.join(", ")}\n\n`
-    }
-
-    if (analysis.comparatives && analysis.comparatives.length > 0) {
-      response += `**Comparative Forms:** ${analysis.comparatives.join(", ")}\n\n`
-    }
-
-    if (analysis.grammarRules.length > 0) {
-      response += `**Grammar Rules:**\n`
-      analysis.grammarRules.forEach((rule) => {
-        response += `• **${rule.rule}:** ${rule.description}\n`
-        if (rule.examples.length > 0) {
-          response += `  Examples: ${rule.examples.join(", ")}\n`
+    // Grammar rules
+    if (data.rules.length > 0) {
+      response += "\n**Grammar Rules:**\n"
+      data.rules.forEach((rule: GrammarRule) => {
+        response += `• **${rule.rule}**: ${rule.description}\n`
+        response += `  Examples: ${rule.examples.join(", ")}\n`
+        if (rule.exceptions) {
+          response += `  Exceptions: ${rule.exceptions.join(", ")}\n`
         }
       })
-      response += "\n"
     }
 
-    if (analysis.usage.length > 0) {
-      response += `**Usage Examples:**\n`
-      analysis.usage.forEach((example) => {
-        response += `• "${example}"\n`
+    // Suggestions
+    if (data.suggestions.length > 0) {
+      response += "\n**Suggestions:**\n"
+      data.suggestions.forEach((suggestion: string) => {
+        response += `• ${suggestion}\n`
       })
     }
 
