@@ -83,75 +83,57 @@ export function ThinkingProcess({ steps, isActive, totalSteps = 4, currentStep =
   const totalProcessingTime = steps.reduce((sum, step) => sum + (step.duration || 0), 0)
 
   return (
-    <div className="mb-4">
+    <div className="my-2">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full justify-between p-2 h-auto text-left border border-dashed border-blue-200 bg-blue-50/50 hover:bg-blue-50"
+            size="sm"
+            className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 bg-blue-50/50"
           >
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">
-                {isActive ? "Thinking..." : "View Thinking Process"}
+            <Zap className="w-3 h-3 mr-1" />
+            <span>{isActive ? "Thinking..." : "View Thinking Process"}</span>
+            {!isActive && (
+              <span className="ml-1 text-blue-500">
+                ({completedSteps}/{steps.length} steps, {totalProcessingTime}ms)
               </span>
-              {!isActive && (
-                <div className="flex items-center gap-1 text-xs text-blue-600">
-                  <span>
-                    {completedSteps}/{steps.length} steps
-                  </span>
-                  {totalProcessingTime > 0 && (
-                    <>
-                      <span>•</span>
-                      <span>{totalProcessingTime}ms</span>
-                    </>
-                  )}
-                </div>
-              )}
-              {isActive && (
-                <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse" />
-                  <span className="text-xs text-blue-600">
-                    Step {currentStep}/{totalSteps}
-                  </span>
-                </div>
-              )}
-            </div>
-            {isExpanded ? (
-              <ChevronDown className="w-3 h-3 text-blue-600" />
-            ) : (
-              <ChevronRight className="w-3 h-3 text-blue-600" />
             )}
+            {isActive && (
+              <span className="ml-1 text-blue-500">
+                ({currentStep}/{totalSteps})
+              </span>
+            )}
+            {isExpanded ? <ChevronDown className="w-3 h-3 ml-1" /> : <ChevronRight className="w-3 h-3 ml-1" />}
           </Button>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <Card className="mt-2 border-blue-200 bg-blue-50/30">
-            <CardContent className="p-3">
-              <div className="space-y-2">
+          <Card className="mt-1 border-blue-200 bg-blue-50/30">
+            <CardContent className="p-2">
+              <div className="space-y-1">
                 {steps.map((step, index) => (
-                  <div key={step.id} className="flex items-center gap-2 text-sm">
+                  <div key={step.id} className="flex items-center gap-2 text-xs py-1">
                     <div className="flex-shrink-0">{getStepIcon(step.type, step.status)}</div>
 
                     <div className="flex-1 min-w-0">
                       <span className={`font-medium ${getStatusColor(step.status)}`}>{step.title}</span>
-                      <span className="text-gray-600 ml-2">{step.description}</span>
+                      <span className="text-gray-600 ml-1">- {step.description}</span>
                     </div>
 
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       {step.duration && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5" />
+                        <span className="flex items-center gap-0.5">
+                          <Clock className="w-2 h-2" />
                           {step.duration}ms
                         </span>
                       )}
                       {step.confidence !== undefined && (
-                        <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                        <Badge variant="outline" className="text-xs px-1 py-0 h-3 text-xs">
                           {Math.round(step.confidence * 100)}%
                         </Badge>
                       )}
                       {step.module && (
-                        <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                        <Badge variant="outline" className="text-xs px-1 py-0 h-3">
                           {step.module}
                         </Badge>
                       )}
@@ -160,9 +142,9 @@ export function ThinkingProcess({ steps, isActive, totalSteps = 4, currentStep =
                 ))}
 
                 {isActive && (
-                  <div className="flex items-center justify-center py-2 text-xs text-blue-600">
+                  <div className="flex items-center justify-center py-1 text-xs text-blue-600">
                     <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                    <span>Processing your request...</span>
+                    <span>Processing...</span>
                   </div>
                 )}
               </div>

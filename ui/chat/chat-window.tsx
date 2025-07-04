@@ -181,6 +181,8 @@ export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
       }, 800)
 
       setTimeout(() => {
+        const finalThinkingSteps = [...currentThinkingSteps]
+
         const assistantMessage: Message = {
           id: `assistant-${Date.now()}`,
           type: "assistant",
@@ -189,7 +191,7 @@ export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
           confidence: response.confidence,
           sources: response.sources,
           processingTime,
-          thinkingSteps: [...currentThinkingSteps],
+          thinkingSteps: finalThinkingSteps,
         }
 
         setMessages((prev) => [...prev, assistantMessage])
@@ -313,11 +315,6 @@ export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
 
             {messages.map((message) => (
               <div key={message.id}>
-                {/* Show thinking process for assistant messages */}
-                {message.type === "assistant" && message.thinkingSteps && message.thinkingSteps.length > 0 && (
-                  <ThinkingProcess steps={message.thinkingSteps} isActive={false} />
-                )}
-
                 <div className={`flex gap-3 ${message.type === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`flex gap-3 max-w-3xl ${message.type === "user" ? "flex-row-reverse" : "flex-row"}`}>
                     <div
@@ -377,17 +374,26 @@ export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
                     </Card>
                   </div>
                 </div>
+
+                {/* Show thinking process AFTER assistant messages like version 100 */}
+                {message.type === "assistant" && message.thinkingSteps && message.thinkingSteps.length > 0 && (
+                  <div className="ml-11 mt-2">
+                    <ThinkingProcess steps={message.thinkingSteps} isActive={false} />
+                  </div>
+                )}
               </div>
             ))}
 
-            {/* Show current thinking process */}
-            {isThinking && (
-              <ThinkingProcess
-                steps={currentThinkingSteps}
-                isActive={true}
-                totalSteps={4}
-                currentStep={currentThinkingSteps.filter((s) => s.status === "completed").length + 1}
-              />
+            {/* Show current thinking process while processing */}
+            {isThinking && currentThinkingSteps.length > 0 && (
+              <div className="ml-11">
+                <ThinkingProcess
+                  steps={currentThinkingSteps}
+                  isActive={true}
+                  totalSteps={4}
+                  currentStep={currentThinkingSteps.filter((s) => s.status === "completed").length + 1}
+                />
+              </div>
             )}
 
             {isLoading && !isThinking && (
