@@ -1,100 +1,114 @@
 "use client"
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-import type React from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Book, FileText, Code, Calculator } from "lucide-react"
+type KnowledgeItem = {
+  id: string
+  question: string
+  answer: string
+  category: string
+}
 
-interface VocabularyData {
-  metadata: {
-    totalEntries: number
+export function KnowledgeManagementTab() {
+  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeItem[]>([])
+  const [newQuestion, setNewQuestion] = useState("")
+  const [newAnswer, setNewAnswer] = useState("")
+  const [newCategory, setNewCategory] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
+
+  useEffect(() => {
+    // In a real app, this would fetch from a database.
+    // For now, we'll use mock data.
+    const mockKnowledge: KnowledgeItem[] = [
+      { id: "1", question: "What is the capital of France?", answer: "Paris", category: "Geography" },
+      { id: "2", question: "What is 2 + 2?", answer: "4", category: "Math" },
+      { id: "3", question: "What is the formula for water?", answer: "H2O", category: "Science" },
+    ]
+    setKnowledgeBase(mockKnowledge)
+  }, [])
+
+  const handleAddItem = () => {
+    if (newQuestion && newAnswer && newCategory) {
+      const newItem: KnowledgeItem = {
+        id: (knowledgeBase.length + 1).toString(),
+        question: newQuestion,
+        answer: newAnswer,
+        category: newCategory,
+      }
+      setKnowledgeBase([...knowledgeBase, newItem])
+      setNewQuestion("")
+      setNewAnswer("")
+      setNewCategory("")
+    }
   }
-}
 
-interface KnowledgeManagementTabProps {
-  vocabularyItems: any[]
-  factItems: any[]
-  codingItems: any[]
-  mathItems: any[]
-  vocabData: VocabularyData | null
-  setActiveSection: (section: string) => void
-}
+  const handleDeleteItem = (id: string) => {
+    setKnowledgeBase(knowledgeBase.filter((item) => item.id !== id))
+  }
 
-const KnowledgeManagementTab: React.FC<KnowledgeManagementTabProps> = ({
-  vocabularyItems,
-  factItems,
-  codingItems,
-  mathItems,
-  vocabData,
-  setActiveSection,
-}) => {
+  const filteredKnowledge = knowledgeBase.filter(
+    (item) =>
+      item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
   return (
-    <div>
-      {/* Replace the current quicklinks section with overview-style cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
-          onClick={() => setActiveSection("vocabulary")}
-        >
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {vocabData?.metadata?.totalEntries || vocabularyItems.length}
-                </div>
-                <div className="text-sm text-muted-foreground">Vocabulary Words</div>
-              </div>
-              <Book className="h-8 w-8 text-blue-600" />
+    <div className="flex flex-col h-full p-4 space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Add New Knowledge</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Input placeholder="Question" value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} />
+          <Input placeholder="Answer" value={newAnswer} onChange={(e) => setNewAnswer(e.target.value)} />
+          <Input placeholder="Category" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
+        </CardContent>
+        <CardFooter>
+          <Button onClick={handleAddItem}>Add Item</Button>
+        </CardFooter>
+      </Card>
+      <Card className="flex-1 flex flex-col">
+        <CardHeader>
+          <CardTitle>Knowledge Base</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 flex flex-col space-y-2 p-0">
+          <div className="px-6 pb-2">
+            <Input
+              placeholder="Search knowledge base..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <ScrollArea className="flex-1 px-6">
+            <div className="space-y-4">
+              {filteredKnowledge.map((item) => (
+                <Card key={item.id}>
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-sm font-semibold">{item.question}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 text-sm">
+                    <p>
+                      <span className="font-semibold">Answer:</span> {item.answer}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Category:</span> {item.category}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="p-4">
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteItem(item.id)}>
+                      Delete
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
-          onClick={() => setActiveSection("facts")}
-        >
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-green-600">{factItems.length}</div>
-                <div className="text-sm text-muted-foreground">Facts & Knowledge</div>
-              </div>
-              <FileText className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
-          onClick={() => setActiveSection("coding")}
-        >
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-purple-600">{codingItems.length}</div>
-                <div className="text-sm text-muted-foreground">Coding Knowledge</div>
-              </div>
-              <Code className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
-          onClick={() => setActiveSection("mathematics")}
-        >
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-orange-600">{mathItems.length}</div>
-                <div className="text-sm text-muted-foreground">Math Concepts</div>
-              </div>
-              <Calculator className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
     </div>
   )
 }
-
-export default KnowledgeManagementTab

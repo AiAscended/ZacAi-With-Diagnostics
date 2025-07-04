@@ -1,21 +1,23 @@
 import type React from "react"
-import type { Metadata } from "next"
-import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 
-export const metadata: Metadata = {
-  title: "ZacAI - Advanced AI Assistant",
-  description: "Your intelligent companion for vocabulary, mathematics, facts, and more",
-    generator: 'v0.dev'
+interface LayoutProps {
+  children: React.ReactNode
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function Layout({ children }: LayoutProps) {
   return (
-    <html lang="en">
-      <body className="antialiased">{children}</body>
-    </html>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {children}
+      <Toaster />
+    </ThemeProvider>
   )
 }
+
+
+import './globals.css'
+
+export const metadata = {
+      generator: 'v0.dev'
+    };
