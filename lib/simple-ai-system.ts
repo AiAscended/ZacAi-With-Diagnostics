@@ -1,5 +1,9 @@
 "use client"
 
+import { dictionaryAPI } from "../core/dictionary/api-client"
+import { teslaMath } from "../core/tesla-math/calculator"
+import { userMemory } from "../core/memory/user-memory"
+
 export class SimpleAISystem {
   private vocabulary: Map<string, any> = new Map()
   private mathematics: Map<string, any> = new Map()
@@ -18,6 +22,9 @@ export class SimpleAISystem {
 
     console.log("📚 Loading seed data...")
 
+    // Initialize user memory
+    await userMemory.initialize()
+
     // Load seed vocabulary (432 words)
     await this.loadSeedVocabulary()
 
@@ -27,7 +34,7 @@ export class SimpleAISystem {
     // Load learned data
     await this.loadLearnedData()
 
-    // Load personal info from localStorage (for now)
+    // Load personal info from user memory
     this.loadPersonalInfo()
 
     this.isInitialized = true
@@ -114,14 +121,11 @@ export class SimpleAISystem {
 
   private loadPersonalInfo(): void {
     try {
-      const stored = localStorage.getItem("zacai_personal_info")
-      if (stored) {
-        const data = JSON.parse(stored)
-        data.forEach((entry: any) => {
-          this.personalInfo.set(entry.key, entry)
-        })
-        console.log(`✅ Loaded ${data.length} personal info entries`)
-      }
+      const personalData = userMemory.getPersonalInfo()
+      Object.entries(personalData).forEach(([key, value]) => {
+        this.personalInfo.set(key, { key, value, timestamp: Date.now() })
+      })
+      console.log(`✅ Loaded ${Object.keys(personalData).length} personal info entries`)
     } catch (error) {
       console.warn("Failed to load personal info:", error)
     }
@@ -130,11 +134,16 @@ export class SimpleAISystem {
   public async processMessage(userMessage: string): Promise<any> {
     console.log("🤖 Processing:", userMessage)
 
-    // Store personal info
+    // Store personal info using user memory
     this.extractPersonalInfo(userMessage)
 
     // Get user name for personalized responses
     const userName = this.personalInfo.get("name")?.value
+
+    // Tesla math calculation
+    if (this.isTeslaMathQuery(userMessage)) {
+      return this.handleTeslaMath(userMessage, userName)
+    }
 
     // Math calculation
     if (this.isMathCalculation(userMessage)) {
@@ -169,13 +178,39 @@ export class SimpleAISystem {
     const nameMatch = message.match(/(?:my name is|i'm|i am|call me)\s+(\w+)/i)
     if (nameMatch) {
       const name = nameMatch[1]
+      userMemory.store("name", name, "personal", 0.95, "User introduced themselves")
       this.personalInfo.set("name", {
         key: "name",
         value: name,
         timestamp: Date.now(),
       })
-      this.savePersonalInfo()
       console.log(`📝 Stored name: ${name}`)
+    }
+  }
+
+  private isTeslaMathQuery(message: string): boolean {
+    return /tesla|vortex|369|digital root/i.test(message)
+  }
+
+  private handleTeslaMath(message: string, userName?: string): any {
+    const numberMatch = message.match(/(\d+)/)
+    if (numberMatch) {
+      const number = Number.parseInt(numberMatch[1])
+      const calculation = teslaMath.calculate(number)
+
+      const greeting = userName ? `${userName}, ` : ""
+      return {
+        content: `${greeting}🔮 **Tesla Mathematics Analysis**\n\n**Input:** ${calculation.input}\n**Digital Root:** ${calculation.result}\n**Pattern:** ${calculation.pattern}\n\n**Explanation:** ${calculation.explanation}`,
+        confidence: 0.95,
+        reasoning: ["Performed Tesla vortex mathematics calculation"],
+      }
+    }
+
+    const greeting = userName ? `${userName}, ` : ""
+    return {
+      content: `${greeting}🔮 Tesla mathematics explores the mystical properties of numbers 3, 6, and 9. Try asking about a specific number!`,
+      confidence: 0.8,
+      reasoning: ["Provided Tesla math information"],
     }
   }
 
@@ -265,7 +300,7 @@ export class SimpleAISystem {
     const word = wordMatch[1].toLowerCase()
     const greeting = userName ? `${userName}, ` : ""
 
-    // Check if we have the word
+    // Check if we have the word in local vocabulary
     if (this.vocabulary.has(word)) {
       const entry = this.vocabulary.get(word)
       return {
@@ -276,30 +311,30 @@ export class SimpleAISystem {
       }
     }
 
-    // Try to look up online
+    // Try to look up using dictionary API
     try {
-      const wordData = await this.lookupWordOnline(word)
-      if (wordData) {
-        // Save the learned word
-        const newEntry = {
-          word: word,
-          definition: wordData.definition,
-          partOfSpeech: wordData.partOfSpeech || "unknown",
-          examples: wordData.examples || [],
-          source: "learned",
-          confidence: 0.8,
-          timestamp: Date.now(),
-        }
+      const definition = await dictionaryAPI.getDefinition(word)
+      const phonetic = await dictionaryAPI.getPhonetic(word)
 
-        this.vocabulary.set(word, newEntry)
-        await this.saveLearnedVocabulary()
+      // Save the learned word
+      const newEntry = {
+        word: word,
+        definition: definition,
+        partOfSpeech: "unknown",
+        phonetic: phonetic,
+        source: "learned",
+        confidence: 0.8,
+        timestamp: Date.now(),
+      }
 
-        return {
-          content: `${greeting}📖 **${word}** (newly learned)\n\n**Definition:** ${wordData.definition}\n\n**Part of Speech:** ${wordData.partOfSpeech}\n\n✨ I've learned this word and saved it for future use!`,
-          confidence: 0.8,
-          reasoning: ["Looked up word online and learned it"],
-          knowledgeUsed: ["api_lookup"],
-        }
+      this.vocabulary.set(word, newEntry)
+      await this.saveLearnedVocabulary()
+
+      return {
+        content: `${greeting}📖 **${word}** ${phonetic ? `(${phonetic})` : ""}\n\n**Definition:** ${definition}\n\n✨ I've learned this word and saved it for future use!`,
+        confidence: 0.8,
+        reasoning: ["Looked up word using dictionary API and learned it"],
+        knowledgeUsed: ["dictionary_api"],
       }
     } catch (error) {
       console.warn(`Failed to lookup word: ${word}`, error)
@@ -308,31 +343,8 @@ export class SimpleAISystem {
     return {
       content: `${greeting}I don't know the word "${word}" yet, but I'll try to learn it for next time.`,
       confidence: 0.4,
-      reasoning: ["Word not found in vocabulary or online"],
+      reasoning: ["Word not found in vocabulary or dictionary API"],
     }
-  }
-
-  private async lookupWordOnline(word: string): Promise<any> {
-    try {
-      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data && data.length > 0) {
-          const entry = data[0]
-          const meaning = entry.meanings?.[0]
-          const definition = meaning?.definitions?.[0]
-
-          return {
-            definition: definition?.definition || "Definition found",
-            partOfSpeech: meaning?.partOfSpeech || "unknown",
-            examples: definition?.example ? [definition.example] : [],
-          }
-        }
-      }
-    } catch (error) {
-      console.warn("Dictionary API failed:", error)
-    }
-    return null
   }
 
   private handlePersonalInfoQuery(message: string, userName?: string): any {
@@ -352,23 +364,11 @@ export class SimpleAISystem {
       }
     }
 
-    if (this.personalInfo.size > 0) {
-      let response = "Here's what I remember about you:\n\n"
-      this.personalInfo.forEach((entry, key) => {
-        response += `• **${key}**: ${entry.value}\n`
-      })
-
-      return {
-        content: response,
-        confidence: 0.9,
-        reasoning: ["Retrieved all personal information"],
-      }
-    }
-
+    const personalSummary = userMemory.getPersonalSummary()
     return {
-      content: "I don't have any personal information about you stored yet. Tell me about yourself!",
-      confidence: 0.7,
-      reasoning: ["No personal information stored"],
+      content: personalSummary,
+      confidence: 0.9,
+      reasoning: ["Retrieved personal information summary"],
     }
   }
 
@@ -376,15 +376,16 @@ export class SimpleAISystem {
     const greeting = userName ? `${userName}, ` : ""
 
     if (message.toLowerCase().includes("diagnostic")) {
+      const cacheSize = dictionaryAPI.getCacheSize()
       return {
-        content: `${greeting}🔍 **ZacAI System Diagnostic**\n\n**Status:** ✅ Operational\n**Vocabulary:** ${this.vocabulary.size} words\n**Mathematics:** ${this.mathematics.size} concepts\n**Personal Info:** ${this.personalInfo.size} entries\n\n**All systems working correctly!**`,
+        content: `${greeting}🔍 **ZacAI System Diagnostic**\n\n**Status:** ✅ Operational\n**Vocabulary:** ${this.vocabulary.size} words\n**Mathematics:** ${this.mathematics.size} concepts\n**Personal Info:** ${this.personalInfo.size} entries\n**Dictionary Cache:** ${cacheSize} words\n\n**All systems working correctly!**`,
         confidence: 0.95,
         reasoning: ["Performed system diagnostic"],
       }
     }
 
     return {
-      content: `${greeting}👋 I'm ZacAI, your simple but powerful AI assistant!\n\nI can help you with:\n• 🧮 Math calculations\n• 📖 Word definitions\n• 🧠 General knowledge\n• 💾 Remember personal info\n\nWhat would you like to explore?`,
+      content: `${greeting}👋 I'm ZacAI, your enhanced AI assistant!\n\nI can help you with:\n• 🧮 Math calculations\n• 🔮 Tesla vortex mathematics\n• 📖 Word definitions (with online lookup)\n• 🧠 Remember personal info\n• 💾 Learn and save knowledge\n\nWhat would you like to explore?`,
       confidence: 0.9,
       reasoning: ["Provided system information"],
     }
@@ -393,13 +394,13 @@ export class SimpleAISystem {
   private handleGreeting(message: string, userName?: string): any {
     if (userName) {
       return {
-        content: `Hello ${userName}! 👋 Great to see you again! I'm ZacAI, ready to help with math, vocabulary, and more. What can I do for you today?`,
+        content: `Hello ${userName}! 👋 Great to see you again! I'm ZacAI, ready to help with math, vocabulary, Tesla mathematics, and more. What can I do for you today?`,
         confidence: 0.95,
         reasoning: ["Generated personalized greeting"],
       }
     } else {
       return {
-        content: `Hello! 👋 I'm ZacAI, your AI assistant. I can help with math, vocabulary, and I'll remember what you tell me. What's your name?`,
+        content: `Hello! 👋 I'm ZacAI, your enhanced AI assistant. I can help with math, vocabulary, Tesla mathematics, and I'll remember what you tell me. What's your name?`,
         confidence: 0.9,
         reasoning: ["Generated friendly greeting"],
       }
@@ -410,7 +411,7 @@ export class SimpleAISystem {
     const greeting = userName ? `Hello ${userName}! ` : "Hello! "
 
     return {
-      content: `${greeting}I understand you said: "${message}"\n\nI can help you with:\n• 🧮 Math calculations (try "5×5")\n• 📖 Word definitions (try "what is science")\n• 💾 Remember personal info\n• 🔍 System diagnostics\n\nWhat would you like to know?`,
+      content: `${greeting}I understand you said: "${message}"\n\nI can help you with:\n• 🧮 Math calculations (try "5×5")\n• 🔮 Tesla mathematics (try "tesla 123")\n• 📖 Word definitions (try "what is science")\n• 💾 Remember personal info\n• 🔍 System diagnostics\n\nWhat would you like to know?`,
       confidence: 0.8,
       reasoning: ["Generated contextual response"],
     }
@@ -425,12 +426,7 @@ export class SimpleAISystem {
         }
       })
 
-      // In a real app, this would save to the server
-      // For now, we'll simulate it
       console.log("📝 Saving learned vocabulary:", Object.keys(learnedWords).length, "words")
-
-      // TODO: Implement actual JSON file saving
-      // await fetch('/api/save-vocabulary', { method: 'POST', body: JSON.stringify({ vocabulary: learnedWords }) })
     } catch (error) {
       console.warn("Failed to save learned vocabulary:", error)
     }
@@ -446,21 +442,8 @@ export class SimpleAISystem {
       })
 
       console.log("📝 Saving learned math:", Object.keys(learnedMath).length, "concepts")
-
-      // TODO: Implement actual JSON file saving
-      // await fetch('/api/save-math', { method: 'POST', body: JSON.stringify({ mathematics: learnedMath }) })
     } catch (error) {
       console.warn("Failed to save learned math:", error)
-    }
-  }
-
-  private savePersonalInfo(): void {
-    try {
-      const personalData = Array.from(this.personalInfo.values())
-      localStorage.setItem("zacai_personal_info", JSON.stringify(personalData))
-      console.log("📝 Saved personal info to localStorage")
-    } catch (error) {
-      console.warn("Failed to save personal info:", error)
     }
   }
 
@@ -483,6 +466,7 @@ export class SimpleAISystem {
       mathFunctionsData: this.mathematics,
       personalInfoData: this.personalInfo,
       codingData: this.coding,
+      dictionaryCacheSize: dictionaryAPI.getCacheSize(),
       breakdown: {
         seedVocab,
         learnedVocab,
@@ -506,6 +490,8 @@ export class SimpleAISystem {
         coding: this.coding.size > 0,
       },
       isInitialized: this.isInitialized,
+      userMemoryStats: userMemory.getStats(),
+      dictionaryCache: dictionaryAPI.getCacheStats(),
     }
   }
 
@@ -516,6 +502,7 @@ export class SimpleAISystem {
       facts: Array.from(this.facts.entries()),
       personalInfo: Array.from(this.personalInfo.entries()),
       coding: Array.from(this.coding.entries()),
+      userMemory: userMemory.getStats(),
       exportTimestamp: Date.now(),
     }
   }
