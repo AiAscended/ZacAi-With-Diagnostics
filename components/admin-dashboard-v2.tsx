@@ -216,50 +216,66 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
           <div className="flex-1 overflow-auto p-6">
             {activeTab === "overview" && (
               <div className="space-y-6">
-                {/* Quick Stats */}
+                {/* Quick Stats - CLEAN WHITE DESIGN */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card>
+                  <Card
+                    className="bg-white hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => setActiveTab("modules")}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Total Queries</p>
-                          <p className="text-2xl font-bold">{stats?.totalQueries || 0}</p>
+                          <p className="text-2xl font-bold text-blue-600">{stats?.totalQueries || 0}</p>
                         </div>
                         <Activity className="w-8 h-8 text-blue-600" />
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card
+                    className="bg-white hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => setActiveTab("performance")}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Avg Response</p>
-                          <p className="text-2xl font-bold">{Math.round(stats?.averageResponseTime || 0)}ms</p>
+                          <p className="text-2xl font-bold text-green-600">
+                            {Math.round(stats?.averageResponseTime || 0)}ms
+                          </p>
                         </div>
                         <Clock className="w-8 h-8 text-green-600" />
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card
+                    className="bg-white hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => setActiveTab("modules")}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Active Modules</p>
-                          <p className="text-2xl font-bold">{Object.keys(stats?.modules || {}).length}</p>
+                          <p className="text-2xl font-bold text-purple-600">
+                            {Object.keys(stats?.modules || {}).length}
+                          </p>
                         </div>
                         <Database className="w-8 h-8 text-purple-600" />
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card
+                    className="bg-white hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => setActiveTab("memory")}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">System Health</p>
-                          <p className="text-2xl font-bold">98%</p>
+                          <p className="text-2xl font-bold text-emerald-600">98%</p>
                         </div>
                         <CheckCircle className="w-8 h-8 text-emerald-600" />
                       </div>
@@ -268,7 +284,7 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
                 </div>
 
                 {/* Module Status */}
-                <Card>
+                <Card className="bg-white">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Database className="w-5 h-5" />
@@ -278,36 +294,40 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {Object.entries(stats?.modules || {}).map(([name, moduleStats]) => (
-                        <div key={name} className="p-4 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-medium capitalize flex items-center gap-2">
-                              {name === "vocabulary" && <BookOpen className="w-4 h-4" />}
-                              {name === "mathematics" && <Calculator className="w-4 h-4" />}
-                              {name === "facts" && <Globe className="w-4 h-4" />}
-                              {name === "coding" && <Code className="w-4 h-4" />}
-                              {name === "philosophy" && <Lightbulb className="w-4 h-4" />}
-                              {name === "user-info" && <User className="w-4 h-4" />}
-                              {name}
-                            </h3>
-                            <Badge variant="outline" className="bg-green-50 text-green-700">
-                              Active
-                            </Badge>
-                          </div>
-                          <div className="space-y-1 text-sm text-gray-600">
-                            <div className="flex justify-between">
-                              <span>Queries:</span>
-                              <span>{(moduleStats as any)?.totalQueries || 0}</span>
+                        <Card key={name} className="bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="font-medium capitalize flex items-center gap-2">
+                                {name === "vocabulary" && <BookOpen className="w-4 h-4 text-blue-600" />}
+                                {name === "mathematics" && <Calculator className="w-4 h-4 text-green-600" />}
+                                {name === "facts" && <Globe className="w-4 h-4 text-purple-600" />}
+                                {name === "coding" && <Code className="w-4 h-4 text-cyan-600" />}
+                                {name === "philosophy" && <Lightbulb className="w-4 h-4 text-orange-600" />}
+                                {name === "user-info" && <User className="w-4 h-4 text-red-600" />}
+                                {name}
+                              </h3>
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                Active
+                              </Badge>
                             </div>
-                            <div className="flex justify-between">
-                              <span>Success Rate:</span>
-                              <span>{Math.round(((moduleStats as any)?.successRate || 0) * 100)}%</span>
+                            <div className="space-y-1 text-sm text-gray-600">
+                              <div className="flex justify-between">
+                                <span>Queries:</span>
+                                <span className="font-medium">{(moduleStats as any)?.totalQueries || 0}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Success Rate:</span>
+                                <span className="font-medium">
+                                  {Math.round(((moduleStats as any)?.successRate || 0) * 100)}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Learnt Entries:</span>
+                                <span className="font-medium">{(moduleStats as any)?.learntEntries || 0}</span>
+                              </div>
                             </div>
-                            <div className="flex justify-between">
-                              <span>Learnt Entries:</span>
-                              <span>{(moduleStats as any)?.learntEntries || 0}</span>
-                            </div>
-                          </div>
-                        </div>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   </CardContent>
@@ -319,7 +339,7 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {Object.entries(stats?.modules || {}).map(([name, moduleStats]) => (
-                    <Card key={name}>
+                    <Card key={name} className="bg-white">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2 capitalize">
                           {name === "vocabulary" && <BookOpen className="w-5 h-5 text-blue-600" />}
@@ -378,7 +398,7 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
 
             {activeTab === "memory" && (
               <div className="space-y-6">
-                <Card>
+                <Card className="bg-white">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5" />
@@ -421,7 +441,7 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
 
             {activeTab === "settings" && (
               <div className="space-y-6">
-                <Card>
+                <Card className="bg-white">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Settings className="w-5 h-5" />
@@ -484,7 +504,7 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
 
             {/* Placeholder for other tabs */}
             {!["overview", "modules", "memory", "settings"].includes(activeTab) && (
-              <Card>
+              <Card className="bg-white">
                 <CardContent className="p-8 text-center">
                   <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
                     <FileText className="w-6 h-6 text-gray-400" />

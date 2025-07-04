@@ -1,16 +1,18 @@
-import { HealthMonitor } from "./health-monitor"
+import { HealthMonitor, type SystemHealth } from "./health-monitor"
 
 export interface SafeModeConfig {
   enableModules: boolean
   enableNetworkRequests: boolean
   enableStorage: boolean
   enableAdvancedFeatures: boolean
-  maxErrors: number
+  maxRetries: number
+  fallbackMode: boolean
 }
 
 export class SafeModeSystem {
   private healthMonitor: HealthMonitor
   private config: SafeModeConfig
+  private systemHealth: SystemHealth | null = null
   private initialized = false
 
   constructor() {
@@ -20,162 +22,154 @@ export class SafeModeSystem {
       enableNetworkRequests: true,
       enableStorage: true,
       enableAdvancedFeatures: true,
-      maxErrors: 5,
+      maxRetries: 3,
+      fallbackMode: false,
     }
   }
 
   async initialize(): Promise<void> {
     try {
-      this.healthMonitor.registerComponent("SafeModeSystem")
+      console.log("🛡️ SafeMode: Initializing system...")
 
-      // Test basic browser features
-      await this.testBrowserFeatures()
+      // Run initial health checks
+      this.systemHealth = await this.healthMonitor.runHealthChecks()
 
-      // Test storage
-      await this.testStorage()
-
-      // Test network (optional)
-      await this.testNetwork()
+      // Adjust configuration based on health
+      this.adjustConfigurationBasedOnHealth()
 
       this.initialized = true
-      this.healthMonitor.updateComponent("SafeModeSystem", "online")
+      console.log("✅ SafeMode: System initialized successfully")
     } catch (error) {
-      this.healthMonitor.logError("SafeModeSystem", `Initialization failed: ${error}`)
-      this.enterSafeMode()
+      console.error("❌ SafeMode: Initialization failed:", error)
+      this.enableFallbackMode()
     }
   }
 
-  private async testBrowserFeatures(): Promise<void> {
-    try {
-      // Test basic JavaScript features
-      const test = JSON.stringify({ test: true })
-      JSON.parse(test)
+  private adjustConfigurationBasedOnHealth(): void {
+    if (!this.systemHealth) return
 
-      // Test DOM access
-      if (typeof document === "undefined") {
-        throw new Error("DOM not available")
+    // Disable features based on health checks
+    for (const check of this.systemHealth.checks) {
+      switch (check.name) {
+        case "Local Storage":
+          if (check.status === "error") {
+            this.config.enableStorage = false
+            console.log("⚠️ SafeMode: Storage disabled due to health check")
+          }
+          break
+
+        case "Network":
+          if (check.status === "error") {
+            this.config.enableNetworkRequests = false
+            console.log("⚠️ SafeMode: Network requests disabled due to health check")
+          }
+          break
+
+        case "Memory":
+          if (check.status === "error") {
+            this.config.enableAdvancedFeatures = false
+            this.config.enableModules = false
+            console.log("⚠️ SafeMode: Advanced features disabled due to memory issues")
+          }
+          break
       }
+    }
 
-      this.healthMonitor.registerComponent("BrowserFeatures")
-      this.healthMonitor.updateComponent("BrowserFeatures", "online")
-    } catch (error) {
-      this.healthMonitor.logError("BrowserFeatures", `Browser test failed: ${error}`)
-      this.config.enableAdvancedFeatures = false
+    // If too many issues, enable fallback mode
+    const errorCount = this.systemHealth.checks.filter((c) => c.status === "error").length
+    if (errorCount >= 2) {
+      this.enableFallbackMode()
     }
   }
 
-  private async testStorage(): Promise<void> {
-    try {
-      if (typeof localStorage !== "undefined") {
-        localStorage.setItem("zacai_test", "test")
-        const test = localStorage.getItem("zacai_test")
-        if (test === "test") {
-          localStorage.removeItem("zacai_test")
-          this.healthMonitor.registerComponent("Storage")
-          this.healthMonitor.updateComponent("Storage", "online")
-        } else {
-          throw new Error("Storage read/write failed")
-        }
-      } else {
-        throw new Error("localStorage not available")
-      }
-    } catch (error) {
-      this.healthMonitor.logError("Storage", `Storage test failed: ${error}`)
-      this.config.enableStorage = false
-    }
-  }
-
-  private async testNetwork(): Promise<void> {
-    try {
-      // Simple network test - try to fetch a small resource
-      const response = await fetch("/favicon.ico", {
-        method: "HEAD",
-        cache: "no-cache",
-      })
-
-      if (response.ok) {
-        this.healthMonitor.registerComponent("Network")
-        this.healthMonitor.updateComponent("Network", "online")
-      } else {
-        throw new Error(`Network test failed: ${response.status}`)
-      }
-    } catch (error) {
-      this.healthMonitor.logWarning("Network", `Network test failed: ${error}`)
-      this.config.enableNetworkRequests = false
-    }
-  }
-
-  private enterSafeMode(): void {
+  private enableFallbackMode(): void {
+    console.log("🚨 SafeMode: Enabling fallback mode")
     this.config = {
       enableModules: false,
       enableNetworkRequests: false,
       enableStorage: false,
       enableAdvancedFeatures: false,
-      maxErrors: 1,
+      maxRetries: 1,
+      fallbackMode: true,
     }
-    this.healthMonitor.logWarning("SafeModeSystem", "Entered safe mode due to errors")
   }
 
   canUseFeature(feature: keyof SafeModeConfig): boolean {
     return this.config[feature] as boolean
   }
 
+  async runDiagnostics(): Promise<SystemHealth> {
+    this.systemHealth = await this.healthMonitor.runHealthChecks()
+    this.adjustConfigurationBasedOnHealth()
+    return this.systemHealth
+  }
+
   getSystemStatus(): string {
-    const health = this.healthMonitor.getHealth()
-    const components = this.healthMonitor.getComponents()
+    const uptime = this.healthMonitor.getUptime()
+    const uptimeStr = this.formatUptime(uptime)
 
-    return `🔍 **System Status Report**
+    return `🔍 **ZacAI System Status**
 
-**Overall Health:** ${health.status.toUpperCase()}
-**Uptime:** ${Math.round((Date.now() - (Date.now() - health.uptime)) / 1000)}s
-**Initialized:** ${this.initialized ? "Yes" : "No"}
+**Core System:**
+• Status: ${this.initialized ? "✅ Online" : "❌ Offline"}
+• Uptime: ${uptimeStr}
+• Mode: ${this.config.fallbackMode ? "🚨 Fallback" : "✅ Normal"}
 
 **Features:**
-• Modules: ${this.config.enableModules ? "✅" : "❌"}
-• Network: ${this.config.enableNetworkRequests ? "✅" : "❌"}
-• Storage: ${this.config.enableStorage ? "✅" : "❌"}
-• Advanced: ${this.config.enableAdvancedFeatures ? "✅" : "❌"}
+• Modules: ${this.config.enableModules ? "✅ Enabled" : "❌ Disabled"}
+• Network: ${this.config.enableNetworkRequests ? "✅ Enabled" : "❌ Disabled"}
+• Storage: ${this.config.enableStorage ? "✅ Enabled" : "❌ Disabled"}
+• Advanced: ${this.config.enableAdvancedFeatures ? "✅ Enabled" : "❌ Disabled"}
 
-**Components:** ${components.length} registered`
+**Health:** ${this.systemHealth?.overall || "Unknown"}`
   }
 
   getHealthReport(): string {
-    const health = this.healthMonitor.getHealth()
-    const components = this.healthMonitor.getComponents()
-
-    let report = `📊 **Health Report**\n\n`
-
-    if (health.errors.length > 0) {
-      report += `**Recent Errors:**\n`
-      health.errors.forEach((error) => {
-        report += `• ${error}\n`
-      })
-      report += `\n`
+    if (!this.systemHealth) {
+      return "⚠️ No health data available"
     }
 
-    if (health.warnings.length > 0) {
-      report += `**Warnings:**\n`
-      health.warnings.forEach((warning) => {
-        report += `• ${warning}\n`
-      })
-      report += `\n`
+    let report = `🏥 **System Health Report**\n\n`
+    report += `**Overall Status:** ${this.getHealthEmoji(this.systemHealth.overall)} ${this.systemHealth.overall.toUpperCase()}\n\n`
+
+    report += `**Component Status:**\n`
+    for (const check of this.systemHealth.checks) {
+      report += `• ${this.getHealthEmoji(check.status)} **${check.name}:** ${check.message}\n`
     }
 
-    if (components.length > 0) {
-      report += `**Component Status:**\n`
-      components.forEach((comp) => {
-        const status = comp.status === "online" ? "✅" : comp.status === "offline" ? "⚠️" : "❌"
-        report += `• ${comp.name}: ${status} (errors: ${comp.errorCount})\n`
-      })
-    }
+    report += `\n**Last Check:** ${new Date(this.systemHealth.lastCheck).toLocaleTimeString()}`
 
     return report
   }
 
-  async runDiagnostics(): Promise<void> {
-    // Re-run all tests
-    await this.testBrowserFeatures()
-    await this.testStorage()
-    await this.testNetwork()
+  private getHealthEmoji(status: "healthy" | "warning" | "error"): string {
+    switch (status) {
+      case "healthy":
+        return "✅"
+      case "warning":
+        return "⚠️"
+      case "error":
+        return "❌"
+      default:
+        return "❓"
+    }
+  }
+
+  private formatUptime(uptime: number): string {
+    const seconds = Math.floor(uptime / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+
+    if (hours > 0) return `${hours}h ${minutes % 60}m ${seconds % 60}s`
+    if (minutes > 0) return `${minutes}m ${seconds % 60}s`
+    return `${seconds}s`
+  }
+
+  getConfiguration(): SafeModeConfig {
+    return { ...this.config }
+  }
+
+  isInitialized(): boolean {
+    return this.initialized
   }
 }
