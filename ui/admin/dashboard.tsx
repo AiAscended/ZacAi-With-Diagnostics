@@ -25,12 +25,11 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  Settings,
   Home,
-  FileText,
   Cog,
   Menu,
   X,
+  FileText,
 } from "lucide-react"
 
 interface AdminDashboardProps {
@@ -61,7 +60,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
 
   useEffect(() => {
     loadSystemData()
-    const interval = setInterval(loadSystemData, 10000) // Refresh every 10 seconds
+    const interval = setInterval(loadSystemData, 10000)
     return () => clearInterval(interval)
   }, [])
 
@@ -69,14 +68,12 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
     try {
       setRefreshing(true)
 
-      // Load system stats
       const stats = systemManager.getSystemStats()
       const log = systemManager.getChatLog()
 
       setSystemStats(stats)
       setChatLog(log)
 
-      // Load vocabulary data
       try {
         const seedWords = vocabularyModule.getSeedWords()
         const learntWords = vocabularyModule.getLearntWords()
@@ -85,7 +82,6 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
         console.error("Failed to load vocab data:", error)
       }
 
-      // Load maths data
       try {
         const seedConcepts = mathematicsModule.getSeedConcepts()
         const learntConcepts = mathematicsModule.getLearntConcepts()
@@ -95,7 +91,6 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
         console.error("Failed to load maths data:", error)
       }
 
-      // Load user memory data
       try {
         const memoryStats = userMemory.getStats()
         const personalInfo = userMemory.getPersonalInfo()
@@ -627,7 +622,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
+                  <FileText className="w-5 h-5" />
                   {sidebarItems.find((item) => item.id === currentPage)?.label}
                 </CardTitle>
               </CardHeader>
