@@ -30,6 +30,8 @@ import {
   Menu,
   X,
   FileText,
+  Archive,
+  BarChart3,
 } from "lucide-react"
 
 interface AdminDashboardProps {
@@ -47,8 +49,11 @@ type AdminPage =
   | "chat-log"
   | "settings"
 
+type ModuleSubPage = "overview" | "seed" | "learnt" | "stats" | "settings"
+
 export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
   const [currentPage, setCurrentPage] = useState<AdminPage>("overview")
+  const [currentSubPage, setCurrentSubPage] = useState<ModuleSubPage>("overview")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [systemStats, setSystemStats] = useState<any>(null)
   const [chatLog, setChatLog] = useState<any[]>([])
@@ -64,6 +69,11 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    // Reset sub-page when main page changes
+    setCurrentSubPage("overview")
+  }, [currentPage])
+
   const loadSystemData = async () => {
     try {
       setRefreshing(true)
@@ -77,7 +87,8 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
       try {
         const seedWords = vocabularyModule.getSeedWords()
         const learntWords = vocabularyModule.getLearntWords()
-        setVocabData({ seedWords, learntWords })
+        const vocabStats = vocabularyModule.getStats()
+        setVocabData({ seedWords, learntWords, stats: vocabStats })
       } catch (error) {
         console.error("Failed to load vocab data:", error)
       }
@@ -152,6 +163,69 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
     { id: "settings", label: "Settings", icon: Cog },
   ]
 
+  const getModuleQuickLinks = (page: AdminPage) => {
+    switch (page) {
+      case "vocabulary":
+        return [
+          { id: "overview", label: "Overview", icon: Home, count: systemStats?.modules?.vocabulary?.totalQueries || 0 },
+          { id: "seed", label: "Seed Words", icon: Database, count: Object.keys(vocabData?.seedWords || {}).length },
+          {
+            id: "learnt",
+            label: "Learnt Words",
+            icon: Archive,
+            count: Object.keys(vocabData?.learntWords || {}).length,
+          },
+          {
+            id: "stats",
+            label: "Statistics",
+            icon: BarChart3,
+            count: Math.round((vocabData?.stats?.successRate || 0) * 100),
+          },
+        ]
+      case "maths":
+        return [
+          {
+            id: "overview",
+            label: "Overview",
+            icon: Home,
+            count: systemStats?.modules?.mathematics?.totalQueries || 0,
+          },
+          {
+            id: "seed",
+            label: "Seed Concepts",
+            icon: Database,
+            count: Object.keys(mathData?.seedConcepts || {}).length,
+          },
+          {
+            id: "learnt",
+            label: "Learnt Concepts",
+            icon: Archive,
+            count: Object.keys(mathData?.learntConcepts || {}).length,
+          },
+          {
+            id: "stats",
+            label: "Statistics",
+            icon: BarChart3,
+            count: Math.round((mathData?.stats?.successRate || 0) * 100),
+          },
+        ]
+      case "user-memory":
+        return [
+          { id: "overview", label: "Overview", icon: Home, count: userMemoryData?.stats?.totalEntries || 0 },
+          { id: "seed", label: "Personal Info", icon: User, count: userMemoryData?.stats?.byType?.personal || 0 },
+          { id: "learnt", label: "Preferences", icon: Archive, count: userMemoryData?.stats?.byType?.preference || 0 },
+          {
+            id: "stats",
+            label: "Statistics",
+            icon: BarChart3,
+            count: Math.round((userMemoryData?.stats?.averageConfidence || 0) * 100),
+          },
+        ]
+      default:
+        return []
+    }
+  }
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center bg-gray-50">
@@ -165,6 +239,8 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
       </div>
     )
   }
+
+  const quickLinks = getModuleQuickLinks(currentPage)
 
   return (
     <div className="h-full flex bg-gray-50">
@@ -233,6 +309,33 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
             </div>
           </div>
         </div>
+
+        {/* Quick Links for Module Pages */}
+        {quickLinks.length > 0 && (
+          <div className="bg-white border-b border-gray-200 px-6 py-3">
+            <div className="flex gap-2 overflow-x-auto">
+              {quickLinks.map((link) => {
+                const Icon = link.icon
+                const isActive = currentSubPage === link.id
+                return (
+                  <Button
+                    key={link.id}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    className="flex-shrink-0"
+                    onClick={() => setCurrentSubPage(link.id as ModuleSubPage)}
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {link.label}
+                    <Badge variant="secondary" className="ml-2 bg-white/20">
+                      {link.count}
+                    </Badge>
+                  </Button>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Page Content */}
         <div className="flex-1 overflow-auto p-6">
@@ -321,227 +424,415 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
 
           {currentPage === "vocabulary" && (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-blue-600" />
-                    Vocabulary Module
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <p className="text-2xl font-bold text-blue-600">
-                        {systemStats?.modules?.vocabulary?.totalQueries || 0}
-                      </p>
-                      <p className="text-sm text-gray-600">Word Lookups</p>
+              {currentSubPage === "overview" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-blue-600" />
+                      Vocabulary Module Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <p className="text-2xl font-bold text-blue-600">
+                          {systemStats?.modules?.vocabulary?.totalQueries || 0}
+                        </p>
+                        <p className="text-sm text-gray-600">Word Lookups</p>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-600">
+                          {Object.keys(vocabData?.seedWords || {}).length}
+                        </p>
+                        <p className="text-sm text-gray-600">Seed Words</p>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <p className="text-2xl font-bold text-purple-600">
+                          {Object.keys(vocabData?.learntWords || {}).length}
+                        </p>
+                        <p className="text-sm text-gray-600">Learnt Words</p>
+                      </div>
+                      <div className="text-center p-4 bg-orange-50 rounded-lg">
+                        <p className="text-2xl font-bold text-orange-600">
+                          {Math.round((vocabData?.stats?.successRate || 0) * 100)}%
+                        </p>
+                        <p className="text-sm text-gray-600">Success Rate</p>
+                      </div>
                     </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <p className="text-2xl font-bold text-green-600">
-                        {Object.keys(vocabData?.seedWords || {}).length}
-                      </p>
-                      <p className="text-sm text-gray-600">Seed Words</p>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <p className="text-2xl font-bold text-purple-600">
-                        {Object.keys(vocabData?.learntWords || {}).length}
-                      </p>
-                      <p className="text-sm text-gray-600">Learnt Words</p>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              )}
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Seed Words */}
-                    <div>
-                      <h3 className="font-semibold mb-3">Seed Words</h3>
-                      <ScrollArea className="h-96 border rounded-lg p-3">
-                        <div className="space-y-3">
-                          {vocabData?.seedWords &&
-                            Object.entries(vocabData.seedWords).map(([word, data]: [string, any]) => (
-                              <div key={word} className="p-3 bg-gray-50 rounded-lg">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="font-medium text-blue-600">{word.toUpperCase()}</h4>
-                                  <Badge variant="outline">{data.partOfSpeech}</Badge>
-                                </div>
-                                <p className="text-sm text-gray-700 mb-2">{data.definition}</p>
-                                {data.phonetics && (
-                                  <p className="text-xs text-gray-500">Pronunciation: {data.phonetics}</p>
-                                )}
-                                {data.frequency && (
-                                  <p className="text-xs text-gray-500">Frequency: {data.frequency}/5</p>
-                                )}
-                                {data.synonyms && data.synonyms.length > 0 && (
-                                  <p className="text-xs text-gray-500">
-                                    Synonyms: {data.synonyms.slice(0, 3).join(", ")}
-                                  </p>
-                                )}
+              {currentSubPage === "seed" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="w-5 h-5 text-green-600" />
+                      Seed Words Database
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-96">
+                      <div className="space-y-3">
+                        {vocabData?.seedWords &&
+                          Object.entries(vocabData.seedWords).map(([word, data]: [string, any]) => (
+                            <div key={word} className="p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium text-blue-600">{word.toUpperCase()}</h4>
+                                <Badge variant="outline">{data.partOfSpeech}</Badge>
                               </div>
-                            ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-
-                    {/* Learnt Words */}
-                    <div>
-                      <h3 className="font-semibold mb-3">Recently Learnt Words</h3>
-                      <ScrollArea className="h-96 border rounded-lg p-3">
-                        <div className="space-y-3">
-                          {vocabData?.learntWords &&
-                            Object.entries(vocabData.learntWords).map(([id, entry]: [string, any]) => (
-                              <div key={id} className="p-3 bg-gray-50 rounded-lg">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="font-medium text-green-600">{entry.content?.word?.toUpperCase()}</h4>
-                                  <Badge variant="outline">{entry.content?.partOfSpeech}</Badge>
-                                </div>
-                                <p className="text-sm text-gray-700 mb-2">{entry.content?.definition}</p>
-                                <p className="text-xs text-gray-500">Added: {formatTimestamp(entry.timestamp)}</p>
+                              <p className="text-sm text-gray-700 mb-2">{data.definition}</p>
+                              {data.phonetics && (
+                                <p className="text-xs text-gray-500">Pronunciation: {data.phonetics}</p>
+                              )}
+                              {data.frequency && <p className="text-xs text-gray-500">Frequency: {data.frequency}/5</p>}
+                              {data.synonyms && data.synonyms.length > 0 && (
                                 <p className="text-xs text-gray-500">
-                                  Confidence: {Math.round(entry.confidence * 100)}%
+                                  Synonyms: {data.synonyms.slice(0, 3).join(", ")}
                                 </p>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
+
+              {currentSubPage === "learnt" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Archive className="w-5 h-5 text-purple-600" />
+                      Recently Learnt Words
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-96">
+                      <div className="space-y-3">
+                        {vocabData?.learntWords &&
+                          Object.entries(vocabData.learntWords).map(([id, entry]: [string, any]) => (
+                            <div key={id} className="p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium text-green-600">{entry.content?.word?.toUpperCase()}</h4>
+                                <Badge variant="outline">{entry.content?.partOfSpeech}</Badge>
                               </div>
-                            ))}
-                          {(!vocabData?.learntWords || Object.keys(vocabData.learntWords).length === 0) && (
-                            <p className="text-gray-500 text-center py-8">
-                              No learnt words yet. Try asking me to define a word!
-                            </p>
-                          )}
+                              <p className="text-sm text-gray-700 mb-2">{entry.content?.definition}</p>
+                              <p className="text-xs text-gray-500">Added: {formatTimestamp(entry.timestamp)}</p>
+                              <p className="text-xs text-gray-500">Confidence: {Math.round(entry.confidence * 100)}%</p>
+                            </div>
+                          ))}
+                        {(!vocabData?.learntWords || Object.keys(vocabData.learntWords).length === 0) && (
+                          <p className="text-gray-500 text-center py-8">
+                            No learnt words yet. Try asking me to define a word!
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
+
+              {currentSubPage === "stats" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-orange-600" />
+                      Vocabulary Statistics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h3 className="font-semibold">Performance Metrics</h3>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Total Queries:</span>
+                            <span className="font-mono">{vocabData?.stats?.totalQueries || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Success Rate:</span>
+                            <span className="font-mono">{Math.round((vocabData?.stats?.successRate || 0) * 100)}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Avg Response Time:</span>
+                            <span className="font-mono">
+                              {Math.round(vocabData?.stats?.averageResponseTime || 0)}ms
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Learnt Entries:</span>
+                            <span className="font-mono">{vocabData?.stats?.learntEntries || 0}</span>
+                          </div>
                         </div>
-                      </ScrollArea>
+                      </div>
+                      <div className="space-y-4">
+                        <h3 className="font-semibold">Data Sources</h3>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Seed Words:</span>
+                            <span className="font-mono">{Object.keys(vocabData?.seedWords || {}).length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Online Lookups:</span>
+                            <span className="font-mono">{Object.keys(vocabData?.learntWords || {}).length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Last Update:</span>
+                            <span className="font-mono text-xs">
+                              {vocabData?.stats?.lastUpdate ? formatTimestamp(vocabData.stats.lastUpdate) : "Never"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 
           {currentPage === "maths" && (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="w-5 h-5 text-green-600" />
-                    Maths Module
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <p className="text-2xl font-bold text-green-600">
-                        {systemStats?.modules?.mathematics?.totalQueries || 0}
-                      </p>
-                      <p className="text-sm text-gray-600">Calculations</p>
+              {currentSubPage === "overview" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calculator className="w-5 h-5 text-green-600" />
+                      Maths Module Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-600">
+                          {systemStats?.modules?.mathematics?.totalQueries || 0}
+                        </p>
+                        <p className="text-sm text-gray-600">Calculations</p>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <p className="text-2xl font-bold text-blue-600">
+                          {Object.keys(mathData?.seedConcepts || {}).length}
+                        </p>
+                        <p className="text-sm text-gray-600">Seed Concepts</p>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <p className="text-2xl font-bold text-purple-600">
+                          {Object.keys(mathData?.learntConcepts || {}).length}
+                        </p>
+                        <p className="text-sm text-gray-600">Learnt Concepts</p>
+                      </div>
+                      <div className="text-center p-4 bg-orange-50 rounded-lg">
+                        <p className="text-2xl font-bold text-orange-600">
+                          {Math.round((mathData?.stats?.successRate || 0) * 100)}%
+                        </p>
+                        <p className="text-sm text-gray-600">Success Rate</p>
+                      </div>
                     </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <p className="text-2xl font-bold text-blue-600">
-                        {Object.keys(mathData?.seedConcepts || {}).length}
-                      </p>
-                      <p className="text-sm text-gray-600">Seed Concepts</p>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <p className="text-2xl font-bold text-purple-600">
-                        {Object.keys(mathData?.learntConcepts || {}).length}
-                      </p>
-                      <p className="text-sm text-gray-600">Learnt Concepts</p>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              )}
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Seed Concepts */}
-                    <div>
-                      <h3 className="font-semibold mb-3">Seed Concepts</h3>
-                      <ScrollArea className="h-96 border rounded-lg p-3">
-                        <div className="space-y-3">
-                          {mathData?.seedConcepts &&
-                            Object.entries(mathData.seedConcepts).map(([key, concept]: [string, any]) => (
-                              <div key={key} className="p-3 bg-gray-50 rounded-lg">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="font-medium text-green-600">{concept.name}</h4>
-                                  <Badge variant="outline">Level {concept.difficulty}</Badge>
-                                </div>
-                                <p className="text-sm text-gray-700 mb-2">{concept.description}</p>
-                                {concept.formula && (
-                                  <p className="text-xs text-gray-600 font-mono bg-white p-2 rounded">
-                                    {concept.formula}
-                                  </p>
-                                )}
-                                <p className="text-xs text-gray-500 mt-2">Category: {concept.category}</p>
-                                {concept.examples && (
-                                  <p className="text-xs text-gray-500">{concept.examples.length} examples</p>
-                                )}
+              {currentSubPage === "seed" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="w-5 h-5 text-blue-600" />
+                      Seed Concepts Database
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-96">
+                      <div className="space-y-3">
+                        {mathData?.seedConcepts &&
+                          Object.entries(mathData.seedConcepts).map(([key, concept]: [string, any]) => (
+                            <div key={key} className="p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium text-green-600">{concept.name}</h4>
+                                <Badge variant="outline">Level {concept.difficulty}</Badge>
                               </div>
-                            ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-
-                    {/* Learnt Concepts */}
-                    <div>
-                      <h3 className="font-semibold mb-3">Recently Learnt Concepts</h3>
-                      <ScrollArea className="h-96 border rounded-lg p-3">
-                        <div className="space-y-3">
-                          {mathData?.learntConcepts &&
-                            Object.entries(mathData.learntConcepts).map(([id, entry]: [string, any]) => (
-                              <div key={id} className="p-3 bg-gray-50 rounded-lg">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="font-medium text-purple-600">{entry.content?.name}</h4>
-                                  <Badge variant="outline">Level {entry.content?.difficulty}</Badge>
-                                </div>
-                                <p className="text-sm text-gray-700 mb-2">{entry.content?.description}</p>
-                                <p className="text-xs text-gray-500">Added: {formatTimestamp(entry.timestamp)}</p>
-                                <p className="text-xs text-gray-500">
-                                  Confidence: {Math.round(entry.confidence * 100)}%
+                              <p className="text-sm text-gray-700 mb-2">{concept.description}</p>
+                              {concept.formula && (
+                                <p className="text-xs text-gray-600 font-mono bg-white p-2 rounded mb-2">
+                                  {concept.formula}
                                 </p>
+                              )}
+                              <p className="text-xs text-gray-500">Category: {concept.category}</p>
+                              {concept.examples && (
+                                <p className="text-xs text-gray-500">{concept.examples.length} examples</p>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
+
+              {currentSubPage === "learnt" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Archive className="w-5 h-5 text-purple-600" />
+                      Recently Learnt Concepts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-96">
+                      <div className="space-y-3">
+                        {mathData?.learntConcepts &&
+                          Object.entries(mathData.learntConcepts).map(([id, entry]: [string, any]) => (
+                            <div key={id} className="p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium text-purple-600">{entry.content?.name}</h4>
+                                <Badge variant="outline">Level {entry.content?.difficulty}</Badge>
                               </div>
-                            ))}
-                          {(!mathData?.learntConcepts || Object.keys(mathData.learntConcepts).length === 0) && (
-                            <p className="text-gray-500 text-center py-8">
-                              No learnt concepts yet. Try asking me to solve a math problem!
-                            </p>
-                          )}
+                              <p className="text-sm text-gray-700 mb-2">{entry.content?.description}</p>
+                              <p className="text-xs text-gray-500">Added: {formatTimestamp(entry.timestamp)}</p>
+                              <p className="text-xs text-gray-500">Confidence: {Math.round(entry.confidence * 100)}%</p>
+                            </div>
+                          ))}
+                        {(!mathData?.learntConcepts || Object.keys(mathData.learntConcepts).length === 0) && (
+                          <p className="text-gray-500 text-center py-8">
+                            No learnt concepts yet. Try asking me to solve a math problem!
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
+
+              {currentSubPage === "stats" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-orange-600" />
+                      Maths Statistics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h3 className="font-semibold">Performance Metrics</h3>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Total Queries:</span>
+                            <span className="font-mono">{mathData?.stats?.totalQueries || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Success Rate:</span>
+                            <span className="font-mono">{Math.round((mathData?.stats?.successRate || 0) * 100)}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Avg Response Time:</span>
+                            <span className="font-mono">{Math.round(mathData?.stats?.averageResponseTime || 0)}ms</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Learnt Entries:</span>
+                            <span className="font-mono">{mathData?.stats?.learntEntries || 0}</span>
+                          </div>
                         </div>
-                      </ScrollArea>
+                      </div>
+                      <div className="space-y-4">
+                        <h3 className="font-semibold">Concept Categories</h3>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Arithmetic:</span>
+                            <span className="font-mono">
+                              {
+                                Object.values(mathData?.seedConcepts || {}).filter(
+                                  (c: any) => c.category === "arithmetic",
+                                ).length
+                              }
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Algebra:</span>
+                            <span className="font-mono">
+                              {
+                                Object.values(mathData?.seedConcepts || {}).filter((c: any) => c.category === "algebra")
+                                  .length
+                              }
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Geometry:</span>
+                            <span className="font-mono">
+                              {
+                                Object.values(mathData?.seedConcepts || {}).filter(
+                                  (c: any) => c.category === "geometry",
+                                ).length
+                              }
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Calculus:</span>
+                            <span className="font-mono">
+                              {
+                                Object.values(mathData?.seedConcepts || {}).filter(
+                                  (c: any) => c.category === "calculus",
+                                ).length
+                              }
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 
           {currentPage === "user-memory" && (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5 text-purple-600" />
-                    User Memory System
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <p className="text-2xl font-bold text-purple-600">{userMemoryData?.stats?.totalEntries || 0}</p>
-                      <p className="text-sm text-gray-600">Total Memories</p>
+              {currentSubPage === "overview" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="w-5 h-5 text-purple-600" />
+                      User Memory System Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <p className="text-2xl font-bold text-purple-600">{userMemoryData?.stats?.totalEntries || 0}</p>
+                        <p className="text-sm text-gray-600">Total Memories</p>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <p className="text-2xl font-bold text-blue-600">
+                          {userMemoryData?.stats?.byType?.personal || 0}
+                        </p>
+                        <p className="text-sm text-gray-600">Personal Info</p>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-600">
+                          {userMemoryData?.stats?.byType?.preference || 0}
+                        </p>
+                        <p className="text-sm text-gray-600">Preferences</p>
+                      </div>
+                      <div className="text-center p-4 bg-orange-50 rounded-lg">
+                        <p className="text-2xl font-bold text-orange-600">
+                          {Math.round((userMemoryData?.stats?.averageConfidence || 0) * 100)}%
+                        </p>
+                        <p className="text-sm text-gray-600">Avg Confidence</p>
+                      </div>
                     </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <p className="text-2xl font-bold text-blue-600">{userMemoryData?.stats?.byType?.personal || 0}</p>
-                      <p className="text-sm text-gray-600">Personal Info</p>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <p className="text-2xl font-bold text-green-600">
-                        {userMemoryData?.stats?.byType?.preference || 0}
-                      </p>
-                      <p className="text-sm text-gray-600">Preferences</p>
-                    </div>
-                    <div className="text-center p-4 bg-orange-50 rounded-lg">
-                      <p className="text-2xl font-bold text-orange-600">
-                        {Math.round((userMemoryData?.stats?.averageConfidence || 0) * 100)}%
-                      </p>
-                      <p className="text-sm text-gray-600">Avg Confidence</p>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              )}
 
-                  <div>
-                    <h3 className="font-semibold mb-3">Personal Information</h3>
+              {currentSubPage === "seed" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="w-5 h-5 text-blue-600" />
+                      Personal Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <div className="space-y-3">
                       {userMemoryData?.personalInfo &&
                         Object.entries(userMemoryData.personalInfo).map(([key, value]: [string, any]) => (
@@ -556,9 +847,9 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                         </p>
                       )}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 

@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   Loader2,
+  Zap,
 } from "lucide-react"
 
 export interface ThinkingStep {
@@ -36,123 +37,139 @@ interface ThinkingProcessProps {
 }
 
 export function ThinkingProcess({ steps, isActive, totalSteps = 4, currentStep = 1 }: ThinkingProcessProps) {
-  const [isExpanded, setIsExpanded] = useState(isActive)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const getStepIcon = (type: ThinkingStep["type"], status: ThinkingStep["status"]) => {
     if (status === "processing") {
-      return <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+      return <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
     }
 
     switch (type) {
       case "analysis":
-        return <Brain className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
+        return <Brain className={`w-3 h-3 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
       case "search":
-        return <Search className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
+        return <Search className={`w-3 h-3 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
       case "reasoning":
-        return <Lightbulb className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
+        return <Lightbulb className={`w-3 h-3 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
       case "synthesis":
-        return <CheckCircle className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
+        return <CheckCircle className={`w-3 h-3 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
       case "validation":
         return status === "error" ? (
-          <AlertCircle className="w-4 h-4 text-red-600" />
+          <AlertCircle className="w-3 h-3 text-red-600" />
         ) : (
-          <CheckCircle className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
+          <CheckCircle className={`w-3 h-3 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
         )
       default:
-        return <Brain className={`w-4 h-4 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
+        return <Brain className={`w-3 h-3 ${status === "completed" ? "text-green-600" : "text-gray-400"}`} />
     }
   }
 
   const getStatusColor = (status: ThinkingStep["status"]) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "text-green-700"
       case "processing":
-        return "bg-blue-100 text-blue-800 border-blue-200"
+        return "text-blue-700"
       case "error":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "text-red-700"
       default:
-        return "bg-gray-100 text-gray-600 border-gray-200"
+        return "text-gray-600"
     }
   }
 
   if (steps.length === 0) return null
 
+  const completedSteps = steps.filter((s) => s.status === "completed").length
+  const totalProcessingTime = steps.reduce((sum, step) => sum + (step.duration || 0), 0)
+
   return (
-    <Card className="mb-4 border-dashed border-blue-200 bg-blue-50/30">
+    <div className="mb-4">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" className="w-full justify-between p-4 h-auto">
+          <Button
+            variant="ghost"
+            className="w-full justify-between p-2 h-auto text-left border border-dashed border-blue-200 bg-blue-50/50 hover:bg-blue-50"
+          >
             <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-blue-600" />
-              <span className="font-medium">
-                {isActive ? "Thinking Process" : "View Thinking Process"}
-                {isActive && totalSteps && ` (${currentStep}/${totalSteps})`}
+              <Zap className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">
+                {isActive ? "Thinking..." : "View Thinking Process"}
               </span>
+              {!isActive && (
+                <div className="flex items-center gap-1 text-xs text-blue-600">
+                  <span>
+                    {completedSteps}/{steps.length} steps
+                  </span>
+                  {totalProcessingTime > 0 && (
+                    <>
+                      <span>•</span>
+                      <span>{totalProcessingTime}ms</span>
+                    </>
+                  )}
+                </div>
+              )}
               {isActive && (
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-                  <span className="text-sm text-blue-600">Processing...</span>
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse" />
+                  <span className="text-xs text-blue-600">
+                    Step {currentStep}/{totalSteps}
+                  </span>
                 </div>
               )}
             </div>
-            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            {isExpanded ? (
+              <ChevronDown className="w-3 h-3 text-blue-600" />
+            ) : (
+              <ChevronRight className="w-3 h-3 text-blue-600" />
+            )}
           </Button>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="pt-0 pb-4">
-            <div className="space-y-3">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex items-start gap-3 p-3 bg-white rounded-lg border">
-                  <div className="flex-shrink-0 mt-0.5">{getStepIcon(step.type, step.status)}</div>
+          <Card className="mt-2 border-blue-200 bg-blue-50/30">
+            <CardContent className="p-3">
+              <div className="space-y-2">
+                {steps.map((step, index) => (
+                  <div key={step.id} className="flex items-center gap-2 text-sm">
+                    <div className="flex-shrink-0">{getStepIcon(step.type, step.status)}</div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-sm">{step.title}</h4>
-                      <div className="flex items-center gap-2">
-                        {step.duration && (
-                          <Badge variant="outline" className="text-xs">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {step.duration}ms
-                          </Badge>
-                        )}
-                        <Badge variant="outline" className={`text-xs ${getStatusColor(step.status)}`}>
-                          {step.status}
-                        </Badge>
-                      </div>
+                    <div className="flex-1 min-w-0">
+                      <span className={`font-medium ${getStatusColor(step.status)}`}>{step.title}</span>
+                      <span className="text-gray-600 ml-2">{step.description}</span>
                     </div>
 
-                    <p className="text-sm text-gray-600 mb-2">{step.description}</p>
-
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      {step.duration && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5" />
+                          {step.duration}ms
+                        </span>
+                      )}
                       {step.confidence !== undefined && (
-                        <Badge variant="outline" className="text-xs">
-                          {Math.round(step.confidence * 100)}% confidence
+                        <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                          {Math.round(step.confidence * 100)}%
                         </Badge>
                       )}
                       {step.module && (
-                        <Badge variant="outline" className="text-xs">
-                          {step.module} module
+                        <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                          {step.module}
                         </Badge>
                       )}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {isActive && (
-                <div className="text-center py-2">
-                  <div className="inline-flex items-center gap-2 text-sm text-blue-600">
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                {isActive && (
+                  <div className="flex items-center justify-center py-2 text-xs text-blue-600">
+                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
                     <span>Processing your request...</span>
                   </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </div>
   )
 }
