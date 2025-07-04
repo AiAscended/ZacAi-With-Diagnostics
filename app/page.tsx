@@ -1,12 +1,12 @@
 "use client"
-
-import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, AlertTriangle, CheckCircle, XCircle } from "lucide-react"
-import { SafeModeSystem } from "@/core/system/safe-mode"
+import { Button } from "@/components/ui/button"
+import { Loader2, CheckCircle, XCircle, Zap, Activity } from "lucide-react"
+import { optimizedSystemManager } from "@/core/system/optimized-manager"
+import { performanceMonitor } from "@/core/performance/monitor"
 import AdminDashboardV2 from "@/components/admin-dashboard-v2"
 import EnhancedAIChat from "@/components/enhanced-ai-chat"
 
@@ -16,256 +16,65 @@ interface Message {
   sender: "user" | "ai"
   timestamp: number
   confidence?: number
+  processingTime?: number
 }
 
-type LoadingStage = "initializing" | "diagnostics" | "safe-mode" | "modules" | "ready" | "error"
+type LoadingStage = "initializing" | "critical" | "high-priority" | "background" | "ready" | "error"
 type AppMode = "chat" | "admin"
 
 export default function Home() {
   // Core state
   const [appMode, setAppMode] = useState<AppMode>("chat")
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-
-  // System state
   const [loadingStage, setLoadingStage] = useState<LoadingStage>("initializing")
   const [loadingProgress, setLoadingProgress] = useState<string[]>([])
-  const [safeMode, setSafeMode] = useState<SafeModeSystem | null>(null)
-  const [showDiagnostics, setShowDiagnostics] = useState(false)
+  const [systemReady, setSystemReady] = useState(false)
+  const [performanceData, setPerformanceData] = useState<any>(null)
+  const [showPerformance, setShowPerformance] = useState(false)
 
   useEffect(() => {
-    initializeSystem()
+    initializeOptimizedSystem()
   }, [])
 
   const addLoadingStep = (step: string) => {
     setLoadingProgress((prev) => [...prev, `${new Date().toLocaleTimeString()}: ${step}`])
   }
 
-  const initializeSystem = async () => {
+  const initializeOptimizedSystem = async () => {
     try {
-      addLoadingStep("🚀 Starting ZacAI System...")
+      addLoadingStep("🚀 Starting Optimized ZacAI System...")
       setLoadingStage("initializing")
 
-      // Stage 1: Initialize Safe Mode System
-      addLoadingStep("🛡️ Initializing Safe Mode System...")
-      setLoadingStage("diagnostics")
+      // Start performance monitoring
+      performanceMonitor.startTimer("app-initialization")
 
-      const safeModeSystem = new SafeModeSystem()
-      await safeModeSystem.initialize()
-      setSafeMode(safeModeSystem)
+      addLoadingStep("⚡ Loading critical systems...")
+      setLoadingStage("critical")
 
-      addLoadingStep("✅ Safe Mode System ready")
-      setLoadingStage("safe-mode")
+      // Initialize optimized system manager
+      await optimizedSystemManager.initialize()
 
-      // Stage 2: Check what features we can enable
-      addLoadingStep("🔍 Checking system capabilities...")
+      addLoadingStep("📦 High priority modules loaded")
+      setLoadingStage("high-priority")
 
-      if (safeModeSystem.canUseFeature("enableModules")) {
-        addLoadingStep("📦 Modules can be loaded")
-        setLoadingStage("modules")
-      } else {
-        addLoadingStep("⚠️ Running in basic mode - modules disabled")
-      }
+      addLoadingStep("🔄 Background loading started")
+      setLoadingStage("background")
 
-      if (safeModeSystem.canUseFeature("enableNetworkRequests")) {
-        addLoadingStep("🌐 Network requests enabled")
-      } else {
-        addLoadingStep("⚠️ Network requests disabled - offline mode")
-      }
+      // Small delay to show background loading
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
-      if (safeModeSystem.canUseFeature("enableStorage")) {
-        addLoadingStep("💾 Storage enabled")
-      } else {
-        addLoadingStep("⚠️ Storage disabled - session only")
-      }
-
-      // Stage 3: System ready
-      addLoadingStep("✅ ZacAI System ready!")
+      addLoadingStep("✅ System ready - Optimized for performance!")
       setLoadingStage("ready")
+      setSystemReady(true)
 
-      // Add welcome message
-      const welcomeMessage: Message = {
-        id: "welcome",
-        content: `🎉 **ZacAI System Online!**
+      const totalTime = performanceMonitor.endTimer("app-initialization")
+      addLoadingStep(`⏱️ Total initialization: ${totalTime.toFixed(2)}ms`)
 
-I'm running in ${safeModeSystem.canUseFeature("enableAdvancedFeatures") ? "full" : "safe"} mode.
-
-**Available Commands:**
-• Basic chat and responses
-• Simple math calculations (5+5)
-• Name recognition (my name is...)
-• System diagnostics (status, health)
-• Admin dashboard (admin)
-• Help and information
-
-What would you like to do?`,
-        sender: "ai",
-        timestamp: Date.now(),
-        confidence: 1.0,
-      }
-
-      setMessages([welcomeMessage])
+      // Update performance data
+      setPerformanceData(performanceMonitor.getMetrics())
     } catch (error) {
-      console.error("❌ System initialization failed:", error)
+      console.error("❌ Optimized system initialization failed:", error)
       addLoadingStep(`❌ Error: ${error}`)
       setLoadingStage("error")
-
-      // Even in error state, provide basic functionality
-      const errorMessage: Message = {
-        id: "error",
-        content: `⚠️ **System Error Detected**
-
-ZacAI encountered an error during initialization but is running in emergency mode.
-
-**Available Commands:**
-• Basic responses
-• System diagnostics
-• Error reporting
-
-Type "help" for assistance or "diagnostics" for detailed error information.`,
-        sender: "ai",
-        timestamp: Date.now(),
-        confidence: 0.5,
-      }
-
-      setMessages([errorMessage])
-    }
-  }
-
-  const handleSend = async () => {
-    if (!input.trim()) return
-
-    const userMessage: Message = {
-      id: `user_${Date.now()}`,
-      content: input,
-      sender: "user",
-      timestamp: Date.now(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsLoading(true)
-
-    try {
-      let response = ""
-      let confidence = 0.8
-      const lowerInput = input.toLowerCase()
-
-      // System commands
-      if (lowerInput.includes("status") || lowerInput.includes("diagnostics")) {
-        if (safeMode) {
-          response = safeMode.getSystemStatus() + "\n\n" + safeMode.getHealthReport()
-        } else {
-          response = "⚠️ System diagnostics unavailable - running in emergency mode"
-        }
-        confidence = 0.95
-      }
-      // Health check
-      else if (lowerInput.includes("health")) {
-        if (safeMode) {
-          await safeMode.runDiagnostics()
-          response = safeMode.getHealthReport()
-        } else {
-          response = "⚠️ Health monitoring unavailable"
-        }
-        confidence = 0.95
-      }
-      // Admin mode
-      else if (lowerInput.includes("admin") || lowerInput.includes("dashboard")) {
-        setAppMode("admin")
-        response = "🔧 Switching to Admin Dashboard..."
-        confidence = 0.95
-      }
-      // Help
-      else if (lowerInput.includes("help")) {
-        response = `🆘 **ZacAI Help**
-
-**Available Commands:**
-• **status** - System status and diagnostics
-• **health** - Run health check
-• **admin** - Switch to admin dashboard
-• **help** - Show this help message
-• **my name is [name]** - Tell me your name
-• **[math expression]** - Calculate math (5+5, 10*2)
-• **hello/hi** - Greetings
-
-**System Status:** ${loadingStage}
-**Safe Mode:** ${safeMode ? "Active" : "Inactive"}`
-        confidence = 0.95
-      }
-      // Basic math
-      else if (/^\d+[\s]*[+\-*/][\s]*\d+$/.test(input.replace(/\s/g, ""))) {
-        try {
-          const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
-          response = `🧮 **${input} = ${result}**
-
-Calculation completed successfully!`
-          confidence = 0.95
-        } catch {
-          response = "❌ I couldn't calculate that. Please check your math expression."
-          confidence = 0.3
-        }
-      }
-      // Name recognition
-      else if (lowerInput.includes("my name is")) {
-        const nameMatch = input.match(/my name is (\w+)/i)
-        if (nameMatch) {
-          const name = nameMatch[1]
-          if (safeMode?.canUseFeature("enableStorage")) {
-            localStorage.setItem("zacai_user_name", name)
-          }
-          response = `👋 Nice to meet you, ${name}! I'll remember your name${safeMode?.canUseFeature("enableStorage") ? "" : " for this session only"}.`
-          confidence = 0.95
-        }
-      }
-      // Greetings
-      else if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
-        const userName = safeMode?.canUseFeature("enableStorage") ? localStorage.getItem("zacai_user_name") : null
-        response = `👋 Hello${userName ? ` ${userName}` : ""}! I'm ZacAI, your AI assistant.
-
-I'm currently running in ${safeMode?.canUseFeature("enableAdvancedFeatures") ? "full" : "safe"} mode and ready to help!`
-        confidence = 0.9
-      }
-      // Default response
-      else {
-        response = `I received your message: "${input}"
-
-I'm currently running in ${loadingStage === "ready" ? "operational" : "basic"} mode. Type "help" to see what I can do!`
-        confidence = 0.6
-      }
-
-      const aiMessage: Message = {
-        id: `ai_${Date.now()}`,
-        content: response,
-        sender: "ai",
-        timestamp: Date.now(),
-        confidence,
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    } catch (error) {
-      console.error("❌ Message processing error:", error)
-
-      const errorMessage: Message = {
-        id: `error_${Date.now()}`,
-        content:
-          "⚠️ I encountered an error processing your message. The system is still operational - please try again.",
-        sender: "ai",
-        timestamp: Date.now(),
-        confidence: 0,
-      }
-
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
     }
   }
 
@@ -276,7 +85,7 @@ I'm currently running in ${loadingStage === "ready" ? "operational" : "basic"} m
       case "error":
         return <XCircle className="h-4 w-4 text-red-500" />
       default:
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />
+        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
     }
   }
 
@@ -291,48 +100,128 @@ I'm currently running in ${loadingStage === "ready" ? "operational" : "basic"} m
     }
   }
 
-  // Loading screen
-  if (loadingStage !== "ready" && loadingStage !== "error") {
+  const getLoadingMessage = () => {
+    switch (loadingStage) {
+      case "critical":
+        return "Loading essential systems..."
+      case "high-priority":
+        return "Loading core modules..."
+      case "background":
+        return "Optimizing performance..."
+      case "ready":
+        return "System optimized and ready!"
+      case "error":
+        return "System error detected"
+      default:
+        return "Initializing..."
+    }
+  }
+
+  // Enhanced loading screen with performance metrics
+  if (!systemReady && loadingStage !== "error") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg shadow-xl border-0 bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Initializing ZacAI
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Zap className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-xl font-bold text-gray-900">ZacAI Optimized</div>
+                <div className="text-sm text-gray-500">Performance-first initialization</div>
+              </div>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Stage:</span>
-                <Badge variant="secondary">{loadingStage}</Badge>
-              </div>
-
-              <div className="mt-4">
-                <h4 className="text-sm font-medium mb-2">Loading Progress:</h4>
-                <ScrollArea className="h-32 w-full border rounded p-2">
-                  <div className="space-y-1">
-                    {loadingProgress.map((step, index) => (
-                      <div key={index} className="text-xs text-muted-foreground">
-                        {step}
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Status:</span>
+              <div className="flex items-center gap-2">
+                {getStatusIcon()}
+                <Badge variant={getStatusColor()}>{loadingStage}</Badge>
               </div>
             </div>
+
+            <div className="text-center py-4">
+              <div className="text-lg font-medium text-gray-700 mb-2">{getLoadingMessage()}</div>
+              {performanceData && (
+                <div className="text-sm text-gray-500">
+                  Memory: {performanceData.memoryUsage.used}MB | Modules:{" "}
+                  {Object.keys(performanceData.moduleInitTimes).length}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Loading Progress:</span>
+                <Button variant="ghost" size="sm" onClick={() => setShowPerformance(!showPerformance)}>
+                  <Activity className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <ScrollArea className="h-32 w-full border rounded-lg p-3 bg-gray-50">
+                <div className="space-y-1">
+                  {loadingProgress.map((step, index) => (
+                    <div key={index} className="text-xs text-gray-600 font-mono">
+                      {step}
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+
+            {showPerformance && performanceData && (
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm font-medium mb-2">Performance Metrics:</div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>Load Time: {performanceData.totalLoadTime.toFixed(0)}ms</div>
+                  <div>Memory: {performanceData.memoryUsage.used}MB</div>
+                  <div>Modules: {Object.keys(performanceData.moduleInitTimes).length}</div>
+                  <div>Requests: {performanceData.networkRequests.count}</div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
     )
   }
 
-  // Admin mode - use the restored dashboard
+  // Error state with performance data
+  if (loadingStage === "error") {
+    return (
+      <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-red-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-700">
+              <XCircle className="h-5 w-5" />
+              System Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-600 mb-4">
+              The system encountered an error during initialization. Performance data is available for debugging.
+            </p>
+            <Button onClick={() => setShowPerformance(!showPerformance)} variant="outline" className="w-full">
+              {showPerformance ? "Hide" : "Show"} Performance Report
+            </Button>
+            {showPerformance && (
+              <ScrollArea className="h-40 mt-4 p-2 bg-gray-50 rounded text-xs font-mono">
+                <pre>{optimizedSystemManager.getPerformanceReport()}</pre>
+              </ScrollArea>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Admin mode
   if (appMode === "admin") {
     return <AdminDashboardV2 onToggleChat={() => setAppMode("chat")} />
   }
 
-  // Chat mode
+  // Chat mode - use the enhanced chat component
   return <EnhancedAIChat />
 }
