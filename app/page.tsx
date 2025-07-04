@@ -15,40 +15,37 @@ interface Message {
   sender: "user" | "ai"
   timestamp: number
   confidence?: number
-  reasoning?: string[]
 }
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [systemStatus, setSystemStatus] = useState("loading")
+  const [systemStatus, setSystemStatus] = useState("initializing")
 
   useEffect(() => {
-    // Initialize the app - this should always work
-    try {
-      console.log("🚀 ZacAI App Starting...")
-      setSystemStatus("ready")
+    // Simple initialization that should always work
+    console.log("🚀 ZacAI Starting...")
 
-      // Add welcome message
+    try {
+      setSystemStatus("ready")
       setMessages([
         {
           id: "welcome",
-          content: "Hello! I'm ZacAI. I'm loading my core systems...",
+          content: "Hello! I'm ZacAI. I'm running in basic mode while my advanced systems load.",
           sender: "ai",
           timestamp: Date.now(),
           confidence: 1.0,
         },
       ])
-
-      console.log("✅ ZacAI App Loaded Successfully")
+      console.log("✅ ZacAI Basic Mode Ready")
     } catch (error) {
-      console.error("❌ App Loading Error:", error)
+      console.error("❌ Initialization Error:", error)
       setSystemStatus("error")
       setMessages([
         {
           id: "error",
-          content: "⚠️ System Error: App failed to load properly. Please refresh the page.",
+          content: "⚠️ System Error: Please refresh the page.",
           sender: "ai",
           timestamp: Date.now(),
           confidence: 0,
@@ -72,29 +69,48 @@ export default function Home() {
     setIsLoading(true)
 
     try {
-      // Basic response logic - this should always work
+      // Basic response logic - ALWAYS works
       let response = ""
       let confidence = 0.8
-      let reasoning = ["Basic response"]
-
       const lowerInput = input.toLowerCase()
 
-      if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
-        response = "Hello! I'm ZacAI, your AI assistant. I can help with basic tasks."
+      // Basic math
+      if (/^\d+[+\-*/]\d+$/.test(input.replace(/\s/g, ""))) {
+        try {
+          const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
+          response = `${input} = ${result}`
+          confidence = 0.95
+        } catch {
+          response = "I couldn't calculate that. Please check your math expression."
+          confidence = 0.3
+        }
+      }
+      // Greetings
+      else if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
+        response =
+          "Hello! I'm ZacAI, your AI assistant. I can help with basic math, answer questions, and remember information about you."
         confidence = 0.9
-        reasoning = ["Greeting detected"]
-      } else if (lowerInput.includes("status") || lowerInput.includes("diagnostic")) {
-        response = `🔍 **System Status**\n\n**Core App:** ✅ Running\n**Status:** ${systemStatus}\n**Messages:** ${messages.length}\n**Time:** ${new Date().toLocaleTimeString()}`
+      }
+      // Name recognition
+      else if (lowerInput.includes("my name is")) {
+        const nameMatch = input.match(/my name is (\w+)/i)
+        if (nameMatch) {
+          const name = nameMatch[1]
+          localStorage.setItem("zacai_user_name", name)
+          response = `Nice to meet you, ${name}! I'll remember your name.`
+          confidence = 0.95
+        }
+      }
+      // Status check
+      else if (lowerInput.includes("status") || lowerInput.includes("diagnostic")) {
+        const userName = localStorage.getItem("zacai_user_name")
+        response = `🔍 **System Status**\n\n**Core:** ✅ Running\n**Status:** ${systemStatus}\n**Messages:** ${messages.length}\n**User:** ${userName || "Unknown"}\n**Time:** ${new Date().toLocaleTimeString()}`
         confidence = 0.95
-        reasoning = ["System diagnostic"]
-      } else if (lowerInput.includes("name")) {
-        response = "I'm ZacAI, your AI assistant. What's your name?"
-        confidence = 0.9
-        reasoning = ["Name inquiry"]
-      } else {
-        response = `I received your message: "${input}"\n\nI'm currently in basic mode. My advanced features are being loaded.`
-        confidence = 0.7
-        reasoning = ["Basic echo response"]
+      }
+      // Default response
+      else {
+        response = `I received: "${input}"\n\nI'm currently in basic mode. My advanced modules are being developed.`
+        confidence = 0.6
       }
 
       const aiMessage: Message = {
@@ -103,21 +119,18 @@ export default function Home() {
         sender: "ai",
         timestamp: Date.now(),
         confidence,
-        reasoning,
       }
 
       setMessages((prev) => [...prev, aiMessage])
     } catch (error) {
-      console.error("❌ Message Processing Error:", error)
-
+      console.error("❌ Processing Error:", error)
       const errorMessage: Message = {
         id: `error_${Date.now()}`,
-        content: "⚠️ Sorry, I encountered an error processing your message. Please try again.",
+        content: "⚠️ Sorry, I encountered an error. Please try again.",
         sender: "ai",
         timestamp: Date.now(),
         confidence: 0,
       }
-
       setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
@@ -163,7 +176,6 @@ export default function Home() {
                       {message.confidence !== undefined && (
                         <div className="text-xs mt-2 opacity-70">
                           Confidence: {Math.round(message.confidence * 100)}%
-                          {message.reasoning && <div className="mt-1">Reasoning: {message.reasoning.join(", ")}</div>}
                         </div>
                       )}
                     </div>
