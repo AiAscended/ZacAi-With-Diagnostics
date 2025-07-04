@@ -3,13 +3,12 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, AlertTriangle, CheckCircle, XCircle } from "lucide-react"
 import { SafeModeSystem } from "@/core/system/safe-mode"
 import AdminDashboardV2 from "@/components/admin-dashboard-v2"
+import EnhancedAIChat from "@/components/enhanced-ai-chat"
 
 interface Message {
   id: string
@@ -335,94 +334,5 @@ I'm currently running in ${loadingStage === "ready" ? "operational" : "basic"} m
   }
 
   // Chat mode
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <Card className="h-[600px] flex flex-col">
-          <CardHeader className="flex-shrink-0">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {getStatusIcon()}
-                <span>ZacAI Assistant</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={getStatusColor()}>{loadingStage}</Badge>
-                <Button variant="outline" size="sm" onClick={() => setAppMode("admin")}>
-                  Admin
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setShowDiagnostics(!showDiagnostics)}>
-                  Diagnostics
-                </Button>
-              </div>
-            </CardTitle>
-          </CardHeader>
-
-          {showDiagnostics && (
-            <div className="border-b p-4 bg-muted/50">
-              <ScrollArea className="h-32">
-                <div className="space-y-1">
-                  {loadingProgress.map((step, index) => (
-                    <div key={index} className="text-xs text-muted-foreground">
-                      {step}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-
-          <CardContent className="flex-1 flex flex-col">
-            <ScrollArea className="flex-1 mb-4">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
-                        message.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
-                      }`}
-                    >
-                      <div className="whitespace-pre-wrap">{message.content}</div>
-                      {message.confidence !== undefined && (
-                        <div className="text-xs mt-2 opacity-70">
-                          Confidence: {Math.round(message.confidence * 100)}%
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 p-3 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Processing...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-
-            <div className="flex space-x-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message... (try 'help', 'status', or 'admin')"
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
-                Send
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
+  return <EnhancedAIChat />
 }
