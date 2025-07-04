@@ -77,6 +77,34 @@ class UserMemory {
     return personal
   }
 
+  extractPersonalInfo(): { [key: string]: any } {
+    const personal: { [key: string]: any } = {}
+    this.memory.forEach((entry) => {
+      if (entry.type === "personal") {
+        personal[entry.key] = entry.value
+      }
+    })
+    return personal
+  }
+
+  getPersonalSummary(): string {
+    const personalInfo = this.extractPersonalInfo()
+    const keys = Object.keys(personalInfo)
+
+    if (keys.length === 0) {
+      return "No personal information stored yet."
+    }
+
+    const summary = keys
+      .map((key) => {
+        const value = personalInfo[key]
+        return `${key}: ${value}`
+      })
+      .join(", ")
+
+    return `Personal info: ${summary}`
+  }
+
   private persist(): void {
     try {
       const data: { [key: string]: MemoryEntry } = {}
