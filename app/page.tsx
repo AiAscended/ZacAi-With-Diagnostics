@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -9,7 +8,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, CheckCircle, XCircle, Send, User, Bot, Settings } from "lucide-react"
-import AdminDashboardV2 from "@/components/admin-dashboard-v2"
 
 interface Message {
   id: string
@@ -21,6 +19,113 @@ interface Message {
 
 type LoadingStage = "initializing" | "ready" | "error"
 type AppMode = "chat" | "admin"
+
+// Simple Admin Dashboard Component (inline to avoid import issues)
+function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={onToggleChat}>
+                ← Back to Chat
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">ZacAI Admin Dashboard</h1>
+                <p className="text-gray-600">System management and monitoring</p>
+              </div>
+            </div>
+            <Badge className="bg-green-100 text-green-800">System Online</Badge>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Users</p>
+                  <p className="text-2xl font-bold text-gray-900">1</p>
+                </div>
+                <User className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Active Chats</p>
+                  <p className="text-2xl font-bold text-gray-900">1</p>
+                </div>
+                <Bot className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">System Uptime</p>
+                  <p className="text-2xl font-bold text-gray-900">99.9%</p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Response Time</p>
+                  <p className="text-2xl font-bold text-gray-900">150ms</p>
+                </div>
+                <Settings className="h-8 w-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>System Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <div>
+                  <p className="font-medium text-gray-900">System initialized successfully</p>
+                  <p className="text-sm text-gray-600">2 minutes ago</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-blue-500" />
+                <div>
+                  <p className="font-medium text-gray-900">All modules loaded</p>
+                  <p className="text-sm text-gray-600">3 minutes ago</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <div>
+                  <p className="font-medium text-gray-900">Admin dashboard accessed</p>
+                  <p className="text-sm text-gray-600">Just now</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
 
 export default function Home() {
   const [appMode, setAppMode] = useState<AppMode>("chat")
@@ -41,16 +146,15 @@ export default function Home() {
   const initializeSystem = async () => {
     try {
       addLoadingStep("🚀 Starting ZacAI System...")
-
       await new Promise((resolve) => setTimeout(resolve, 300))
+
       addLoadingStep("✅ Core systems loaded")
-
       await new Promise((resolve) => setTimeout(resolve, 200))
+
       addLoadingStep("📦 Modules initialized")
-
       await new Promise((resolve) => setTimeout(resolve, 100))
-      addLoadingStep("🎉 System ready!")
 
+      addLoadingStep("🎉 System ready!")
       setLoadingStage("ready")
 
       const welcomeMessage: Message = {
@@ -130,12 +234,14 @@ Calculation completed successfully!`
         const nameMatch = input.match(/my name is (\w+)/i)
         if (nameMatch) {
           const name = nameMatch[1]
-          localStorage.setItem("zacai_user_name", name)
+          if (typeof window !== "undefined") {
+            localStorage.setItem("zacai_user_name", name)
+          }
           response = `👋 Nice to meet you, ${name}! I'll remember your name for this session.`
           confidence = 0.95
         }
       } else if (lowerInput.includes("status")) {
-        const userName = localStorage.getItem("zacai_user_name")
+        const userName = typeof window !== "undefined" ? localStorage.getItem("zacai_user_name") : null
         response = `📊 System Status
 
 • Status: Online and operational
@@ -146,7 +252,7 @@ Calculation completed successfully!`
 Everything is working perfectly!`
         confidence = 0.95
       } else if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
-        const userName = localStorage.getItem("zacai_user_name")
+        const userName = typeof window !== "undefined" ? localStorage.getItem("zacai_user_name") : null
         response = `👋 Hello${userName ? ` ${userName}` : ""}! I'm ZacAI, your AI assistant.
 
 I'm ready to help you with various tasks. Type "help" to see what I can do!`
@@ -191,6 +297,7 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
     }
   }
 
+  // Loading screen
   if (loadingStage === "initializing") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -227,6 +334,7 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
     )
   }
 
+  // Error screen
   if (loadingStage === "error") {
     return (
       <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
@@ -250,12 +358,15 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
     )
   }
 
+  // Admin mode
   if (appMode === "admin") {
-    return <AdminDashboardV2 onToggleChat={() => setAppMode("chat")} />
+    return <AdminDashboard onToggleChat={() => setAppMode("chat")} />
   }
 
+  // Main chat interface
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
@@ -279,8 +390,10 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
         </div>
       </div>
 
+      {/* Chat Interface */}
       <div className="max-w-4xl mx-auto p-4">
         <Card className="h-[calc(100vh-200px)] flex flex-col">
+          {/* Messages */}
           <CardContent className="flex-1 p-0">
             <ScrollArea className="h-full p-4">
               <div className="space-y-4">
@@ -333,6 +446,7 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
             </ScrollArea>
           </CardContent>
 
+          {/* Input */}
           <div className="border-t p-4">
             <div className="flex gap-2">
               <Textarea
