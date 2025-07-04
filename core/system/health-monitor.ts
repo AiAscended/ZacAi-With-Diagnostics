@@ -1,147 +1,87 @@
-interface SystemHealth {
-  status: "healthy" | "degraded" | "critical" | "offline"
+export interface SystemHealth {
+  status: "healthy" | "warning" | "error"
+  uptime: number
   errors: string[]
   warnings: string[]
-  modules: { [key: string]: boolean }
   lastCheck: number
 }
 
-interface DiagnosticResult {
-  component: string
-  status: "pass" | "fail" | "warning"
-  message: string
-  timestamp: number
+export interface ComponentHealth {
+  name: string
+  status: "online" | "offline" | "error"
+  lastResponse: number
+  errorCount: number
+  lastError?: string
 }
 
 export class HealthMonitor {
-  private health: SystemHealth = {
-    status: "offline",
-    errors: [],
-    warnings: [],
-    modules: {},
-    lastCheck: 0,
-  }
-
-  private diagnostics: DiagnosticResult[] = []
+  private startTime: number
+  private errors: string[] = []
+  private warnings: string[] = []
+  private components: Map<string, ComponentHealth> = new Map()
 
   constructor() {
-    console.log("🏥 HealthMonitor initialized")
+    this.startTime = Date.now()
   }
 
-  async runDiagnostics(): Promise<SystemHealth> {
-    console.log("🔍 Running system diagnostics...")
+  logError(component: string, error: string): void {
+    this.errors.push(`[${component}] ${error}`)
 
-    this.health = {
-      status: "healthy",
-      errors: [],
-      warnings: [],
-      modules: {},
-      lastCheck: Date.now(),
+    const comp = this.components.get(component) || {
+      name: component,
+      status: "error",
+      lastResponse: 0,
+      errorCount: 0,
     }
 
-    this.diagnostics = []
-
-    // Test 1: Basic JavaScript execution
-    this.addDiagnostic("javascript", "pass", "JavaScript engine working")
-
-    // Test 2: LocalStorage availability
-    try {
-      localStorage.setItem("zacai_health_test", "test")
-      localStorage.removeItem("zacai_health_test")
-      this.addDiagnostic("localStorage", "pass", "LocalStorage available")
-    } catch (error) {
-      this.addDiagnostic("localStorage", "warning", "LocalStorage not available")
-      this.health.warnings.push("LocalStorage not available")
-    }
-
-    // Test 3: Network connectivity
-    try {
-      const response = await fetch("/seed_vocab.json", { method: "HEAD" })
-      if (response.ok) {
-        this.addDiagnostic("network", "pass", "Network connectivity OK")
-      } else {
-        this.addDiagnostic("network", "warning", "Network issues detected")
-        this.health.warnings.push("Network connectivity issues")
-      }
-    } catch (error) {
-      this.addDiagnostic("network", "fail", "Network unavailable")
-      this.health.errors.push("Network unavailable")
-    }
-
-    // Test 4: Core files availability
-    const coreFiles = ["/seed_vocab.json", "/seed_maths.json"]
-    for (const file of coreFiles) {
-      try {
-        const response = await fetch(file, { method: "HEAD" })
-        if (response.ok) {
-          this.addDiagnostic(`file:${file}`, "pass", `${file} available`)
-          this.health.modules[file] = true
-        } else {
-          this.addDiagnostic(`file:${file}`, "warning", `${file} not found`)
-          this.health.warnings.push(`${file} not found`)
-          this.health.modules[file] = false
-        }
-      } catch (error) {
-        this.addDiagnostic(`file:${file}`, "fail", `${file} failed to load`)
-        this.health.errors.push(`${file} failed to load`)
-        this.health.modules[file] = false
-      }
-    }
-
-    // Determine overall health status
-    if (this.health.errors.length > 0) {
-      this.health.status = "critical"
-    } else if (this.health.warnings.length > 0) {
-      this.health.status = "degraded"
-    } else {
-      this.health.status = "healthy"
-    }
-
-    console.log(`🏥 Diagnostics complete: ${this.health.status}`)
-    return this.health
+    comp.status = "error"
+    comp.errorCount++
+    comp.lastError = error
+    this.components.set(component, comp)
   }
 
-  private addDiagnostic(component: string, status: "pass" | "fail" | "warning", message: string) {
-    this.diagnostics.push({
-      component,
-      status,
-      message,
-      timestamp: Date.now(),
+  logWarning(component: string, warning: string): void {
+    this.warnings.push(`[${component}] ${warning}`)
+  }
+
+  registerComponent(name: string): void {
+    this.components.set(name, {
+      name,
+      status: "online",
+      lastResponse: Date.now(),
+      errorCount: 0,
     })
+  }
+
+  updateComponent(name: string, status: "online" | "offline" | "error"): void {
+    const comp = this.components.get(name)
+    if (comp) {
+      comp.status = status
+      comp.lastResponse = Date.now()
+      this.components.set(name, comp)
+    }
   }
 
   getHealth(): SystemHealth {
-    return { ...this.health }
+    const hasErrors = this.errors.length > 0
+    const hasWarnings = this.warnings.length > 0
+
+    return {
+      status: hasErrors ? "error" : hasWarnings ? "warning" : "healthy",
+      uptime: Date.now() - this.startTime,
+      errors: this.errors.slice(-10), // Last 10 errors
+      warnings: this.warnings.slice(-10), // Last 10 warnings
+      lastCheck: Date.now(),
+    }
   }
 
-  getDiagnostics(): DiagnosticResult[] {
-    return [...this.diagnostics]
+  getComponents(): ComponentHealth[] {
+    return Array.from(this.components.values())
   }
 
-  getHealthReport(): string {
-    const report = [
-      `🏥 **ZacAI System Health Report**`,
-      `**Status:** ${this.health.status.toUpperCase()}`,
-      `**Last Check:** ${new Date(this.health.lastCheck).toLocaleString()}`,
-      ``,
-      `**Diagnostics:**`,
-    ]
-
-    this.diagnostics.forEach((diag) => {
-      const icon = diag.status === "pass" ? "✅" : diag.status === "warning" ? "⚠️" : "❌"
-      report.push(`${icon} ${diag.component}: ${diag.message}`)
-    })
-
-    if (this.health.errors.length > 0) {
-      report.push(``, `**Errors:**`)
-      this.health.errors.forEach((error) => report.push(`❌ ${error}`))
-    }
-
-    if (this.health.warnings.length > 0) {
-      report.push(``, `**Warnings:**`)
-      this.health.warnings.forEach((warning) => report.push(`⚠️ ${warning}`))
-    }
-
-    return report.join("\n")
+  reset(): void {
+    this.errors = []
+    this.warnings = []
+    this.components.clear()
   }
 }

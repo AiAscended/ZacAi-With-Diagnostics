@@ -7,7 +7,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, AlertTriangle, CheckCircle, XCircle } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Loader2,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  MessageSquare,
+  Settings,
+  Brain,
+  Activity,
+  Database,
+  TrendingUp,
+} from "lucide-react"
 import { SafeModeSystem } from "@/core/system/safe-mode"
 
 interface Message {
@@ -19,11 +31,16 @@ interface Message {
 }
 
 type LoadingStage = "initializing" | "diagnostics" | "safe-mode" | "modules" | "ready" | "error"
+type AppMode = "chat" | "admin"
 
 export default function Home() {
+  // Core state
+  const [appMode, setAppMode] = useState<AppMode>("chat")
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+
+  // System state
   const [loadingStage, setLoadingStage] = useState<LoadingStage>("initializing")
   const [loadingProgress, setLoadingProgress] = useState<string[]>([])
   const [safeMode, setSafeMode] = useState<SafeModeSystem | null>(null)
@@ -165,6 +182,12 @@ Type "help" for assistance or "diagnostics" for detailed error information.`,
         }
         confidence = 0.95
       }
+      // Admin mode
+      else if (lowerInput.includes("admin") || lowerInput.includes("dashboard")) {
+        setAppMode("admin")
+        response = "🔧 Switching to Admin Dashboard..."
+        confidence = 0.95
+      }
       // Help
       else if (lowerInput.includes("help")) {
         response = `🆘 **ZacAI Help**
@@ -172,6 +195,7 @@ Type "help" for assistance or "diagnostics" for detailed error information.`,
 **Available Commands:**
 • **status** - System status and diagnostics
 • **health** - Run health check
+• **admin** - Switch to admin dashboard
 • **help** - Show this help message
 • **my name is [name]** - Tell me your name
 • **[math expression]** - Calculate math (5+5, 10*2)
@@ -315,91 +339,209 @@ I'm currently running in ${loadingStage === "ready" ? "operational" : "basic"} m
     )
   }
 
-  // Main chat interface
+  // Main application
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <Card className="h-[600px] flex flex-col">
-          <CardHeader className="flex-shrink-0">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {getStatusIcon()}
-                <span>ZacAI Assistant</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={getStatusColor()}>{loadingStage}</Badge>
-                <Button variant="outline" size="sm" onClick={() => setShowDiagnostics(!showDiagnostics)}>
-                  Diagnostics
-                </Button>
-              </div>
-            </CardTitle>
-          </CardHeader>
+      <div className="max-w-6xl mx-auto">
+        <Tabs value={appMode} onValueChange={(value) => setAppMode(value as AppMode)}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="chat" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Chat
+            </TabsTrigger>
+            <TabsTrigger value="admin" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Admin
+            </TabsTrigger>
+          </TabsList>
 
-          {showDiagnostics && (
-            <div className="border-b p-4 bg-muted/50">
-              <ScrollArea className="h-32">
-                <div className="space-y-1">
-                  {loadingProgress.map((step, index) => (
-                    <div key={index} className="text-xs text-muted-foreground">
-                      {step}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-
-          <CardContent className="flex-1 flex flex-col">
-            <ScrollArea className="flex-1 mb-4">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
-                        message.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
-                      }`}
-                    >
-                      <div className="whitespace-pre-wrap">{message.content}</div>
-                      {message.confidence !== undefined && (
-                        <div className="text-xs mt-2 opacity-70">
-                          Confidence: {Math.round(message.confidence * 100)}%
-                        </div>
-                      )}
-                    </div>
+          {/* CHAT MODE */}
+          <TabsContent value="chat" className="mt-4">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader className="flex-shrink-0">
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon()}
+                    <span>ZacAI Assistant</span>
                   </div>
-                ))}
+                  <div className="flex items-center gap-2">
+                    <Badge variant={getStatusColor()}>{loadingStage}</Badge>
+                    <Button variant="outline" size="sm" onClick={() => setShowDiagnostics(!showDiagnostics)}>
+                      Diagnostics
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
 
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 p-3 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Processing...</span>
+              {showDiagnostics && (
+                <div className="border-b p-4 bg-muted/50">
+                  <ScrollArea className="h-32">
+                    <div className="space-y-1">
+                      {loadingProgress.map((step, index) => (
+                        <div key={index} className="text-xs text-muted-foreground">
+                          {step}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+
+              <CardContent className="flex-1 flex flex-col">
+                <ScrollArea className="flex-1 mb-4">
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                      >
+                        <div
+                          className={`max-w-[80%] p-3 rounded-lg ${
+                            message.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
+                          }`}
+                        >
+                          <div className="whitespace-pre-wrap">{message.content}</div>
+                          {message.confidence !== undefined && (
+                            <div className="text-xs mt-2 opacity-70">
+                              Confidence: {Math.round(message.confidence * 100)}%
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+
+                    {isLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-gray-100 p-3 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Processing...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+
+                <div className="flex space-x-2">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type your message... (try 'help', 'status', or 'admin')"
+                    disabled={isLoading}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
+                    Send
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ADMIN MODE */}
+          <TabsContent value="admin" className="mt-4">
+            <div className="grid gap-4">
+              {/* System Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="h-5 w-5" />
+                    System Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
+                      <Activity className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Status</p>
+                        <p className="font-bold">{loadingStage}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                      <MessageSquare className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Messages</p>
+                        <p className="font-bold">{messages.length}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg">
+                      <Database className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Storage</p>
+                        <p className="font-bold">{safeMode?.canUseFeature("enableStorage") ? "Enabled" : "Disabled"}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-orange-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Network</p>
+                        <p className="font-bold">
+                          {safeMode?.canUseFeature("enableNetworkRequests") ? "Online" : "Offline"}
+                        </p>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-            </ScrollArea>
+                </CardContent>
+              </Card>
 
-            <div className="flex space-x-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message... (try 'help' or 'status')"
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
-                Send
-              </Button>
+              {/* System Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {safeMode && (
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap">{safeMode.getSystemStatus()}</pre>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Health Report */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Health Report</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {safeMode && (
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap">{safeMode.getHealthReport()}</pre>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Loading Progress */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Log</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-64">
+                    <div className="space-y-1">
+                      {loadingProgress.map((step, index) => (
+                        <div key={index} className="text-sm text-muted-foreground font-mono">
+                          {step}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
