@@ -1,6 +1,7 @@
 import type React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
+import "./globals.css"
 
 interface LayoutProps {
   children: React.ReactNode
@@ -8,15 +9,16 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      {children}
-      <Toaster />
-    </ThemeProvider>
+    <html lang="en">
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </body>
+    </html>
   )
 }
-
-
-import './globals.css'
 
 export const metadata = {
       generator: 'v0.dev'
