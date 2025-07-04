@@ -1,97 +1,83 @@
-interface TeslaCalculation {
-  input: number
-  result: number
-  pattern: string
-  explanation: string
-  vortexPosition?: number
-}
-
-class TeslaMathCalculator {
-  private readonly TESLA_NUMBERS = [3, 6, 9]
-  private readonly VORTEX_SEQUENCE = [1, 2, 4, 8, 7, 5]
-
-  calculate(input: number): TeslaCalculation {
-    const digitalRoot = this.getDigitalRoot(input)
-    const vortexPosition = this.getVortexPosition(input)
-    const pattern = this.identifyPattern(digitalRoot)
+export class TeslaMathCalculator {
+  calculate(number: number): any {
+    const digitalRoot = this.getDigitalRoot(number)
+    const pattern = this.getTeslaPattern(digitalRoot)
 
     return {
-      input,
+      input: number,
       result: digitalRoot,
-      pattern,
-      explanation: this.generateExplanation(input, digitalRoot, pattern),
-      vortexPosition,
+      pattern: pattern,
+      explanation: this.getExplanation(digitalRoot),
     }
   }
 
   private getDigitalRoot(num: number): number {
-    if (num === 0) return 0
-    return 1 + ((Math.abs(num) - 1) % 9)
-  }
-
-  private getVortexPosition(num: number): number {
-    const digitalRoot = this.getDigitalRoot(num)
-    if (this.TESLA_NUMBERS.includes(digitalRoot)) {
-      return -1 // Tesla numbers are outside the vortex
+    while (num >= 10) {
+      num = num
+        .toString()
+        .split("")
+        .reduce((sum, digit) => sum + Number.parseInt(digit), 0)
     }
-    return this.VORTEX_SEQUENCE.indexOf(digitalRoot)
+    return num
   }
 
-  private identifyPattern(digitalRoot: number): string {
-    if (digitalRoot === 3) return "Divine Trinity - Creation"
-    if (digitalRoot === 6) return "Divine Duality - Balance"
-    if (digitalRoot === 9) return "Divine Unity - Completion"
-    if (this.VORTEX_SEQUENCE.includes(digitalRoot)) return "Vortex Energy"
+  private getTeslaPattern(digitalRoot: number): string {
+    if ([3, 6, 9].includes(digitalRoot)) {
+      return "Tesla Sacred Number"
+    } else if ([1, 2, 4, 8, 7, 5].includes(digitalRoot)) {
+      return "Vortex Cycle Number"
+    }
     return "Unknown Pattern"
   }
 
-  private generateExplanation(input: number, result: number, pattern: string): string {
-    let explanation = `${input} reduces to ${result} (${pattern}). `
-
-    if (this.TESLA_NUMBERS.includes(result)) {
-      explanation += `This is a Tesla number! Tesla believed ${result} held special significance in the universe.`
-    } else {
-      explanation += `This number flows through Tesla's vortex mathematics.`
+  private getExplanation(digitalRoot: number): string {
+    const explanations: { [key: number]: string } = {
+      1: "Beginning, unity, source energy",
+      2: "Duality, balance, partnership",
+      3: "Tesla sacred number - creativity and manifestation",
+      4: "Foundation, stability, material world",
+      5: "Change, freedom, adventure",
+      6: "Tesla sacred number - harmony and nurturing",
+      7: "Spirituality, introspection, mystery",
+      8: "Material success, power, achievement",
+      9: "Tesla sacred number - completion and universal love",
     }
-
-    return explanation
+    return explanations[digitalRoot] || "Unknown significance"
   }
 
-  analyzeSequence(numbers: number[]): {
-    sequence: TeslaCalculation[]
-    patterns: string[]
-    teslaCount: number
-  } {
-    const sequence = numbers.map((num) => this.calculate(num))
-    const patterns = [...new Set(sequence.map((calc) => calc.pattern))]
-    const teslaCount = sequence.filter((calc) => this.TESLA_NUMBERS.includes(calc.result)).length
+  getTeslaPattern(number: number): any {
+    const digitalRoot = this.getDigitalRoot(number)
+    const isTeslaNumber = [3, 6, 9].includes(digitalRoot)
 
-    return { sequence, patterns, teslaCount }
-  }
-
-  generateVortexSequence(length = 12): number[] {
-    const sequence: number[] = []
-    for (let i = 1; i <= length; i++) {
-      const digitalRoot = this.getDigitalRoot(i)
-      if (!this.TESLA_NUMBERS.includes(digitalRoot)) {
-        sequence.push(digitalRoot)
-      }
-    }
-    return sequence
-  }
-
-  isTeslaNumber(num: number): boolean {
-    const digitalRoot = this.getDigitalRoot(num)
-    return this.TESLA_NUMBERS.includes(digitalRoot)
-  }
-
-  getVortexFlow(): { vortex: number[]; tesla: number[] } {
     return {
-      vortex: this.VORTEX_SEQUENCE,
-      tesla: this.TESLA_NUMBERS,
+      digitalRoot,
+      type: isTeslaNumber ? "Tesla Sacred" : "Vortex Cycle",
+      significance: this.getExplanation(digitalRoot),
+      analysis: `The number ${number} reduces to ${digitalRoot}, which is ${isTeslaNumber ? "one of Tesla's sacred numbers" : "part of the vortex cycle"}.`,
+      steps: this.getCalculationSteps(number),
+      isTeslaNumber,
     }
+  }
+
+  private getCalculationSteps(number: number): string[] {
+    const steps: string[] = []
+    let current = number
+
+    steps.push(`Starting with: ${current}`)
+
+    while (current >= 10) {
+      const digits = current
+        .toString()
+        .split("")
+        .map((d) => Number.parseInt(d))
+      const sum = digits.reduce((a, b) => a + b, 0)
+      steps.push(`${digits.join(" + ")} = ${sum}`)
+      current = sum
+    }
+
+    steps.push(`Final digital root: ${current}`)
+    return steps
   }
 }
 
-export const teslaMath = new TeslaMathCalculator()
-export type { TeslaCalculation }
+export const teslaMathCalculator = new TeslaMathCalculator()

@@ -1,152 +1,105 @@
-interface MemoryEntry {
-  key: string
-  value: any
-  type: "personal" | "preference" | "learning" | "context"
-  confidence: number
-  timestamp: number
-  context?: string
-  expiresAt?: number
-}
-
 class UserMemory {
-  private memoryKey = "zacai_user_memory"
-  private memory: Map<string, MemoryEntry> = new Map()
-  private initialized = false
+  private memories: Map<string, any> = new Map()
+  private personalInfo: Map<string, any> = new Map()
 
   async initialize(): Promise<void> {
-    if (this.initialized) return
-
-    try {
-      const stored = localStorage.getItem(this.memoryKey)
-      if (stored) {
-        const data = JSON.parse(stored)
-        Object.entries(data).forEach(([key, entry]) => {
-          this.memory.set(key, entry as MemoryEntry)
-        })
-      }
-      this.initialized = true
-      console.log("🧠 User Memory initialized with", this.memory.size, "entries")
-    } catch (error) {
-      console.error("Failed to initialize user memory:", error)
-    }
+    this.loadFromStorage()
   }
 
-  store(key: string, value: any, type: MemoryEntry["type"] = "context", confidence = 1.0, context?: string): void {
-    const entry: MemoryEntry = {
+  store(key: string, value: any, category = "general", confidence = 0.8, context?: string): void {
+    const memory = {
       key,
       value,
-      type,
+      category,
       confidence,
-      timestamp: Date.now(),
       context,
+      timestamp: Date.now(),
     }
 
-    this.memory.set(key, entry)
-    this.persist()
-    console.log(`🧠 Stored memory: ${key} = ${value}`)
+    this.memories.set(key, memory)
+
+    if (category === "personal") {
+      this.personalInfo.set(key, value)
+    }
+
+    this.saveToStorage()
   }
 
-  retrieve(key: string): MemoryEntry | null {
-    return this.memory.get(key) || null
+  retrieve(key: string): any {
+    return this.memories.get(key)
   }
 
-  search(query: string): MemoryEntry[] {
-    const results: MemoryEntry[] = []
-    const lowerQuery = query.toLowerCase()
-
-    this.memory.forEach((entry) => {
-      if (
-        entry.key.toLowerCase().includes(lowerQuery) ||
-        String(entry.value).toLowerCase().includes(lowerQuery) ||
-        entry.context?.toLowerCase().includes(lowerQuery)
-      ) {
-        results.push(entry)
-      }
+  getPersonalInfo(): any {
+    const info: any = {}
+    this.personalInfo.forEach((value, key) => {
+      info[key] = value
     })
-
-    return results.sort((a, b) => b.confidence - a.confidence)
+    return info
   }
 
-  getPersonalInfo(): { [key: string]: any } {
-    const personal: { [key: string]: any } = {}
-    this.memory.forEach((entry) => {
-      if (entry.type === "personal") {
-        personal[entry.key] = entry.value
-      }
-    })
-    return personal
-  }
-
-  extractPersonalInfo(): { [key: string]: any } {
-    const personal: { [key: string]: any } = {}
-    this.memory.forEach((entry) => {
-      if (entry.type === "personal") {
-        personal[entry.key] = entry.value
-      }
-    })
-    return personal
+  extractPersonalInfo(message: string): void {
+    const nameMatch = message.match(/(?:my name is|i'm|i am|call me)\s+(\w+)/i)
+    if (nameMatch) {
+      this.store("name", nameMatch[1], "personal", 0.95, "User introduction")
+    }
   }
 
   getPersonalSummary(): string {
-    const personalInfo = this.extractPersonalInfo()
-    const keys = Object.keys(personalInfo)
-
-    if (keys.length === 0) {
-      return "No personal information stored yet."
+    if (this.personalInfo.size === 0) {
+      return "I don't have any personal information about you yet. Tell me about yourself!"
     }
 
-    const summary = keys
-      .map((key) => {
-        const value = personalInfo[key]
-        return `${key}: ${value}`
-      })
-      .join(", ")
+    let summary = "Here's what I remember about you:\n\n"
+    this.personalInfo.forEach((value, key) => {
+      summary += `• **${key}**: ${value}\n`
+    })
 
-    return `Personal info: ${summary}`
-  }
-
-  private persist(): void {
-    try {
-      const data: { [key: string]: MemoryEntry } = {}
-      this.memory.forEach((entry, key) => {
-        data[key] = entry
-      })
-      localStorage.setItem(this.memoryKey, JSON.stringify(data))
-    } catch (error) {
-      console.error("Failed to persist user memory:", error)
-    }
-  }
-
-  clear(): void {
-    this.memory.clear()
-    localStorage.removeItem(this.memoryKey)
+    return summary
   }
 
   getStats(): any {
-    const stats = {
-      totalEntries: this.memory.size,
-      byType: {} as { [key: string]: number },
-      averageConfidence: 0,
-      oldestEntry: 0,
-      newestEntry: 0,
+    return {
+      totalEntries: this.memories.size,
+      personalEntries: this.personalInfo.size,
+      categories: this.getCategories(),
     }
+  }
 
-    let totalConfidence = 0
-    let oldest = Date.now()
-    let newest = 0
-
-    this.memory.forEach((entry) => {
-      stats.byType[entry.type] = (stats.byType[entry.type] || 0) + 1
-      totalConfidence += entry.confidence
-      if (entry.timestamp < oldest) oldest = entry.timestamp
-      if (entry.timestamp > newest) newest = entry.timestamp
+  private getCategories(): string[] {
+    const categories = new Set<string>()
+    this.memories.forEach((memory) => {
+      categories.add(memory.category)
     })
+    return Array.from(categories)
+  }
 
-    stats.averageConfidence = this.memory.size > 0 ? totalConfidence / this.memory.size : 0
-    stats.oldestEntry = oldest
-    stats.newestEntry = newest
+  private loadFromStorage(): void {
+    try {
+      const stored = localStorage.getItem("zacai_user_memory")
+      if (stored) {
+        const data = JSON.parse(stored)
+        data.memories?.forEach((memory: any) => {
+          this.memories.set(memory.key, memory)
+        })
+        data.personalInfo?.forEach((info: any) => {
+          this.personalInfo.set(info.key, info.value)
+        })
+      }
+    } catch (error) {
+      console.warn("Failed to load user memory:", error)
+    }
+  }
 
-    return stats
+  private saveToStorage(): void {
+    try {
+      const data = {
+        memories: Array.from(this.memories.values()),
+        personalInfo: Array.from(this.personalInfo.entries()).map(([key, value]) => ({ key, value })),
+      }
+      localStorage.setItem("zacai_user_memory", JSON.stringify(data))
+    } catch (error) {
+      console.warn("Failed to save user memory:", error)
+    }
   }
 }
 

@@ -1,120 +1,57 @@
-interface DictionaryEntry {
-  word: string
-  phonetic?: string
-  phonetics?: Array<{
-    text?: string
-    audio?: string
-  }>
-  meanings: Array<{
-    partOfSpeech: string
-    definitions: Array<{
-      definition: string
-      example?: string
-      synonyms?: string[]
-      antonyms?: string[]
-    }>
-  }>
-  origin?: string
-}
-
-interface DictionaryCache {
-  [word: string]: {
-    data: DictionaryEntry[]
-    timestamp: number
-    expires: number
-  }
-}
-
-class DictionaryAPIClient {
-  private cache: DictionaryCache = {}
-  private readonly CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
-  private readonly API_BASE = "https://api.dictionaryapi.dev/api/v2/entries/en"
-
-  async lookup(word: string): Promise<DictionaryEntry[]> {
-    const normalizedWord = word.toLowerCase().trim()
-
-    // Check cache first
-    const cached = this.cache[normalizedWord]
-    if (cached && Date.now() < cached.expires) {
-      console.log(`📖 Dictionary cache hit for: ${word}`)
-      return cached.data
-    }
-
-    try {
-      console.log(`📖 Fetching dictionary data for: ${word}`)
-      const response = await fetch(`${this.API_BASE}/${encodeURIComponent(normalizedWord)}`)
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error(`Word "${word}" not found in dictionary`)
-        }
-        throw new Error(`Dictionary API error: ${response.status}`)
-      }
-
-      const data: DictionaryEntry[] = await response.json()
-
-      // Cache the result
-      this.cache[normalizedWord] = {
-        data,
-        timestamp: Date.now(),
-        expires: Date.now() + this.CACHE_DURATION,
-      }
-
-      return data
-    } catch (error) {
-      console.error("Dictionary lookup failed:", error)
-      throw error
-    }
-  }
+export class DictionaryAPI {
+  private cache: Map<string, any> = new Map()
+  private baseUrl = "https://api.dictionaryapi.dev/api/v2/entries/en"
 
   async getDefinition(word: string): Promise<string> {
-    try {
-      const entries = await this.lookup(word)
-      if (entries.length === 0) return `No definition found for "${word}"`
-
-      const firstMeaning = entries[0].meanings[0]
-      const firstDefinition = firstMeaning?.definitions[0]
-
-      return firstDefinition?.definition || `No definition available for "${word}"`
-    } catch (error) {
-      return `Could not find definition for "${word}"`
+    if (this.cache.has(word)) {
+      return this.cache.get(word).definition
     }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/${word}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data && data.length > 0) {
+          const entry = data[0]
+          const meaning = entry.meanings?.[0]
+          const definition = meaning?.definitions?.[0]?.definition || "Definition found"
+
+          this.cache.set(word, { definition, timestamp: Date.now() })
+          return definition
+        }
+      }
+    } catch (error) {
+      console.warn("Dictionary API failed:", error)
+    }
+
+    throw new Error("Word not found")
   }
 
   async getPhonetic(word: string): Promise<string> {
     try {
-      const entries = await this.lookup(word)
-      if (entries.length === 0) return ""
-
-      return entries[0].phonetic || entries[0].phonetics?.[0]?.text || ""
+      const response = await fetch(`${this.baseUrl}/${word}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data && data.length > 0) {
+          return data[0].phonetic || ""
+        }
+      }
     } catch (error) {
-      return ""
+      console.warn("Phonetic lookup failed:", error)
     }
+    return ""
   }
 
   getCacheSize(): number {
-    return Object.keys(this.cache).length
+    return this.cache.size
   }
 
-  clearCache(): void {
-    this.cache = {}
-    console.log("📖 Dictionary cache cleared")
-  }
-
-  getCacheStats(): { size: number; oldestEntry: number; newestEntry: number } {
-    const entries = Object.values(this.cache)
-    if (entries.length === 0) {
-      return { size: 0, oldestEntry: 0, newestEntry: 0 }
-    }
-
-    const timestamps = entries.map((entry) => entry.timestamp)
+  getCacheStats(): any {
     return {
-      size: entries.length,
-      oldestEntry: Math.min(...timestamps),
-      newestEntry: Math.max(...timestamps),
+      size: this.cache.size,
+      words: Array.from(this.cache.keys()),
     }
   }
 }
 
-export const dictionaryAPI = new DictionaryAPIClient()
-export type { DictionaryEntry }
+export const dictionaryAPI = new DictionaryAPI()
