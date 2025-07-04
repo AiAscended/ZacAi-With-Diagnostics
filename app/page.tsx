@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -22,13 +23,10 @@ type LoadingStage = "initializing" | "ready" | "error"
 type AppMode = "chat" | "admin"
 
 export default function Home() {
-  // Core state
   const [appMode, setAppMode] = useState<AppMode>("chat")
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-
-  // System state
   const [loadingStage, setLoadingStage] = useState<LoadingStage>("initializing")
   const [loadingProgress, setLoadingProgress] = useState<string[]>([])
 
@@ -44,26 +42,23 @@ export default function Home() {
     try {
       addLoadingStep("🚀 Starting ZacAI System...")
 
-      // Simulate system initialization
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 300))
       addLoadingStep("✅ Core systems loaded")
 
-      await new Promise((resolve) => setTimeout(resolve, 300))
+      await new Promise((resolve) => setTimeout(resolve, 200))
       addLoadingStep("📦 Modules initialized")
 
-      await new Promise((resolve) => setTimeout(resolve, 200))
+      await new Promise((resolve) => setTimeout(resolve, 100))
       addLoadingStep("🎉 System ready!")
 
       setLoadingStage("ready")
 
-      // Add welcome message
       const welcomeMessage: Message = {
         id: "welcome",
-        content: `🎉 **ZacAI System Online!**
+        content: `🎉 ZacAI System Online!
 
 I'm your AI assistant, ready to help with:
 
-**Available Commands:**
 • Basic chat and responses
 • Simple math calculations (5+5)
 • Name recognition (my name is...)
@@ -78,7 +73,7 @@ What would you like to do?`,
 
       setMessages([welcomeMessage])
     } catch (error) {
-      console.error("❌ System initialization failed:", error)
+      console.error("System initialization failed:", error)
       addLoadingStep(`❌ Error: ${error}`)
       setLoadingStage("error")
     }
@@ -103,32 +98,27 @@ What would you like to do?`,
       let confidence = 0.8
       const lowerInput = input.toLowerCase()
 
-      // Admin mode
       if (lowerInput.includes("admin") || lowerInput.includes("dashboard")) {
         setAppMode("admin")
         response = "🔧 Switching to Admin Dashboard..."
         confidence = 0.95
-      }
-      // Help
-      else if (lowerInput.includes("help")) {
-        response = `🆘 **ZacAI Help**
+      } else if (lowerInput.includes("help")) {
+        response = `🆘 ZacAI Help
 
-**Available Commands:**
-• **help** - Show this help message
-• **admin** - Switch to admin dashboard
-• **my name is [name]** - Tell me your name
-• **[math expression]** - Calculate math (5+5, 10*2)
-• **hello/hi** - Greetings
-• **status** - System information
+Available Commands:
+• help - Show this help message
+• admin - Switch to admin dashboard
+• my name is [name] - Tell me your name
+• [math expression] - Calculate math (5+5, 10*2)
+• hello/hi - Greetings
+• status - System information
 
 I'm ready to assist you!`
         confidence = 0.95
-      }
-      // Basic math
-      else if (/^\d+[\s]*[+\-*/][\s]*\d+$/.test(input.replace(/\s/g, ""))) {
+      } else if (/^\d+[\s]*[+\-*/][\s]*\d+$/.test(input.replace(/\s/g, ""))) {
         try {
           const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
-          response = `🧮 **${input} = ${result}**
+          response = `🧮 ${input} = ${result}
 
 Calculation completed successfully!`
           confidence = 0.95
@@ -136,9 +126,7 @@ Calculation completed successfully!`
           response = "❌ I couldn't calculate that. Please check your math expression."
           confidence = 0.3
         }
-      }
-      // Name recognition
-      else if (lowerInput.includes("my name is")) {
+      } else if (lowerInput.includes("my name is")) {
         const nameMatch = input.match(/my name is (\w+)/i)
         if (nameMatch) {
           const name = nameMatch[1]
@@ -146,30 +134,24 @@ Calculation completed successfully!`
           response = `👋 Nice to meet you, ${name}! I'll remember your name for this session.`
           confidence = 0.95
         }
-      }
-      // Status
-      else if (lowerInput.includes("status")) {
+      } else if (lowerInput.includes("status")) {
         const userName = localStorage.getItem("zacai_user_name")
-        response = `📊 **System Status**
+        response = `📊 System Status
 
-• **Status**: Online and operational
-• **User**: ${userName || "Anonymous"}
-• **Session**: Active
-• **Features**: All systems functional
+• Status: Online and operational
+• User: ${userName || "Anonymous"}
+• Session: Active
+• Features: All systems functional
 
 Everything is working perfectly!`
         confidence = 0.95
-      }
-      // Greetings
-      else if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
+      } else if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
         const userName = localStorage.getItem("zacai_user_name")
         response = `👋 Hello${userName ? ` ${userName}` : ""}! I'm ZacAI, your AI assistant.
 
 I'm ready to help you with various tasks. Type "help" to see what I can do!`
         confidence = 0.9
-      }
-      // Default response
-      else {
+      } else {
         response = `I received your message: "${input}"
 
 I'm here to help! Type "help" to see available commands, or just chat with me naturally.`
@@ -186,7 +168,7 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
 
       setMessages((prev) => [...prev, aiMessage])
     } catch (error) {
-      console.error("❌ Message processing error:", error)
+      console.error("Message processing error:", error)
 
       const errorMessage: Message = {
         id: `error_${Date.now()}`,
@@ -209,29 +191,6 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
     }
   }
 
-  const getStatusIcon = () => {
-    switch (loadingStage) {
-      case "ready":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case "error":
-        return <XCircle className="h-4 w-4 text-red-500" />
-      default:
-        return <Loader2 className="h-4 w-4 animate-spin" />
-    }
-  }
-
-  const getStatusColor = () => {
-    switch (loadingStage) {
-      case "ready":
-        return "default"
-      case "error":
-        return "destructive"
-      default:
-        return "secondary"
-    }
-  }
-
-  // Loading screen
   if (loadingStage === "initializing") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -268,7 +227,6 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
     )
   }
 
-  // Error state
   if (loadingStage === "error") {
     return (
       <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
@@ -292,15 +250,12 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
     )
   }
 
-  // Admin mode
   if (appMode === "admin") {
     return <AdminDashboardV2 onToggleChat={() => setAppMode("chat")} />
   }
 
-  // Chat mode - Main interface
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
@@ -311,7 +266,7 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
               <div>
                 <h1 className="text-xl font-bold text-gray-900">ZacAI</h1>
                 <div className="flex items-center gap-2">
-                  {getStatusIcon()}
+                  <CheckCircle className="h-4 w-4 text-green-500" />
                   <span className="text-sm text-gray-600">Online</span>
                 </div>
               </div>
@@ -324,10 +279,8 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
         </div>
       </div>
 
-      {/* Chat Interface */}
       <div className="max-w-4xl mx-auto p-4">
         <Card className="h-[calc(100vh-200px)] flex flex-col">
-          {/* Messages */}
           <CardContent className="flex-1 p-0">
             <ScrollArea className="h-full p-4">
               <div className="space-y-4">
@@ -347,19 +300,7 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
                         message.sender === "user" ? "bg-blue-600 text-white" : "bg-white border shadow-sm"
                       }`}
                     >
-                      <div className="prose prose-sm max-w-none">
-                        {message.content.split("\n").map((line, index) => (
-                          <div key={index}>
-                            {line.startsWith("**") && line.endsWith("**") ? (
-                              <strong>{line.slice(2, -2)}</strong>
-                            ) : line.startsWith("• ") ? (
-                              <div className="ml-4">• {line.slice(2)}</div>
-                            ) : (
-                              line
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                      <div className="whitespace-pre-wrap">{message.content}</div>
 
                       <div className="flex items-center justify-between mt-2 text-xs opacity-70">
                         <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
@@ -392,7 +333,6 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
             </ScrollArea>
           </CardContent>
 
-          {/* Input */}
           <div className="border-t p-4">
             <div className="flex gap-2">
               <Textarea

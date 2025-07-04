@@ -29,7 +29,6 @@ interface AdminDashboardProps {
 export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview")
 
-  // Mock data for demonstration
   const systemStats = {
     totalUsers: 1,
     activeChats: 1,
@@ -85,7 +84,6 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -106,7 +104,6 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
@@ -119,7 +116,6 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardContent className="p-6">
@@ -170,7 +166,6 @@ export default function AdminDashboardV2({ onToggleChat }: AdminDashboardProps) 
               </Card>
             </div>
 
-            {/* Recent Activity */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
