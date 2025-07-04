@@ -352,10 +352,7 @@
       "partOfSpeech": "noun",
       "phonetics": "/tekˈnɒlədʒi/",
       "frequency": 5,
-      "examples": [
-        "Technology has transformed how we communicate",
-        "The latest technology makes tasks more efficient"
-      ],
+      "examples": ["Technology has transformed how we communicate", "The latest technology makes tasks more efficient"],
       "synonyms": ["innovation", "advancement", "engineering"],
       "difficulty": 2
     },
@@ -394,10 +391,7 @@
     "knowledge": {
       "definition": "Facts, information, and skills acquired through experience or education",
       "partOfSpeech": "noun",
-      "examples": [
-        "Knowledge is power",
-        "She has extensive knowledge of ancient history"
-      ],
+      "examples": ["Knowledge is power", "She has extensive knowledge of ancient history"],
       "synonyms": ["information", "understanding", "wisdom", "learning"],
       "antonyms": ["ignorance", "inexperience"],
       "difficulty": 2,
@@ -406,10 +400,7 @@
     "learning": {
       "definition": "The acquisition of knowledge or skills through study, experience, or being taught",
       "partOfSpeech": "noun",
-      "examples": [
-        "Learning is a lifelong process",
-        "Machine learning enables computers to improve automatically"
-      ],
+      "examples": ["Learning is a lifelong process", "Machine learning enables computers to improve automatically"],
       "synonyms": ["education", "study", "training"],
       "difficulty": 2,
       "frequency": 5
@@ -417,10 +408,7 @@
     "education": {
       "definition": "The process of receiving or giving systematic instruction",
       "partOfSpeech": "noun",
-      "examples": [
-        "Education is the foundation of progress",
-        "She received her education at Harvard University"
-      ],
+      "examples": ["Education is the foundation of progress", "She received her education at Harvard University"],
       "synonyms": ["schooling", "teaching", "instruction", "learning"],
       "difficulty": 2,
       "frequency": 5
@@ -428,10 +416,7 @@
     "experience": {
       "definition": "Practical contact with and observation of facts or events",
       "partOfSpeech": "noun",
-      "examples": [
-        "Experience is the best teacher",
-        "She has years of experience in marketing"
-      ],
+      "examples": ["Experience is the best teacher", "She has years of experience in marketing"],
       "synonyms": ["knowledge", "practice", "exposure"],
       "difficulty": 2,
       "frequency": 5
@@ -439,10 +424,7 @@
     "understanding": {
       "definition": "The ability to understand something; comprehension",
       "partOfSpeech": "noun",
-      "examples": [
-        "His understanding of physics is impressive",
-        "We need better understanding between cultures"
-      ],
+      "examples": ["His understanding of physics is impressive", "We need better understanding between cultures"],
       "synonyms": ["comprehension", "grasp", "knowledge"],
       "antonyms": ["confusion", "misunderstanding"],
       "difficulty": 2,
@@ -451,10 +433,7 @@
     "wisdom": {
       "definition": "The quality of having experience, knowledge, and good judgment",
       "partOfSpeech": "noun",
-      "examples": [
-        "With age comes wisdom",
-        "Ancient wisdom still applies today"
-      ],
+      "examples": ["With age comes wisdom", "Ancient wisdom still applies today"],
       "synonyms": ["knowledge", "insight", "understanding"],
       "antonyms": ["foolishness", "ignorance"],
       "difficulty": 3,
@@ -463,10 +442,7 @@
     "creativity": {
       "definition": "The use of imagination or original ideas to create something",
       "partOfSpeech": "noun",
-      "examples": [
-        "Creativity is essential in art and design",
-        "The project required a lot of creativity"
-      ],
+      "examples": ["Creativity is essential in art and design", "The project required a lot of creativity"],
       "synonyms": ["imagination", "innovation", "originality"],
       "antonyms": ["conformity", "conventionality"],
       "difficulty": 3,
@@ -475,10 +451,7 @@
     "innovation": {
       "definition": "The action or process of innovating; a new method, idea, or product",
       "partOfSpeech": "noun",
-      "examples": [
-        "Innovation drives technological progress",
-        "The company is known for its innovation"
-      ],
+      "examples": ["Innovation drives technological progress", "The company is known for its innovation"],
       "synonyms": ["invention", "creativity", "novelty"],
       "antonyms": ["tradition", "convention"],
       "difficulty": 3,
@@ -509,10 +482,7 @@
     "research": {
       "definition": "The systematic investigation into and study of materials and sources",
       "partOfSpeech": "noun",
-      "examples": [
-        "Medical research has led to many breakthroughs",
-        "She conducts research on climate change"
-      ],
+      "examples": ["Medical research has led to many breakthroughs", "She conducts research on climate change"],
       "synonyms": ["investigation", "study", "analysis"],
       "difficulty": 3,
       "frequency": 4
@@ -520,10 +490,7 @@
     "analysis": {
       "definition": "Detailed examination of the elements or structure of something",
       "partOfSpeech": "noun",
-      "examples": [
-        "The analysis revealed interesting patterns",
-        "Data analysis is crucial for business decisions"
-      ],
+      "examples": ["The analysis revealed interesting patterns", "Data analysis is crucial for business decisions"],
       "synonyms": ["examination", "study", "investigation"],
       "difficulty": 3,
       "frequency": 4
@@ -554,10 +521,7 @@
     "theory": {
       "definition": "A supposition or system of ideas intended to explain something",
       "partOfSpeech": "noun",
-      "examples": [
-        "Einstein's theory of relativity changed physics",
-        "The theory explains the observed phenomena"
-      ],
+      "examples": ["Einstein's theory of relativity changed physics", "The theory explains the observed phenomena"],
       "synonyms": ["hypothesis", "principle", "concept"],
       "antonyms": ["practice", "fact"],
       "difficulty": 3,
@@ -577,10 +541,7 @@
     "concept": {
       "definition": "An abstract idea or general notion",
       "partOfSpeech": "noun",
-      "examples": [
-        "The concept of time is difficult to define",
-        "She explained the concept clearly"
-      ],
+      "examples": ["The concept of time is difficult to define", "She explained the concept clearly"],
       "synonyms": ["idea", "notion", "principle"],
       "difficulty": 3,
       "frequency": 4
@@ -588,10 +549,7 @@
     "idea": {
       "definition": "A thought or suggestion as to a possible course of action",
       "partOfSpeech": "noun",
-      "examples": [
-        "That's a brilliant idea!",
-        "The idea came to him suddenly"
-      ],
+      "examples": ["That's a brilliant idea!", "The idea came to him suddenly"],
       "synonyms": ["thought", "concept", "notion"],
       "difficulty": 2,
       "frequency": 5
@@ -599,10 +557,7 @@
     "thought": {
       "definition": "An idea or opinion produced by thinking",
       "partOfSpeech": "noun",
-      "examples": [
-        "Deep thought is required for this problem",
-        "What are your thoughts on this matter?"
-      ],
+      "examples": ["Deep thought is required for this problem", "What are your thoughts on this matter?"],
       "synonyms": ["idea", "notion", "concept"],
       "difficulty": 2,
       "frequency": 5
@@ -610,10 +565,7 @@
     "thinking": {
       "definition": "The process of using one's mind to consider or reason about something",
       "partOfSpeech": "noun",
-      "examples": [
-        "Critical thinking is an important skill",
-        "His thinking on this issue has evolved"
-      ],
+      "examples": ["Critical thinking is an important skill", "His thinking on this issue has evolved"],
       "synonyms": ["reasoning", "contemplation", "reflection"],
       "difficulty": 2,
       "frequency": 4
@@ -621,10 +573,7 @@
     "reasoning": {
       "definition": "The action of thinking about something in a logical, sensible way",
       "partOfSpeech": "noun",
-      "examples": [
-        "His reasoning was flawed",
-        "Mathematical reasoning requires precision"
-      ],
+      "examples": ["His reasoning was flawed", "Mathematical reasoning requires precision"],
       "synonyms": ["logic", "thinking", "analysis"],
       "difficulty": 3,
       "frequency": 3
@@ -632,10 +581,7 @@
     "logic": {
       "definition": "Reasoning conducted or assessed according to strict principles of validity",
       "partOfSpeech": "noun",
-      "examples": [
-        "There's no logic in his argument",
-        "Computer logic gates process information"
-      ],
+      "examples": ["There's no logic in his argument", "Computer logic gates process information"],
       "synonyms": ["reasoning", "rationality", "sense"],
       "antonyms": ["illogic", "irrationality"],
       "difficulty": 3,
@@ -644,10 +590,7 @@
     "rational": {
       "definition": "Based on or in accordance with reason or logic",
       "partOfSpeech": "adjective",
-      "examples": [
-        "We need a rational approach to this problem",
-        "His decision was perfectly rational"
-      ],
+      "examples": ["We need a rational approach to this problem", "His decision was perfectly rational"],
       "synonyms": ["logical", "reasonable", "sensible"],
       "antonyms": ["irrational", "illogical"],
       "difficulty": 3,
@@ -656,10 +599,7 @@
     "reasonable": {
       "definition": "Having sound judgment; fair and sensible",
       "partOfSpeech": "adjective",
-      "examples": [
-        "That's a reasonable request",
-        "She's a very reasonable person"
-      ],
+      "examples": ["That's a reasonable request", "She's a very reasonable person"],
       "synonyms": ["rational", "sensible", "logical"],
       "antonyms": ["unreasonable", "irrational"],
       "difficulty": 2,
@@ -668,10 +608,7 @@
     "sensible": {
       "definition": "Chosen in accordance with wisdom or prudence; likely to be of benefit",
       "partOfSpeech": "adjective",
-      "examples": [
-        "It would be sensible to save money",
-        "She made a sensible decision"
-      ],
+      "examples": ["It would be sensible to save money", "She made a sensible decision"],
       "synonyms": ["reasonable", "practical", "wise"],
       "antonyms": ["foolish", "impractical"],
       "difficulty": 2,
@@ -680,10 +617,7 @@
     "practical": {
       "definition": "Of or concerned with the actual doing or use of something rather than with theory",
       "partOfSpeech": "adjective",
-      "examples": [
-        "We need practical solutions to these problems",
-        "She has practical experience in engineering"
-      ],
+      "examples": ["We need practical solutions to these problems", "She has practical experience in engineering"],
       "synonyms": ["applied", "useful", "functional"],
       "antonyms": ["theoretical", "impractical"],
       "difficulty": 2,
@@ -692,10 +626,7 @@
     "useful": {
       "definition": "Able to be used for a practical purpose or in several ways",
       "partOfSpeech": "adjective",
-      "examples": [
-        "This tool is very useful",
-        "The information was useful for our research"
-      ],
+      "examples": ["This tool is very useful", "The information was useful for our research"],
       "synonyms": ["helpful", "beneficial", "valuable"],
       "antonyms": ["useless", "worthless"],
       "difficulty": 2,
@@ -704,10 +635,7 @@
     "helpful": {
       "definition": "Giving or ready to give help",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The staff were very helpful",
-        "Your advice was really helpful"
-      ],
+      "examples": ["The staff were very helpful", "Your advice was really helpful"],
       "synonyms": ["useful", "beneficial", "supportive"],
       "antonyms": ["unhelpful", "harmful"],
       "difficulty": 2,
@@ -716,10 +644,7 @@
     "beneficial": {
       "definition": "Resulting in good; favorable or advantageous",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Exercise is beneficial for health",
-        "The changes were beneficial to the company"
-      ],
+      "examples": ["Exercise is beneficial for health", "The changes were beneficial to the company"],
       "synonyms": ["helpful", "advantageous", "positive"],
       "antonyms": ["harmful", "detrimental"],
       "difficulty": 3,
@@ -728,10 +653,7 @@
     "advantageous": {
       "definition": "Involving or creating favorable circumstances that increase the chances of success",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The location is advantageous for business",
-        "It would be advantageous to start early"
-      ],
+      "examples": ["The location is advantageous for business", "It would be advantageous to start early"],
       "synonyms": ["beneficial", "favorable", "profitable"],
       "antonyms": ["disadvantageous", "harmful"],
       "difficulty": 3,
@@ -740,10 +662,7 @@
     "favorable": {
       "definition": "Expressing approval or giving consent",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The reviews were favorable",
-        "Weather conditions are favorable for sailing"
-      ],
+      "examples": ["The reviews were favorable", "Weather conditions are favorable for sailing"],
       "synonyms": ["positive", "good", "advantageous"],
       "antonyms": ["unfavorable", "negative"],
       "difficulty": 3,
@@ -752,10 +671,7 @@
     "positive": {
       "definition": "Consisting in or characterized by the presence or possession of features or qualities",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She has a positive attitude",
-        "The test results were positive"
-      ],
+      "examples": ["She has a positive attitude", "The test results were positive"],
       "synonyms": ["good", "favorable", "optimistic"],
       "antonyms": ["negative", "pessimistic"],
       "difficulty": 2,
@@ -764,10 +680,7 @@
     "negative": {
       "definition": "Consisting in or characterized by the absence rather than the presence of distinguishing features",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The feedback was mostly negative",
-        "He has a negative attitude"
-      ],
+      "examples": ["The feedback was mostly negative", "He has a negative attitude"],
       "synonyms": ["bad", "unfavorable", "pessimistic"],
       "antonyms": ["positive", "optimistic"],
       "difficulty": 2,
@@ -776,10 +689,7 @@
     "optimistic": {
       "definition": "Hopeful and confident about the future",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's optimistic about her chances",
-        "The forecast is optimistic"
-      ],
+      "examples": ["She's optimistic about her chances", "The forecast is optimistic"],
       "synonyms": ["hopeful", "positive", "confident"],
       "antonyms": ["pessimistic", "negative"],
       "difficulty": 3,
@@ -788,10 +698,7 @@
     "pessimistic": {
       "definition": "Tending to see the worst aspect of things or believe that the worst will happen",
       "partOfSpeech": "adjective",
-      "examples": [
-        "He's pessimistic about the economy",
-        "Don't be so pessimistic"
-      ],
+      "examples": ["He's pessimistic about the economy", "Don't be so pessimistic"],
       "synonyms": ["negative", "gloomy", "cynical"],
       "antonyms": ["optimistic", "positive"],
       "difficulty": 3,
@@ -800,10 +707,7 @@
     "confident": {
       "definition": "Feeling or showing confidence in oneself; self-assured",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's confident in her abilities",
-        "He gave a confident presentation"
-      ],
+      "examples": ["She's confident in her abilities", "He gave a confident presentation"],
       "synonyms": ["assured", "self-assured", "certain"],
       "antonyms": ["uncertain", "insecure"],
       "difficulty": 2,
@@ -812,10 +716,7 @@
     "certain": {
       "definition": "Known for sure; established beyond doubt",
       "partOfSpeech": "adjective",
-      "examples": [
-        "I'm certain this is correct",
-        "It's certain to rain today"
-      ],
+      "examples": ["I'm certain this is correct", "It's certain to rain today"],
       "synonyms": ["sure", "definite", "confident"],
       "antonyms": ["uncertain", "doubtful"],
       "difficulty": 2,
@@ -824,10 +725,7 @@
     "sure": {
       "definition": "Completely confident that one is right",
       "partOfSpeech": "adjective",
-      "examples": [
-        "I'm sure this is the right way",
-        "Are you sure about that?"
-      ],
+      "examples": ["I'm sure this is the right way", "Are you sure about that?"],
       "synonyms": ["certain", "confident", "definite"],
       "antonyms": ["unsure", "uncertain"],
       "difficulty": 1,
@@ -836,10 +734,7 @@
     "definite": {
       "definition": "Clearly stated or decided; not vague or doubtful",
       "partOfSpeech": "adjective",
-      "examples": [
-        "We need a definite answer",
-        "There's a definite improvement"
-      ],
+      "examples": ["We need a definite answer", "There's a definite improvement"],
       "synonyms": ["certain", "clear", "specific"],
       "antonyms": ["indefinite", "vague"],
       "difficulty": 3,
@@ -848,10 +743,7 @@
     "clear": {
       "definition": "Easy to perceive, understand, or interpret; not confused or doubtful",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The instructions are clear",
-        "It's clear that we need to change"
-      ],
+      "examples": ["The instructions are clear", "It's clear that we need to change"],
       "synonyms": ["obvious", "evident", "plain"],
       "antonyms": ["unclear", "confusing"],
       "difficulty": 2,
@@ -860,10 +752,7 @@
     "obvious": {
       "definition": "Easily perceived or understood; clear, self-evident, or apparent",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The answer is obvious",
-        "It's obvious that he's tired"
-      ],
+      "examples": ["The answer is obvious", "It's obvious that he's tired"],
       "synonyms": ["clear", "evident", "apparent"],
       "antonyms": ["obscure", "hidden"],
       "difficulty": 2,
@@ -872,10 +761,7 @@
     "evident": {
       "definition": "Clearly revealed to the mind or the senses or judgment",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The damage is evident",
-        "It's evident that she's upset"
-      ],
+      "examples": ["The damage is evident", "It's evident that she's upset"],
       "synonyms": ["obvious", "clear", "apparent"],
       "antonyms": ["hidden", "unclear"],
       "difficulty": 3,
@@ -884,10 +770,7 @@
     "apparent": {
       "definition": "Clearly visible or understood; obvious",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The cause of the problem is apparent",
-        "Her disappointment was apparent"
-      ],
+      "examples": ["The cause of the problem is apparent", "Her disappointment was apparent"],
       "synonyms": ["obvious", "evident", "clear"],
       "antonyms": ["hidden", "obscure"],
       "difficulty": 3,
@@ -896,10 +779,7 @@
     "visible": {
       "definition": "Able to be seen",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The stars are visible tonight",
-        "There's a visible improvement"
-      ],
+      "examples": ["The stars are visible tonight", "There's a visible improvement"],
       "synonyms": ["apparent", "noticeable", "observable"],
       "antonyms": ["invisible", "hidden"],
       "difficulty": 2,
@@ -908,10 +788,7 @@
     "hidden": {
       "definition": "Kept out of sight; concealed",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The treasure was hidden in the cave",
-        "There are hidden costs involved"
-      ],
+      "examples": ["The treasure was hidden in the cave", "There are hidden costs involved"],
       "synonyms": ["concealed", "secret", "obscured"],
       "antonyms": ["visible", "obvious"],
       "difficulty": 2,
@@ -920,10 +797,7 @@
     "secret": {
       "definition": "Kept hidden from others; not known or seen by others",
       "partOfSpeech": "adjective",
-      "examples": [
-        "It's a secret recipe",
-        "They held a secret meeting"
-      ],
+      "examples": ["It's a secret recipe", "They held a secret meeting"],
       "synonyms": ["hidden", "concealed", "confidential"],
       "antonyms": ["public", "open"],
       "difficulty": 2,
@@ -932,10 +806,7 @@
     "public": {
       "definition": "Of or concerning the people as a whole",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Public opinion is divided",
-        "The park is open to the public"
-      ],
+      "examples": ["Public opinion is divided", "The park is open to the public"],
       "synonyms": ["open", "communal", "general"],
       "antonyms": ["private", "secret"],
       "difficulty": 2,
@@ -944,10 +815,7 @@
     "private": {
       "definition": "Belonging to or for the use of one particular person or group of people only",
       "partOfSpeech": "adjective",
-      "examples": [
-        "This is private property",
-        "We need to have a private conversation"
-      ],
+      "examples": ["This is private property", "We need to have a private conversation"],
       "synonyms": ["personal", "individual", "exclusive"],
       "antonyms": ["public", "open"],
       "difficulty": 2,
@@ -956,10 +824,7 @@
     "personal": {
       "definition": "Belonging to or affecting a particular person rather than anyone else",
       "partOfSpeech": "adjective",
-      "examples": [
-        "This is a personal matter",
-        "She shared her personal experience"
-      ],
+      "examples": ["This is a personal matter", "She shared her personal experience"],
       "synonyms": ["private", "individual", "own"],
       "antonyms": ["impersonal", "public"],
       "difficulty": 2,
@@ -968,10 +833,7 @@
     "individual": {
       "definition": "Single; separate; existing as a distinct entity",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Each individual case is different",
-        "We need individual attention"
-      ],
+      "examples": ["Each individual case is different", "We need individual attention"],
       "synonyms": ["separate", "distinct", "particular"],
       "antonyms": ["collective", "group"],
       "difficulty": 3,
@@ -980,10 +842,7 @@
     "separate": {
       "definition": "Forming or viewed as a unit apart or by itself",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Keep the documents in separate files",
-        "They live in separate houses"
-      ],
+      "examples": ["Keep the documents in separate files", "They live in separate houses"],
       "synonyms": ["distinct", "individual", "apart"],
       "antonyms": ["together", "combined"],
       "difficulty": 2,
@@ -992,10 +851,7 @@
     "together": {
       "definition": "With each other; in unity or proximity",
       "partOfSpeech": "adverb",
-      "examples": [
-        "We work well together",
-        "Let's put the pieces together"
-      ],
+      "examples": ["We work well together", "Let's put the pieces together"],
       "synonyms": ["jointly", "collectively", "united"],
       "antonyms": ["apart", "separately"],
       "difficulty": 2,
@@ -1004,10 +860,7 @@
     "united": {
       "definition": "Joined together politically, for a common purpose, or by common feelings",
       "partOfSpeech": "adjective",
-      "examples": [
-        "We must stand united",
-        "The United States of America"
-      ],
+      "examples": ["We must stand united", "The United States of America"],
       "synonyms": ["joined", "combined", "together"],
       "antonyms": ["divided", "separated"],
       "difficulty": 2,
@@ -1016,10 +869,7 @@
     "combined": {
       "definition": "Existing or occurring together; joint",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The combined effort was successful",
-        "Their combined income is substantial"
-      ],
+      "examples": ["The combined effort was successful", "Their combined income is substantial"],
       "synonyms": ["joint", "united", "merged"],
       "antonyms": ["separate", "individual"],
       "difficulty": 3,
@@ -1028,10 +878,7 @@
     "joint": {
       "definition": "Shared, held, or made by two or more people together",
       "partOfSpeech": "adjective",
-      "examples": [
-        "It was a joint decision",
-        "They opened a joint bank account"
-      ],
+      "examples": ["It was a joint decision", "They opened a joint bank account"],
       "synonyms": ["shared", "combined", "mutual"],
       "antonyms": ["individual", "separate"],
       "difficulty": 3,
@@ -1040,10 +887,7 @@
     "shared": {
       "definition": "Used, done, or experienced jointly with another or others",
       "partOfSpeech": "adjective",
-      "examples": [
-        "We have shared interests",
-        "The shared responsibility was helpful"
-      ],
+      "examples": ["We have shared interests", "The shared responsibility was helpful"],
       "synonyms": ["joint", "common", "mutual"],
       "antonyms": ["individual", "exclusive"],
       "difficulty": 2,
@@ -1052,10 +896,7 @@
     "common": {
       "definition": "Occurring, found, or done often; prevalent",
       "partOfSpeech": "adjective",
-      "examples": [
-        "It's a common mistake",
-        "We have common goals"
-      ],
+      "examples": ["It's a common mistake", "We have common goals"],
       "synonyms": ["usual", "typical", "ordinary"],
       "antonyms": ["rare", "uncommon"],
       "difficulty": 2,
@@ -1064,10 +905,7 @@
     "usual": {
       "definition": "Habitually or typically occurring or done; customary",
       "partOfSpeech": "adjective",
-      "examples": [
-        "He arrived at the usual time",
-        "This is the usual procedure"
-      ],
+      "examples": ["He arrived at the usual time", "This is the usual procedure"],
       "synonyms": ["normal", "typical", "standard"],
       "antonyms": ["unusual", "rare"],
       "difficulty": 2,
@@ -1076,10 +914,7 @@
     "normal": {
       "definition": "Conforming to a standard; usual, typical, or expected",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Everything seems normal",
-        "It's normal to feel nervous"
-      ],
+      "examples": ["Everything seems normal", "It's normal to feel nervous"],
       "synonyms": ["usual", "typical", "standard"],
       "antonyms": ["abnormal", "unusual"],
       "difficulty": 2,
@@ -1088,10 +923,7 @@
     "typical": {
       "definition": "Having the distinctive qualities of a particular type of person or thing",
       "partOfSpeech": "adjective",
-      "examples": [
-        "This is typical behavior for him",
-        "A typical day at the office"
-      ],
+      "examples": ["This is typical behavior for him", "A typical day at the office"],
       "synonyms": ["characteristic", "normal", "usual"],
       "antonyms": ["atypical", "unusual"],
       "difficulty": 3,
@@ -1100,10 +932,7 @@
     "standard": {
       "definition": "Used or accepted as normal or average",
       "partOfSpeech": "adjective",
-      "examples": [
-        "This is standard procedure",
-        "The standard size is medium"
-      ],
+      "examples": ["This is standard procedure", "The standard size is medium"],
       "synonyms": ["normal", "regular", "conventional"],
       "antonyms": ["nonstandard", "unusual"],
       "difficulty": 3,
@@ -1112,10 +941,7 @@
     "regular": {
       "definition": "Arranged in or constituting a constant or definite pattern",
       "partOfSpeech": "adjective",
-      "examples": [
-        "He keeps regular hours",
-        "We have regular meetings"
-      ],
+      "examples": ["He keeps regular hours", "We have regular meetings"],
       "synonyms": ["consistent", "routine", "systematic"],
       "antonyms": ["irregular", "random"],
       "difficulty": 2,
@@ -1124,10 +950,7 @@
     "consistent": {
       "definition": "Acting or done in the same way over time, especially so as to be fair or accurate",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Her performance has been consistent",
-        "We need consistent policies"
-      ],
+      "examples": ["Her performance has been consistent", "We need consistent policies"],
       "synonyms": ["steady", "regular", "uniform"],
       "antonyms": ["inconsistent", "variable"],
       "difficulty": 3,
@@ -1136,10 +959,7 @@
     "steady": {
       "definition": "Firmly fixed, supported, or balanced; not shaking or moving",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Keep the camera steady",
-        "She has a steady job"
-      ],
+      "examples": ["Keep the camera steady", "She has a steady job"],
       "synonyms": ["stable", "firm", "consistent"],
       "antonyms": ["unsteady", "shaky"],
       "difficulty": 2,
@@ -1148,10 +968,7 @@
     "stable": {
       "definition": "Not likely to change or fail; firmly established",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The economy is stable",
-        "She's in stable condition"
-      ],
+      "examples": ["The economy is stable", "She's in stable condition"],
       "synonyms": ["steady", "secure", "solid"],
       "antonyms": ["unstable", "volatile"],
       "difficulty": 3,
@@ -1160,10 +977,7 @@
     "secure": {
       "definition": "Fixed or fastened so as not to give way, become loose, or be lost",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Make sure the door is secure",
-        "He has a secure job"
-      ],
+      "examples": ["Make sure the door is secure", "He has a secure job"],
       "synonyms": ["safe", "protected", "stable"],
       "antonyms": ["insecure", "unsafe"],
       "difficulty": 3,
@@ -1172,10 +986,7 @@
     "safe": {
       "definition": "Protected from or not exposed to danger or risk; not likely to be harmed",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The children are safe at home",
-        "Is it safe to swim here?"
-      ],
+      "examples": ["The children are safe at home", "Is it safe to swim here?"],
       "synonyms": ["secure", "protected", "harmless"],
       "antonyms": ["dangerous", "unsafe"],
       "difficulty": 2,
@@ -1184,10 +995,7 @@
     "dangerous": {
       "definition": "Able or likely to cause harm or injury",
       "partOfSpeech": "adjective",
-      "examples": [
-        "That road is dangerous at night",
-        "It's dangerous to text while driving"
-      ],
+      "examples": ["That road is dangerous at night", "It's dangerous to text while driving"],
       "synonyms": ["hazardous", "risky", "unsafe"],
       "antonyms": ["safe", "harmless"],
       "difficulty": 2,
@@ -1196,10 +1004,7 @@
     "risky": {
       "definition": "Full of the possibility of danger, failure, or loss",
       "partOfSpeech": "adjective",
-      "examples": [
-        "It's a risky investment",
-        "That was a risky decision"
-      ],
+      "examples": ["It's a risky investment", "That was a risky decision"],
       "synonyms": ["dangerous", "hazardous", "uncertain"],
       "antonyms": ["safe", "secure"],
       "difficulty": 3,
@@ -1208,10 +1013,7 @@
     "uncertain": {
       "definition": "Not able to be relied on; not known or definite",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The outcome is uncertain",
-        "I'm uncertain about the answer"
-      ],
+      "examples": ["The outcome is uncertain", "I'm uncertain about the answer"],
       "synonyms": ["unsure", "doubtful", "unclear"],
       "antonyms": ["certain", "sure"],
       "difficulty": 3,
@@ -1220,10 +1022,7 @@
     "doubtful": {
       "definition": "Feeling uncertain about something",
       "partOfSpeech": "adjective",
-      "examples": [
-        "I'm doubtful about his claims",
-        "The weather looks doubtful"
-      ],
+      "examples": ["I'm doubtful about his claims", "The weather looks doubtful"],
       "synonyms": ["uncertain", "skeptical", "unsure"],
       "antonyms": ["certain", "confident"],
       "difficulty": 3,
@@ -1232,10 +1031,7 @@
     "skeptical": {
       "definition": "Not easily convinced; having doubts or reservations",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's skeptical of his motives",
-        "I'm skeptical about that claim"
-      ],
+      "examples": ["She's skeptical of his motives", "I'm skeptical about that claim"],
       "synonyms": ["doubtful", "suspicious", "questioning"],
       "antonyms": ["trusting", "believing"],
       "difficulty": 4,
@@ -1244,10 +1040,7 @@
     "suspicious": {
       "definition": "Having or showing a cautious distrust of someone or something",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She was suspicious of his behavior",
-        "That looks suspicious"
-      ],
+      "examples": ["She was suspicious of his behavior", "That looks suspicious"],
       "synonyms": ["doubtful", "wary", "distrustful"],
       "antonyms": ["trusting", "unsuspicious"],
       "difficulty": 3,
@@ -1256,10 +1049,7 @@
     "trusting": {
       "definition": "Showing or tending to have a belief in a person's honesty or sincerity",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She has a trusting nature",
-        "He's too trusting of strangers"
-      ],
+      "examples": ["She has a trusting nature", "He's too trusting of strangers"],
       "synonyms": ["believing", "faithful", "confident"],
       "antonyms": ["suspicious", "distrustful"],
       "difficulty": 3,
@@ -1268,10 +1058,7 @@
     "faithful": {
       "definition": "Loyal, constant, and steadfast",
       "partOfSpeech": "adjective",
-      "examples": [
-        "He's a faithful friend",
-        "She remained faithful to her principles"
-      ],
+      "examples": ["He's a faithful friend", "She remained faithful to her principles"],
       "synonyms": ["loyal", "devoted", "reliable"],
       "antonyms": ["unfaithful", "disloyal"],
       "difficulty": 3,
@@ -1280,10 +1067,7 @@
     "loyal": {
       "definition": "Giving or showing firm and constant support or allegiance",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's loyal to her friends",
-        "He's a loyal employee"
-      ],
+      "examples": ["She's loyal to her friends", "He's a loyal employee"],
       "synonyms": ["faithful", "devoted", "committed"],
       "antonyms": ["disloyal", "unfaithful"],
       "difficulty": 3,
@@ -1292,10 +1076,7 @@
     "devoted": {
       "definition": "Very loving or loyal",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's devoted to her family",
-        "He's a devoted teacher"
-      ],
+      "examples": ["She's devoted to her family", "He's a devoted teacher"],
       "synonyms": ["dedicated", "committed", "loyal"],
       "antonyms": ["indifferent", "uncommitted"],
       "difficulty": 3,
@@ -1304,10 +1085,7 @@
     "dedicated": {
       "definition": "Devoted to a task or purpose; having single-minded loyalty or integrity",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's dedicated to her work",
-        "He's a dedicated student"
-      ],
+      "examples": ["She's dedicated to her work", "He's a dedicated student"],
       "synonyms": ["committed", "devoted", "focused"],
       "antonyms": ["uncommitted", "indifferent"],
       "difficulty": 3,
@@ -1316,10 +1094,7 @@
     "committed": {
       "definition": "Feeling dedication and loyalty to a cause, activity, or job",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's committed to environmental protection",
-        "He's a committed volunteer"
-      ],
+      "examples": ["She's committed to environmental protection", "He's a committed volunteer"],
       "synonyms": ["dedicated", "devoted", "determined"],
       "antonyms": ["uncommitted", "indifferent"],
       "difficulty": 3,
@@ -1328,10 +1103,7 @@
     "determined": {
       "definition": "Having made a firm decision and being resolved not to change it",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's determined to succeed",
-        "He has a determined attitude"
-      ],
+      "examples": ["She's determined to succeed", "He has a determined attitude"],
       "synonyms": ["resolute", "persistent", "committed"],
       "antonyms": ["undetermined", "wavering"],
       "difficulty": 3,
@@ -1340,10 +1112,7 @@
     "persistent": {
       "definition": "Continuing firmly or obstinately in a course of action in spite of difficulty",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's persistent in her efforts",
-        "The problem is persistent"
-      ],
+      "examples": ["She's persistent in her efforts", "The problem is persistent"],
       "synonyms": ["determined", "tenacious", "steadfast"],
       "antonyms": ["giving up", "inconsistent"],
       "difficulty": 4,
@@ -1352,10 +1121,7 @@
     "tenacious": {
       "definition": "Tending to keep a firm hold of something; clinging or adhering closely",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She has a tenacious grip on power",
-        "He's tenacious in pursuing his goals"
-      ],
+      "examples": ["She has a tenacious grip on power", "He's tenacious in pursuing his goals"],
       "synonyms": ["persistent", "determined", "stubborn"],
       "antonyms": ["yielding", "flexible"],
       "difficulty": 4,
@@ -1364,10 +1130,7 @@
     "stubborn": {
       "definition": "Having or showing dogged determination not to change one's attitude",
       "partOfSpeech": "adjective",
-      "examples": [
-        "He's too stubborn to admit he's wrong",
-        "She has a stubborn streak"
-      ],
+      "examples": ["He's too stubborn to admit he's wrong", "She has a stubborn streak"],
       "synonyms": ["obstinate", "inflexible", "headstrong"],
       "antonyms": ["flexible", "yielding"],
       "difficulty": 3,
@@ -1376,10 +1139,7 @@
     "flexible": {
       "definition": "Capable of bending easily without breaking; willing to change or compromise",
       "partOfSpeech": "adjective",
-      "examples": [
-        "We need a flexible approach",
-        "She has flexible working hours"
-      ],
+      "examples": ["We need a flexible approach", "She has flexible working hours"],
       "synonyms": ["adaptable", "adjustable", "pliable"],
       "antonyms": ["rigid", "inflexible"],
       "difficulty": 3,
@@ -1388,10 +1148,7 @@
     "adaptable": {
       "definition": "Able to adjust to new conditions",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Humans are highly adaptable",
-        "She's adaptable to change"
-      ],
+      "examples": ["Humans are highly adaptable", "She's adaptable to change"],
       "synonyms": ["flexible", "adjustable", "versatile"],
       "antonyms": ["rigid", "inflexible"],
       "difficulty": 4,
@@ -1400,10 +1157,7 @@
     "versatile": {
       "definition": "Able to adapt or be adapted to many different functions or activities",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's a versatile performer",
-        "This is a versatile tool"
-      ],
+      "examples": ["She's a versatile performer", "This is a versatile tool"],
       "synonyms": ["adaptable", "flexible", "multi-talented"],
       "antonyms": ["limited", "specialized"],
       "difficulty": 4,
@@ -1412,10 +1166,7 @@
     "talented": {
       "definition": "Having a natural aptitude or skill for something",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's a talented musician",
-        "He's talented at mathematics"
-      ],
+      "examples": ["She's a talented musician", "He's talented at mathematics"],
       "synonyms": ["gifted", "skilled", "able"],
       "antonyms": ["untalented", "unskilled"],
       "difficulty": 3,
@@ -1424,10 +1175,7 @@
     "skilled": {
       "definition": "Having or showing the knowledge, ability, or training to perform a task well",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's a skilled craftsperson",
-        "Skilled workers are in demand"
-      ],
+      "examples": ["She's a skilled craftsperson", "Skilled workers are in demand"],
       "synonyms": ["expert", "proficient", "competent"],
       "antonyms": ["unskilled", "inexperienced"],
       "difficulty": 3,
@@ -1436,10 +1184,7 @@
     "expert": {
       "definition": "Having or involving authoritative knowledge",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's an expert pianist",
-        "We need expert advice"
-      ],
+      "examples": ["She's an expert pianist", "We need expert advice"],
       "synonyms": ["skilled", "professional", "specialist"],
       "antonyms": ["amateur", "novice"],
       "difficulty": 3,
@@ -1448,10 +1193,7 @@
     "professional": {
       "definition": "Relating to or belonging to a profession",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She maintains professional standards",
-        "He has professional experience"
-      ],
+      "examples": ["She maintains professional standards", "He has professional experience"],
       "synonyms": ["expert", "skilled", "competent"],
       "antonyms": ["amateur", "unprofessional"],
       "difficulty": 3,
@@ -1460,10 +1202,7 @@
     "competent": {
       "definition": "Having the necessary ability, knowledge, or skill to do something successfully",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's competent at her job",
-        "He's a competent driver"
-      ],
+      "examples": ["She's competent at her job", "He's a competent driver"],
       "synonyms": ["capable", "able", "skilled"],
       "antonyms": ["incompetent", "unable"],
       "difficulty": 3,
@@ -1472,10 +1211,7 @@
     "capable": {
       "definition": "Having the ability, fitness, or quality necessary to do or achieve a specified thing",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's capable of great things",
-        "He's a very capable manager"
-      ],
+      "examples": ["She's capable of great things", "He's a very capable manager"],
       "synonyms": ["able", "competent", "qualified"],
       "antonyms": ["incapable", "unable"],
       "difficulty": 3,
@@ -1484,10 +1220,7 @@
     "able": {
       "definition": "Having the power, skill, means, or opportunity to do something",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's able to solve complex problems",
-        "Are you able to help?"
-      ],
+      "examples": ["She's able to solve complex problems", "Are you able to help?"],
       "synonyms": ["capable", "competent", "skilled"],
       "antonyms": ["unable", "incapable"],
       "difficulty": 2,
@@ -1496,10 +1229,7 @@
     "qualified": {
       "definition": "Officially recognized as being trained to perform a particular job",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's qualified for the position",
-        "He's a qualified engineer"
-      ],
+      "examples": ["She's qualified for the position", "He's a qualified engineer"],
       "synonyms": ["certified", "licensed", "competent"],
       "antonyms": ["unqualified", "inexperienced"],
       "difficulty": 3,
@@ -1508,10 +1238,7 @@
     "experienced": {
       "definition": "Having knowledge or skill in a particular area gained over time",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's an experienced teacher",
-        "We need experienced workers"
-      ],
+      "examples": ["She's an experienced teacher", "We need experienced workers"],
       "synonyms": ["seasoned", "skilled", "knowledgeable"],
       "antonyms": ["inexperienced", "novice"],
       "difficulty": 3,
@@ -1520,10 +1247,7 @@
     "knowledgeable": {
       "definition": "Intelligent and well informed",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's knowledgeable about history",
-        "He's very knowledgeable"
-      ],
+      "examples": ["She's knowledgeable about history", "He's very knowledgeable"],
       "synonyms": ["informed", "educated", "learned"],
       "antonyms": ["ignorant", "uninformed"],
       "difficulty": 4,
@@ -1532,10 +1256,7 @@
     "informed": {
       "definition": "Having or showing knowledge of a particular subject or situation",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She made an informed decision",
-        "Keep me informed of any changes"
-      ],
+      "examples": ["She made an informed decision", "Keep me informed of any changes"],
       "synonyms": ["knowledgeable", "aware", "educated"],
       "antonyms": ["uninformed", "ignorant"],
       "difficulty": 3,
@@ -1544,10 +1265,7 @@
     "educated": {
       "definition": "Having been educated to a high standard",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's well educated",
-        "He comes from an educated family"
-      ],
+      "examples": ["She's well educated", "He comes from an educated family"],
       "synonyms": ["learned", "scholarly", "knowledgeable"],
       "antonyms": ["uneducated", "ignorant"],
       "difficulty": 3,
@@ -1556,10 +1274,7 @@
     "intelligent": {
       "definition": "Having or showing intelligence, especially of a high level",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's very intelligent",
-        "That was an intelligent question"
-      ],
+      "examples": ["She's very intelligent", "That was an intelligent question"],
       "synonyms": ["smart", "clever", "bright"],
       "antonyms": ["unintelligent", "stupid"],
       "difficulty": 3,
@@ -1568,10 +1283,7 @@
     "smart": {
       "definition": "Having or showing a quick-witted intelligence",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's a smart student",
-        "That was a smart move"
-      ],
+      "examples": ["She's a smart student", "That was a smart move"],
       "synonyms": ["intelligent", "clever", "bright"],
       "antonyms": ["stupid", "dumb"],
       "difficulty": 2,
@@ -1580,10 +1292,7 @@
     "clever": {
       "definition": "Quick to understand, learn, and devise or apply ideas; intelligent",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's very clever",
-        "That's a clever solution"
-      ],
+      "examples": ["She's very clever", "That's a clever solution"],
       "synonyms": ["smart", "intelligent", "bright"],
       "antonyms": ["stupid", "dull"],
       "difficulty": 3,
@@ -1592,10 +1301,7 @@
     "bright": {
       "definition": "Intelligent and quick-witted",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's a bright child",
-        "He has a bright future"
-      ],
+      "examples": ["She's a bright child", "He has a bright future"],
       "synonyms": ["smart", "intelligent", "clever"],
       "antonyms": ["dull", "dim"],
       "difficulty": 2,
@@ -1604,10 +1310,7 @@
     "brilliant": {
       "definition": "Exceptionally clever or talented",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She's a brilliant scientist",
-        "That was a brilliant idea"
-      ],
+      "examples": ["She's a brilliant scientist", "That was a brilliant idea"],
       "synonyms": ["genius", "exceptional", "outstanding"],
       "antonyms": ["mediocre", "ordinary"],
       "difficulty": 4,
@@ -1616,10 +1319,7 @@
     "genius": {
       "definition": "Exceptional intellectual or creative power or other natural ability",
       "partOfSpeech": "noun",
-      "examples": [
-        "Einstein was a genius",
-        "She has a genius for mathematics"
-      ],
+      "examples": ["Einstein was a genius", "She has a genius for mathematics"],
       "synonyms": ["brilliance", "talent", "gift"],
       "antonyms": ["stupidity", "mediocrity"],
       "difficulty": 4,
@@ -1628,10 +1328,7 @@
     "exceptional": {
       "definition": "Unusual; not typical",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She has exceptional talent",
-        "This is an exceptional case"
-      ],
+      "examples": ["She has exceptional talent", "This is an exceptional case"],
       "synonyms": ["outstanding", "remarkable", "extraordinary"],
       "antonyms": ["ordinary", "typical"],
       "difficulty": 4,
@@ -1640,10 +1337,7 @@
     "outstanding": {
       "definition": "Exceptionally good",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She did outstanding work",
-        "The performance was outstanding"
-      ],
+      "examples": ["She did outstanding work", "The performance was outstanding"],
       "synonyms": ["excellent", "exceptional", "superb"],
       "antonyms": ["poor", "mediocre"],
       "difficulty": 3,
@@ -1652,10 +1346,7 @@
     "excellent": {
       "definition": "Extremely good; outstanding",
       "partOfSpeech": "adjective",
-      "examples": [
-        "She did excellent work",
-        "The food was excellent"
-      ],
+      "examples": ["She did excellent work", "The food was excellent"],
       "synonyms": ["outstanding", "superb", "wonderful"],
       "antonyms": ["poor", "terrible"],
       "difficulty": 3,
@@ -1664,10 +1355,7 @@
     "wonderful": {
       "definition": "Inspiring delight, pleasure, or admiration; extremely good",
       "partOfSpeech": "adjective",
-      "examples": [
-        "We had a wonderful time",
-        "She's a wonderful person"
-      ],
+      "examples": ["We had a wonderful time", "She's a wonderful person"],
       "synonyms": ["marvelous", "fantastic", "great"],
       "antonyms": ["terrible", "awful"],
       "difficulty": 2,
@@ -1676,10 +1364,7 @@
     "fantastic": {
       "definition": "Extraordinarily good or attractive",
       "partOfSpeech": "adjective",
-      "examples": [
-        "The view is fantastic",
-        "She did a fantastic job"
-      ],
+      "examples": ["The view is fantastic", "She did a fantastic job"],
       "synonyms": ["wonderful", "amazing", "incredible"],
       "antonyms": ["terrible", "awful"],
       "difficulty": 3,
@@ -1687,3 +1372,732 @@
     },
     "amazing": {
       "definition": "Causing great surprise or wonder; astonishing",
+      "partOfSpeech": "adjective",
+      "examples": ["The results are amazing", "She has amazing talent"],
+      "synonyms": ["astonishing", "incredible", "remarkable"],
+      "antonyms": ["ordinary", "boring"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "incredible": {
+      "definition": "Impossible to believe; extraordinary",
+      "partOfSpeech": "adjective",
+      "examples": ["The story is incredible", "She has incredible strength"],
+      "synonyms": ["unbelievable", "amazing", "extraordinary"],
+      "antonyms": ["believable", "ordinary"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "extraordinary": {
+      "definition": "Very unusual or remarkable",
+      "partOfSpeech": "adjective",
+      "examples": ["She has extraordinary abilities", "This is an extraordinary situation"],
+      "synonyms": ["remarkable", "exceptional", "unusual"],
+      "antonyms": ["ordinary", "common"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "remarkable": {
+      "definition": "Worthy of attention; striking",
+      "partOfSpeech": "adjective",
+      "examples": ["She made remarkable progress", "It's a remarkable achievement"],
+      "synonyms": ["notable", "impressive", "extraordinary"],
+      "antonyms": ["unremarkable", "ordinary"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "impressive": {
+      "definition": "Evoking admiration through size, quality, or skill",
+      "partOfSpeech": "adjective",
+      "examples": ["The building is impressive", "She gave an impressive performance"],
+      "synonyms": ["striking", "remarkable", "notable"],
+      "antonyms": ["unimpressive", "mediocre"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "striking": {
+      "definition": "Attracting attention by reason of being unusual, extreme, or prominent",
+      "partOfSpeech": "adjective",
+      "examples": ["There's a striking resemblance", "She has striking features"],
+      "synonyms": ["notable", "remarkable", "impressive"],
+      "antonyms": ["unremarkable", "ordinary"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "notable": {
+      "definition": "Worthy of attention or notice; remarkable",
+      "partOfSpeech": "adjective",
+      "examples": ["There was a notable improvement", "She's a notable scientist"],
+      "synonyms": ["remarkable", "significant", "important"],
+      "antonyms": ["insignificant", "unremarkable"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "significant": {
+      "definition": "Sufficiently great or important to be worthy of attention; noteworthy",
+      "partOfSpeech": "adjective",
+      "examples": ["There was a significant change", "This is a significant discovery"],
+      "synonyms": ["important", "meaningful", "considerable"],
+      "antonyms": ["insignificant", "trivial"],
+      "difficulty": 4,
+      "frequency": 4
+    },
+    "important": {
+      "definition": "Of great significance or value; likely to have a profound effect on success",
+      "partOfSpeech": "adjective",
+      "examples": ["This is an important decision", "Education is important"],
+      "synonyms": ["significant", "crucial", "vital"],
+      "antonyms": ["unimportant", "trivial"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "crucial": {
+      "definition": "Decisive or critical, especially in the success or failure of something",
+      "partOfSpeech": "adjective",
+      "examples": ["This is a crucial moment", "Timing is crucial"],
+      "synonyms": ["critical", "vital", "essential"],
+      "antonyms": ["unimportant", "trivial"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "critical": {
+      "definition": "Having a decisive or crucial importance in the success or failure of something",
+      "partOfSpeech": "adjective",
+      "examples": ["This is a critical decision", "The situation is critical"],
+      "synonyms": ["crucial", "vital", "essential"],
+      "antonyms": ["unimportant", "trivial"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "vital": {
+      "definition": "Absolutely necessary or important; essential",
+      "partOfSpeech": "adjective",
+      "examples": ["Water is vital for life", "This information is vital"],
+      "synonyms": ["essential", "crucial", "necessary"],
+      "antonyms": ["unnecessary", "unimportant"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "essential": {
+      "definition": "Absolutely necessary; extremely important",
+      "partOfSpeech": "adjective",
+      "examples": ["Food is essential for survival", "This is essential information"],
+      "synonyms": ["necessary", "vital", "crucial"],
+      "antonyms": ["unnecessary", "optional"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "necessary": {
+      "definition": "Required to be done, achieved, or present; needed",
+      "partOfSpeech": "adjective",
+      "examples": ["It's necessary to study hard", "Take only necessary items"],
+      "synonyms": ["essential", "required", "needed"],
+      "antonyms": ["unnecessary", "optional"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "required": {
+      "definition": "Officially compulsory, or otherwise considered essential",
+      "partOfSpeech": "adjective",
+      "examples": ["Attendance is required", "Complete all required fields"],
+      "synonyms": ["necessary", "mandatory", "compulsory"],
+      "antonyms": ["optional", "voluntary"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "optional": {
+      "definition": "Available to be chosen but not obligatory",
+      "partOfSpeech": "adjective",
+      "examples": ["The course is optional", "Dessert is optional"],
+      "synonyms": ["voluntary", "elective", "discretionary"],
+      "antonyms": ["required", "mandatory"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "voluntary": {
+      "definition": "Done, given, or acting of one's own free will",
+      "partOfSpeech": "adjective",
+      "examples": ["Participation is voluntary", "She does voluntary work"],
+      "synonyms": ["optional", "willing", "free"],
+      "antonyms": ["mandatory", "forced"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "willing": {
+      "definition": "Ready, eager, or prepared to do something",
+      "partOfSpeech": "adjective",
+      "examples": ["She's willing to help", "Are you willing to try?"],
+      "synonyms": ["ready", "prepared", "eager"],
+      "antonyms": ["unwilling", "reluctant"],
+      "difficulty": 2,
+      "frequency": 4
+    },
+    "ready": {
+      "definition": "In a suitable state for an activity, action, or situation; fully prepared",
+      "partOfSpeech": "adjective",
+      "examples": ["Are you ready to go?", "Dinner is ready"],
+      "synonyms": ["prepared", "set", "willing"],
+      "antonyms": ["unprepared", "unready"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "prepared": {
+      "definition": "Ready to do or deal with something",
+      "partOfSpeech": "adjective",
+      "examples": ["She's well prepared for the exam", "Be prepared for anything"],
+      "synonyms": ["ready", "organized", "equipped"],
+      "antonyms": ["unprepared", "unready"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "organized": {
+      "definition": "Arranged in a systematic way, especially on a large scale",
+      "partOfSpeech": "adjective",
+      "examples": ["She's very organized", "We need an organized approach"],
+      "synonyms": ["systematic", "structured", "orderly"],
+      "antonyms": ["disorganized", "chaotic"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "systematic": {
+      "definition": "Done or acting according to a fixed plan or system; methodical",
+      "partOfSpeech": "adjective",
+      "examples": ["We need a systematic approach", "He's very systematic in his work"],
+      "synonyms": ["methodical", "organized", "structured"],
+      "antonyms": ["random", "haphazard"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "methodical": {
+      "definition": "Done according to a systematic or established form of procedure",
+      "partOfSpeech": "adjective",
+      "examples": ["She has a methodical approach", "He's methodical in his research"],
+      "synonyms": ["systematic", "orderly", "careful"],
+      "antonyms": ["haphazard", "random"],
+      "difficulty": 4,
+      "frequency": 2
+    },
+    "careful": {
+      "definition": "Making sure of avoiding potential danger, mishap, or harm; cautious",
+      "partOfSpeech": "adjective",
+      "examples": ["Be careful crossing the street", "She's careful with money"],
+      "synonyms": ["cautious", "prudent", "attentive"],
+      "antonyms": ["careless", "reckless"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "cautious": {
+      "definition": "Careful to avoid potential problems or dangers",
+      "partOfSpeech": "adjective",
+      "examples": ["She's cautious about investments", "Take a cautious approach"],
+      "synonyms": ["careful", "wary", "prudent"],
+      "antonyms": ["reckless", "careless"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "prudent": {
+      "definition": "Acting with or showing care and thought for the future",
+      "partOfSpeech": "adjective",
+      "examples": ["It's prudent to save money", "She made a prudent decision"],
+      "synonyms": ["wise", "sensible", "careful"],
+      "antonyms": ["imprudent", "reckless"],
+      "difficulty": 4,
+      "frequency": 2
+    },
+    "wise": {
+      "definition": "Having or showing experience, knowledge, and good judgment",
+      "partOfSpeech": "adjective",
+      "examples": ["She's wise beyond her years", "That was a wise choice"],
+      "synonyms": ["intelligent", "prudent", "sensible"],
+      "antonyms": ["foolish", "unwise"],
+      "difficulty": 2,
+      "frequency": 4
+    },
+    "foolish": {
+      "definition": "Lacking good sense or judgment; unwise",
+      "partOfSpeech": "adjective",
+      "examples": ["That was a foolish mistake", "Don't be foolish"],
+      "synonyms": ["silly", "stupid", "unwise"],
+      "antonyms": ["wise", "sensible"],
+      "difficulty": 2,
+      "frequency": 3
+    },
+    "silly": {
+      "definition": "Having or showing a lack of common sense or judgment; absurd and foolish",
+      "partOfSpeech": "adjective",
+      "examples": ["That's a silly idea", "Don't be silly"],
+      "synonyms": ["foolish", "ridiculous", "absurd"],
+      "antonyms": ["sensible", "serious"],
+      "difficulty": 2,
+      "frequency": 4
+    },
+    "ridiculous": {
+      "definition": "Deserving or inviting derision or mockery; absurd",
+      "partOfSpeech": "adjective",
+      "examples": ["That's ridiculous!", "The price is ridiculous"],
+      "synonyms": ["absurd", "silly", "preposterous"],
+      "antonyms": ["reasonable", "sensible"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "absurd": {
+      "definition": "Wildly unreasonable, illogical, or inappropriate",
+      "partOfSpeech": "adjective",
+      "examples": ["The idea is absurd", "It's absurd to think that"],
+      "synonyms": ["ridiculous", "preposterous", "nonsensical"],
+      "antonyms": ["reasonable", "logical"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "logical": {
+      "definition": "Of or according to the rules of logic or formal argument",
+      "partOfSpeech": "adjective",
+      "examples": ["That's a logical conclusion", "Use logical thinking"],
+      "synonyms": ["rational", "reasonable", "sensible"],
+      "antonyms": ["illogical", "irrational"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "illogical": {
+      "definition": "Lacking sense or clear, sound reasoning",
+      "partOfSpeech": "adjective",
+      "examples": ["His argument is illogical", "That's an illogical conclusion"],
+      "synonyms": ["irrational", "unreasonable", "nonsensical"],
+      "antonyms": ["logical", "rational"],
+      "difficulty": 4,
+      "frequency": 2
+    },
+    "irrational": {
+      "definition": "Not logical or reasonable",
+      "partOfSpeech": "adjective",
+      "examples": ["She has an irrational fear", "That's irrational behavior"],
+      "synonyms": ["illogical", "unreasonable", "absurd"],
+      "antonyms": ["rational", "logical"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "unreasonable": {
+      "definition": "Not guided by or based on good sense",
+      "partOfSpeech": "adjective",
+      "examples": ["That's an unreasonable request", "He's being unreasonable"],
+      "synonyms": ["irrational", "unfair", "excessive"],
+      "antonyms": ["reasonable", "fair"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "fair": {
+      "definition": "In accordance with the rules or standards; legitimate",
+      "partOfSpeech": "adjective",
+      "examples": ["That's a fair decision", "Play fair"],
+      "synonyms": ["just", "equitable", "reasonable"],
+      "antonyms": ["unfair", "unjust"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "unfair": {
+      "definition": "Not based on or behaving according to the principles of equality and justice",
+      "partOfSpeech": "adjective",
+      "examples": ["That's unfair treatment", "Life is unfair sometimes"],
+      "synonyms": ["unjust", "inequitable", "biased"],
+      "antonyms": ["fair", "just"],
+      "difficulty": 2,
+      "frequency": 4
+    },
+    "just": {
+      "definition": "Based on or behaving according to what is morally right and fair",
+      "partOfSpeech": "adjective",
+      "examples": ["That's a just decision", "He's a just person"],
+      "synonyms": ["fair", "righteous", "equitable"],
+      "antonyms": ["unjust", "unfair"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "unjust": {
+      "definition": "Not based on or behaving according to what is morally right and fair",
+      "partOfSpeech": "adjective",
+      "examples": ["The punishment was unjust", "It's unjust to blame her"],
+      "synonyms": ["unfair", "wrong", "inequitable"],
+      "antonyms": ["just", "fair"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "right": {
+      "definition": "Morally good, justified, or acceptable",
+      "partOfSpeech": "adjective",
+      "examples": ["That's the right thing to do", "You're absolutely right"],
+      "synonyms": ["correct", "proper", "just"],
+      "antonyms": ["wrong", "incorrect"],
+      "difficulty": 1,
+      "frequency": 5
+    },
+    "wrong": {
+      "definition": "Not correct or true; incorrect",
+      "partOfSpeech": "adjective",
+      "examples": ["That answer is wrong", "It's wrong to lie"],
+      "synonyms": ["incorrect", "false", "mistaken"],
+      "antonyms": ["right", "correct"],
+      "difficulty": 1,
+      "frequency": 5
+    },
+    "correct": {
+      "definition": "Free from error; in accordance with fact or truth",
+      "partOfSpeech": "adjective",
+      "examples": ["That's the correct answer", "Is this information correct?"],
+      "synonyms": ["right", "accurate", "true"],
+      "antonyms": ["incorrect", "wrong"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "incorrect": {
+      "definition": "Not in accordance with fact; wrong",
+      "partOfSpeech": "adjective",
+      "examples": ["That information is incorrect", "You have the incorrect address"],
+      "synonyms": ["wrong", "false", "inaccurate"],
+      "antonyms": ["correct", "right"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "accurate": {
+      "definition": "Correct in all details; exact",
+      "partOfSpeech": "adjective",
+      "examples": ["The report is accurate", "She gave an accurate description"],
+      "synonyms": ["precise", "exact", "correct"],
+      "antonyms": ["inaccurate", "wrong"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "precise": {
+      "definition": "Marked by exactness and accuracy of expression or detail",
+      "partOfSpeech": "adjective",
+      "examples": ["Give me precise instructions", "The measurement is precise"],
+      "synonyms": ["exact", "accurate", "specific"],
+      "antonyms": ["imprecise", "vague"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "exact": {
+      "definition": "Not approximated in any way; precise",
+      "partOfSpeech": "adjective",
+      "examples": ["What's the exact time?", "Those are his exact words"],
+      "synonyms": ["precise", "accurate", "specific"],
+      "antonyms": ["approximate", "inexact"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "specific": {
+      "definition": "Clearly defined or identified",
+      "partOfSpeech": "adjective",
+      "examples": ["I need specific information", "Be more specific"],
+      "synonyms": ["particular", "exact", "precise"],
+      "antonyms": ["general", "vague"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "general": {
+      "definition": "Affecting or concerning all or most people or things; widespread",
+      "partOfSpeech": "adjective",
+      "examples": ["There's general agreement", "In general, I agree"],
+      "synonyms": ["overall", "broad", "common"],
+      "antonyms": ["specific", "particular"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "particular": {
+      "definition": "Used to single out an individual member of a specified group or class",
+      "partOfSpeech": "adjective",
+      "examples": ["This particular case is different", "I have no particular preference"],
+      "synonyms": ["specific", "individual", "special"],
+      "antonyms": ["general", "universal"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "special": {
+      "definition": "Better, greater, or otherwise different from what is usual",
+      "partOfSpeech": "adjective",
+      "examples": ["This is a special occasion", "She's a special person"],
+      "synonyms": ["unique", "exceptional", "particular"],
+      "antonyms": ["ordinary", "common"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "unique": {
+      "definition": "Being the only one of its kind; unlike anything else",
+      "partOfSpeech": "adjective",
+      "examples": ["Each person is unique", "This is a unique opportunity"],
+      "synonyms": ["distinctive", "special", "one-of-a-kind"],
+      "antonyms": ["common", "typical"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "distinctive": {
+      "definition": "Characteristic of one person or thing, and so serving to distinguish it from others",
+      "partOfSpeech": "adjective",
+      "examples": ["She has a distinctive voice", "The building has distinctive architecture"],
+      "synonyms": ["unique", "characteristic", "individual"],
+      "antonyms": ["common", "ordinary"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "characteristic": {
+      "definition": "Typical of a particular person, place, or thing",
+      "partOfSpeech": "adjective",
+      "examples": ["That's characteristic behavior for him", "The characteristic smell of roses"],
+      "synonyms": ["typical", "distinctive", "representative"],
+      "antonyms": ["uncharacteristic", "atypical"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "representative": {
+      "definition": "Typical of a class, group, or body of opinion",
+      "partOfSpeech": "adjective",
+      "examples": ["This is representative of his work", "A representative sample"],
+      "synonyms": ["typical", "characteristic", "exemplary"],
+      "antonyms": ["unrepresentative", "atypical"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "exemplary": {
+      "definition": "Serving as a desirable model; representing the best of its kind",
+      "partOfSpeech": "adjective",
+      "examples": ["She showed exemplary behavior", "His work is exemplary"],
+      "synonyms": ["model", "ideal", "perfect"],
+      "antonyms": ["poor", "inadequate"],
+      "difficulty": 4,
+      "frequency": 2
+    },
+    "perfect": {
+      "definition": "Having all the required or desirable elements, qualities, or characteristics",
+      "partOfSpeech": "adjective",
+      "examples": ["She has perfect pitch", "The weather is perfect"],
+      "synonyms": ["flawless", "ideal", "excellent"],
+      "antonyms": ["imperfect", "flawed"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "imperfect": {
+      "definition": "Not perfect; faulty or incomplete",
+      "partOfSpeech": "adjective",
+      "examples": ["The system is imperfect", "We live in an imperfect world"],
+      "synonyms": ["flawed", "defective", "incomplete"],
+      "antonyms": ["perfect", "flawless"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "flawed": {
+      "definition": "Having or characterized by a fundamental weakness or imperfection",
+      "partOfSpeech": "adjective",
+      "examples": ["The plan is flawed", "His reasoning is flawed"],
+      "synonyms": ["defective", "imperfect", "faulty"],
+      "antonyms": ["perfect", "flawless"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "complete": {
+      "definition": "Having all the necessary or appropriate parts",
+      "partOfSpeech": "adjective",
+      "examples": ["The set is complete", "I need complete information"],
+      "synonyms": ["whole", "entire", "full"],
+      "antonyms": ["incomplete", "partial"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "incomplete": {
+      "definition": "Not having all the necessary or appropriate parts",
+      "partOfSpeech": "adjective",
+      "examples": ["The work is incomplete", "This is an incomplete list"],
+      "synonyms": ["unfinished", "partial", "deficient"],
+      "antonyms": ["complete", "whole"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "whole": {
+      "definition": "All of; entire",
+      "partOfSpeech": "adjective",
+      "examples": ["The whole family came", "I ate the whole pizza"],
+      "synonyms": ["entire", "complete", "full"],
+      "antonyms": ["partial", "incomplete"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "entire": {
+      "definition": "With no part left out; whole",
+      "partOfSpeech": "adjective",
+      "examples": ["The entire building collapsed", "I read the entire book"],
+      "synonyms": ["whole", "complete", "total"],
+      "antonyms": ["partial", "incomplete"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "total": {
+      "definition": "Comprising the whole number or amount",
+      "partOfSpeech": "adjective",
+      "examples": ["The total cost is $100", "There was total silence"],
+      "synonyms": ["complete", "entire", "absolute"],
+      "antonyms": ["partial", "incomplete"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "partial": {
+      "definition": "Existing only in part; incomplete",
+      "partOfSpeech": "adjective",
+      "examples": ["This is only a partial solution", "I have partial information"],
+      "synonyms": ["incomplete", "limited", "fragmentary"],
+      "antonyms": ["complete", "total"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "limited": {
+      "definition": "Restricted in size, amount, or extent; few, small, or short",
+      "partOfSpeech": "adjective",
+      "examples": ["We have limited time", "There are limited options"],
+      "synonyms": ["restricted", "constrained", "finite"],
+      "antonyms": ["unlimited", "infinite"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "unlimited": {
+      "definition": "Not limited or restricted in terms of number, quantity, or extent",
+      "partOfSpeech": "adjective",
+      "examples": ["You have unlimited access", "The possibilities are unlimited"],
+      "synonyms": ["infinite", "boundless", "unrestricted"],
+      "antonyms": ["limited", "restricted"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "infinite": {
+      "definition": "Limitless or endless in space, extent, or size; impossible to measure",
+      "partOfSpeech": "adjective",
+      "examples": ["The universe seems infinite", "There are infinite possibilities"],
+      "synonyms": ["endless", "unlimited", "boundless"],
+      "antonyms": ["finite", "limited"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "finite": {
+      "definition": "Having limits or bounds",
+      "partOfSpeech": "adjective",
+      "examples": ["We have finite resources", "Human life is finite"],
+      "synonyms": ["limited", "bounded", "restricted"],
+      "antonyms": ["infinite", "unlimited"],
+      "difficulty": 4,
+      "frequency": 2
+    },
+    "endless": {
+      "definition": "Having or seeming to have no end or limit",
+      "partOfSpeech": "adjective",
+      "examples": ["The meeting seemed endless", "There are endless possibilities"],
+      "synonyms": ["infinite", "limitless", "eternal"],
+      "antonyms": ["finite", "limited"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "eternal": {
+      "definition": "Lasting or existing forever; without end",
+      "partOfSpeech": "adjective",
+      "examples": ["Love is eternal", "The eternal struggle between good and evil"],
+      "synonyms": ["everlasting", "endless", "permanent"],
+      "antonyms": ["temporary", "finite"],
+      "difficulty": 4,
+      "frequency": 2
+    },
+    "temporary": {
+      "definition": "Lasting for only a limited period of time; not permanent",
+      "partOfSpeech": "adjective",
+      "examples": ["This is a temporary solution", "She has a temporary job"],
+      "synonyms": ["short-term", "provisional", "interim"],
+      "antonyms": ["permanent", "lasting"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "permanent": {
+      "definition": "Lasting or intended to last or remain unchanged indefinitely",
+      "partOfSpeech": "adjective",
+      "examples": ["She has a permanent job", "The damage is permanent"],
+      "synonyms": ["lasting", "enduring", "eternal"],
+      "antonyms": ["temporary", "short-term"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "lasting": {
+      "definition": "Enduring or able to endure over a long period of time",
+      "partOfSpeech": "adjective",
+      "examples": ["They have a lasting friendship", "The impact was lasting"],
+      "synonyms": ["enduring", "permanent", "durable"],
+      "antonyms": ["temporary", "short-lived"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "enduring": {
+      "definition": "Lasting over a long period of time",
+      "partOfSpeech": "adjective",
+      "examples": ["Their love is enduring", "She has enduring patience"],
+      "synonyms": ["lasting", "permanent", "persistent"],
+      "antonyms": ["temporary", "fleeting"],
+      "difficulty": 4,
+      "frequency": 2
+    },
+    "durable": {
+      "definition": "Able to withstand wear, pressure, or damage; hard-wearing",
+      "partOfSpeech": "adjective",
+      "examples": ["These shoes are very durable", "We need durable materials"],
+      "synonyms": ["sturdy", "robust", "lasting"],
+      "antonyms": ["fragile", "weak"],
+      "difficulty": 4,
+      "frequency": 3
+    },
+    "sturdy": {
+      "definition": "Strongly and solidly built",
+      "partOfSpeech": "adjective",
+      "examples": ["The table is sturdy", "He has a sturdy build"],
+      "synonyms": ["strong", "robust", "solid"],
+      "antonyms": ["weak", "fragile"],
+      "difficulty": 3,
+      "frequency": 3
+    },
+    "strong": {
+      "definition": "Having the power to move heavy weights or perform other physically demanding tasks",
+      "partOfSpeech": "adjective",
+      "examples": ["He's very strong", "The wind is strong today"],
+      "synonyms": ["powerful", "mighty", "robust"],
+      "antonyms": ["weak", "feeble"],
+      "difficulty": 2,
+      "frequency": 5
+    },
+    "weak": {
+      "definition": "Lacking the power to perform physically demanding tasks",
+      "partOfSpeech": "adjective",
+      "examples": ["She felt weak after the illness", "The signal is weak"],
+      "synonyms": ["feeble", "frail", "fragile"],
+      "antonyms": ["strong", "powerful"],
+      "difficulty": 2,
+      "frequency": 4
+    },
+    "powerful": {
+      "definition": "Having great power or strength",
+      "partOfSpeech": "adjective",
+      "examples": ["She gave a powerful speech", "The engine is powerful"],
+      "synonyms": ["strong", "mighty", "potent"],
+      "antonyms": ["weak", "powerless"],
+      "difficulty": 3,
+      "frequency": 4
+    },
+    "mighty": {
+      "definition": "Possessing great and impressive power or strength",
+      "partOfSpeech": "adjective",
+      "examples": ["The mighty oak tree", "He's a mighty warrior"],
+      "synonyms": ["powerful", "strong", "formidable"],
+      "antonyms": ["weak", "feeble"],
+      "difficulty": 4,
+      "frequency": 2
+    },
+    "formidable": {
+      "definition": "Inspiring fear or respect through being impressively large, powerful, intense, or capable",
+      "partOfSpeech": "adjective",
+      "examples": ["She's a formidable opponent", "The task is formidable"],
+      "synonyms": ["intimidating", "daunting", "impressive"],
+      "antonyms": ["weak", "insignificant"],
+      "difficulty": 5,
+      "frequency": 2
+    }
+  }
+}
