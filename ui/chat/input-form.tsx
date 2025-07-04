@@ -3,21 +3,17 @@
 import type React from "react"
 
 import { useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Send, Loader2 } from "lucide-react"
 
 interface InputFormProps {
   onSubmit: (message: string) => void
-  isLoading?: boolean
+  isLoading: boolean
   placeholder?: string
 }
 
-export default function InputForm({
-  onSubmit,
-  isLoading = false,
-  placeholder = "Type your message here...",
-}: InputFormProps) {
+export default function InputForm({ onSubmit, isLoading, placeholder }: InputFormProps) {
   const [input, setInput] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -46,7 +42,7 @@ export default function InputForm({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={placeholder}
+            placeholder={placeholder || "Type your message..."}
             disabled={isLoading}
             className="flex-1"
           />

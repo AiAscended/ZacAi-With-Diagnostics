@@ -5,133 +5,242 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, BookOpen, Database, Download } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Search, BookOpen, Calculator, Globe, Code, Lightbulb, Download, Upload } from "lucide-react"
 
 export default function KnowledgeBrowser() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedModule, setSelectedModule] = useState("vocabulary")
 
-  const categories = [
-    { id: "all", name: "All", count: 1250 },
-    { id: "vocabulary", name: "Vocabulary", count: 500 },
-    { id: "mathematics", name: "Mathematics", count: 200 },
-    { id: "facts", name: "Facts", count: 300 },
-    { id: "coding", name: "Coding", count: 150 },
-    { id: "philosophy", name: "Philosophy", count: 100 },
-  ]
+  const mockData = {
+    vocabulary: [
+      { word: "algorithm", definition: "A process or set of rules to be followed in calculations", confidence: 0.95 },
+      {
+        word: "quantum",
+        definition: "The minimum amount of any physical entity involved in an interaction",
+        confidence: 0.92,
+      },
+      {
+        word: "artificial",
+        definition: "Made or produced by human beings rather than occurring naturally",
+        confidence: 0.88,
+      },
+    ],
+    mathematics: [
+      { concept: "Fibonacci Sequence", formula: "F(n) = F(n-1) + F(n-2)", confidence: 0.96 },
+      { concept: "Pythagorean Theorem", formula: "a² + b² = c²", confidence: 0.98 },
+      { concept: "Golden Ratio", formula: "φ = (1 + √5) / 2", confidence: 0.94 },
+    ],
+    facts: [
+      { topic: "Solar System", content: "The Solar System consists of the Sun and 8 planets", confidence: 0.99 },
+      { topic: "DNA", content: "DNA is a double helix structure containing genetic information", confidence: 0.97 },
+      {
+        topic: "Photosynthesis",
+        content: "Process by which plants convert light energy into chemical energy",
+        confidence: 0.95,
+      },
+    ],
+  }
 
-  const sampleEntries = [
-    {
-      id: 1,
-      title: "Algorithm",
-      category: "vocabulary",
-      content: "A step-by-step procedure for solving a problem...",
-      confidence: 0.95,
-      sources: ["dictionary", "coding"],
-    },
-    {
-      id: 2,
-      title: "Fibonacci Sequence",
-      category: "mathematics",
-      content: "A series of numbers where each number is the sum...",
-      confidence: 0.92,
-      sources: ["mathematics"],
-    },
-    {
-      id: 3,
-      title: "React Components",
-      category: "coding",
-      content: "Reusable pieces of UI in React applications...",
-      confidence: 0.88,
-      sources: ["coding", "nextjs"],
-    },
-  ]
+  const getModuleIcon = (module: string) => {
+    switch (module) {
+      case "vocabulary":
+        return <BookOpen className="h-4 w-4" />
+      case "mathematics":
+        return <Calculator className="h-4 w-4" />
+      case "facts":
+        return <Globe className="h-4 w-4" />
+      case "coding":
+        return <Code className="h-4 w-4" />
+      case "philosophy":
+        return <Lightbulb className="h-4 w-4" />
+      default:
+        return <BookOpen className="h-4 w-4" />
+    }
+  }
 
-  const filteredEntries = sampleEntries.filter((entry) => {
-    const matchesSearch = entry.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || entry.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 0.9) return "bg-green-100 text-green-800 border-green-200"
+    if (confidence >= 0.7) return "bg-yellow-100 text-yellow-800 border-yellow-200"
+    return "bg-red-100 text-red-800 border-red-200"
+  }
 
   return (
     <div className="space-y-6">
+      {/* Search and Controls */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
+            <Search className="h-5 w-5" />
             Knowledge Browser
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search knowledge base..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Button variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
+          <div className="flex gap-4 mb-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Search knowledge base..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
+            <Button variant="outline">
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+          </div>
 
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.id)}
-                >
-                  {category.name} ({category.count})
-                </Button>
-              ))}
-            </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm">
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-4">
-        {filteredEntries.map((entry) => (
-          <Card key={entry.id}>
-            <CardContent className="p-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{entry.title}</h3>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="capitalize">
-                      {entry.category}
-                    </Badge>
-                    <Badge variant="outline">{Math.round(entry.confidence * 100)}% confidence</Badge>
+      {/* Knowledge Modules */}
+      <Tabs value={selectedModule} onValueChange={setSelectedModule}>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="vocabulary" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Vocabulary
+          </TabsTrigger>
+          <TabsTrigger value="mathematics" className="flex items-center gap-2">
+            <Calculator className="h-4 w-4" />
+            Math
+          </TabsTrigger>
+          <TabsTrigger value="facts" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Facts
+          </TabsTrigger>
+          <TabsTrigger value="coding" className="flex items-center gap-2">
+            <Code className="h-4 w-4" />
+            Coding
+          </TabsTrigger>
+          <TabsTrigger value="philosophy" className="flex items-center gap-2">
+            <Lightbulb className="h-4 w-4" />
+            Philosophy
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="vocabulary" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  {getModuleIcon("vocabulary")}
+                  Vocabulary Knowledge
+                </span>
+                <Badge variant="secondary">{mockData.vocabulary.length} entries</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {mockData.vocabulary.map((item, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{item.word}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{item.definition}</p>
+                      </div>
+                      <Badge variant="outline" className={`ml-4 ${getConfidenceColor(item.confidence)}`}>
+                        {Math.round(item.confidence * 100)}%
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-                <p className="text-sm text-gray-600">{entry.content}</p>
-                <div className="flex flex-wrap gap-1">
-                  {entry.sources.map((source, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs">
-                      {source}
-                    </Badge>
-                  ))}
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+        </TabsContent>
 
-      {filteredEntries.length === 0 && (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Database className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600">No knowledge entries found matching your criteria.</p>
-          </CardContent>
-        </Card>
-      )}
+        <TabsContent value="mathematics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  {getModuleIcon("mathematics")}
+                  Mathematics Knowledge
+                </span>
+                <Badge variant="secondary">{mockData.mathematics.length} entries</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {mockData.mathematics.map((item, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{item.concept}</h4>
+                        <p className="text-sm text-gray-600 mt-1 font-mono">{item.formula}</p>
+                      </div>
+                      <Badge variant="outline" className={`ml-4 ${getConfidenceColor(item.confidence)}`}>
+                        {Math.round(item.confidence * 100)}%
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="facts" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  {getModuleIcon("facts")}
+                  Facts Knowledge
+                </span>
+                <Badge variant="secondary">{mockData.facts.length} entries</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {mockData.facts.map((item, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{item.topic}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{item.content}</p>
+                      </div>
+                      <Badge variant="outline" className={`ml-4 ${getConfidenceColor(item.confidence)}`}>
+                        {Math.round(item.confidence * 100)}%
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="coding" className="space-y-4">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Code className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-lg font-semibold mb-2">Coding Knowledge</h3>
+              <p className="text-gray-600">Coding knowledge module is being loaded...</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="philosophy" className="space-y-4">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-lg font-semibold mb-2">Philosophy Knowledge</h3>
+              <p className="text-gray-600">Philosophy knowledge module is being loaded...</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

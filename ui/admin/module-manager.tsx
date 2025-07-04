@@ -3,120 +3,157 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Progress } from "@/components/ui/progress"
-import { Settings, Play, Pause, RefreshCw, AlertTriangle } from "lucide-react"
+import {
+  Database,
+  Play,
+  Pause,
+  RotateCcw,
+  Settings,
+  BookOpen,
+  Calculator,
+  Globe,
+  Code,
+  Lightbulb,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+} from "lucide-react"
 
 interface ModuleManagerProps {
   modules: any
 }
 
 export default function ModuleManager({ modules }: ModuleManagerProps) {
-  const [moduleStates, setModuleStates] = useState(modules || {})
+  const [moduleStates, setModuleStates] = useState<{ [key: string]: boolean }>({
+    vocabulary: true,
+    mathematics: true,
+    facts: true,
+    coding: false,
+    philosophy: false,
+  })
 
-  const toggleModule = (moduleName: string) => {
-    setModuleStates((prev: any) => ({
-      ...prev,
-      [moduleName]: {
-        ...prev[moduleName],
-        status: prev[moduleName].status === "active" ? "standby" : "active",
-      },
-    }))
-  }
-
-  const restartModule = (moduleName: string) => {
-    // Simulate module restart
-    setModuleStates((prev: any) => ({
-      ...prev,
-      [moduleName]: {
-        ...prev[moduleName],
-        status: "restarting",
-      },
-    }))
-
-    setTimeout(() => {
-      setModuleStates((prev: any) => ({
-        ...prev,
-        [moduleName]: {
-          ...prev[moduleName],
-          status: "active",
-        },
-      }))
-    }, 2000)
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800"
-      case "standby":
-        return "bg-yellow-100 text-yellow-800"
-      case "restarting":
-        return "bg-blue-100 text-blue-800"
-      case "error":
-        return "bg-red-100 text-red-800"
+  const getModuleIcon = (module: string) => {
+    switch (module) {
+      case "vocabulary":
+        return <BookOpen className="h-5 w-5 text-blue-600" />
+      case "mathematics":
+        return <Calculator className="h-5 w-5 text-green-600" />
+      case "facts":
+        return <Globe className="h-5 w-5 text-purple-600" />
+      case "coding":
+        return <Code className="h-5 w-5 text-cyan-600" />
+      case "philosophy":
+        return <Lightbulb className="h-5 w-5 text-orange-600" />
       default:
-        return "bg-gray-100 text-gray-800"
+        return <Database className="h-5 w-5 text-gray-600" />
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "active":
-        return <Play className="h-4 w-4" />
-      case "standby":
-        return <Pause className="h-4 w-4" />
-      case "restarting":
-        return <RefreshCw className="h-4 w-4 animate-spin" />
+        return <CheckCircle className="h-4 w-4 text-green-600" />
+      case "loading":
+        return <Clock className="h-4 w-4 text-yellow-600" />
       case "error":
-        return <AlertTriangle className="h-4 w-4" />
+        return <AlertCircle className="h-4 w-4 text-red-600" />
       default:
-        return <Settings className="h-4 w-4" />
+        return <AlertCircle className="h-4 w-4 text-gray-600" />
     }
+  }
+
+  const toggleModule = (moduleName: string) => {
+    setModuleStates((prev) => ({
+      ...prev,
+      [moduleName]: !prev[moduleName],
+    }))
+  }
+
+  const restartModule = (moduleName: string) => {
+    console.log(`Restarting module: ${moduleName}`)
+    // Add restart logic here
+  }
+
+  const configureModule = (moduleName: string) => {
+    console.log(`Configuring module: ${moduleName}`)
+    // Add configuration logic here
   }
 
   return (
     <div className="space-y-6">
+      {/* Module Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Modules</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {Object.values(moduleStates).filter(Boolean).length}
+                </p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Modules</p>
+                <p className="text-2xl font-bold text-gray-900">{Object.keys(moduleStates).length}</p>
+              </div>
+              <Database className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">System Load</p>
+                <p className="text-2xl font-bold text-purple-600">67%</p>
+              </div>
+              <Progress value={67} className="w-8 h-8" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Module Controls */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Module Manager
+            <Database className="h-5 w-5" />
+            Module Management
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {Object.entries(moduleStates).map(([name, module]: [string, any]) => (
-              <Card key={name} className="border">
-                <CardContent className="p-4">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+            {Object.entries(modules || {}).map(([name, module]: [string, any]) => (
+              <div key={name} className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    {getModuleIcon(name)}
+                    <div>
+                      <h3 className="font-medium text-gray-900 capitalize">{name}</h3>
+                      <div className="flex items-center gap-2 mt-1">
                         {getStatusIcon(module.status)}
-                        <div>
-                          <h3 className="font-semibold capitalize">{name}</h3>
-                          <p className="text-sm text-gray-600">Load time: {module.loadTime}ms</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge className={getStatusColor(module.status)}>{module.status}</Badge>
-                        <Switch
-                          checked={module.status === "active"}
-                          onCheckedChange={() => toggleModule(name)}
-                          disabled={module.status === "restarting"}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Performance</span>
-                        <span>
-                          {module.loadTime < 100 ? "Excellent" : module.loadTime < 200 ? "Good" : "Needs Optimization"}
+                        <span className="text-sm text-gray-600">
+                          {module.status} • Load time: {module.loadTime}ms
                         </span>
                       </div>
-                      <Progress value={module.loadTime < 100 ? 90 : module.loadTime < 200 ? 70 : 40} className="h-2" />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">Enabled</span>
+                      <Switch checked={moduleStates[name]} onCheckedChange={() => toggleModule(name)} />
                     </div>
 
                     <div className="flex gap-2">
@@ -124,52 +161,68 @@ export default function ModuleManager({ modules }: ModuleManagerProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => restartModule(name)}
-                        disabled={module.status === "restarting"}
+                        disabled={!moduleStates[name]}
                       >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${module.status === "restarting" ? "animate-spin" : ""}`} />
-                        Restart
+                        <RotateCcw className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Configure
+                      <Button variant="outline" size="sm" onClick={() => configureModule(name)}>
+                        <Settings className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+
+                {moduleStates[name] && (
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Queries:</span>
+                        <span className="ml-2 font-medium">42</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Success Rate:</span>
+                        <span className="ml-2 font-medium">95%</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Avg Response:</span>
+                        <span className="ml-2 font-medium">150ms</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Memory:</span>
+                        <span className="ml-2 font-medium">12MB</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </CardContent>
       </Card>
 
+      {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Module Performance Summary</CardTitle>
+          <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {Object.values(moduleStates).filter((m: any) => m.status === "active").length}
-              </div>
-              <div className="text-sm text-gray-600">Active Modules</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {Object.values(moduleStates).filter((m: any) => m.status === "standby").length}
-              </div>
-              <div className="text-sm text-gray-600">Standby Modules</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {Math.round(
-                  Object.values(moduleStates).reduce((acc: number, m: any) => acc + m.loadTime, 0) /
-                    Object.values(moduleStates).length,
-                )}
-                ms
-              </div>
-              <div className="text-sm text-gray-600">Avg Load Time</div>
-            </div>
+          <div className="flex gap-4">
+            <Button variant="outline">
+              <Play className="h-4 w-4 mr-2" />
+              Start All
+            </Button>
+            <Button variant="outline">
+              <Pause className="h-4 w-4 mr-2" />
+              Stop All
+            </Button>
+            <Button variant="outline">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Restart All
+            </Button>
+            <Button variant="outline">
+              <Settings className="h-4 w-4 mr-2" />
+              Global Config
+            </Button>
           </div>
         </CardContent>
       </Card>
