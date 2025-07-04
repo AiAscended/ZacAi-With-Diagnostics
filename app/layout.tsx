@@ -6,8 +6,8 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ZacAI Assistant",
-  description: "Your personal AI assistant",
+  title: "ZacAI",
+  description: "AI Assistant",
     generator: 'v0.dev'
 }
 

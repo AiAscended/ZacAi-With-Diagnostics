@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { Loader2, CheckCircle, XCircle, Send, User, Bot, Settings } from "lucide-react"
+import { Input } from "@/components/ui/input"
 
 interface Message {
   id: string
@@ -129,11 +129,30 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
 
 export default function Home() {
   const [appMode, setAppMode] = useState<AppMode>("chat")
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "welcome",
+      content: `🎉 ZacAI System Online!
+
+I'm your AI assistant, ready to help with:
+
+• Basic chat and responses
+• Simple math calculations (5+5)
+• Name recognition (my name is...)
+• System status and help
+• Admin dashboard (type "admin")
+
+What would you like to do?`,
+      sender: "ai",
+      timestamp: Date.now(),
+      confidence: 1.0,
+    },
+  ])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [loadingStage, setLoadingStage] = useState<LoadingStage>("initializing")
   const [loadingProgress, setLoadingProgress] = useState<string[]>([])
+  const [showAdmin, setShowAdmin] = useState(false)
 
   useEffect(() => {
     initializeSystem()
@@ -156,26 +175,6 @@ export default function Home() {
 
       addLoadingStep("🎉 System ready!")
       setLoadingStage("ready")
-
-      const welcomeMessage: Message = {
-        id: "welcome",
-        content: `🎉 ZacAI System Online!
-
-I'm your AI assistant, ready to help with:
-
-• Basic chat and responses
-• Simple math calculations (5+5)
-• Name recognition (my name is...)
-• System status and help
-• Admin dashboard (type "admin")
-
-What would you like to do?`,
-        sender: "ai",
-        timestamp: Date.now(),
-        confidence: 1.0,
-      }
-
-      setMessages([welcomeMessage])
     } catch (error) {
       console.error("System initialization failed:", error)
       addLoadingStep(`❌ Error: ${error}`)
@@ -203,7 +202,7 @@ What would you like to do?`,
       const lowerInput = input.toLowerCase()
 
       if (lowerInput.includes("admin") || lowerInput.includes("dashboard")) {
-        setAppMode("admin")
+        setShowAdmin(true)
         response = "🔧 Switching to Admin Dashboard..."
         confidence = 0.95
       } else if (lowerInput.includes("help")) {
@@ -359,8 +358,35 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
   }
 
   // Admin mode
-  if (appMode === "admin") {
-    return <AdminDashboard onToggleChat={() => setAppMode("chat")} />
+  if (showAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-2xl font-bold">ZacAI Admin Dashboard</h1>
+              <Button onClick={() => setShowAdmin(false)}>Back to Chat</Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold">System Status</h3>
+                  <p className="text-green-600">Online</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold">Messages</h3>
+                  <p>{messages.length}</p>
+                </CardContent>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   // Main chat interface
@@ -382,7 +408,7 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
                 </div>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setAppMode("admin")}>
+            <Button variant="outline" size="sm" onClick={() => setShowAdmin(true)}>
               <Settings className="h-4 w-4 mr-2" />
               Admin
             </Button>
@@ -449,7 +475,7 @@ I'm here to help! Type "help" to see available commands, or just chat with me na
           {/* Input */}
           <div className="border-t p-4">
             <div className="flex gap-2">
-              <Textarea
+              <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
