@@ -1,214 +1,242 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, XCircle } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Loader2, Brain, Settings } from "lucide-react"
 
-// Core imports with fallbacks
-let ChatWindow: any = null
-let AdminDashboard: any = null
+// Simple Chat Component
+function ChatWindow({ onToggleAdmin }: { onToggleAdmin: () => void }) {
+  const [messages, setMessages] = useState([
+    {
+      id: "1",
+      type: "assistant" as const,
+      content: "Hello! I'm ZacAI. How can I help you today?",
+      timestamp: Date.now(),
+    },
+  ])
+  const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-try {
-  ChatWindow = require("@/ui/chat/chat-window").default
-} catch {
-  console.warn("ChatWindow not found, using fallback")
-}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim() || isLoading) return
 
-try {
-  AdminDashboard = require("@/ui/admin/dashboard").default
-} catch {
-  console.warn("AdminDashboard not found, using fallback")
-}
-
-type LoadingStage = "initializing" | "ready" | "error"
-type AppMode = "chat" | "admin"
-
-// Fallback Chat Component
-function FallbackChat({ onToggleAdmin }: { onToggleAdmin: () => void }) {
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            ZacAI Chat (Fallback Mode)
-            <Button onClick={onToggleAdmin}>Admin</Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Chat system loading... Core is stable.</p>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-// Fallback Admin Component
-function FallbackAdmin({ onToggleChat }: { onToggleChat: () => void }) {
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            ZacAI Admin (Fallback Mode)
-            <Button onClick={onToggleChat}>Back to Chat</Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Admin system loading... Core is stable.</p>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-export default function Home() {
-  const [appMode, setAppMode] = useState<AppMode>("chat")
-  const [loadingStage, setLoadingStage] = useState<LoadingStage>("initializing")
-  const [loadingProgress, setLoadingProgress] = useState<string[]>([])
-  const [systemHealth, setSystemHealth] = useState({
-    core: true,
-    chat: false,
-    admin: false,
-  })
-
-  useEffect(() => {
-    initializeSystem()
-  }, [])
-
-  const addLoadingStep = (step: string) => {
-    setLoadingProgress((prev) => [...prev, `${new Date().toLocaleTimeString()}: ${step}`])
-  }
-
-  const initializeSystem = async () => {
-    try {
-      addLoadingStep("🚀 Starting ZacAI Core System...")
-      await new Promise((resolve) => setTimeout(resolve, 300))
-
-      // Core self-diagnostic
-      addLoadingStep("🔍 Running self-diagnostics...")
-      const health = {
-        core: true,
-        chat: !!ChatWindow,
-        admin: !!AdminDashboard,
-      }
-      setSystemHealth(health)
-
-      addLoadingStep("✅ Core systems loaded")
-      await new Promise((resolve) => setTimeout(resolve, 200))
-
-      addLoadingStep("📦 Loading modules...")
-      await new Promise((resolve) => setTimeout(resolve, 100))
-
-      addLoadingStep("🎉 System ready!")
-      setLoadingStage("ready")
-    } catch (error) {
-      console.error("System initialization failed:", error)
-      addLoadingStep(`❌ Error: ${error}`)
-      setLoadingStage("error")
+    const userMessage = {
+      id: Date.now().toString(),
+      type: "user" as const,
+      content: input.trim(),
+      timestamp: Date.now(),
     }
+
+    setMessages((prev) => [...prev, userMessage])
+    setInput("")
+    setIsLoading(true)
+
+    // Simple AI response logic
+    setTimeout(() => {
+      let response = ""
+      const lowerInput = input.toLowerCase()
+
+      if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
+        response = "Hello! Nice to meet you. How can I assist you today?"
+      } else if (lowerInput.includes("help")) {
+        response = "I can help you with basic questions, math, and general conversation. What would you like to know?"
+      } else if (/^\d+[\s]*[+\-*/][\s]*\d+/.test(input)) {
+        try {
+          const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
+          response = `${input} = ${result}`
+        } catch {
+          response = "I couldn't calculate that. Please check your math expression."
+        }
+      } else {
+        response = `You said: "${input}". I'm here to help! Try asking me something or type "help" for more options.`
+      }
+
+      const aiMessage = {
+        id: (Date.now() + 1).toString(),
+        type: "assistant" as const,
+        content: response,
+        timestamp: Date.now(),
+      }
+
+      setMessages((prev) => [...prev, aiMessage])
+      setIsLoading(false)
+    }, 1000)
   }
 
-  // Loading screen
-  if (loadingStage === "initializing") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-xl">
+  return (
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Brain className="w-8 h-8 text-blue-600" />
+            <div>
+              <h1 className="text-xl font-bold">ZacAI Chat</h1>
+              <p className="text-sm text-gray-600">Your AI Assistant</p>
+            </div>
+            <Badge className="bg-green-100 text-green-800">Online</Badge>
+          </div>
+          <Button onClick={onToggleAdmin} variant="outline">
+            <Settings className="w-4 h-4 mr-2" />
+            Admin
+          </Button>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="max-w-2xl mx-auto space-y-4">
+          {messages.map((message) => (
+            <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+              <Card className={`max-w-xs ${message.type === "user" ? "bg-blue-100" : "bg-white"}`}>
+                <CardContent className="p-3">
+                  <p className="text-sm">{message.content}</p>
+                  <p className="text-xs text-gray-500 mt-1">{new Date(message.timestamp).toLocaleTimeString()}</p>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <Card className="bg-white">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm">Thinking...</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Input */}
+      <div className="bg-white border-t p-4">
+        <form onSubmit={handleSubmit} className="max-w-2xl mx-auto flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isLoading}
+          />
+          <Button type="submit" disabled={isLoading || !input.trim()}>
+            Send
+          </Button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// Simple Admin Component
+function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
+  return (
+    <div className="h-screen bg-gray-50">
+      <div className="bg-white border-b p-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">ZacAI Admin Dashboard</h1>
+          <Button onClick={onToggleChat} variant="outline">
+            Back to Chat
+          </Button>
+        </div>
+      </div>
+
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>System Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Badge className="bg-green-100 text-green-800">Online</Badge>
+              <p className="text-sm text-gray-600 mt-2">All systems operational</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Messages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">0</p>
+              <p className="text-sm text-gray-600">Total conversations</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Uptime</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">100%</p>
+              <p className="text-sm text-gray-600">System availability</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-              Initializing ZacAI
-            </CardTitle>
+            <CardTitle>System Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Stage:</span>
-                <Badge variant="secondary">Starting up...</Badge>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Version:</span>
+                <span>1.0.0</span>
               </div>
-
-              <div>
-                <h4 className="text-sm font-medium mb-2">System Health:</h4>
-                <div className="space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-xs">Core:</span>
-                    <Badge variant={systemHealth.core ? "default" : "destructive"}>
-                      {systemHealth.core ? "✓" : "✗"}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs">Chat:</span>
-                    <Badge variant={systemHealth.chat ? "default" : "secondary"}>
-                      {systemHealth.chat ? "✓" : "Fallback"}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs">Admin:</span>
-                    <Badge variant={systemHealth.admin ? "default" : "secondary"}>
-                      {systemHealth.admin ? "✓" : "Fallback"}
-                    </Badge>
-                  </div>
-                </div>
+              <div className="flex justify-between">
+                <span>Status:</span>
+                <Badge className="bg-green-100 text-green-800">Running</Badge>
               </div>
-
-              <div>
-                <h4 className="text-sm font-medium mb-2">Loading Progress:</h4>
-                <ScrollArea className="h-32 w-full border rounded p-2 bg-gray-50">
-                  <div className="space-y-1">
-                    {loadingProgress.map((step, index) => (
-                      <div key={index} className="text-xs text-gray-600">
-                        {step}
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+              <div className="flex justify-between">
+                <span>Mode:</span>
+                <span>Production</span>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-    )
-  }
+    </div>
+  )
+}
 
-  // Error screen
-  if (loadingStage === "error") {
+// Main App Component
+export default function Home() {
+  const [mode, setMode] = useState<"chat" | "admin">("chat")
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simple initialization
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+  }, [])
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-red-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-700">
-              <XCircle className="h-5 w-5" />
-              System Error
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-red-600 mb-4">
-              The system encountered an error during initialization. Core is stable, using fallback mode.
-            </p>
-            <Button onClick={() => window.location.reload()} className="w-full">
-              Refresh Page
-            </Button>
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-96">
+          <CardContent className="p-8 text-center">
+            <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-blue-600" />
+            <h2 className="text-xl font-bold mb-2">Loading ZacAI</h2>
+            <p className="text-gray-600">Initializing system...</p>
           </CardContent>
         </Card>
       </div>
     )
   }
 
-  // Admin mode - with fallback
-  if (appMode === "admin") {
-    if (AdminDashboard) {
-      return <AdminDashboard onToggleChat={() => setAppMode("chat")} />
-    } else {
-      return <FallbackAdmin onToggleChat={() => setAppMode("chat")} />
-    }
+  if (mode === "admin") {
+    return <AdminDashboard onToggleChat={() => setMode("chat")} />
   }
 
-  // Chat mode - with fallback
-  if (ChatWindow) {
-    return <ChatWindow onToggleAdmin={() => setAppMode("admin")} />
-  } else {
-    return <FallbackChat onToggleAdmin={() => setAppMode("admin")} />
-  }
+  return <ChatWindow onToggleAdmin={() => setMode("admin")} />
 }
