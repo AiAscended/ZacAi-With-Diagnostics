@@ -1,15 +1,160 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Loader2, XCircle, Brain, CheckCircle } from "lucide-react"
 
-// Simple, reliable components to avoid circular dependencies
+// Self-contained UI components to avoid import issues
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>{children}</div>
+)
+
+const CardHeader = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>{children}</div>
+)
+
+const CardTitle = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>{children}</h3>
+)
+
+const CardContent = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`p-6 pt-0 ${className}`}>{children}</div>
+)
+
+const Button = ({
+  children,
+  onClick,
+  disabled = false,
+  type = "button",
+  variant = "default",
+  size = "default",
+  className = "",
+}: {
+  children: React.ReactNode
+  onClick?: () => void
+  disabled?: boolean
+  type?: "button" | "submit"
+  variant?: "default" | "outline" | "ghost"
+  size?: "default" | "sm"
+  className?: string
+}) => {
+  const baseClasses =
+    "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+
+  const variantClasses = {
+    default: "bg-primary text-primary-foreground hover:bg-primary/90 bg-blue-600 text-white hover:bg-blue-700",
+    outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+    ghost: "hover:bg-accent hover:text-accent-foreground",
+  }
+
+  const sizeClasses = {
+    default: "h-10 px-4 py-2",
+    sm: "h-9 rounded-md px-3",
+  }
+
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+    >
+      {children}
+    </button>
+  )
+}
+
+const Badge = ({
+  children,
+  variant = "default",
+  className = "",
+}: {
+  children: React.ReactNode
+  variant?: "default" | "secondary" | "outline"
+  className?: string
+}) => {
+  const variantClasses = {
+    default: "bg-primary text-primary-foreground hover:bg-primary/80 bg-blue-600 text-white",
+    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100 text-gray-900",
+    outline: "text-foreground border border-gray-200",
+  }
+
+  return (
+    <div
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${variantClasses[variant]} ${className}`}
+    >
+      {children}
+    </div>
+  )
+}
+
+const ScrollArea = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`relative overflow-auto ${className}`}>{children}</div>
+)
+
+// Icons as simple SVG components
+const Brain = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+    />
+  </svg>
+)
+
+const Loader2 = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={`${className} animate-spin`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+    />
+  </svg>
+)
+
+const CheckCircle = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+)
+
+const XCircle = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+)
+
+const Send = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+  </svg>
+)
+
+const Settings = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+    />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+)
+
+// Types
 interface Message {
   id: string
   type: "user" | "assistant"
@@ -225,7 +370,7 @@ export default function Home() {
     )
   }
 
-  // Main application - render components directly to avoid import issues
+  // Main application
   if (appMode === "admin") {
     return <AdminDashboard onToggleChat={() => setAppMode("chat")} />
   }
@@ -233,7 +378,7 @@ export default function Home() {
   return <ChatWindow onToggleAdmin={() => setAppMode("admin")} />
 }
 
-// Inline ChatWindow component to avoid import issues
+// ChatWindow Component
 function ChatWindow({ onToggleAdmin }: { onToggleAdmin: () => void }) {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -434,9 +579,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
     setIsLoading(true)
 
     try {
-      const startTime = Date.now()
       const { response, confidence, sources } = await simulateThinking(input.trim())
-      const totalTime = Date.now() - startTime
 
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
@@ -489,7 +632,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
               variant="outline"
               className="gap-2 bg-white/50 hover:bg-white/80 border-gray-200 shadow-sm"
             >
-              <Brain className="w-4 h-4" />
+              <Settings className="w-4 h-4" />
               Admin Panel
             </Button>
           </div>
@@ -517,7 +660,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                       >
                         {/* Avatar */}
                         <div
-                          className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
+                          className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md text-sm font-bold ${
                             message.type === "user"
                               ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
                               : "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700"
@@ -576,7 +719,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                 {isThinking && currentThinking.length > 0 && (
                   <div className="flex justify-start">
                     <div className="flex gap-3 max-w-4xl">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 flex items-center justify-center shadow-md">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 flex items-center justify-center shadow-md text-sm font-bold">
                         AI
                       </div>
                       <Card className="bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200 shadow-sm">
@@ -623,7 +766,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                 {isLoading && !isThinking && (
                   <div className="flex justify-start">
                     <div className="flex gap-3 max-w-4xl">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 flex items-center justify-center shadow-md">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 flex items-center justify-center shadow-md text-sm font-bold">
                         AI
                       </div>
                       <Card className="bg-white border-gray-200 shadow-sm">
@@ -655,7 +798,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                   disabled={isLoading || !input.trim()}
                   className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-8 py-3 shadow-lg"
                 >
-                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Send"}
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </Button>
               </form>
             </div>
@@ -666,9 +809,8 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
   )
 }
 
-// Inline AdminDashboard component to avoid import issues
+// AdminDashboard Component
 function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
-  const [activeTab, setActiveTab] = useState("overview")
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -706,7 +848,7 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
                 ← Back to Chat
               </Button>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
+                <Settings className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">ZacAI Admin Dashboard</h1>
