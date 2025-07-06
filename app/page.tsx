@@ -1,11 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
-// Self-contained UI components to avoid import issues
+// Self-contained UI Components
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>{children}</div>
+  <div className={`rounded-lg border bg-white text-gray-900 shadow-sm ${className}`}>{children}</div>
 )
 
 const CardHeader = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -38,17 +38,17 @@ const Button = ({
   className?: string
 }) => {
   const baseClasses =
-    "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 btn-hover-effect"
 
   const variantClasses = {
-    default: "bg-primary text-primary-foreground hover:bg-primary/90 bg-blue-600 text-white hover:bg-blue-700",
-    outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-    ghost: "hover:bg-accent hover:text-accent-foreground",
+    default: "bg-blue-600 text-white hover:bg-blue-700 shadow-md",
+    outline: "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700",
+    ghost: "hover:bg-gray-100 text-gray-700",
   }
 
   const sizeClasses = {
     default: "h-10 px-4 py-2",
-    sm: "h-9 rounded-md px-3",
+    sm: "h-9 rounded-md px-3 text-sm",
   }
 
   return (
@@ -73,14 +73,14 @@ const Badge = ({
   className?: string
 }) => {
   const variantClasses = {
-    default: "bg-primary text-primary-foreground hover:bg-primary/80 bg-blue-600 text-white",
-    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100 text-gray-900",
-    outline: "text-foreground border border-gray-200",
+    default: "bg-blue-600 text-white",
+    secondary: "bg-gray-100 text-gray-900",
+    outline: "text-gray-700 border border-gray-200 bg-white",
   }
 
   return (
     <div
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${variantClasses[variant]} ${className}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${variantClasses[variant]} ${className}`}
     >
       {children}
     </div>
@@ -91,7 +91,7 @@ const ScrollArea = ({ children, className = "" }: { children: React.ReactNode; c
   <div className={`relative overflow-auto ${className}`}>{children}</div>
 )
 
-// Icons as simple SVG components
+// Icon Components
 const Brain = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path
@@ -105,11 +105,11 @@ const Brain = ({ className = "w-4 h-4" }: { className?: string }) => (
 
 const Loader2 = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg className={`${className} animate-spin`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
     <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
     />
   </svg>
 )
@@ -154,6 +154,28 @@ const Settings = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 )
 
+const Activity = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+    />
+  </svg>
+)
+
+const Clock = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+)
+
 // Types
 interface Message {
   id: string
@@ -177,6 +199,7 @@ interface ThinkingStep {
 type LoadingStage = "initializing" | "ready" | "error"
 type AppMode = "chat" | "admin"
 
+// Main Component
 export default function Home() {
   const [appMode, setAppMode] = useState<AppMode>("chat")
   const [loadingStage, setLoadingStage] = useState<LoadingStage>("initializing")
@@ -201,24 +224,24 @@ export default function Home() {
       addLoadingStep("🚀 Starting ZacAI Core System...")
 
       // Simulate core system initialization
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      await new Promise((resolve) => setTimeout(resolve, 1200))
       setSystemHealth((prev) => ({ ...prev, core: true }))
       addLoadingStep("✅ Core engine online")
 
       // Initialize chat system
-      await new Promise((resolve) => setTimeout(resolve, 600))
+      await new Promise((resolve) => setTimeout(resolve, 800))
       setSystemHealth((prev) => ({ ...prev, chat: true }))
       addLoadingStep("💬 Chat interface ready")
 
       // Initialize admin system
-      await new Promise((resolve) => setTimeout(resolve, 400))
+      await new Promise((resolve) => setTimeout(resolve, 600))
       setSystemHealth((prev) => ({ ...prev, admin: true }))
       addLoadingStep("⚙️ Admin dashboard ready")
 
       addLoadingStep("🎉 All systems operational!")
 
       // Small delay before showing ready state
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 800))
       setLoadingStage("ready")
     } catch (error) {
       console.error("System initialization failed:", error)
@@ -227,18 +250,16 @@ export default function Home() {
     }
   }
 
-  // Loading screen with enhanced animation
+  // Loading screen
   if (loadingStage === "initializing") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+        <Card className="w-full max-w-lg shadow-2xl border-0 glass-effect animate-fadeIn">
           <CardHeader className="text-center pb-4">
             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg">
               <Brain className="w-10 h-10 text-white animate-pulse" />
             </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              ZacAI System
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold gradient-text">ZacAI System</CardTitle>
             <p className="text-gray-600 text-lg">Initializing advanced AI assistant...</p>
           </CardHeader>
 
@@ -246,8 +267,8 @@ export default function Home() {
             {/* Status Badge */}
             <div className="flex items-center justify-center">
               <Badge variant="secondary" className="bg-blue-100 text-blue-700 animate-pulse px-4 py-2">
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Starting up...
+                <Loader2 className="w-4 h-4 mr-2" />
+                Starting up<span className="loading-dots"></span>
               </Badge>
             </div>
 
@@ -265,7 +286,7 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        <Loader2 className="w-3 h-3 mr-1" />
                         Loading
                       </>
                     )}
@@ -282,7 +303,7 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        <Loader2 className="w-3 h-3 mr-1" />
                         Loading
                       </>
                     )}
@@ -299,7 +320,7 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        <Loader2 className="w-3 h-3 mr-1" />
                         Loading
                       </>
                     )}
@@ -314,7 +335,7 @@ export default function Home() {
               <ScrollArea className="h-40 w-full border rounded-lg p-3 bg-white/80">
                 <div className="space-y-1">
                   {loadingProgress.map((step, index) => (
-                    <div key={index} className="text-xs text-gray-600 font-mono leading-relaxed">
+                    <div key={index} className="text-xs text-gray-600 font-mono leading-relaxed animate-slideIn">
                       {step}
                     </div>
                   ))}
@@ -330,7 +351,7 @@ export default function Home() {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-1000 ease-out"
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full progress-bar"
                   style={{ width: `${Math.min((loadingProgress.length / 5) * 100, 100)}%` }}
                 />
               </div>
@@ -406,6 +427,15 @@ I'm your advanced AI assistant, ready to help with:
   const [isLoading, setIsLoading] = useState(false)
   const [currentThinking, setCurrentThinking] = useState<ThinkingStep[]>([])
   const [isThinking, setIsThinking] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, currentThinking])
 
   const simulateThinking = async (userInput: string) => {
     const thinkingSteps: Omit<ThinkingStep, "id">[] = [
@@ -455,7 +485,7 @@ I'm your advanced AI assistant, ready to help with:
         prev.map((step, index) => (index === i ? { ...step, status: "processing" as const } : step)),
       )
 
-      await new Promise((resolve) => setTimeout(resolve, 400 + Math.random() * 300))
+      await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 400))
 
       setCurrentThinking((prev) =>
         prev.map((step, index) =>
@@ -471,7 +501,7 @@ I'm your advanced AI assistant, ready to help with:
       )
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 200))
+    await new Promise((resolve) => setTimeout(resolve, 300))
     setIsThinking(false)
 
     return generateResponse(userInput)
@@ -518,6 +548,48 @@ Redirecting you to the administrative interface where you can:
       }
     }
 
+    if (lowerInput.includes("help")) {
+      return {
+        response: `🆘 **ZacAI Help Center**
+
+I'm here to assist you with a comprehensive range of capabilities:
+
+**💬 Conversation & Questions**
+• Natural language discussions on any topic
+• Detailed explanations and clarifications
+• Educational content and tutorials
+
+**🧮 Mathematics & Calculations**
+• Basic arithmetic (try: 25 + 17 * 3)
+• Complex equations and problem-solving
+• Statistical analysis and data interpretation
+
+**💻 Programming & Code**
+• Code review and debugging assistance
+• Programming concept explanations
+• Algorithm design and optimization
+
+**✍️ Creative Tasks**
+• Writing assistance and editing
+• Brainstorming and idea generation
+• Content creation and storytelling
+
+**🔍 Research & Information**
+• Fact-checking and verification
+• In-depth topic exploration
+• Current knowledge synthesis
+
+**⚙️ System Management**
+• Type "admin" to access the dashboard
+• Configure settings and preferences
+• Monitor performance metrics
+
+**What specific area would you like help with?**`,
+        confidence: 0.92,
+        sources: ["help", "documentation", "core"],
+      }
+    }
+
     if (/^\d+[\s]*[+\-*/][\s]*\d+/.test(input.replace(/\s/g, ""))) {
       try {
         const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
@@ -527,7 +599,12 @@ Redirecting you to the administrative interface where you can:
 **Expression:** \`${input}\`
 **Result:** \`${result}\`
 
-✅ Calculation completed successfully!`,
+✅ Calculation completed successfully!
+
+Would you like me to:
+• Explain the steps involved?
+• Help with more complex mathematics?
+• Show alternative calculation methods?`,
           confidence: 0.97,
           sources: ["mathematics", "calculator"],
         }
@@ -538,6 +615,7 @@ Redirecting you to the administrative interface where you can:
 I couldn't process that mathematical expression. Please try:
 • Simple arithmetic: \`5 + 3\`, \`10 * 2\`, \`15 / 3\`
 • Using parentheses for complex expressions: \`(5 + 3) * 2\`
+• Ensuring proper mathematical notation
 
 **Example:** Try asking me "What is 25 + 17?"`,
           confidence: 0.3,
@@ -557,7 +635,9 @@ I'm processing your request and thinking through the best way to help you. To pr
 • **Clarify your goal** - Are you looking for an explanation, solution, or discussion?
 • **Share details** - Any particular angle or use case you have in mind?
 
-I'm here to help with detailed, thoughtful responses once I understand exactly what you're looking for!`,
+I'm here to help with detailed, thoughtful responses once I understand exactly what you're looking for!
+
+**Tip:** Try asking more specific questions like "Explain how..." or "Help me understand..."`,
       confidence: 0.65,
       sources: ["general", "clarification"],
     }
@@ -623,7 +703,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                 <p className="text-sm text-gray-600">Advanced AI Chat Interface • Version 208</p>
               </div>
               <Badge className="bg-green-100 text-green-800 border-green-200 px-3 py-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 status-pulse" />
                 Online
               </Badge>
             </div>
@@ -641,7 +721,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
 
       {/* Chat Area */}
       <div className="flex-1 max-w-6xl mx-auto w-full p-6">
-        <Card className="h-full flex flex-col shadow-2xl bg-white/95 backdrop-blur-sm border-0">
+        <Card className="h-full flex flex-col shadow-2xl glass-effect border-0">
           <CardHeader className="pb-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
             <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
               <Brain className="w-5 h-5 text-blue-600" />
@@ -653,7 +733,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
             <ScrollArea className="flex-1 px-6">
               <div className="space-y-6 py-6">
                 {messages.map((message) => (
-                  <div key={message.id}>
+                  <div key={message.id} className="message-enter">
                     <div className={`flex gap-4 ${message.type === "user" ? "justify-end" : "justify-start"}`}>
                       <div
                         className={`flex gap-3 max-w-4xl ${message.type === "user" ? "flex-row-reverse" : "flex-row"}`}
@@ -672,7 +752,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                         {/* Message Content */}
                         <div className={`flex-1 ${message.type === "user" ? "text-right" : "text-left"}`}>
                           <Card
-                            className={`${
+                            className={`card-hover ${
                               message.type === "user"
                                 ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white border-blue-600"
                                 : "bg-white border-gray-200 shadow-sm"
@@ -691,6 +771,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                                   <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
                                   {message.confidence !== undefined && (
                                     <Badge variant="outline" className="text-xs">
+                                      <CheckCircle className="w-3 h-3 mr-1" />
                                       {Math.round(message.confidence * 100)}%
                                     </Badge>
                                   )}
@@ -717,7 +798,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
 
                 {/* Active Thinking Process */}
                 {isThinking && currentThinking.length > 0 && (
-                  <div className="flex justify-start">
+                  <div className="flex justify-start animate-fadeIn">
                     <div className="flex gap-3 max-w-4xl">
                       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 flex items-center justify-center shadow-md text-sm font-bold">
                         AI
@@ -726,17 +807,22 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                         <CardContent className="p-4">
                           <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                              <Loader2 className="w-4 h-4 animate-spin text-orange-600" />
-                              <span className="text-sm font-medium text-orange-800">Thinking...</span>
+                              <Loader2 className="w-4 h-4 text-orange-600" />
+                              <span className="text-sm font-medium text-orange-800">
+                                Thinking<span className="loading-dots"></span>
+                              </span>
                             </div>
                             <div className="space-y-2">
                               {currentThinking.map((step) => (
-                                <div key={step.id} className="flex items-center gap-3 text-xs">
+                                <div
+                                  key={step.id}
+                                  className={`flex items-center gap-3 text-xs thinking-step ${step.status}`}
+                                >
                                   <div className="flex-shrink-0">
                                     {step.status === "completed" ? (
                                       <CheckCircle className="w-3 h-3 text-green-600" />
                                     ) : step.status === "processing" ? (
-                                      <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                                      <Loader2 className="w-3 h-3 text-blue-600" />
                                     ) : (
                                       <div className="w-3 h-3 rounded-full bg-gray-300" />
                                     )}
@@ -752,6 +838,9 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                                   >
                                     {step.title}
                                   </span>
+                                  {step.duration && step.status === "completed" && (
+                                    <span className="text-gray-400 ml-auto">{step.duration}ms</span>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -764,7 +853,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
 
                 {/* Loading indicator */}
                 {isLoading && !isThinking && (
-                  <div className="flex justify-start">
+                  <div className="flex justify-start animate-fadeIn">
                     <div className="flex gap-3 max-w-4xl">
                       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 flex items-center justify-center shadow-md text-sm font-bold">
                         AI
@@ -772,14 +861,18 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                       <Card className="bg-white border-gray-200 shadow-sm">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-2">
-                            <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
-                            <span className="text-sm text-gray-600">Processing your request...</span>
+                            <Loader2 className="w-4 h-4 text-gray-600" />
+                            <span className="text-sm text-gray-600">
+                              Processing your request<span className="loading-dots"></span>
+                            </span>
                           </div>
                         </CardContent>
                       </Card>
                     </div>
                   </div>
                 )}
+
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
 
@@ -790,7 +883,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask me anything... I can help with questions, math, coding, creative tasks, and more!"
-                  className="flex-1 bg-white border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-base"
+                  className="flex-1 bg-white border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-base focus-ring"
                   disabled={isLoading}
                 />
                 <Button
@@ -798,7 +891,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                   disabled={isLoading || !input.trim()}
                   className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-8 py-3 shadow-lg"
                 >
-                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                  {isLoading ? <Loader2 className="w-5 h-5" /> : <Send className="w-5 h-5" />}
                 </Button>
               </form>
             </div>
@@ -815,22 +908,22 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
 
   useEffect(() => {
     // Simulate loading
-    const timer = setTimeout(() => setIsLoading(false), 1000)
+    const timer = setTimeout(() => setIsLoading(false), 1500)
     return () => clearTimeout(timer)
   }, [])
 
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Card className="w-96 shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
+        <Card className="w-96 shadow-2xl border-0 glass-effect animate-fadeIn">
           <CardContent className="p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-              <Brain className="w-8 h-8 text-white animate-pulse" />
+              <Settings className="w-8 h-8 text-white animate-pulse" />
             </div>
-            <h2 className="text-xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Loading ZacAI Dashboard
-            </h2>
-            <p className="text-gray-600">Initializing system analytics...</p>
+            <h2 className="text-xl font-bold mb-2 gradient-text">Loading ZacAI Dashboard</h2>
+            <p className="text-gray-600">
+              Initializing system analytics<span className="loading-dots"></span>
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -838,7 +931,7 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 animate-fadeIn">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -857,8 +950,16 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
             </div>
             <div className="flex items-center gap-3">
               <Badge className="bg-green-100 text-green-800 border-green-200 px-3 py-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 status-pulse" />
                 Online
+              </Badge>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1">
+                <Activity className="w-3 h-3 mr-1" />
+                127 queries
+              </Badge>
+              <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200 px-3 py-1">
+                <Clock className="w-3 h-3 mr-1" />
+                30m uptime
               </Badge>
             </div>
           </div>
@@ -868,7 +969,7 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <Card className="glass-effect border-0 shadow-lg card-hover">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -877,13 +978,13 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
                   <p className="text-xs text-green-600 mt-1">↗ +12% from last hour</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                  <Brain className="h-6 w-6 text-white" />
+                  <Activity className="h-6 w-6 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <Card className="glass-effect border-0 shadow-lg card-hover">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -898,7 +999,7 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <Card className="glass-effect border-0 shadow-lg card-hover">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -907,13 +1008,13 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
                   <p className="text-xs text-orange-600 mt-1">↗ +50ms slower</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Brain className="h-6 w-6 text-white" />
+                  <Clock className="h-6 w-6 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <Card className="glass-effect border-0 shadow-lg card-hover">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -930,29 +1031,51 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
         </div>
 
         {/* System Status */}
-        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+        <Card className="glass-effect border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-blue-600" />
-              System Status
+              System Status & Module Health
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {["Vocabulary", "Mathematics", "Facts", "Coding"].map((module) => (
-                <div key={module} className="p-4 border rounded-lg bg-gray-50/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium">{module}</h3>
-                    <Badge className="bg-green-100 text-green-800">Active</Badge>
+              {[
+                { name: "Vocabulary", accuracy: 94, loadTime: 120, status: "active" },
+                { name: "Mathematics", accuracy: 98, loadTime: 95, status: "active" },
+                { name: "Facts", accuracy: 89, loadTime: 200, status: "active" },
+                { name: "Coding", accuracy: 92, loadTime: 180, status: "active" },
+              ].map((module) => (
+                <div key={module.name} className="p-4 border rounded-lg bg-gray-50/50 card-hover">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium text-gray-900">{module.name}</h3>
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-1 status-pulse" />
+                      Active
+                    </Badge>
                   </div>
-                  <div className="space-y-1 text-sm text-gray-600">
+                  <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex justify-between">
                       <span>Accuracy:</span>
-                      <span className="font-medium">94%</span>
+                      <span className="font-medium text-gray-900">{module.accuracy}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Load Time:</span>
-                      <span className="font-medium">120ms</span>
+                      <span className="font-medium text-gray-900">{module.loadTime}ms</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <span className="font-medium text-green-600 capitalize">{module.status}</span>
+                    </div>
+                  </div>
+
+                  {/* Progress bar for accuracy */}
+                  <div className="mt-3">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full progress-bar"
+                        style={{ width: `${module.accuracy}%` }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -960,6 +1083,92 @@ function AdminDashboard({ onToggleChat }: { onToggleChat: () => void }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Performance Metrics */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="glass-effect border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-purple-600" />
+                Performance Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Memory Usage</span>
+                    <span className="font-medium">67.8MB / 1GB</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full progress-bar"
+                      style={{ width: "68%" }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>CPU Usage</span>
+                    <span className="font-medium">23%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full progress-bar"
+                      style={{ width: "23%" }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Response Quality</span>
+                    <span className="font-medium">96%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full progress-bar"
+                      style={{ width: "96%" }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-orange-600" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[
+                  { time: "2 min ago", action: "User query processed", status: "success" },
+                  { time: "5 min ago", action: "Math calculation completed", status: "success" },
+                  { time: "8 min ago", action: "Admin dashboard accessed", status: "info" },
+                  { time: "12 min ago", action: "System health check", status: "success" },
+                  { time: "15 min ago", action: "Knowledge base updated", status: "info" },
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 rounded bg-white/50">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          activity.status === "success" ? "bg-green-500" : "bg-blue-500"
+                        }`}
+                      />
+                      <span className="text-sm text-gray-700">{activity.action}</span>
+                    </div>
+                    <span className="text-xs text-gray-500">{activity.time}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

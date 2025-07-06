@@ -2,15 +2,15 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { ErrorBoundary } from "@/components/error-boundary"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ZacAI - Enhanced AI Assistant",
-  description: "Advanced AI assistant with modular intelligence capabilities",
+  title: "ZacAI - Advanced AI Assistant",
+  description: "Your intelligent AI companion for conversations, calculations, and creative tasks",
+  keywords: ["AI", "Assistant", "Chat", "ZacAI", "Artificial Intelligence"],
+  authors: [{ name: "ZacAI Team" }],
+  viewport: "width=device-width, initial-scale=1",
     generator: 'v0.dev'
 }
 
@@ -20,14 +20,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ErrorBoundary>
-          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-            {children}
-            <Toaster />
-          </ThemeProvider>
-        </ErrorBoundary>
+    <html lang="en" className="h-full">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </head>
+      <body className={`${inter.className} h-full antialiased`}>
+        <div id="root" className="h-full">
+          {children}
+        </div>
       </body>
     </html>
   )
