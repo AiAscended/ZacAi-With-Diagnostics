@@ -1,195 +1,214 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Loader2, XCircle } from "lucide-react"
 
-interface Message {
-  id: string
-  text: string
-  sender: "user" | "ai"
-  timestamp: Date
+// Core imports with fallbacks
+let ChatWindow: any = null
+let AdminDashboard: any = null
+
+try {
+  ChatWindow = require("@/ui/chat/chat-window").default
+} catch {
+  console.warn("ChatWindow not found, using fallback")
 }
 
-export default function ZacAimain() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hello! I'm ZacAimain. How can I help you today?",
-      sender: "ai",
-      timestamp: new Date(),
-    },
-  ])
-  const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+try {
+  AdminDashboard = require("@/ui/admin/dashboard").default
+} catch {
+  console.warn("AdminDashboard not found, using fallback")
+}
 
-  const handleSend = async () => {
-    if (!input.trim()) return
+type LoadingStage = "initializing" | "ready" | "error"
+type AppMode = "chat" | "admin"
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: input,
-      sender: "user",
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsLoading(true)
-
-    // Simple AI responses
-    let response = ""
-    const inputLower = input.toLowerCase()
-
-    if (inputLower.includes("hello") || inputLower.includes("hi")) {
-      response = "Hello! Nice to meet you. How can I assist you today?"
-    } else if (inputLower.includes("help")) {
-      response = "I can help you with basic math, answer questions, and have conversations. Try asking me something!"
-    } else if (inputLower.match(/\d+\s*[+\-*/]\s*\d+/)) {
-      try {
-        const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
-        response = `The answer is: ${result}`
-      } catch {
-        response = "Sorry, I couldn't calculate that. Please try a simpler math expression."
-      }
-    } else {
-      response = `I understand you said: "${input}". I'm a simple AI assistant. Try asking me for help or giving me a math problem!`
-    }
-
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: response,
-        sender: "ai",
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, aiMessage])
-      setIsLoading(false)
-    }, 1000)
-  }
-
+// Fallback Chat Component
+function FallbackChat({ onToggleAdmin }: { onToggleAdmin: () => void }) {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-6">ZacAimain AI Assistant</h1>
-
-        <Tabs defaultValue="chat" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="chat">Chat</TabsTrigger>
-            <TabsTrigger value="admin">Admin</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="chat">
-            <Card className="h-[600px] flex flex-col">
-              <CardHeader>
-                <CardTitle>Chat Window</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                <ScrollArea className="flex-1 mb-4 p-4 border rounded">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`mb-4 p-3 rounded-lg ${
-                        message.sender === "user"
-                          ? "bg-blue-500 text-white ml-auto max-w-xs"
-                          : "bg-gray-200 text-gray-800 mr-auto max-w-xs"
-                      }`}
-                    >
-                      <p>{message.text}</p>
-                      <small className="opacity-70">{message.timestamp.toLocaleTimeString()}</small>
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="bg-gray-200 text-gray-800 mr-auto max-w-xs mb-4 p-3 rounded-lg">
-                      <p>Thinking...</p>
-                    </div>
-                  )}
-                </ScrollArea>
-
-                <div className="flex gap-2">
-                  <Input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type your message..."
-                    onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                    disabled={isLoading}
-                  />
-                  <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
-                    Send
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="admin">
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Dashboard</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">System Status</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>Status:</span>
-                          <span className="text-green-600">Online</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Messages:</span>
-                          <span>{messages.length}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Uptime:</span>
-                          <span>Active</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Quick Actions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <Button
-                          className="w-full"
-                          onClick={() =>
-                            setMessages([
-                              {
-                                id: "1",
-                                text: "Chat cleared! How can I help you?",
-                                sender: "ai",
-                                timestamp: new Date(),
-                              },
-                            ])
-                          }
-                        >
-                          Clear Chat
-                        </Button>
-                        <Button className="w-full bg-transparent" variant="outline">
-                          Export Data
-                        </Button>
-                        <Button className="w-full bg-transparent" variant="outline">
-                          System Health Check
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            ZacAI Chat (Fallback Mode)
+            <Button onClick={onToggleAdmin}>Admin</Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Chat system loading... Core is stable.</p>
+        </CardContent>
+      </Card>
     </div>
   )
+}
+
+// Fallback Admin Component
+function FallbackAdmin({ onToggleChat }: { onToggleChat: () => void }) {
+  return (
+    <div className="min-h-screen bg-gray-50 p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            ZacAI Admin (Fallback Mode)
+            <Button onClick={onToggleChat}>Back to Chat</Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Admin system loading... Core is stable.</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+export default function Home() {
+  const [appMode, setAppMode] = useState<AppMode>("chat")
+  const [loadingStage, setLoadingStage] = useState<LoadingStage>("initializing")
+  const [loadingProgress, setLoadingProgress] = useState<string[]>([])
+  const [systemHealth, setSystemHealth] = useState({
+    core: true,
+    chat: false,
+    admin: false,
+  })
+
+  useEffect(() => {
+    initializeSystem()
+  }, [])
+
+  const addLoadingStep = (step: string) => {
+    setLoadingProgress((prev) => [...prev, `${new Date().toLocaleTimeString()}: ${step}`])
+  }
+
+  const initializeSystem = async () => {
+    try {
+      addLoadingStep("🚀 Starting ZacAI Core System...")
+      await new Promise((resolve) => setTimeout(resolve, 300))
+
+      // Core self-diagnostic
+      addLoadingStep("🔍 Running self-diagnostics...")
+      const health = {
+        core: true,
+        chat: !!ChatWindow,
+        admin: !!AdminDashboard,
+      }
+      setSystemHealth(health)
+
+      addLoadingStep("✅ Core systems loaded")
+      await new Promise((resolve) => setTimeout(resolve, 200))
+
+      addLoadingStep("📦 Loading modules...")
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      addLoadingStep("🎉 System ready!")
+      setLoadingStage("ready")
+    } catch (error) {
+      console.error("System initialization failed:", error)
+      addLoadingStep(`❌ Error: ${error}`)
+      setLoadingStage("error")
+    }
+  }
+
+  // Loading screen
+  if (loadingStage === "initializing") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              Initializing ZacAI
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Stage:</span>
+                <Badge variant="secondary">Starting up...</Badge>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-2">System Health:</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-xs">Core:</span>
+                    <Badge variant={systemHealth.core ? "default" : "destructive"}>
+                      {systemHealth.core ? "✓" : "✗"}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs">Chat:</span>
+                    <Badge variant={systemHealth.chat ? "default" : "secondary"}>
+                      {systemHealth.chat ? "✓" : "Fallback"}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs">Admin:</span>
+                    <Badge variant={systemHealth.admin ? "default" : "secondary"}>
+                      {systemHealth.admin ? "✓" : "Fallback"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-2">Loading Progress:</h4>
+                <ScrollArea className="h-32 w-full border rounded p-2 bg-gray-50">
+                  <div className="space-y-1">
+                    {loadingProgress.map((step, index) => (
+                      <div key={index} className="text-xs text-gray-600">
+                        {step}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Error screen
+  if (loadingStage === "error") {
+    return (
+      <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-red-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-700">
+              <XCircle className="h-5 w-5" />
+              System Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-600 mb-4">
+              The system encountered an error during initialization. Core is stable, using fallback mode.
+            </p>
+            <Button onClick={() => window.location.reload()} className="w-full">
+              Refresh Page
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Admin mode - with fallback
+  if (appMode === "admin") {
+    if (AdminDashboard) {
+      return <AdminDashboard onToggleChat={() => setAppMode("chat")} />
+    } else {
+      return <FallbackAdmin onToggleChat={() => setAppMode("chat")} />
+    }
+  }
+
+  // Chat mode - with fallback
+  if (ChatWindow) {
+    return <ChatWindow onToggleAdmin={() => setAppMode("admin")} />
+  } else {
+    return <FallbackChat onToggleAdmin={() => setAppMode("admin")} />
+  }
 }

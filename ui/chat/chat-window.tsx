@@ -1,53 +1,26 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
 import type React from "react"
-import { Card, CardContent } from "@/components/ui/card"
+
+import { useState, useRef, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send, Bot, User, Brain, Settings, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
-
-// Import sub-components with fallbacks
-let MessageComponent: any = null
-let InputForm: any = null
-let ThinkingDisplay: any = null
-let Suggestions: any = null
-
-try {
-  MessageComponent = require("./message").default
-} catch {
-  console.warn("Message component not found, using fallback")
-}
-
-try {
-  InputForm = require("./input-form").default
-} catch {
-  console.warn("InputForm component not found, using fallback")
-}
-
-try {
-  ThinkingDisplay = require("./thinking-display").default
-} catch {
-  console.warn("ThinkingDisplay component not found, using fallback")
-}
-
-try {
-  Suggestions = require("./suggestions").default
-} catch {
-  console.warn("Suggestions component not found, using fallback")
-}
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Brain, Settings, Send, Loader2 } from "lucide-react"
 
 interface Message {
   id: string
-  type: "user" | "assistant"
+  type: "user" | "assistant" | "thinking"
   content: string
   timestamp: number
-  confidence?: number
-  sources?: string[]
-  processingTime?: number
-  thinkingSteps?: any[]
+  thinking?: {
+    steps: string[]
+    currentStep: number
+    isComplete: boolean
+  }
 }
 
 interface ChatWindowProps {
@@ -59,39 +32,121 @@ export default function ChatWindow({ onToggleAdmin }: ChatWindowProps) {
     {
       id: "welcome",
       type: "assistant",
-      content: `🎉 ZacAI System Online!
-
-I'm your AI assistant, ready to help with:
-
-• Basic chat and responses
-• Simple math calculations (5+5)
-• Name recognition (my name is...)
-• System status and help
-• Admin dashboard (type "admin")
-
-What would you like to do?`,
+      content:
+        "Hello! I'm ZacAI, your advanced AI assistant. I can help you with questions, calculations, creative tasks, and much more. What would you like to explore today?",
       timestamp: Date.now(),
-      confidence: 1.0,
     },
   ])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [currentThinkingSteps, setCurrentThinkingSteps] = useState<any[]>([])
-  const [isThinking, setIsThinking] = useState(false)
-  const [systemStatus, setSystemStatus] = useState<any>({
-    initialized: true,
-    totalQueries: 0,
-    successRate: 1.0,
-  })
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [currentThinking, setCurrentThinking] = useState<Message | null>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector("[data-radix-scroll-area-viewport]")
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight
+      }
+    }
+  }
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages, currentThinkingSteps])
+  }, [messages, currentThinking])
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  const simulateThinking = async (userInput: string): Promise<string> => {
+    const thinkingSteps = [
+      "Analyzing your question...",
+      "Processing context and meaning...",
+      "Considering multiple approaches...",
+      "Formulating comprehensive response...",
+      "Finalizing answer...",
+    ]
+
+    const thinkingMessage: Message = {
+      id: `thinking-${Date.now()}`,
+      type: "thinking",
+      content: "Let me think about this...",
+      timestamp: Date.now(),
+      thinking: {
+        steps: thinkingSteps,
+        currentStep: 0,
+        isComplete: false,
+      },
+    }
+
+    setCurrentThinking(thinkingMessage)
+
+    // Simulate thinking process
+    for (let i = 0; i < thinkingSteps.length; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      setCurrentThinking((prev) =>
+        prev
+          ? {
+              ...prev,
+              thinking: {
+                ...prev.thinking!,
+                currentStep: i,
+              },
+            }
+          : null,
+      )
+    }
+
+    // Complete thinking
+    setCurrentThinking((prev) =>
+      prev
+        ? {
+            ...prev,
+            thinking: {
+              ...prev.thinking!,
+              isComplete: true,
+            },
+          }
+        : null,
+    )
+
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    setCurrentThinking(null)
+
+    // Generate response based on input
+    return generateResponse(userInput)
+  }
+
+  const generateResponse = (input: string): string => {
+    const lowerInput = input.toLowerCase()
+
+    if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
+      return "Hello! It's great to meet you. I'm here to help with any questions or tasks you might have. What's on your mind today?"
+    }
+
+    if (lowerInput.includes("help")) {
+      return "I can assist you with a wide variety of tasks including:\n\n• Answering questions and providing explanations\n• Mathematical calculations and problem-solving\n• Creative writing and brainstorming\n• Code analysis and programming help\n• Research and information gathering\n• General conversation and advice\n\nWhat specific area would you like help with?"
+    }
+
+    if (lowerInput.includes("math") || /\d+[\s]*[+\-*/][\s]*\d+/.test(input)) {
+      try {
+        const mathExpression = input.match(/\d+[\s]*[+\-*/][\s]*\d+/)?.[0]
+        if (mathExpression) {
+          const result = eval(mathExpression.replace(/[^0-9+\-*/().]/g, ""))
+          return `I can help with that calculation!\n\n${mathExpression} = ${result}\n\nWould you like me to explain the steps or help with more complex mathematics?`
+        }
+      } catch {
+        return "I can see you're interested in mathematics! While I couldn't parse that specific expression, I'm great at helping with math problems. Try giving me a clear equation like '25 + 17' or ask me about mathematical concepts."
+      }
+    }
+
+    if (lowerInput.includes("code") || lowerInput.includes("programming")) {
+      return "I'd be happy to help with programming and code-related questions! I can assist with:\n\n• Debugging and troubleshooting\n• Code review and optimization\n• Explaining programming concepts\n• Writing code snippets\n• Architecture and design patterns\n\nWhat programming challenge are you working on?"
+    }
+
+    if (lowerInput.includes("creative") || lowerInput.includes("write") || lowerInput.includes("story")) {
+      return "I love creative projects! I can help you with:\n\n• Creative writing and storytelling\n• Brainstorming ideas\n• Character development\n• Plot structure\n• Poetry and prose\n• Content creation\n\nWhat kind of creative project are you working on?"
+    }
+
+    // Default response
+    return `That's an interesting question about "${input}". I'm processing your request and thinking through the best way to help you. Could you provide a bit more context or let me know what specific aspect you'd like me to focus on?`
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,268 +163,151 @@ What would you like to do?`,
     setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
-    setIsThinking(true)
-    setCurrentThinkingSteps([])
 
     try {
-      const startTime = Date.now()
-      let response = ""
-      let confidence = 0.8
-      const lowerInput = input.toLowerCase()
+      const response = await simulateThinking(input.trim())
 
-      // Simple AI logic
-      if (lowerInput.includes("admin") || lowerInput.includes("dashboard")) {
-        response = "🔧 Switching to Admin Dashboard..."
-        confidence = 0.95
-        setTimeout(() => onToggleAdmin(), 1000)
-      } else if (lowerInput.includes("help")) {
-        response = `🆘 ZacAI Help
-
-Available Commands:
-• help - Show this help message
-• admin - Switch to admin dashboard
-• my name is [name] - Tell me your name
-• [math expression] - Calculate math (5+5, 10*2)
-• hello/hi - Greetings
-• status - System information
-
-I'm ready to assist you!`
-        confidence = 0.95
-      } else if (/^\d+[\s]*[+\-*/][\s]*\d+$/.test(input.replace(/\s/g, ""))) {
-        try {
-          const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
-          response = `🧮 ${input} = ${result}
-
-Calculation completed successfully!`
-          confidence = 0.95
-        } catch {
-          response = "❌ I couldn't calculate that. Please check your math expression."
-          confidence = 0.3
-        }
-      } else if (lowerInput.includes("my name is")) {
-        const nameMatch = input.match(/my name is (\w+)/i)
-        if (nameMatch) {
-          const name = nameMatch[1]
-          if (typeof window !== "undefined") {
-            localStorage.setItem("zacai_user_name", name)
-          }
-          response = `👋 Nice to meet you, ${name}! I'll remember your name for this session.`
-          confidence = 0.95
-        }
-      } else if (lowerInput.includes("status")) {
-        const userName = typeof window !== "undefined" ? localStorage.getItem("zacai_user_name") : null
-        response = `📊 System Status
-
-• Status: Online and operational
-• User: ${userName || "Anonymous"}
-• Session: Active
-• Features: All systems functional
-
-Everything is working perfectly!`
-        confidence = 0.95
-      } else if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
-        const userName = typeof window !== "undefined" ? localStorage.getItem("zacai_user_name") : null
-        response = `👋 Hello${userName ? ` ${userName}` : ""}! I'm ZacAI, your AI assistant.
-
-I'm ready to help you with various tasks. Type "help" to see what I can do!`
-        confidence = 0.9
-      } else {
-        response = `I received your message: "${input}"
-
-I'm here to help! Type "help" to see available commands, or just chat with me naturally.`
-        confidence = 0.6
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        type: "assistant",
+        content: response,
+        timestamp: Date.now(),
       }
 
-      const processingTime = Date.now() - startTime
-
-      setTimeout(() => {
-        const assistantMessage: Message = {
-          id: `assistant-${Date.now()}`,
-          type: "assistant",
-          content: response,
-          timestamp: Date.now(),
-          confidence,
-          sources: ["core"],
-          processingTime,
-        }
-
-        setMessages((prev) => [...prev, assistantMessage])
-        setIsThinking(false)
-        setCurrentThinkingSteps([])
-        setSystemStatus((prev: any) => ({
-          ...prev,
-          totalQueries: prev.totalQueries + 1,
-        }))
-      }, 1000)
+      setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
-      console.error("Error processing query:", error)
-
-      setTimeout(() => {
-        const errorMessage: Message = {
-          id: `error-${Date.now()}`,
-          type: "assistant",
-          content: "I apologize, but I encountered an error processing your request. Please try again.",
-          timestamp: Date.now(),
-          confidence: 0,
-          sources: ["error"],
-        }
-        setMessages((prev) => [...prev, errorMessage])
-        setIsThinking(false)
-        setCurrentThinkingSteps([])
-      }, 500)
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        type: "assistant",
+        content: "I apologize, but I encountered an error processing your request. Please try again.",
+        timestamp: Date.now(),
+      }
+      setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
-      inputRef.current?.focus()
     }
   }
 
-  const formatTimestamp = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString()
-  }
-
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return "bg-green-100 text-green-800 border-green-200"
-    if (confidence >= 0.6) return "bg-yellow-100 text-yellow-800 border-yellow-200"
-    return "bg-red-100 text-red-800 border-red-200"
-  }
-
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Brain className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">ZacAI Assistant</h1>
-              <p className="text-sm text-gray-600">Enhanced AI with modular intelligence</p>
+      <div className="bg-white/80 backdrop-blur-sm border-b shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">ZacAI Assistant</h1>
+                <p className="text-sm text-gray-600">Advanced AI Chat Interface</p>
+              </div>
+              <Badge className="bg-green-100 text-green-800 border-green-200">Online</Badge>
             </div>
-            <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
-              {systemStatus?.initialized ? "Online" : "Offline"}
-            </Badge>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="text-right text-sm text-gray-600">
-              <p>{systemStatus?.totalQueries || 0} queries processed</p>
-              <p>{Math.round((systemStatus?.successRate || 0) * 100)}% success rate</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={onToggleAdmin}>
-              <Settings className="w-4 h-4 mr-2" />
-              Admin
+            <Button onClick={onToggleAdmin} variant="outline" className="gap-2 bg-transparent">
+              <Settings className="w-4 h-4" />
+              Admin Panel
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-6">
-          <div className="space-y-4 max-w-4xl mx-auto">
-            {messages.map((message) => (
-              <div key={message.id}>
-                <div className={`flex gap-3 ${message.type === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`flex gap-3 max-w-3xl ${message.type === "user" ? "flex-row-reverse" : "flex-row"}`}>
+      {/* Chat Area */}
+      <div className="flex-1 max-w-4xl mx-auto w-full p-4">
+        <Card className="h-full flex flex-col shadow-xl bg-white/90 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Chat Session</CardTitle>
+            <Separator />
+          </CardHeader>
+
+          <CardContent className="flex-1 flex flex-col p-0">
+            <ScrollArea ref={scrollAreaRef} className="flex-1 px-6">
+              <div className="space-y-4 py-4">
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                        message.type === "user" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
-                      }`}
+                      className={`max-w-[80%] ${
+                        message.type === "user"
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                          : "bg-gray-100 text-gray-900"
+                      } rounded-2xl px-4 py-3 shadow-sm`}
                     >
-                      {message.type === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                    </div>
-
-                    <Card className={`${message.type === "user" ? "bg-blue-50 border-blue-200" : "bg-white"}`}>
-                      <CardContent className="p-4">
-                        <div className="space-y-2">
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>{formatTimestamp(message.timestamp)}</span>
-
-                            {message.type === "assistant" && (
-                              <div className="flex items-center gap-2">
-                                {message.processingTime && (
-                                  <Badge variant="outline" className="text-xs">
-                                    <Clock className="w-3 h-3 mr-1" />
-                                    {message.processingTime}ms
-                                  </Badge>
-                                )}
-
-                                {message.confidence !== undefined && (
-                                  <Badge
-                                    variant="outline"
-                                    className={`text-xs ${getConfidenceColor(message.confidence)}`}
-                                  >
-                                    {message.confidence >= 0.8 ? (
-                                      <CheckCircle className="w-3 h-3 mr-1" />
-                                    ) : (
-                                      <AlertCircle className="w-3 h-3 mr-1" />
-                                    )}
-                                    {Math.round(message.confidence * 100)}%
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          {message.sources && message.sources.length > 0 && (
-                            <div className="flex flex-wrap gap-1 pt-2 border-t border-gray-100">
-                              {message.sources.map((source, idx) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  <span className="mr-1">🤖</span>
-                                  {source}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {isLoading && !isThinking && (
-              <div className="flex gap-3 justify-start">
-                <div className="flex gap-3 max-w-3xl">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                  <Card className="bg-white">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">Processing your request...</span>
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                      <div className={`text-xs mt-2 ${message.type === "user" ? "text-blue-100" : "text-gray-500"}`}>
+                        {new Date(message.timestamp).toLocaleTimeString()}
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Thinking Process Display */}
+                {currentThinking && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-2xl px-4 py-3 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-orange-600" />
+                        <span className="text-sm font-medium text-orange-800">Thinking...</span>
+                      </div>
+                      <div className="space-y-1">
+                        {currentThinking.thinking?.steps.map((step, index) => (
+                          <div
+                            key={index}
+                            className={`text-xs flex items-center gap-2 ${
+                              index <= currentThinking.thinking!.currentStep ? "text-orange-700" : "text-orange-400"
+                            }`}
+                          >
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                index < currentThinking.thinking!.currentStep
+                                  ? "bg-green-500"
+                                  : index === currentThinking.thinking!.currentStep
+                                    ? "bg-orange-500 animate-pulse"
+                                    : "bg-gray-300"
+                              }`}
+                            />
+                            {step}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Loading indicator */}
+                {isLoading && !currentThinking && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 rounded-2xl px-4 py-3 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
+                        <span className="text-sm text-gray-600">Processing...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </ScrollArea>
 
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
-      </div>
-
-      {/* Input */}
-      <div className="bg-white border-t border-gray-200 p-4">
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Try: 'Hi, I'm Ron' or 'define algorithm' or '2+2*3' or 'what is quantum physics?'"
-              disabled={isLoading}
-              className="flex-1"
-            />
-            <Button type="submit" disabled={isLoading || !input.trim()}>
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            </Button>
-          </div>
-        </form>
+            {/* Input Area */}
+            <div className="border-t bg-gray-50/50 p-4">
+              <form onSubmit={handleSubmit} className="flex gap-3">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask me anything... I can help with questions, math, coding, creative tasks, and more!"
+                  className="flex-1 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  disabled={isLoading}
+                />
+                <Button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-6"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </form>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

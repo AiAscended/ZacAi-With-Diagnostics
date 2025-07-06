@@ -3,8 +3,7 @@
 import React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { AlertTriangle, RefreshCw, Bug, Home } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
 
 interface ErrorBoundaryState {
   hasError: boolean
@@ -113,88 +112,20 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       // Default error UI
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl">
+          <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-red-600">
-                <AlertTriangle className="w-6 h-6" />
-                System Error Detected
+              <CardTitle className="flex items-center gap-2 text-red-700">
+                <AlertTriangle className="h-5 w-5" />
+                Something went wrong
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive">Error ID: {this.state.errorId}</Badge>
-                <Badge variant="outline">{new Date().toLocaleString()}</Badge>
-              </div>
-
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h3 className="font-semibold text-red-800 mb-2">Error Details:</h3>
-                <p className="text-red-700 font-mono text-sm">
-                  {this.state.error?.name}: {this.state.error?.message}
-                </p>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-800 mb-2">What happened?</h3>
-                <p className="text-blue-700 text-sm">
-                  ZacAI encountered an unexpected error. The system has automatically logged this issue for diagnostics.
-                  You can try the recovery options below.
-                </p>
-              </div>
-
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-800 mb-2">Recovery Options:</h3>
-                <div className="space-y-2 text-green-700 text-sm">
-                  <p>
-                    • <strong>Retry:</strong> Attempt to recover from this error
-                  </p>
-                  <p>
-                    • <strong>Reload:</strong> Refresh the entire application
-                  </p>
-                  <p>
-                    • <strong>Home:</strong> Return to the main page
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={this.handleRetry} className="flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4" />
-                  Try Again
-                </Button>
-                <Button
-                  onClick={this.handleReload}
-                  variant="outline"
-                  className="flex items-center gap-2 bg-transparent"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Reload App
-                </Button>
-                <Button
-                  onClick={this.handleGoHome}
-                  variant="outline"
-                  className="flex items-center gap-2 bg-transparent"
-                >
-                  <Home className="w-4 h-4" />
-                  Go Home
-                </Button>
-              </div>
-
-              {process.env.NODE_ENV === "development" && this.state.error?.stack && (
-                <details className="mt-4">
-                  <summary className="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-800">
-                    <Bug className="w-4 h-4 inline mr-1" />
-                    Developer Details (Click to expand)
-                  </summary>
-                  <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-40">
-                    {this.state.error.stack}
-                  </pre>
-                  {this.state.errorInfo?.componentStack && (
-                    <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-40">
-                      {this.state.errorInfo.componentStack}
-                    </pre>
-                  )}
-                </details>
-              )}
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                The application encountered an unexpected error. Please refresh the page to try again.
+              </p>
+              <Button onClick={this.handleReload} className="w-full">
+                Refresh Page
+              </Button>
             </CardContent>
           </Card>
         </div>

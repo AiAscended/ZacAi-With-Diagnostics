@@ -1,41 +1,17 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BarChart3, Database, Brain, TrendingUp, ArrowLeft } from "lucide-react"
-
-// Import sub-components with fallbacks
-let StatsPanel: any = null
-let KnowledgeBrowser: any = null
-let ModuleManager: any = null
-let DiagnosticsPanel: any = null
-
-try {
-  StatsPanel = require("./stats-panel").default
-} catch {
-  console.warn("StatsPanel component not found, using fallback")
-}
-
-try {
-  KnowledgeBrowser = require("./knowledge-browser").default
-} catch {
-  console.warn("KnowledgeBrowser component not found, using fallback")
-}
-
-try {
-  ModuleManager = require("./module-manager").default
-} catch {
-  console.warn("ModuleManager component not found, using fallback")
-}
-
-try {
-  DiagnosticsPanel = require("./diagnostics-panel").default
-} catch {
-  console.warn("DiagnosticsPanel component not found, using fallback")
-}
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
+import { BarChart3, Database, Brain, TrendingUp, ArrowLeft, Settings, Download, Upload } from "lucide-react"
 
 interface AdminDashboardProps {
   onToggleChat: () => void
@@ -52,8 +28,25 @@ interface SystemStats {
   memoryStats: any
 }
 
+interface SystemSettings {
+  responseSpeed: number
+  memoryRetention: number
+  learningRate: number
+  enableThinking: boolean
+  autoSave: boolean
+  debugMode: boolean
+}
+
 export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
   const [stats, setStats] = useState<SystemStats | null>(null)
+  const [settings, setSettings] = useState<SystemSettings>({
+    responseSpeed: 5,
+    memoryRetention: 30,
+    learningRate: 0.5,
+    enableThinking: true,
+    autoSave: true,
+    debugMode: false,
+  })
   const [activeTab, setActiveTab] = useState("overview")
   const [isLoading, setIsLoading] = useState(true)
 
@@ -69,11 +62,11 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
       const systemStats: SystemStats = {
         initialized: true,
         modules: {
-          vocabulary: { status: "active", loadTime: 120 },
-          mathematics: { status: "active", loadTime: 95 },
-          facts: { status: "active", loadTime: 200 },
-          coding: { status: "active", loadTime: 180 },
-          philosophy: { status: "standby", loadTime: 0 },
+          vocabulary: { status: "active", loadTime: 120, accuracy: 0.94 },
+          mathematics: { status: "active", loadTime: 95, accuracy: 0.98 },
+          facts: { status: "active", loadTime: 200, accuracy: 0.89 },
+          coding: { status: "active", loadTime: 180, accuracy: 0.92 },
+          philosophy: { status: "standby", loadTime: 0, accuracy: 0.85 },
         },
         uptime: Date.now() - (Date.now() - 300000), // 5 minutes ago
         totalQueries: 42,
@@ -100,6 +93,43 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
     return `${seconds}s`
   }
 
+  const handleSettingsChange = (key: keyof SystemSettings, value: any) => {
+    setSettings((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const handleSaveSettings = () => {
+    // In a real app, this would save to backend
+    console.log("Saving settings:", settings)
+    alert("Settings saved successfully!")
+  }
+
+  const handleExportSettings = () => {
+    const dataStr = JSON.stringify(settings, null, 2)
+    const dataBlob = new Blob([dataStr], { type: "application/json" })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "zacai-settings.json"
+    link.click()
+  }
+
+  const handleImportSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const importedSettings = JSON.parse(e.target?.result as string)
+          setSettings(importedSettings)
+          alert("Settings imported successfully!")
+        } catch (error) {
+          alert("Error importing settings. Please check the file format.")
+        }
+      }
+      reader.readAsText(file)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
@@ -115,9 +145,9 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-white/80 backdrop-blur-sm border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -156,12 +186,12 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
             <TabsTrigger value="stats">Statistics</TabsTrigger>
             <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
             <TabsTrigger value="modules">Modules</TabsTrigger>
-            <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
+              <Card className="bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -173,7 +203,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -185,7 +215,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -197,7 +227,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -212,19 +242,21 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
               </Card>
             </div>
 
-            <Card>
+            <Card className="bg-white/90 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle>Module Status</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {Object.entries(stats?.modules || {}).map(([name, module]: [string, any]) => (
-                    <div key={name} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={name} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50/50">
                       <div className="flex items-center gap-3">
                         <Database className="h-5 w-5 text-gray-600" />
                         <div>
                           <p className="font-medium text-gray-900 capitalize">{name}</p>
-                          <p className="text-sm text-gray-600">Load time: {module.loadTime}ms</p>
+                          <p className="text-sm text-gray-600">
+                            Load time: {module.loadTime}ms | Accuracy: {Math.round(module.accuracy * 100)}%
+                          </p>
                         </div>
                       </div>
                       <Badge variant={module.status === "active" ? "default" : "secondary"}>{module.status}</Badge>
@@ -235,64 +267,182 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="stats" className="space-y-6">
-            {StatsPanel ? (
-              <StatsPanel stats={stats} />
-            ) : (
-              <Card>
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-white/90 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Statistics Panel</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    System Settings
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Statistics panel loading...</p>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="response-speed">Response Speed: {settings.responseSpeed}</Label>
+                    <Slider
+                      id="response-speed"
+                      min={1}
+                      max={10}
+                      step={1}
+                      value={[settings.responseSpeed]}
+                      onValueChange={(value) => handleSettingsChange("responseSpeed", value[0])}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Higher values increase response speed but may reduce accuracy
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="memory-retention">Memory Retention (days): {settings.memoryRetention}</Label>
+                    <Input
+                      id="memory-retention"
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={settings.memoryRetention}
+                      onChange={(e) => handleSettingsChange("memoryRetention", Number.parseInt(e.target.value))}
+                    />
+                    <p className="text-xs text-gray-500">How long to retain conversation history</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="learning-rate">Learning Rate: {settings.learningRate}</Label>
+                    <Slider
+                      id="learning-rate"
+                      min={0.1}
+                      max={1}
+                      step={0.1}
+                      value={[settings.learningRate]}
+                      onValueChange={(value) => handleSettingsChange("learningRate", value[0])}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500">Rate at which the system adapts to new information</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="enable-thinking">Enable Thinking Process</Label>
+                        <p className="text-xs text-gray-500">Show AI reasoning steps</p>
+                      </div>
+                      <Switch
+                        id="enable-thinking"
+                        checked={settings.enableThinking}
+                        onCheckedChange={(checked) => handleSettingsChange("enableThinking", checked)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="auto-save">Auto Save</Label>
+                        <p className="text-xs text-gray-500">Automatically save conversations</p>
+                      </div>
+                      <Switch
+                        id="auto-save"
+                        checked={settings.autoSave}
+                        onCheckedChange={(checked) => handleSettingsChange("autoSave", checked)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="debug-mode">Debug Mode</Label>
+                        <p className="text-xs text-gray-500">Enable detailed logging</p>
+                      </div>
+                      <Switch
+                        id="debug-mode"
+                        checked={settings.debugMode}
+                        onCheckedChange={(checked) => handleSettingsChange("debugMode", checked)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <Button onClick={handleSaveSettings} className="w-full">
+                      Save Settings
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
-            )}
+
+              <Card className="bg-white/90 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Import/Export Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Export Current Settings</Label>
+                    <p className="text-sm text-gray-600 mb-3">Download your current settings as a JSON file</p>
+                    <Button onClick={handleExportSettings} variant="outline" className="w-full bg-transparent">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export Settings
+                    </Button>
+                  </div>
+
+                  <div>
+                    <Label>Import Settings</Label>
+                    <p className="text-sm text-gray-600 mb-3">Upload a settings JSON file to restore configuration</p>
+                    <div className="relative">
+                      <Input
+                        type="file"
+                        accept=".json"
+                        onChange={handleImportSettings}
+                        className="hidden"
+                        id="import-settings"
+                      />
+                      <Button asChild variant="outline" className="w-full bg-transparent">
+                        <label htmlFor="import-settings" className="cursor-pointer">
+                          <Upload className="h-4 w-4 mr-2" />
+                          Import Settings
+                        </label>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <h4 className="font-medium mb-2">Current Configuration</h4>
+                    <div className="bg-gray-50 rounded p-3 text-xs">
+                      <pre>{JSON.stringify(settings, null, 2)}</pre>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
-          <TabsContent value="knowledge" className="space-y-6">
-            {KnowledgeBrowser ? (
-              <KnowledgeBrowser />
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Knowledge Browser</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Knowledge browser loading...</p>
-                </CardContent>
-              </Card>
-            )}
+          {/* Other tabs would go here - keeping them simple for now */}
+          <TabsContent value="stats">
+            <Card className="bg-white/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Detailed Statistics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Advanced statistics and analytics will be displayed here.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          <TabsContent value="modules" className="space-y-6">
-            {ModuleManager ? (
-              <ModuleManager modules={stats?.modules} />
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Module Manager</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Module manager loading...</p>
-                </CardContent>
-              </Card>
-            )}
+          <TabsContent value="knowledge">
+            <Card className="bg-white/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Knowledge Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Knowledge base management tools will be available here.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          <TabsContent value="diagnostics" className="space-y-6">
-            {DiagnosticsPanel ? (
-              <DiagnosticsPanel stats={stats} />
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Diagnostics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Diagnostics panel loading...</p>
-                </CardContent>
-              </Card>
-            )}
+          <TabsContent value="modules">
+            <Card className="bg-white/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Module Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Module configuration and management interface will be here.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
