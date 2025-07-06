@@ -580,7 +580,7 @@ I'm here to help with detailed, thoughtful responses once I understand exactly w
                             </CardContent>
                           </Card>
 
-                          {/* Thinking Process - Version 100 Style */}
+                          {/* Thinking Process */}
                           {message.thinking && message.thinking.steps.length > 0 && (
                             <div className="mt-3">
                               <Collapsible>

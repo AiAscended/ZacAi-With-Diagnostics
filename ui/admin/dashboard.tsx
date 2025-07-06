@@ -76,40 +76,40 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
       const systemStats: SystemStats = {
         initialized: true,
         modules: {
-          vocabulary: {
-            status: "active",
-            loadTime: 120,
+          vocabulary: { 
+            status: "active", 
+            loadTime: 120, 
             accuracy: 0.94,
             memoryUsage: "12.3MB",
-            lastUpdate: "2 hours ago",
+            lastUpdate: "2 hours ago"
           },
-          mathematics: {
-            status: "active",
-            loadTime: 95,
+          mathematics: { 
+            status: "active", 
+            loadTime: 95, 
             accuracy: 0.98,
             memoryUsage: "8.7MB",
-            lastUpdate: "1 hour ago",
+            lastUpdate: "1 hour ago"
           },
-          facts: {
-            status: "active",
-            loadTime: 200,
+          facts: { 
+            status: "active", 
+            loadTime: 200, 
             accuracy: 0.89,
             memoryUsage: "15.2MB",
-            lastUpdate: "30 minutes ago",
+            lastUpdate: "30 minutes ago"
           },
-          coding: {
-            status: "active",
-            loadTime: 180,
+          coding: { 
+            status: "active", 
+            loadTime: 180, 
             accuracy: 0.92,
             memoryUsage: "18.9MB",
-            lastUpdate: "45 minutes ago",
+            lastUpdate: "45 minutes ago"
           },
-          philosophy: {
-            status: "standby",
-            loadTime: 0,
+          philosophy: { 
+            status: "standby", 
+            loadTime: 0, 
             accuracy: 0.85,
             memoryUsage: "0MB",
-            lastUpdate: "Never",
+            lastUpdate: "Never"
           },
         },
         uptime: Date.now() - (Date.now() - 1800000), // 30 minutes ago
@@ -138,7 +138,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
   }
 
   const handleSettingsChange = (key: keyof SystemSettings, value: any) => {
-    setSettings((prev) => ({ ...prev, [key]: value }))
+    setSettings(prev => ({ ...prev, [key]: value }))
   }
 
   const handleSaveSettings = () => {
@@ -153,7 +153,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
     const url = URL.createObjectURL(dataBlob)
     const link = document.createElement("a")
     link.href = url
-    link.download = `zacai-settings-${new Date().toISOString().split("T")[0]}.json`
+    link.download = `zacai-settings-${new Date().toISOString().split('T')[0]}.json`
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -217,9 +217,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                 variant="outline"
                 className={`px-3 py-1 ${stats?.initialized ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"}`}
               >
-                <div
-                  className={`w-2 h-2 rounded-full mr-2 ${stats?.initialized ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
-                />
+                <div className={`w-2 h-2 rounded-full mr-2 ${stats?.initialized ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
                 {stats?.initialized ? "Online" : "Offline"}
               </Badge>
               <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1">
@@ -239,21 +237,11 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
       <div className="max-w-7xl mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 bg-white/50 backdrop-blur-sm">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-white">
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="data-[state=active]:bg-white">
-              Statistics
-            </TabsTrigger>
-            <TabsTrigger value="knowledge" className="data-[state=active]:bg-white">
-              Knowledge
-            </TabsTrigger>
-            <TabsTrigger value="modules" className="data-[state=active]:bg-white">
-              Modules
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-white">
-              Settings
-            </TabsTrigger>
+            <TabsTrigger value="overview" className="data-[state=active]:bg-white">Overview</TabsTrigger>
+            <TabsTrigger value="stats" className="data-[state=active]:bg-white">Statistics</TabsTrigger>
+            <TabsTrigger value="knowledge" className="data-[state=active]:bg-white">Knowledge</TabsTrigger>
+            <TabsTrigger value="modules" className="data-[state=active]:bg-white">Modules</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-white">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -335,28 +323,20 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Memory Usage</span>
-                      <span className="font-medium">
-                        {stats?.memoryStats?.used} / {stats?.memoryStats?.total}
-                      </span>
+                      <span className="font-medium">{stats?.memoryStats?.used} / {stats?.memoryStats?.total}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
-                        style={{ width: "68%" }}
-                      />
+                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full" style={{ width: "68%" }} />
                     </div>
                   </div>
-
+                  
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>CPU Usage</span>
                       <span className="font-medium">23%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full"
-                        style={{ width: "23%" }}
-                      />
+                      <div className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full" style={{ width: "23%" }} />
                     </div>
                   </div>
 
@@ -366,10 +346,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                       <span className="font-medium">96%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full"
-                        style={{ width: "96%" }}
-                      />
+                      <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full" style={{ width: "96%" }} />
                     </div>
                   </div>
                 </CardContent>
@@ -386,16 +363,11 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                   <ScrollArea className="h-48">
                     <div className="space-y-3">
                       {Object.entries(stats?.modules || {}).map(([name, module]: [string, any]) => (
-                        <div
-                          key={name}
-                          className="flex items-center justify-between p-3 border rounded-lg bg-gray-50/50"
-                        >
+                        <div key={name} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50/50">
                           <div className="flex items-center gap-3">
-                            <div
-                              className={`w-3 h-3 rounded-full ${
-                                module.status === "active" ? "bg-green-500 animate-pulse" : "bg-gray-400"
-                              }`}
-                            />
+                            <div className={`w-3 h-3 rounded-full ${
+                              module.status === "active" ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                            }`} />
                             <div>
                               <p className="font-medium text-gray-900 capitalize">{name}</p>
                               <p className="text-xs text-gray-600">
@@ -479,9 +451,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                   <div className="space-y-4 pt-4 border-t">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="enable-thinking" className="text-sm font-medium">
-                          Enable Thinking Process
-                        </Label>
+                        <Label htmlFor="enable-thinking" className="text-sm font-medium">Enable Thinking Process</Label>
                         <p className="text-xs text-gray-500">Show AI reasoning steps to users</p>
                       </div>
                       <Switch
@@ -493,9 +463,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="auto-save" className="text-sm font-medium">
-                          Auto Save
-                        </Label>
+                        <Label htmlFor="auto-save" className="text-sm font-medium">Auto Save</Label>
                         <p className="text-xs text-gray-500">Automatically save conversations and settings</p>
                       </div>
                       <Switch
@@ -507,9 +475,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="debug-mode" className="text-sm font-medium">
-                          Debug Mode
-                        </Label>
+                        <Label htmlFor="debug-mode" className="text-sm font-medium">Debug Mode</Label>
                         <p className="text-xs text-gray-500">Enable detailed logging and diagnostics</p>
                       </div>
                       <Switch
@@ -521,10 +487,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                   </div>
 
                   <div className="pt-4 border-t">
-                    <Button
-                      onClick={handleSaveSettings}
-                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                    >
+                    <Button onClick={handleSaveSettings} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
                       <Shield className="w-4 h-4 mr-2" />
                       Save Configuration
                     </Button>
@@ -544,11 +507,7 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                   <div>
                     <Label className="text-sm font-medium">Export Current Settings</Label>
                     <p className="text-sm text-gray-600 mb-3">Download your current configuration as a JSON file</p>
-                    <Button
-                      onClick={handleExportSettings}
-                      variant="outline"
-                      className="w-full bg-white hover:bg-gray-50"
-                    >
+                    <Button onClick={handleExportSettings} variant="outline" className="w-full bg-white hover:bg-gray-50">
                       <Download className="h-4 w-4 mr-2" />
                       Export Settings
                     </Button>
@@ -574,63 +533,4 @@ export default function AdminDashboard({ onToggleChat }: AdminDashboardProps) {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t">
-                    <Label className="text-sm font-medium">Current Configuration Preview</Label>
-                    <ScrollArea className="h-48 mt-2">
-                      <div className="bg-gray-50 rounded-lg p-3 text-xs font-mono">
-                        <pre className="whitespace-pre-wrap text-gray-700">{JSON.stringify(settings, null, 2)}</pre>
-                      </div>
-                    </ScrollArea>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Placeholder tabs */}
-          <TabsContent value="stats">
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-blue-600" />
-                  Detailed Statistics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Advanced statistics and analytics dashboard will be implemented here.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="knowledge">
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-green-600" />
-                  Knowledge Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Knowledge base management tools will be available here.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="modules">
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5 text-purple-600" />
-                  Module Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Module configuration and management interface will be here.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  )
-}
+                  <div className="pt-4 border-\

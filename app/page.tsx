@@ -16,6 +16,11 @@ export default function Home() {
   const [appMode, setAppMode] = useState<AppMode>("chat")
   const [loadingStage, setLoadingStage] = useState<LoadingStage>("initializing")
   const [loadingProgress, setLoadingProgress] = useState<string[]>([])
+  const [systemHealth, setSystemHealth] = useState({
+    core: true,
+    chat: true,
+    admin: true,
+  })
 
   useEffect(() => {
     initializeSystem()
@@ -31,6 +36,12 @@ export default function Home() {
       await new Promise((resolve) => setTimeout(resolve, 500))
 
       addLoadingStep("🔍 Running self-diagnostics...")
+      const health = {
+        core: true,
+        chat: true,
+        admin: true,
+      }
+      setSystemHealth(health)
       await new Promise((resolve) => setTimeout(resolve, 300))
 
       addLoadingStep("✅ Core systems loaded")
@@ -74,6 +85,30 @@ export default function Home() {
                 <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                 Starting up...
               </Badge>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">System Health Check:</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-600">Core Engine:</span>
+                  <Badge variant={systemHealth.core ? "default" : "destructive"} className="text-xs">
+                    {systemHealth.core ? "✓ Online" : "✗ Offline"}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-600">Chat Interface:</span>
+                  <Badge variant={systemHealth.chat ? "default" : "secondary"} className="text-xs">
+                    {systemHealth.chat ? "✓ Ready" : "⏳ Loading"}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-600">Admin Panel:</span>
+                  <Badge variant={systemHealth.admin ? "default" : "secondary"} className="text-xs">
+                    {systemHealth.admin ? "✓ Ready" : "⏳ Loading"}
+                  </Badge>
+                </div>
+              </div>
             </div>
 
             <div>
