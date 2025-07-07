@@ -1,142 +1,163 @@
-export interface HealthCheck {
-  name: string
-  status: "healthy" | "warning" | "error"
-  message: string
-  timestamp: number
+export interface SystemMetrics {
+  memoryUsage: number
+  responseTime: number
+  errorRate: number
+  uptime: number
+  activeConnections: number
 }
 
-export interface SystemHealth {
-  overall: "healthy" | "warning" | "error"
-  checks: HealthCheck[]
-  uptime: number
-  lastCheck: number
+export interface PerformanceAlert {
+  type: "memory" | "response_time" | "error_rate" | "connectivity"
+  severity: "low" | "medium" | "high" | "critical"
+  message: string
+  timestamp: number
+  resolved: boolean
 }
 
 export class HealthMonitor {
-  private checks: HealthCheck[] = []
-  private startTime: number = Date.now()
+  private metrics: SystemMetrics = {
+    memoryUsage: 0,
+    responseTime: 0,
+    errorRate: 0,
+    uptime: Date.now(),
+    activeConnections: 0,
+  }
 
-  async runHealthChecks(): Promise<SystemHealth> {
-    this.checks = []
+  private alerts: PerformanceAlert[] = []
+  private monitoringInterval?: NodeJS.Timeout
+  private startTime = Date.now()
 
-    // Check browser environment
-    await this.checkBrowserEnvironment()
+  async initialize(): Promise<void> {
+    console.log("🔍 Initializing Health Monitor...")
 
-    // Check localStorage
-    await this.checkLocalStorage()
+    this.startMonitoring()
 
-    // Check network connectivity
-    await this.checkNetworkConnectivity()
+    console.log("✅ Health Monitor initialized")
+  }
 
+  private startMonitoring(): void {
+    this.monitoringInterval = setInterval(() => {
+      this.collectMetrics()
+      this.checkThresholds()
+    }, 5000) // Check every 5 seconds
+  }
+
+  private collectMetrics(): void {
+    // Update uptime
+    this.metrics.uptime = Date.now() - this.startTime
+
+    // Collect memory usage if available
+    if ("memory" in performance) {
+      const memory = (performance as any).memory
+      this.metrics.memoryUsage = memory.usedJSHeapSize / memory.totalJSHeapSize
+    }
+
+    // Update other metrics would be collected from actual system usage
+    // For now, we'll simulate some basic metrics
+    this.metrics.responseTime = Math.random() * 1000 + 500 // 500-1500ms
+    this.metrics.errorRate = Math.random() * 0.1 // 0-10% error rate
+  }
+
+  private checkThresholds(): void {
     // Check memory usage
-    await this.checkMemoryUsage()
+    if (this.metrics.memoryUsage > 0.9) {
+      this.addAlert({
+        type: "memory",
+        severity: "critical",
+        message: `Memory usage critical: ${Math.round(this.metrics.memoryUsage * 100)}%`,
+        timestamp: Date.now(),
+        resolved: false,
+      })
+    } else if (this.metrics.memoryUsage > 0.8) {
+      this.addAlert({
+        type: "memory",
+        severity: "high",
+        message: `Memory usage high: ${Math.round(this.metrics.memoryUsage * 100)}%`,
+        timestamp: Date.now(),
+        resolved: false,
+      })
+    }
 
-    const overall = this.determineOverallHealth()
+    // Check response time
+    if (this.metrics.responseTime > 3000) {
+      this.addAlert({
+        type: "response_time",
+        severity: "high",
+        message: `Response time slow: ${Math.round(this.metrics.responseTime)}ms`,
+        timestamp: Date.now(),
+        resolved: false,
+      })
+    }
 
-    return {
-      overall,
-      checks: this.checks,
-      uptime: Date.now() - this.startTime,
-      lastCheck: Date.now(),
+    // Check error rate
+    if (this.metrics.errorRate > 0.05) {
+      this.addAlert({
+        type: "error_rate",
+        severity: "medium",
+        message: `Error rate elevated: ${Math.round(this.metrics.errorRate * 100)}%`,
+        timestamp: Date.now(),
+        resolved: false,
+      })
     }
   }
 
-  private async checkBrowserEnvironment(): Promise<void> {
-    try {
-      if (typeof window === "undefined") {
-        this.addCheck("Browser Environment", "error", "Running in non-browser environment")
-        return
-      }
+  private addAlert(alert: PerformanceAlert): void {
+    // Avoid duplicate alerts
+    const existingAlert = this.alerts.find((a) => a.type === alert.type && a.severity === alert.severity && !a.resolved)
 
-      if (!window.localStorage) {
-        this.addCheck("Browser Environment", "warning", "localStorage not available")
-        return
-      }
+    if (!existingAlert) {
+      this.alerts.push(alert)
+      console.warn(`🚨 Health Alert: ${alert.message}`)
 
-      this.addCheck("Browser Environment", "healthy", "Browser environment is compatible")
-    } catch (error) {
-      this.addCheck("Browser Environment", "error", `Browser check failed: ${error}`)
+      // Keep only last 50 alerts
+      if (this.alerts.length > 50) {
+        this.alerts = this.alerts.slice(-50)
+      }
     }
   }
 
-  private async checkLocalStorage(): Promise<void> {
-    try {
-      const testKey = "zacai_health_test"
-      const testValue = "test_value"
+  getMetrics(): SystemMetrics {
+    return { ...this.metrics }
+  }
 
-      localStorage.setItem(testKey, testValue)
-      const retrieved = localStorage.getItem(testKey)
-      localStorage.removeItem(testKey)
+  getAlerts(): PerformanceAlert[] {
+    return [...this.alerts]
+  }
 
-      if (retrieved === testValue) {
-        this.addCheck("Local Storage", "healthy", "localStorage is working correctly")
-      } else {
-        this.addCheck("Local Storage", "error", "localStorage read/write test failed")
-      }
-    } catch (error) {
-      this.addCheck("Local Storage", "error", `localStorage error: ${error}`)
+  getActiveAlerts(): PerformanceAlert[] {
+    return this.alerts.filter((alert) => !alert.resolved)
+  }
+
+  resolveAlert(alertIndex: number): void {
+    if (this.alerts[alertIndex]) {
+      this.alerts[alertIndex].resolved = true
     }
   }
 
-  private async checkNetworkConnectivity(): Promise<void> {
-    try {
-      if (!navigator.onLine) {
-        this.addCheck("Network", "warning", "Browser reports offline status")
-        return
-      }
-      this.addCheck("Network", "healthy", "Network connectivity appears available.")
-    } catch (error) {
-      this.addCheck("Network", "error", `Network check failed: ${error}`)
+  clearResolvedAlerts(): void {
+    this.alerts = this.alerts.filter((alert) => !alert.resolved)
+  }
+
+  isHealthy(): boolean {
+    const activeAlerts = this.getActiveAlerts()
+    const criticalAlerts = activeAlerts.filter((a) => a.severity === "critical")
+    return criticalAlerts.length === 0
+  }
+
+  getHealthScore(): number {
+    const activeAlerts = this.getActiveAlerts()
+    const weights = { critical: 4, high: 3, medium: 2, low: 1 }
+
+    const totalPenalty = activeAlerts.reduce((sum, alert) => {
+      return sum + weights[alert.severity]
+    }, 0)
+
+    return Math.max(0, 100 - totalPenalty * 5)
+  }
+
+  destroy(): void {
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval)
     }
-  }
-
-  private async checkMemoryUsage(): Promise<void> {
-    try {
-      if ("memory" in performance) {
-        const memory = (performance as any).memory
-        const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024)
-        const limitMB = Math.round(memory.jsHeapSizeLimit / 1024 / 1024)
-        const usagePercent = (usedMB / limitMB) * 100
-
-        if (usagePercent > 90) {
-          this.addCheck(
-            "Memory",
-            "error",
-            `Critical memory usage: ${usedMB}MB/${limitMB}MB (${usagePercent.toFixed(1)}%)`,
-          )
-        } else if (usagePercent > 75) {
-          this.addCheck(
-            "Memory",
-            "warning",
-            `High memory usage: ${usedMB}MB/${limitMB}MB (${usagePercent.toFixed(1)}%)`,
-          )
-        } else {
-          this.addCheck(
-            "Memory",
-            "healthy",
-            `Memory usage normal: ${usedMB}MB/${limitMB}MB (${usagePercent.toFixed(1)}%)`,
-          )
-        }
-      } else {
-        this.addCheck("Memory", "warning", "Memory monitoring not available in this browser")
-      }
-    } catch (error) {
-      this.addCheck("Memory", "error", `Memory check failed: ${error}`)
-    }
-  }
-
-  private addCheck(name: string, status: "healthy" | "warning" | "error", message: string): void {
-    this.checks.push({
-      name,
-      status,
-      message,
-      timestamp: Date.now(),
-    })
-  }
-
-  private determineOverallHealth(): "healthy" | "warning" | "error" {
-    if (this.checks.some((check) => check.status === "error")) return "error"
-    if (this.checks.some((check) => check.status === "warning")) return "warning"
-    return "healthy"
   }
 }

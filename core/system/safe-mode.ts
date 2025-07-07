@@ -1,94 +1,148 @@
-import { HealthMonitor, type SystemHealth } from "./health-monitor"
+export interface HealthCheck {
+  name: string
+  status: "healthy" | "warning" | "critical"
+  message: string
+  timestamp: number
+}
+
+export interface SystemHealth {
+  overall: "healthy" | "degraded" | "critical"
+  checks: HealthCheck[]
+  timestamp: number
+}
 
 export interface SafeModeConfig {
-  enableModules: boolean
-  enableNetworkRequests: boolean
-  enableStorage: boolean
-  enableAdvancedFeatures: boolean
   fallbackMode: boolean
+  criticalModulesOnly: boolean
+  maxRetries: number
+  healthCheckInterval: number
 }
 
 export class SafeModeSystem {
-  private healthMonitor: HealthMonitor
-  private config: SafeModeConfig
-  private systemHealth: SystemHealth | null = null
-  private initialized = false
-
-  constructor() {
-    this.healthMonitor = new HealthMonitor()
-    this.config = {
-      enableModules: true,
-      enableNetworkRequests: true,
-      enableStorage: true,
-      enableAdvancedFeatures: true,
-      fallbackMode: false,
-    }
+  private config: SafeModeConfig = {
+    fallbackMode: false,
+    criticalModulesOnly: false,
+    maxRetries: 3,
+    healthCheckInterval: 30000,
   }
+
+  private healthChecks: HealthCheck[] = []
+  private lastHealthCheck = 0
+  private healthCheckTimer?: NodeJS.Timeout
 
   async initialize(): Promise<void> {
+    console.log("🛡️ Initializing Safe Mode System...")
+
+    await this.runHealthChecks()
+    this.startHealthMonitoring()
+
+    console.log("✅ Safe Mode System initialized")
+  }
+
+  private async runHealthChecks(): Promise<void> {
+    this.healthChecks = []
+
+    // Check browser environment
+    this.healthChecks.push({
+      name: "Browser Environment",
+      status: typeof window !== "undefined" ? "healthy" : "critical",
+      message: typeof window !== "undefined" ? "Browser environment detected" : "Not running in browser",
+      timestamp: Date.now(),
+    })
+
+    // Check localStorage availability
     try {
-      console.log("🛡️ SafeMode: Initializing system...")
-      this.systemHealth = await this.healthMonitor.runHealthChecks()
-      this.adjustConfigurationBasedOnHealth()
-      this.initialized = true
-      console.log("✅ SafeMode: System initialized successfully")
+      localStorage.setItem("zacai-test", "test")
+      localStorage.removeItem("zacai-test")
+      this.healthChecks.push({
+        name: "Local Storage",
+        status: "healthy",
+        message: "Local storage is available",
+        timestamp: Date.now(),
+      })
     } catch (error) {
-      console.error("❌ SafeMode: Initialization failed:", error)
-      this.enableFallbackMode()
-    }
-  }
-
-  private adjustConfigurationBasedOnHealth(): void {
-    if (!this.systemHealth) return
-
-    for (const check of this.systemHealth.checks) {
-      if (check.status === "error") {
-        switch (check.name) {
-          case "Local Storage":
-            this.config.enableStorage = false
-            console.warn("⚠️ SafeMode: Storage disabled due to health check failure.")
-            break
-          case "Network":
-            this.config.enableNetworkRequests = false
-            console.warn("⚠️ SafeMode: Network requests disabled due to health check failure.")
-            break
-          case "Memory":
-            this.config.enableAdvancedFeatures = false
-            console.warn("⚠️ SafeMode: Advanced features disabled due to memory issues.")
-            break
-        }
-      }
+      this.healthChecks.push({
+        name: "Local Storage",
+        status: "warning",
+        message: "Local storage not available, using memory fallback",
+        timestamp: Date.now(),
+      })
     }
 
-    if (this.systemHealth.overall === "error") {
-      this.enableFallbackMode()
+    // Check memory usage (if available)
+    if ("memory" in performance) {
+      const memory = (performance as any).memory
+      const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024)
+      const totalMB = Math.round(memory.totalJSHeapSize / 1024 / 1024)
+
+      this.healthChecks.push({
+        name: "Memory Usage",
+        status: usedMB < totalMB * 0.8 ? "healthy" : "warning",
+        message: `Using ${usedMB}MB of ${totalMB}MB available`,
+        timestamp: Date.now(),
+      })
     }
+
+    // Check network connectivity
+    this.healthChecks.push({
+      name: "Network Status",
+      status: navigator.onLine ? "healthy" : "warning",
+      message: navigator.onLine ? "Network connection available" : "Offline mode",
+      timestamp: Date.now(),
+    })
+
+    this.lastHealthCheck = Date.now()
   }
 
-  private enableFallbackMode(): void {
-    console.error("🚨 SafeMode: Critical errors detected. Enabling fallback mode.")
-    this.config = {
-      enableModules: false,
-      enableNetworkRequests: false,
-      enableStorage: false,
-      enableAdvancedFeatures: false,
-      fallbackMode: true,
+  private startHealthMonitoring(): void {
+    this.healthCheckTimer = setInterval(() => {
+      this.runHealthChecks()
+    }, this.config.healthCheckInterval)
+  }
+
+  getSystemHealth(): SystemHealth {
+    const criticalCount = this.healthChecks.filter((c) => c.status === "critical").length
+    const warningCount = this.healthChecks.filter((c) => c.status === "warning").length
+
+    let overall: "healthy" | "degraded" | "critical"
+    if (criticalCount > 0) {
+      overall = "critical"
+    } else if (warningCount > 0) {
+      overall = "degraded"
+    } else {
+      overall = "healthy"
     }
-  }
 
-  canUseFeature(feature: keyof Omit<SafeModeConfig, "fallbackMode">): boolean {
-    return this.config[feature]
-  }
-
-  getSystemHealth(): SystemHealth | null {
-    return this.systemHealth
+    return {
+      overall,
+      checks: this.healthChecks,
+      timestamp: this.lastHealthCheck,
+    }
   }
 
   getConfiguration(): SafeModeConfig {
     return { ...this.config }
   }
 
-  isInitialized(): boolean {
-    return this.initialized
+  updateConfiguration(updates: Partial<SafeModeConfig>): void {
+    this.config = { ...this.config, ...updates }
+  }
+
+  enterSafeMode(): void {
+    console.warn("🚨 Entering Safe Mode")
+    this.config.fallbackMode = true
+    this.config.criticalModulesOnly = true
+  }
+
+  exitSafeMode(): void {
+    console.log("✅ Exiting Safe Mode")
+    this.config.fallbackMode = false
+    this.config.criticalModulesOnly = false
+  }
+
+  destroy(): void {
+    if (this.healthCheckTimer) {
+      clearInterval(this.healthCheckTimer)
+    }
   }
 }
