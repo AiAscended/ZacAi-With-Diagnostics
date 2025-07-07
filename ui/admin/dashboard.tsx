@@ -94,10 +94,15 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                   <p className="text-sm font-medium text-gray-600">System Health</p>
                   <div className="flex items-center gap-2 mt-1">
                     {getHealthIcon(healthReport.overall)}
-                    <span className={`text-lg font-semibold ${
-                      healthReport.overall === "healthy" ? "text-green-600" :
-                      healthReport.overall === "degraded" ? "text-yellow-600" : "text-red-600"
-                    }`}>
+                    <span
+                      className={`text-lg font-semibold ${
+                        healthReport.overall === "healthy"
+                          ? "text-green-600"
+                          : healthReport.overall === "degraded"
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                      }`}
+                    >
                       {healthReport.overall.toUpperCase()}
                     </span>
                   </div>
@@ -130,9 +135,7 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                 <div>
                   <p className="text-sm font-medium text-gray-600">Failed Modules</p>
                   <p className="text-2xl font-bold text-gray-900">{failedModules.length}</p>
-                  <p className="text-xs text-gray-500">
-                    {failedModules.filter(m => m.essential).length} critical
-                  </p>
+                  <p className="text-xs text-gray-500">{failedModules.filter((m) => m.essential).length} critical</p>
                 </div>
                 <XCircle className="w-8 h-8 text-red-500" />
               </div>
@@ -144,9 +147,7 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Load Time</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {Math.round(loadingSummary.averageLoadTime)}ms
-                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{Math.round(loadingSummary.averageLoadTime)}ms</p>
                   <p className="text-xs text-gray-500">Average per module</p>
                 </div>
                 <Clock className="w-8 h-8 text-purple-500" />
@@ -178,20 +179,19 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                   <ScrollArea className="h-64">
                     <div className="space-y-2">
                       {loadingStatus
-                        .filter(module => module.status === "loaded")
+                        .filter((module) => module.status === "loaded")
                         .map((module) => (
-                          <div key={module.name} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div
+                            key={module.name}
+                            className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
+                          >
                             <div>
                               <p className="font-semibold text-green-800">{module.name}</p>
                               <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-xs bg-white">
                                   {module.priority}
                                 </Badge>
-                                {module.loadTime && (
-                                  <span className="text-xs text-green-600">
-                                    {module.loadTime}ms
-                                  </span>
-                                )}
+                                {module.loadTime && <span className="text-xs text-green-600">{module.loadTime}ms</span>}
                               </div>
                             </div>
                             {getStatusIcon(module.status)}
@@ -214,16 +214,15 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                   <ScrollArea className="h-64">
                     <div className="space-y-2">
                       {failedModules.map((module) => (
-                        <div key={module.name} className={`p-3 border rounded-lg ${
-                          module.essential 
-                            ? "bg-red-50 border-red-200" 
-                            : "bg-yellow-50 border-yellow-200"
-                        }`}>
+                        <div
+                          key={module.name}
+                          className={`p-3 border rounded-lg ${
+                            module.essential ? "bg-red-50 border-red-200" : "bg-yellow-50 border-yellow-200"
+                          }`}
+                        >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className={`font-semibold ${
-                                module.essential ? "text-red-800" : "text-yellow-800"
-                              }`}>
+                              <p className={`font-semibold ${module.essential ? "text-red-800" : "text-yellow-800"}`}>
                                 {module.name}
                               </p>
                               <div className="flex items-center gap-2 mt-1">
@@ -235,9 +234,7 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                                 </Badge>
                               </div>
                               {module.error && (
-                                <p className={`text-xs mt-1 ${
-                                  module.essential ? "text-red-600" : "text-yellow-600"
-                                }`}>
+                                <p className={`text-xs mt-1 ${module.essential ? "text-red-600" : "text-yellow-600"}`}>
                                   {module.error}
                                 </p>
                               )}
@@ -273,14 +270,19 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="font-semibold">Overall Status</span>
-                      <Badge variant={
-                        healthReport.overall === "healthy" ? "default" :
-                        healthReport.overall === "degraded" ? "secondary" : "destructive"
-                      }>
+                      <Badge
+                        variant={
+                          healthReport.overall === "healthy"
+                            ? "default"
+                            : healthReport.overall === "degraded"
+                              ? "secondary"
+                              : "destructive"
+                        }
+                      >
                         {healthReport.overall.toUpperCase()}
                       </Badge>
                     </div>
-                    
+
                     <div className="space-y-2">
                       {healthReport.checks.map((check, index) => (
                         <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
@@ -312,7 +314,7 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                       </div>
                       <Progress value={(loadingSummary.loaded / loadingSummary.total) * 100} className="h-2" />
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <p className="font-semibold text-blue-800">Total Load Time</p>
@@ -320,7 +322,9 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                       </div>
                       <div className="p-3 bg-green-50 rounded-lg">
                         <p className="font-semibold text-green-800">Avg Load Time</p>
-                        <p className="text-xl font-bold text-green-600">{Math.round(loadingSummary.averageLoadTime)}ms</p>
+                        <p className="text-xl font-bold text-green-600">
+                          {Math.round(loadingSummary.averageLoadTime)}ms
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -370,12 +374,17 @@ export function AdminDashboard({ onToggleChat, loader, safeMode }: AdminDashboar
                         <li>✅ Health monitoring: Running</li>
                         <li>✅ Safe mode system: Ready</li>
                         {failedModules.length > 0 && (
-                          <li className="text-yellow-600">
-                            ⚠️ {failedModules.length} non-critical modules bypassed
-                          </li>
+                          <li className="text-yellow-600">⚠️ {failedModules.length} non-critical modules bypassed</li>
                         )}
                       </ul>
                     </div>
                   </div>
                 </div>
-              </CardContent>\
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  )
+}
