@@ -1,23 +1,10 @@
-export interface SystemConfig {
-  version: string
-  environment: "development" | "production" | "test"
-  features: {
-    vocabulary: boolean
-    mathematics: boolean
-    coding: boolean
-    facts: boolean
-    philosophy: boolean
-    userInfo: boolean
-  }
-}
-
 export interface ModuleInterface {
   name: string
   version: string
   initialized: boolean
-  initialize(): Promise<void>
+  initialize(): Promise<any>
   process(input: string, context?: any): Promise<ModuleResponse>
-  learn(data: any): Promise<void>
+  learn?(data: any): Promise<void>
   getStats(): ModuleStats
 }
 
@@ -27,7 +14,7 @@ export interface ModuleResponse {
   confidence: number
   source: string
   timestamp: number
-  metadata?: any
+  error?: string
 }
 
 export interface ModuleStats {
@@ -38,51 +25,28 @@ export interface ModuleStats {
   lastUpdate: number
 }
 
-export interface LearntDataEntry {
-  id: string
-  content: any
-  confidence: number
-  source: string
-  context: string
-  timestamp: number
-  usageCount: number
-  lastUsed: number
-  verified: boolean
-  tags: string[]
-  relationships: string[]
-}
-
 export interface IntentAnalysis {
   intent: string
   confidence: number
-  entities: any[]
+  entities: string[]
   context: any
   suggestedModules: string[]
 }
 
-export interface ContextMessage {
-  role: "user" | "assistant" | "system"
-  content: string
-  timestamp?: number
-  metadata?: any
-}
-
-export interface ReasoningStep {
-  step: number
-  reasoning: string
-  input: any
-  output: any
+export interface ReasoningChain {
+  id: string
+  steps: ReasoningStep[]
+  conclusion: string
   confidence: number
   timestamp: number
 }
 
-export interface ReasoningChain {
-  id: string
-  input: string
-  steps: ReasoningStep[]
-  finalOutput: any
-  totalConfidence: number
-  processingTime: number
+export interface ReasoningStep {
+  step: number
+  description: string
+  input: any
+  output: any
+  confidence: number
 }
 
 export interface LearningPattern {
@@ -90,37 +54,87 @@ export interface LearningPattern {
   pattern: string
   frequency: number
   confidence: number
-  context: string[]
+  context: any
   timestamp: number
-  category?: string
-  effectiveness?: number
 }
 
-export interface ChatMessage {
+export interface SystemConfiguration {
+  version: string
+  environment: "development" | "production" | "test"
+  features: {
+    [key: string]: boolean
+  }
+  limits: {
+    maxQueryLength: number
+    maxResponseTime: number
+    maxMemoryUsage: number
+  }
+  modules: {
+    [key: string]: {
+      enabled: boolean
+      priority: number
+      config: any
+    }
+  }
+}
+
+export interface PerformanceMetrics {
+  responseTime: number
+  memoryUsage: number
+  cpuUsage: number
+  errorRate: number
+  throughput: number
+  timestamp: number
+}
+
+export interface ErrorInfo {
   id: string
-  role: "user" | "assistant"
-  content: string
+  type: string
+  message: string
+  stack?: string
+  context: any
   timestamp: number
-  confidence?: number
-  sources?: string[]
-  reasoning?: string[]
-  thinking?: string[]
+  resolved: boolean
 }
 
-export interface AIResponse {
-  response: string
+export interface UserProfile {
+  id: string
+  name?: string
+  preferences: {
+    [key: string]: any
+  }
+  history: {
+    queries: number
+    sessions: number
+    lastActive: number
+  }
+  personalInfo: {
+    [key: string]: any
+  }
+}
+
+export interface KnowledgeEntry {
+  id: string
+  type: "fact" | "definition" | "concept" | "procedure"
+  content: any
+  source: string
   confidence: number
-  sources: string[]
-  reasoning: string[]
-  thinking?: string[]
+  tags: string[]
+  relationships: string[]
   timestamp: number
+  lastAccessed: number
+  accessCount: number
 }
 
-export interface SystemState {
-  initialized: boolean
-  loading: boolean
-  error: string | null
-  modules: string[]
-  activeModules: string[]
-  stats: any
+export interface ConversationContext {
+  sessionId: string
+  messages: Array<{
+    role: "user" | "assistant" | "system"
+    content: string
+    timestamp: number
+    metadata?: any
+  }>
+  startTime: number
+  lastActivity: number
+  messageCount: number
 }

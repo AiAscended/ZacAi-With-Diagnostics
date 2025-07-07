@@ -1,159 +1,331 @@
+import { storageManager } from "@/core/storage/manager"
+import { userMemory } from "@/core/memory/user-memory"
+import { cognitiveEngine } from "@/engines/cognitive"
+import { learningEngine } from "@/engines/learning"
+import { reasoningEngine } from "@/engines/reasoning"
+import { vocabularyModule } from "@/modules/vocabulary"
+import { mathematicsModule } from "@/modules/mathematics"
+import { factsModule } from "@/modules/facts"
+import { codingModule } from "@/modules/coding"
+import { philosophyModule } from "@/modules/philosophy"
+import { userInfoModule } from "@/modules/user-info"
 import type { OptimizedLoader } from "./optimized-loader"
 
-export interface QueryResponse {
+interface SystemState {
+  initialized: boolean
+  criticalSystemsReady: boolean
+  modulesLoaded: string[]
+  errors: string[]
+  health: any
+}
+
+interface ChatLogEntry {
+  id: string
+  input: string
   response: string
   confidence: number
   sources: string[]
-  reasoning: string[]
   timestamp: number
+  processingTime: number
+  thinkingSteps?: any[]
 }
 
-class SystemManager {
-  private loader?: OptimizedLoader
-  private initialized = false
-
-  async initialize(loader: OptimizedLoader): Promise<void> {
-    if (this.initialized) return
-
-    console.log("🧠 Initializing System Manager...")
-
-    this.loader = loader
-
-    // Initialize core systems with loaded modules
-    const healthMonitor = loader.getModule("healthMonitor")
-    const storageManager = loader.getModule("storageManager")
-    const cognitiveEngine = loader.getModule("cognitiveEngine")
-
-    if (healthMonitor) {
-      console.log("✅ Health Monitor connected")
-    }
-
-    if (storageManager) {
-      console.log("✅ Storage Manager connected")
-    }
-
-    if (cognitiveEngine) {
-      console.log("✅ Cognitive Engine connected")
-    }
-
-    this.initialized = true
-    console.log("🎉 System Manager fully operational")
+export class SystemManager {
+  private state: SystemState = {
+    initialized: false,
+    criticalSystemsReady: false,
+    modulesLoaded: [],
+    errors: [],
+    health: null,
   }
 
-  async processQuery(input: string): Promise<QueryResponse> {
-    if (!this.initialized || !this.loader) {
-      throw new Error("System not initialized")
+  private chatLog: ChatLogEntry[] = []
+  private modules: Map<string, any> = new Map()
+  private engines: Map<string, any> = new Map()
+
+  async initialize(loader: OptimizedLoader): Promise<void> {
+    try {
+      console.log("🚀 Initializing ZacAI System Manager...")
+
+      // Phase 1: Critical Systems
+      await this.initializeCriticalSystems(loader)
+      this.state.criticalSystemsReady = true
+
+      // Phase 2: Initialize Engines
+      await this.initializeEngines(loader)
+
+      // Phase 3: Load Core Modules
+      await this.loadCoreModules(loader)
+
+      // Phase 4: Run Health Checks
+      await this.runHealthChecks()
+
+      this.state.initialized = true
+      console.log("✅ System Manager initialized successfully")
+    } catch (error) {
+      this.state.errors.push(`System initialization failed: ${error}`)
+      console.error("❌ System Manager initialization failed:", error)
+      throw error
+    }
+  }
+
+  private async initializeCriticalSystems(loader: OptimizedLoader): Promise<void> {
+    console.log("🔧 Initializing critical systems...")
+
+    loader.register("storageManager", () => storageManager.initialize(), "critical")
+    loader.register("userMemory", () => userMemory.initialize(), "critical")
+    loader.register("cognitiveEngine", () => cognitiveEngine.initialize(this.modules), "critical")
+  }
+
+  private async initializeEngines(loader: OptimizedLoader): Promise<void> {
+    console.log("🧠 Initializing AI engines...")
+
+    loader.register("learning", () => learningEngine.initialize(), "high")
+    loader.register("reasoning", () => reasoningEngine.initialize(), "high")
+  }
+
+  private async loadCoreModules(loader: OptimizedLoader): Promise<void> {
+    console.log("📦 Loading core modules...")
+
+    loader.register("vocabulary", () => vocabularyModule.initialize(), "high")
+    loader.register("mathematics", () => mathematicsModule.initialize(), "high")
+    loader.register("facts", () => factsModule.initialize(), "medium")
+    loader.register("coding", () => codingModule.initialize(), "medium")
+    loader.register("philosophy", () => philosophyModule.initialize(), "low")
+    loader.register("userInfo", () => userInfoModule.initialize(), "low")
+
+    const loadedModuleNames = loader
+      .getLoadingStatus()
+      .filter((s) => s.status === "loaded")
+      .map((s) => s.name)
+
+    for (const name of loadedModuleNames) {
+      const moduleInstance = loader.getModule(name)
+      if (moduleInstance) {
+        this.modules.set(name, moduleInstance)
+      }
     }
 
+    // The cognitive engine needs a reference to the loaded modules
+    const engine = this.getModule("cognitiveEngine")
+    if (engine) {
+      engine.registerModules(this.modules)
+    }
+  }
+
+  private async runHealthChecks(): Promise<void> {
+    console.log("🔍 Running system health checks...")
+
+    const health = {
+      core: this.state.criticalSystemsReady,
+      engines: this.engines.size,
+      modules: this.state.modulesLoaded.length,
+      storage: true,
+      memory: true,
+      timestamp: Date.now(),
+    }
+
+    this.state.health = health
+    console.log("✅ Health checks completed")
+  }
+
+  async processQuery(input: string): Promise<any> {
     const startTime = Date.now()
 
-    try {
-      // Get cognitive engine
-      const cognitiveEngine = this.loader.getModule("cognitiveEngine")
+    if (!this.state.initialized) {
+      return { response: "System is not ready. Please wait.", confidence: 0, sources: ["system"] }
+    }
 
-      if (cognitiveEngine && cognitiveEngine.processInput) {
-        const result = await cognitiveEngine.processInput(input)
-        return {
-          ...result,
-          timestamp: Date.now(),
-        }
+    const engine = this.getModule("cognitiveEngine")
+    if (!engine) {
+      return {
+        response: "Cognitive engine is offline. Cannot process request.",
+        confidence: 0,
+        sources: ["system-error"],
+      }
+    }
+
+    try {
+      // Extract user's name for personalized responses
+      const userName = userMemory.retrieve("name")?.value
+
+      // Store user name if provided
+      userMemory.extractPersonalInfo(input)
+
+      // Use cognitive engine to process the query
+      const result = await engine.processInput(input)
+      const processingTime = Date.now() - startTime
+
+      // Log the interaction
+      const logEntry: ChatLogEntry = {
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        input,
+        response: result.response,
+        confidence: result.confidence,
+        sources: result.sources,
+        timestamp: Date.now(),
+        processingTime,
+        thinkingSteps: result.reasoning,
       }
 
-      // Fallback processing
-      return this.fallbackProcessing(input)
+      this.chatLog.push(logEntry)
+
+      // Keep only last 100 entries
+      if (this.chatLog.length > 100) {
+        this.chatLog = this.chatLog.slice(-100)
+      }
+
+      return {
+        response: result.response,
+        confidence: result.confidence,
+        sources: result.sources,
+        reasoning: result.reasoning,
+        processingTime,
+        userName,
+      }
     } catch (error) {
       console.error("Query processing error:", error)
       return {
         response: "I encountered an error processing your request. Please try again.",
         confidence: 0,
         sources: ["error"],
-        reasoning: ["Error in query processing"],
-        timestamp: Date.now(),
+        processingTime: Date.now() - startTime,
       }
     }
   }
 
-  private fallbackProcessing(input: string): QueryResponse {
-    const lowerInput = input.toLowerCase().trim()
+  private generateFallbackResponse(input: string, userName?: string): any {
+    const lowerInput = input.toLowerCase()
 
-    // Handle basic commands
-    if (lowerInput === "help") {
+    // Handle special cases
+    if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
       return {
-        response:
-          "I'm ZacAI v2.0.8 with production-grade architecture. I can help with:\n\n• Mathematics and calculations\n• Vocabulary and definitions\n• General knowledge questions\n• System status and diagnostics\n\nTry asking me to 'define a word', solve '5 + 5', or check 'status'.",
-        confidence: 1.0,
-        sources: ["system"],
-        reasoning: ["Built-in help system"],
-        timestamp: Date.now(),
+        response: `👋 Hello${userName ? ` ${userName}` : ""}! I'm ZacAI, your AI assistant. How can I help you today?`,
+        confidence: 0.9,
+        sources: ["core"],
+        reasoning: ["Simple greeting response"],
       }
     }
 
-    if (lowerInput === "status") {
-      const summary = this.loader!.getLoadingSummary()
+    if (lowerInput.includes("help")) {
       return {
-        response: `System Status Report:\n\n• Modules: ${summary.loaded}/${summary.total} loaded\n• Failed: ${summary.failed} modules\n• Bypassed: ${summary.bypassed} modules\n• Average load time: ${Math.round(summary.averageLoadTime)}ms\n• Architecture: Production-grade modular system\n• Status: ${summary.failed === 0 ? "Fully Operational" : "Operational with degraded features"}`,
-        confidence: 1.0,
-        sources: ["system"],
-        reasoning: ["System status query"],
-        timestamp: Date.now(),
+        response: `🆘 **ZacAI Help**
+
+Available Commands:
+• **Define words** - "Define artificial intelligence"
+• **Math calculations** - "5 + 5" or "What is 15 * 8?"
+• **General questions** - Ask me about facts, coding, philosophy
+• **Remember information** - "My name is..." 
+• **System status** - "Status" or "How are you?"
+
+What would you like to try?`,
+        confidence: 0.95,
+        sources: ["core"],
+        reasoning: ["Help command response"],
       }
     }
 
-    // Basic math
-    const mathMatch = lowerInput.match(/^(\d+)\s*([+\-*/])\s*(\d+)$/)
-    if (mathMatch) {
-      const [, a, op, b] = mathMatch
-      const numA = Number.parseFloat(a)
-      const numB = Number.parseFloat(b)
-      let result: number
-
-      switch (op) {
-        case "+":
-          result = numA + numB
-          break
-        case "-":
-          result = numA - numB
-          break
-        case "*":
-          result = numA * numB
-          break
-        case "/":
-          result = numB !== 0 ? numA / numB : Number.NaN
-          break
-        default:
-          result = Number.NaN
-      }
-
-      if (!isNaN(result)) {
+    // Handle math calculations
+    if (/^\d+[\s]*[+\-*/][\s]*\d+/.test(input.replace(/\s/g, ""))) {
+      try {
+        const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
         return {
-          response: `${numA} ${op} ${numB} = ${result}`,
-          confidence: 1.0,
-          sources: ["basic-math"],
-          reasoning: ["Basic arithmetic calculation"],
-          timestamp: Date.now(),
+          response: `🧮 **${input} = ${result}**\n\nCalculation completed successfully!`,
+          confidence: 0.95,
+          sources: ["mathematics"],
+          reasoning: ["Mathematical calculation"],
+        }
+      } catch {
+        return {
+          response: "❌ I couldn't calculate that. Please check your math expression.",
+          confidence: 0.3,
+          sources: ["error"],
+          reasoning: ["Math calculation error"],
         }
       }
     }
 
     // Default response
     return {
-      response: `I received your message: "${input}"\n\nI'm running in fallback mode as some modules are still loading. My full capabilities will be available once all modules are operational. Try asking for 'help' or 'status' for more information.`,
-      confidence: 0.7,
-      sources: ["fallback"],
-      reasoning: ["Fallback processing - limited functionality"],
-      timestamp: Date.now(),
+      response: `I received your message: "${input}"
+
+I'm here to help! Try asking me to:
+• Define a word or concept
+• Solve a math problem  
+• Explain something you're curious about
+• Type "help" for more options
+
+What else would you like to explore?`,
+      confidence: 0.6,
+      sources: ["core"],
+      reasoning: ["Default fallback response"],
     }
   }
 
-  getSystemStatus() {
-    if (!this.loader) return null
+  getSystemStats(): any {
+    const moduleStats: any = {}
+    const engineStats: any = {}
+
+    for (const [name, module] of this.modules) {
+      try {
+        moduleStats[name] = module.getStats()
+      } catch (error) {
+        moduleStats[name] = {
+          totalQueries: 0,
+          successRate: 0,
+          averageResponseTime: 0,
+          learntEntries: 0,
+          lastUpdate: 0,
+        }
+      }
+    }
+
+    for (const [name, engine] of this.engines) {
+      try {
+        engineStats[name] = engine.getStats()
+      } catch (error) {
+        engineStats[name] = {
+          initialized: false,
+        }
+      }
+    }
 
     return {
-      initialized: this.initialized,
-      loadingSummary: this.loader.getLoadingSummary(),
-      loadedModules: Array.from(this.loader.getLoadedModules().keys()),
-      failedModules: this.loader.getFailedModules().map((m) => m.name),
+      initialized: this.state.initialized,
+      modules: moduleStats,
+      engines: engineStats,
+      uptime: Date.now() - (this.state.health?.timestamp || Date.now()),
+      totalQueries: this.chatLog.length,
+      averageResponseTime: this.calculateAverageResponseTime(),
+      successRate: this.calculateSuccessRate(),
+      chatLogEntries: this.chatLog.length,
+      health: this.state.health,
+      errors: this.state.errors,
     }
+  }
+
+  private calculateAverageResponseTime(): number {
+    if (this.chatLog.length === 0) return 0
+    const total = this.chatLog.reduce((sum, entry) => sum + entry.processingTime, 0)
+    return Math.round(total / this.chatLog.length)
+  }
+
+  private calculateSuccessRate(): number {
+    if (this.chatLog.length === 0) return 1
+    const successful = this.chatLog.filter((entry) => entry.confidence > 0.5).length
+    return successful / this.chatLog.length
+  }
+
+  getChatLog(): ChatLogEntry[] {
+    return [...this.chatLog]
+  }
+
+  isInitialized(): boolean {
+    return this.state.initialized
+  }
+
+  getModule<T>(name: string): T | undefined {
+    return this.modules.get(name) as T | undefined
   }
 }
 

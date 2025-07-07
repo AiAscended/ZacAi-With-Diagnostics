@@ -1,187 +1,128 @@
-import type { ContextMessage } from "@/types/global"
-import { generateId, calculateSimilarity } from "@/utils/helpers"
+interface ContextMessage {
+  role: "user" | "assistant" | "system"
+  content: string
+  timestamp?: number
+  metadata?: any
+}
 
-export class ContextManager {
-  private context: ContextMessage[] = []
-  private maxContextLength = 50 // Updated max context size
-  private currentSessionId = generateId()
+interface ConversationContext {
+  messages: ContextMessage[]
+  sessionId: string
+  startTime: number
+  lastActivity: number
+  messageCount: number
+}
 
-  createContext(): void {
-    this.context = []
-    console.log("📝 Context manager initialized") // Updated log message
+class ContextManager {
+  private context: ConversationContext | null = null
+  private maxMessages = 50 // Keep last 50 messages for context
+  private sessionTimeout = 30 * 60 * 1000 // 30 minutes
+
+  async createContext(): Promise<void> {
+    this.context = {
+      messages: [],
+      sessionId: this.generateSessionId(),
+      startTime: Date.now(),
+      lastActivity: Date.now(),
+      messageCount: 0,
+    }
+
+    console.log("📝 Context Manager initialized")
   }
 
   addMessage(message: ContextMessage): void {
+    if (!this.context) {
+      this.createContext()
+    }
+
     const contextMessage: ContextMessage = {
       ...message,
       timestamp: Date.now(),
     }
 
-    this.context.push(contextMessage)
+    this.context!.messages.push(contextMessage)
+    this.context!.lastActivity = Date.now()
+    this.context!.messageCount++
 
-    // Keep context within limits
-    if (this.context.length > this.maxContextLength) {
-      this.context = this.context.slice(-this.maxContextLength)
+    // Keep only recent messages to prevent memory bloat
+    if (this.context!.messages.length > this.maxMessages) {
+      this.context!.messages = this.context!.messages.slice(-this.maxMessages)
     }
-  }
-
-  getContext(): ContextMessage[] {
-    return [...this.context]
-  }
-
-  getRecentMessages(count = 5): ContextMessage[] {
-    return this.context.slice(-count)
   }
 
   extractContext(currentInput: string): any {
-    const recentMessages = this.getRecentMessages(5)
+    if (!this.context) {
+      return {
+        sessionId: "no-context",
+        messageCount: 0,
+        recentMessages: [],
+        currentInput,
+      }
+    }
 
-    // Extract topics from recent conversation
-    const topics = this.extractTopics(recentMessages)
-
-    // Find related previous messages
-    const relatedMessages = this.findRelatedMessages(currentInput)
-
-    // Extract user preferences from conversation
-    const preferences = this.extractUserPreferences(recentMessages)
+    // Get recent messages for context
+    const recentMessages = this.context.messages
+      .slice(-5) // Last 5 messages
+      .map((msg) => ({
+        role: msg.role,
+        content: msg.content.substring(0, 100), // Truncate for context
+      }))
 
     return {
-      sessionId: this.currentSessionId,
-      messageCount: this.context.length,
+      sessionId: this.context.sessionId,
+      messageCount: this.context.messageCount,
       recentMessages,
-      topics,
-      relatedMessages,
-      preferences,
-      timestamp: Date.now(),
+      currentInput,
+      sessionDuration: Date.now() - this.context.startTime,
     }
-  }
-
-  private extractTopics(messages: ContextMessage[]): string[] {
-    const topics: string[] = []
-
-    for (const message of messages) {
-      const words = message.content
-        .toLowerCase()
-        .replace(/[^\w\s]/g, " ")
-        .split(/\s+/)
-        .filter((word) => word.length > 3)
-
-      // Simple topic extraction - look for repeated important words
-      const wordCounts: { [key: string]: number } = {}
-      for (const word of words) {
-        wordCounts[word] = (wordCounts[word] || 0) + 1
-      }
-
-      // Add words that appear multiple times
-      for (const [word, count] of Object.entries(wordCounts)) {
-        if (count > 1 && !topics.includes(word)) {
-          topics.push(word)
-        }
-      }
-    }
-
-    return topics.slice(0, 10) // Limit to top 10 topics
-  }
-
-  private findRelatedMessages(currentInput: string): ContextMessage[] {
-    const related: Array<{ message: ContextMessage; similarity: number }> = []
-
-    for (const message of this.context) {
-      const similarity = calculateSimilarity(currentInput, message.content)
-      if (similarity > 0.3) {
-        // Threshold for relevance
-        related.push({ message, similarity })
-      }
-    }
-
-    // Sort by similarity and return top 3
-    return related
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 3)
-      .map((item) => item.message)
-  }
-
-  private extractUserPreferences(messages: ContextMessage[]): any {
-    const preferences: any = {
-      interests: [],
-      learningStyle: "mixed",
-      difficulty: "medium",
-    }
-
-    for (const message of messages) {
-      if (message.role === "user") {
-        const content = message.content.toLowerCase()
-
-        // Extract interests
-        if (content.includes("i like") || content.includes("i love")) {
-          const match = content.match(/i (?:like|love) (.+?)(?:\.|$|,)/i)
-          if (match) {
-            preferences.interests.push(match[1].trim())
-          }
-        }
-
-        // Extract difficulty preference
-        if (content.includes("simple") || content.includes("easy")) {
-          preferences.difficulty = "easy"
-        } else if (content.includes("advanced") || content.includes("complex")) {
-          preferences.difficulty = "hard"
-        }
-
-        // Extract learning style hints
-        if (content.includes("show me") || content.includes("example")) {
-          preferences.learningStyle = "visual"
-        } else if (content.includes("explain") || content.includes("tell me")) {
-          preferences.learningStyle = "auditory"
-        }
-      }
-    }
-
-    return preferences
-  }
-
-  clearContext(): void {
-    this.context = []
-    this.currentSessionId = generateId()
   }
 
   getContextStats(): any {
-    const userMessages = this.context.filter((m) => m.role === "user").length
-    const assistantMessages = this.context.filter((m) => m.role === "assistant").length
+    if (!this.context) {
+      return {
+        active: false,
+        messageCount: 0,
+        sessionDuration: 0,
+      }
+    }
 
     return {
-      totalMessages: this.context.length,
-      userMessages,
-      assistantMessages,
-      sessionId: this.currentSessionId,
-      oldestMessage: this.context.length > 0 ? this.context[0].timestamp : null,
-      newestMessage: this.context.length > 0 ? this.context[this.context.length - 1].timestamp : null,
-      maxSize: this.maxContextLength, // Added max context size to stats
+      active: true,
+      sessionId: this.context.sessionId,
+      messageCount: this.context.messageCount,
+      sessionDuration: Date.now() - this.context.startTime,
+      lastActivity: this.context.lastActivity,
+      messagesInMemory: this.context.messages.length,
     }
   }
 
-  exportContext(): any {
-    return {
-      sessionId: this.currentSessionId,
-      messages: this.context,
-      stats: this.getContextStats(),
-      exportTime: Date.now(),
-    }
+  clearContext(): void {
+    this.context = null
+    console.log("🗑️ Context cleared")
   }
 
-  importContext(data: any): void {
-    if (data.messages && Array.isArray(data.messages)) {
-      this.context = data.messages
-      this.currentSessionId = data.sessionId || generateId()
-    }
+  private generateSessionId(): string {
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 
-  setMaxContextLength(length: number): void {
-    this.maxContextLength = Math.max(1, Math.min(100, length))
+  // Check if session has expired
+  isSessionExpired(): boolean {
+    if (!this.context) return true
+    return Date.now() - this.context.lastActivity > this.sessionTimeout
+  }
 
-    // Trim context if needed
-    if (this.context.length > this.maxContextLength) {
-      this.context = this.context.slice(-this.maxContextLength)
+  // Get conversation summary for long-term memory
+  getConversationSummary(): string {
+    if (!this.context || this.context.messages.length === 0) {
+      return "No conversation history"
     }
+
+    const userMessages = this.context.messages
+      .filter((msg) => msg.role === "user")
+      .slice(-10) // Last 10 user messages
+      .map((msg) => msg.content)
+
+    return `Recent topics: ${userMessages.join("; ")}`
   }
 }
 
