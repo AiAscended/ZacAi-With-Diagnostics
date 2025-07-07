@@ -1,5 +1,7 @@
 "use client"
 
+import { Separator } from "@/components/ui/separator"
+
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
@@ -9,19 +11,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { AdminDashboard } from "@/ui/admin/dashboard"
-import { Brain, Send, User, Bot, Settings } from "lucide-react"
+import { AdminDashboardClean } from "@/components/admin-dashboard-clean"
+import { Brain, Send, Settings, MessageSquare, User, Bot, Clock, CheckCircle, AlertTriangle } from "lucide-react"
 import type { OptimizedLoader } from "@/core/system/optimized-loader"
 import type { SafeModeSystem } from "@/core/system/safe-mode"
 
 interface Message {
   id: string
-  role: "user" | "assistant"
   content: string
+  sender: "user" | "ai"
   timestamp: number
   confidence?: number
   sources?: string[]
-  reasoning?: string[]
+  processingTime?: number
 }
 
 interface EnhancedAIChatProps {
@@ -30,37 +32,68 @@ interface EnhancedAIChatProps {
 }
 
 export function EnhancedAIChat({ loader, safeMode }: EnhancedAIChatProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content:
-        "👋 Hello! I'm ZacAI v2.0.8, now fully operational with production-grade architecture. How can I help you today?",
-      timestamp: Date.now(),
-      confidence: 1.0,
-      sources: ["system"],
-    },
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
+  const [systemStats, setSystemStats] = useState<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  useEffect(() => {
+    // Add welcome message
+    const welcomeMessage: Message = {
+      id: "welcome",
+      content: `👋 **Welcome to ZacAI v2.0.8+**
+
+I'm your personal AI assistant, ready to help with:
+• **Math calculations** - Try "5 + 5" or "What is 15 * 8?"
+• **General questions** - Ask me about anything
+• **System help** - Type "help" for more options
+
+What would you like to explore today?`,
+      sender: "ai",
+      timestamp: Date.now(),
+      confidence: 1.0,
+      sources: ["system"],
+    }
+
+    setMessages([welcomeMessage])
+
+    // Load system stats
+    loadSystemStats()
+
+    // Focus input
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [])
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
-  const handleSendMessage = async () => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const loadSystemStats = () => {
+    try {
+      const stats = systemManager.getSystemStats()
+      setSystemStats(stats)
+    } catch (error) {
+      console.error("Failed to load system stats:", error)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
-      role: "user",
-      content: input,
+      content: input.trim(),
+      sender: "user",
       timestamp: Date.now(),
     }
 
@@ -69,201 +102,217 @@ export function EnhancedAIChat({ loader, safeMode }: EnhancedAIChatProps) {
     setIsLoading(true)
 
     try {
-      const response = await systemManager.processQuery(input)
+      const result = await systemManager.processQuery(input.trim())
 
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: "assistant",
-        content: response.response,
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        content: result.response,
+        sender: "ai",
         timestamp: Date.now(),
-        confidence: response.confidence,
-        sources: response.sources,
-        reasoning: response.reasoning,
+        confidence: result.confidence,
+        sources: result.sources,
+        processingTime: result.processingTime,
       }
 
-      setMessages((prev) => [...prev, assistantMessage])
+      setMessages((prev) => [...prev, aiMessage])
+      loadSystemStats()
     } catch (error) {
+      console.error("Error processing query:", error)
+
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
-        role: "assistant",
-        content: "I encountered an error processing your request. Please try again.",
+        content: "❌ I encountered an error processing your request. Please try again.",
+        sender: "ai",
         timestamp: Date.now(),
         confidence: 0,
         sources: ["error"],
       }
+
       setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
+  const formatTimestamp = (timestamp: number) => {
+    return new Date(timestamp).toLocaleTimeString()
+  }
+
+  const getConfidenceColor = (confidence?: number) => {
+    if (!confidence) return "bg-gray-100 text-gray-700"
+    if (confidence >= 0.8) return "bg-green-100 text-green-700"
+    if (confidence >= 0.6) return "bg-yellow-100 text-yellow-700"
+    return "bg-red-100 text-red-700"
+  }
+
+  const getSystemHealthIcon = () => {
+    const health = safeMode.getSystemHealth()
+    if (!health) return <AlertTriangle className="w-4 h-4 text-yellow-500" />
+
+    switch (health.overall) {
+      case "healthy":
+        return <CheckCircle className="w-4 h-4 text-green-500" />
+      case "warning":
+        return <AlertTriangle className="w-4 h-4 text-yellow-500" />
+      default:
+        return <AlertTriangle className="w-4 h-4 text-red-500" />
     }
   }
 
   if (showAdmin) {
-    return <AdminDashboard onToggleChat={() => setShowAdmin(false)} loader={loader} safeMode={safeMode} />
+    return <AdminDashboardClean onToggleChat={() => setShowAdmin(false)} />
   }
 
-  const systemHealth = safeMode.getSystemHealth()
-  const loadingSummary = loader.getLoadingSummary()
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-6xl h-[90vh] shadow-2xl border-0 flex flex-col">
-        {/* Header */}
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white flex-shrink-0">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <div className="bg-white/90 backdrop-blur-sm border-b shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold flex items-center gap-3">
-              <Brain className="h-8 w-8" />
-              <div>
-                <div>ZacAI v2.0.8</div>
-                <div className="text-sm font-normal text-blue-100">
-                  Production Architecture • {loadingSummary.loaded}/{loadingSummary.total} modules
-                </div>
-              </div>
-            </CardTitle>
             <div className="flex items-center gap-3">
-              <Badge
-                className={`${
-                  systemHealth.overall === "healthy"
-                    ? "bg-green-500"
-                    : systemHealth.overall === "degraded"
-                      ? "bg-yellow-500"
-                      : "bg-red-500"
-                } text-white`}
-              >
-                {systemHealth.overall.toUpperCase()}
-              </Badge>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  ZacAI v2.0.8+
+                </h1>
+                <p className="text-sm text-gray-600">Your Personal AI Assistant</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* System Health */}
+              <div className="flex items-center gap-2">
+                {getSystemHealthIcon()}
+                <span className="text-sm text-gray-600">{safeMode.getSystemHealth()?.overall || "Unknown"}</span>
+              </div>
+
+              {/* Stats */}
+              {systemStats && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                    {systemStats.totalQueries} queries
+                  </Badge>
+                  <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                    {Math.round(systemStats.averageResponseTime)}ms avg
+                  </Badge>
+                </div>
+              )}
+
+              {/* Admin Button */}
               <Button
-                onClick={() => setShowAdmin(true)}
                 variant="outline"
-                className="text-white border-white hover:bg-white/10"
+                size="sm"
+                onClick={() => setShowAdmin(true)}
+                className="flex items-center gap-2"
               >
-                <Settings className="h-4 w-4 mr-2" />
+                <Settings className="w-4 h-4" />
                 Admin
               </Button>
             </div>
           </div>
-        </CardHeader>
+        </div>
+      </div>
 
-        {/* Messages */}
-        <CardContent className="flex-1 flex flex-col p-0">
-          <ScrollArea className="flex-1 p-6">
-            <div className="space-y-6">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex items-start gap-4 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {message.role === "assistant" && (
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-5 w-5 text-white" />
-                    </div>
-                  )}
+      {/* Chat Area */}
+      <div className="max-w-4xl mx-auto p-4">
+        <Card className="h-[calc(100vh-200px)] flex flex-col shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <MessageSquare className="w-5 h-5" />
+              Chat with ZacAI
+            </CardTitle>
+          </CardHeader>
 
-                  <div className={`max-w-[75%] ${message.role === "user" ? "ml-auto" : "mr-auto"}`}>
+          <CardContent className="flex-1 flex flex-col p-0">
+            {/* Messages */}
+            <ScrollArea className="flex-1 px-6">
+              <div className="space-y-4 py-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    {message.sender === "ai" && (
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+
                     <div
-                      className={`p-4 rounded-2xl ${
-                        message.role === "user"
-                          ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white"
-                          : "bg-white border shadow-sm"
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                        message.sender === "user" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"
                       }`}
                     >
                       <div className="whitespace-pre-wrap">{message.content}</div>
 
                       {/* Message metadata */}
-                      <div
-                        className={`flex items-center gap-2 mt-2 text-xs ${
-                          message.role === "user" ? "text-blue-100" : "text-gray-500"
-                        }`}
-                      >
-                        <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
+                      <div className="flex items-center gap-2 mt-2 text-xs opacity-70">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatTimestamp(message.timestamp)}</span>
+
                         {message.confidence !== undefined && (
-                          <Badge variant="outline" className="text-xs">
-                            {Math.round(message.confidence * 100)}% confidence
+                          <Badge variant="secondary" className={`text-xs ${getConfidenceColor(message.confidence)}`}>
+                            {Math.round(message.confidence * 100)}%
                           </Badge>
                         )}
-                        {message.sources && message.sources.length > 0 && (
-                          <Badge variant="outline" className="text-xs">
-                            {message.sources.join(", ")}
-                          </Badge>
-                        )}
+
+                        {message.processingTime && <span>{message.processingTime}ms</span>}
+                      </div>
+                    </div>
+
+                    {message.sender === "user" && (
+                      <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-gray-600" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isLoading && (
+                  <div className="flex gap-3 justify-start">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="bg-gray-100 rounded-2xl px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <span className="text-gray-600">ZacAI is thinking...</span>
                       </div>
                     </div>
                   </div>
+                )}
 
-                  {message.role === "user" && (
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                </div>
-              ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
 
-              {isLoading && (
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <Bot className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="bg-white border shadow-sm p-4 rounded-2xl">
-                    <div className="flex items-center gap-3">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      <span className="text-gray-600">ZacAI is thinking...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
+            <Separator />
 
-          {/* Input */}
-          <div className="border-t bg-white p-6 flex-shrink-0">
-            <div className="flex gap-3 mb-3">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask me anything... (try 'help', 'status', or '5 + 5')"
-                className="flex-1 text-base"
-                disabled={isLoading}
-              />
-              <Button
-                onClick={handleSendMessage}
-                disabled={isLoading || !input.trim()}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={() => setInput("help")} disabled={isLoading}>
-                Help
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setInput("status")} disabled={isLoading}>
-                System Status
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setInput("5 + 5")} disabled={isLoading}>
-                Math Test
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setInput("define artificial intelligence")}
-                disabled={isLoading}
-              >
-                Define Word
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            {/* Input Form */}
+            <form onSubmit={handleSubmit} className="p-4">
+              <div className="flex gap-3">
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask me anything..."
+                  disabled={isLoading}
+                  className="flex-1 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                />
+                <Button
+                  type="submit"
+                  disabled={!input.trim() || isLoading}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

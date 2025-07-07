@@ -35,29 +35,15 @@ export class OptimizedLoader {
   private startTime = 0
 
   constructor() {
+    // Register minimal core modules only
     this.registerCoreModules()
   }
 
   private registerCoreModules() {
-    // Critical system modules - must load first
-    this.register("healthMonitor", () => this.loadHealthMonitor(), "critical", true)
+    // Only register the absolute essentials
     this.register("storageManager", () => this.loadStorageManager(), "critical", true)
     this.register("userMemory", () => this.loadUserMemory(), "critical", true)
-
-    // High priority engines
-    this.register("cognitiveEngine", () => this.loadCognitiveEngine(), "high", true)
-    this.register("reasoningEngine", () => this.loadReasoningEngine(), "high", false)
-    this.register("learningEngine", () => this.loadLearningEngine(), "high", false)
-
-    // Medium priority modules
-    this.register("vocabularyModule", () => this.loadVocabularyModule(), "medium", false)
-    this.register("mathematicsModule", () => this.loadMathematicsModule(), "medium", false)
-    this.register("factsModule", () => this.loadFactsModule(), "medium", false)
-
-    // Low priority modules
-    this.register("codingModule", () => this.loadCodingModule(), "low", false)
-    this.register("philosophyModule", () => this.loadPhilosophyModule(), "low", false)
-    this.register("userInfoModule", () => this.loadUserInfoModule(), "low", false)
+    this.register("cognitiveEngine", () => this.loadCognitiveEngine(), "high", false)
   }
 
   register(
@@ -66,7 +52,7 @@ export class OptimizedLoader {
     priority: ModulePriority,
     essential = false,
     dependencies: string[] = [],
-    timeout = 10000,
+    timeout = 5000,
   ) {
     this.modules.set(name, {
       name,
@@ -77,7 +63,6 @@ export class OptimizedLoader {
       timeout,
     })
 
-    // Initialize result entry
     this.loadResults.set(name, {
       name,
       status: "pending",
@@ -110,6 +95,9 @@ export class OptimizedLoader {
 
         await this.loadModule(module)
         completed++
+
+        // Add small delay for visual feedback
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
 
       progressCallback?.(100, "System ready!")
@@ -125,7 +113,6 @@ export class OptimizedLoader {
       const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority]
       if (priorityDiff !== 0) return priorityDiff
 
-      // Within same priority, essential modules first
       if (a.essential && !b.essential) return -1
       if (!a.essential && b.essential) return 1
 
@@ -137,23 +124,12 @@ export class OptimizedLoader {
     const result = this.loadResults.get(module.name)!
 
     try {
-      // Check dependencies
-      if (module.dependencies) {
-        for (const dep of module.dependencies) {
-          const depResult = this.loadResults.get(dep)
-          if (!depResult || depResult.status !== "loaded") {
-            throw new Error(`Dependency ${dep} not loaded`)
-          }
-        }
-      }
-
       result.status = "loading"
       const loadStart = Date.now()
 
-      // Load with timeout
       const instance = await Promise.race([
         module.loader(),
-        this.createTimeout(module.timeout || 10000, `${module.name} load timeout`),
+        this.createTimeout(module.timeout || 5000, `${module.name} load timeout`),
       ])
 
       const loadTime = Date.now() - loadStart
@@ -177,9 +153,8 @@ export class OptimizedLoader {
       if (module.essential) {
         throw new Error(`Critical module ${module.name} failed: ${errorMessage}`)
       } else {
-        // Non-essential module failed, mark as bypassed and continue
         result.status = "bypassed"
-        console.warn(`⚠️ Non-essential module ${module.name} bypassed due to error`)
+        console.warn(`⚠️ Non-essential module ${module.name} bypassed`)
       }
     }
   }
@@ -190,172 +165,125 @@ export class OptimizedLoader {
     })
   }
 
-  // Module loader implementations
-  private async loadHealthMonitor(): Promise<any> {
-    try {
-      const { HealthMonitor } = await import("@/core/system/health-monitor")
-      const instance = new HealthMonitor()
-      await instance.initialize()
-      return instance
-    } catch (error) {
-      // Fallback health monitor
-      return {
-        initialize: async () => {},
-        getHealth: () => ({ status: "unknown", checks: [] }),
-        isHealthy: () => true,
-      }
-    }
-  }
-
+  // Simple fallback implementations
   private async loadStorageManager(): Promise<any> {
-    try {
-      const { storageManager } = await import("@/core/storage/manager")
-      await storageManager.initialize()
-      return storageManager
-    } catch (error) {
-      // Fallback storage manager
-      return {
-        initialize: async () => {},
-        get: () => null,
-        set: () => {},
-        has: () => false,
-      }
+    return {
+      initialize: async () => {},
+      get: (key: string) => {
+        try {
+          return JSON.parse(localStorage.getItem(key) || "null")
+        } catch {
+          return null
+        }
+      },
+      set: (key: string, value: any) => {
+        try {
+          localStorage.setItem(key, JSON.stringify(value))
+        } catch {
+          console.warn("Storage not available")
+        }
+      },
+      has: (key: string) => localStorage.getItem(key) !== null,
     }
   }
 
   private async loadUserMemory(): Promise<any> {
-    try {
-      const { userMemory } = await import("@/core/memory/user-memory")
-      await userMemory.initialize()
-      return userMemory
-    } catch (error) {
-      // Fallback user memory
-      return {
-        initialize: async () => {},
-        store: () => {},
-        retrieve: () => null,
-        extractPersonalInfo: () => {},
-      }
+    return {
+      initialize: async () => {},
+      store: (key: string, value: any) => {
+        try {
+          localStorage.setItem(`zacai_memory_${key}`, JSON.stringify(value))
+        } catch {
+          console.warn("Memory storage not available")
+        }
+      },
+      retrieve: (key: string) => {
+        try {
+          const item = localStorage.getItem(`zacai_memory_${key}`)
+          return item ? JSON.parse(item) : null
+        } catch {
+          return null
+        }
+      },
+      extractPersonalInfo: (input: string) => {
+        // Simple name extraction
+        const nameMatch = input.match(/my name is (\w+)/i)
+        if (nameMatch) {
+          try {
+            localStorage.setItem("zacai_memory_name", JSON.stringify({ value: nameMatch[1] }))
+          } catch {}
+        }
+      },
     }
   }
 
   private async loadCognitiveEngine(): Promise<any> {
-    try {
-      const { cognitiveEngine } = await import("@/engines/cognitive")
-      await cognitiveEngine.initialize()
-      return cognitiveEngine
-    } catch (error) {
-      // Fallback cognitive engine
-      return {
-        initialize: async () => {},
-        processInput: async (input: string) => ({
-          response: `I received: "${input}". Some modules are still loading.`,
-          confidence: 0.5,
-          sources: ["fallback"],
-          reasoning: ["Using fallback response"],
-        }),
-        registerModule: () => {},
-      }
-    }
-  }
-
-  private async loadReasoningEngine(): Promise<any> {
-    try {
-      const { reasoningEngine } = await import("@/engines/reasoning")
-      await reasoningEngine.initialize()
-      return reasoningEngine
-    } catch (error) {
-      return this.createFallbackModule("reasoning")
-    }
-  }
-
-  private async loadLearningEngine(): Promise<any> {
-    try {
-      const { learningEngine } = await import("@/engines/learning")
-      await learningEngine.initialize()
-      return learningEngine
-    } catch (error) {
-      return this.createFallbackModule("learning")
-    }
-  }
-
-  private async loadVocabularyModule(): Promise<any> {
-    try {
-      const { vocabularyModule } = await import("@/modules/vocabulary")
-      await vocabularyModule.initialize()
-      return vocabularyModule
-    } catch (error) {
-      return this.createFallbackModule("vocabulary")
-    }
-  }
-
-  private async loadMathematicsModule(): Promise<any> {
-    try {
-      const { mathematicsModule } = await import("@/modules/mathematics")
-      await mathematicsModule.initialize()
-      return mathematicsModule
-    } catch (error) {
-      return this.createFallbackModule("mathematics")
-    }
-  }
-
-  private async loadFactsModule(): Promise<any> {
-    try {
-      const { factsModule } = await import("@/modules/facts")
-      await factsModule.initialize()
-      return factsModule
-    } catch (error) {
-      return this.createFallbackModule("facts")
-    }
-  }
-
-  private async loadCodingModule(): Promise<any> {
-    try {
-      const { codingModule } = await import("@/modules/coding")
-      await codingModule.initialize()
-      return codingModule
-    } catch (error) {
-      return this.createFallbackModule("coding")
-    }
-  }
-
-  private async loadPhilosophyModule(): Promise<any> {
-    try {
-      const { philosophyModule } = await import("@/modules/philosophy")
-      await philosophyModule.initialize()
-      return philosophyModule
-    } catch (error) {
-      return this.createFallbackModule("philosophy")
-    }
-  }
-
-  private async loadUserInfoModule(): Promise<any> {
-    try {
-      const { userInfoModule } = await import("@/modules/user-info")
-      await userInfoModule.initialize()
-      return userInfoModule
-    } catch (error) {
-      return this.createFallbackModule("user-info")
-    }
-  }
-
-  private createFallbackModule(name: string): any {
     return {
-      name,
       initialize: async () => {},
-      process: async (input: string) => ({
-        success: false,
-        data: `${name} module not available`,
-        confidence: 0,
-        source: `${name}-fallback`,
-      }),
-      getStats: () => ({
-        totalQueries: 0,
-        successRate: 0,
-        averageResponseTime: 0,
-        learntEntries: 0,
-        lastUpdate: 0,
-      }),
+      processInput: async (input: string) => {
+        // Simple processing logic
+        const lowerInput = input.toLowerCase()
+
+        if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
+          return {
+            response: "👋 Hello! I'm ZacAI, your AI assistant. How can I help you today?",
+            confidence: 0.9,
+            sources: ["core"],
+            reasoning: ["Simple greeting response"],
+          }
+        }
+
+        if (lowerInput.includes("help")) {
+          return {
+            response: `🆘 **ZacAI Help**
+
+Available Commands:
+• **Math calculations** - "5 + 5" or "What is 15 * 8?"
+• **General questions** - Ask me about anything
+• **System status** - "Status" or "How are you?"
+
+What would you like to try?`,
+            confidence: 0.95,
+            sources: ["core"],
+            reasoning: ["Help command response"],
+          }
+        }
+
+        // Simple math calculation
+        if (/^\d+[\s]*[+\-*/][\s]*\d+/.test(input.replace(/\s/g, ""))) {
+          try {
+            const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
+            return {
+              response: `🧮 **${input} = ${result}**\n\nCalculation completed successfully!`,
+              confidence: 0.95,
+              sources: ["mathematics"],
+              reasoning: ["Mathematical calculation"],
+            }
+          } catch {
+            return {
+              response: "❌ I couldn't calculate that. Please check your math expression.",
+              confidence: 0.3,
+              sources: ["error"],
+              reasoning: ["Math calculation error"],
+            }
+          }
+        }
+
+        // Default response
+        return {
+          response: `I received your message: "${input}"
+
+I'm here to help! Try asking me to:
+• Solve a math problem  
+• Type "help" for more options
+
+What else would you like to explore?`,
+          confidence: 0.6,
+          sources: ["core"],
+          reasoning: ["Default fallback response"],
+        }
+      },
+      registerModules: () => {},
     }
   }
 

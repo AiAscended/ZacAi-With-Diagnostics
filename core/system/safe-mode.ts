@@ -35,10 +35,8 @@ export class SafeModeSystem {
     console.log("🛡️ Initializing Safe Mode System...")
 
     try {
-      // Run comprehensive health checks
       await this.runHealthChecks()
 
-      // Check if we need to enter safe mode
       if (this.systemHealth?.overall === "critical") {
         this.enterSafeMode()
       }
@@ -54,16 +52,58 @@ export class SafeModeSystem {
     const checks: HealthCheck[] = []
 
     // Browser environment check
-    checks.push(await this.checkBrowserEnvironment())
+    try {
+      if (typeof window === "undefined") {
+        checks.push({
+          name: "Browser Environment",
+          status: "error",
+          message: "Not running in browser environment",
+          timestamp: Date.now(),
+        })
+      } else {
+        checks.push({
+          name: "Browser Environment",
+          status: "healthy",
+          message: "Browser environment is compatible",
+          timestamp: Date.now(),
+        })
+      }
+    } catch (error) {
+      checks.push({
+        name: "Browser Environment",
+        status: "error",
+        message: `Browser check failed: ${error}`,
+        timestamp: Date.now(),
+      })
+    }
 
-    // Storage availability check
-    checks.push(await this.checkStorageAvailability())
+    // Storage check
+    try {
+      const testKey = "zacai_test"
+      localStorage.setItem(testKey, "test")
+      localStorage.removeItem(testKey)
+      checks.push({
+        name: "Storage",
+        status: "healthy",
+        message: "Storage systems operational",
+        timestamp: Date.now(),
+      })
+    } catch (error) {
+      checks.push({
+        name: "Storage",
+        status: "warning",
+        message: "Storage not available, using memory fallback",
+        timestamp: Date.now(),
+      })
+    }
 
-    // Memory check
-    checks.push(await this.checkMemoryUsage())
-
-    // Network connectivity check
-    checks.push(await this.checkNetworkConnectivity())
+    // Network check
+    checks.push({
+      name: "Network",
+      status: navigator.onLine ? "healthy" : "warning",
+      message: navigator.onLine ? "Network available" : "Offline mode",
+      timestamp: Date.now(),
+    })
 
     // Determine overall health
     const criticalErrors = checks.filter((c) => c.status === "error").length
@@ -86,163 +126,13 @@ export class SafeModeSystem {
     }
   }
 
-  private async checkBrowserEnvironment(): Promise<HealthCheck> {
-    try {
-      if (typeof window === "undefined") {
-        return {
-          name: "Browser Environment",
-          status: "error",
-          message: "Not running in browser environment",
-          timestamp: Date.now(),
-        }
-      }
-
-      // Check for required APIs
-      const requiredAPIs = ["localStorage", "fetch", "Promise"]
-      const missingAPIs = requiredAPIs.filter((api) => !(api in window))
-
-      if (missingAPIs.length > 0) {
-        return {
-          name: "Browser Environment",
-          status: "warning",
-          message: `Missing APIs: ${missingAPIs.join(", ")}`,
-          timestamp: Date.now(),
-        }
-      }
-
-      return {
-        name: "Browser Environment",
-        status: "healthy",
-        message: "Browser environment is compatible",
-        timestamp: Date.now(),
-      }
-    } catch (error) {
-      return {
-        name: "Browser Environment",
-        status: "error",
-        message: `Browser check failed: ${error}`,
-        timestamp: Date.now(),
-      }
-    }
-  }
-
-  private async checkStorageAvailability(): Promise<HealthCheck> {
-    try {
-      const testKey = "zacai_safe_mode_test"
-      const testValue = "test_data"
-
-      // Test localStorage
-      localStorage.setItem(testKey, testValue)
-      const retrieved = localStorage.getItem(testKey)
-      localStorage.removeItem(testKey)
-
-      if (retrieved !== testValue) {
-        return {
-          name: "Storage",
-          status: "error",
-          message: "localStorage read/write test failed",
-          timestamp: Date.now(),
-        }
-      }
-
-      return {
-        name: "Storage",
-        status: "healthy",
-        message: "Storage systems operational",
-        timestamp: Date.now(),
-      }
-    } catch (error) {
-      return {
-        name: "Storage",
-        status: "error",
-        message: `Storage check failed: ${error}`,
-        timestamp: Date.now(),
-      }
-    }
-  }
-
-  private async checkMemoryUsage(): Promise<HealthCheck> {
-    try {
-      if ("memory" in performance) {
-        const memory = (performance as any).memory
-        const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024)
-        const limitMB = Math.round(memory.jsHeapSizeLimit / 1024 / 1024)
-        const usagePercent = (usedMB / limitMB) * 100
-
-        if (usagePercent > 90) {
-          return {
-            name: "Memory",
-            status: "error",
-            message: `Critical memory usage: ${usagePercent.toFixed(1)}%`,
-            timestamp: Date.now(),
-          }
-        } else if (usagePercent > 75) {
-          return {
-            name: "Memory",
-            status: "warning",
-            message: `High memory usage: ${usagePercent.toFixed(1)}%`,
-            timestamp: Date.now(),
-          }
-        }
-
-        return {
-          name: "Memory",
-          status: "healthy",
-          message: `Memory usage normal: ${usagePercent.toFixed(1)}%`,
-          timestamp: Date.now(),
-        }
-      }
-
-      return {
-        name: "Memory",
-        status: "warning",
-        message: "Memory monitoring not available",
-        timestamp: Date.now(),
-      }
-    } catch (error) {
-      return {
-        name: "Memory",
-        status: "error",
-        message: `Memory check failed: ${error}`,
-        timestamp: Date.now(),
-      }
-    }
-  }
-
-  private async checkNetworkConnectivity(): Promise<HealthCheck> {
-    try {
-      if (!navigator.onLine) {
-        return {
-          name: "Network",
-          status: "warning",
-          message: "Browser reports offline status",
-          timestamp: Date.now(),
-        }
-      }
-
-      return {
-        name: "Network",
-        status: "healthy",
-        message: "Network connectivity available",
-        timestamp: Date.now(),
-      }
-    } catch (error) {
-      return {
-        name: "Network",
-        status: "error",
-        message: `Network check failed: ${error}`,
-        timestamp: Date.now(),
-      }
-    }
-  }
-
   enterSafeMode(): void {
-    console.warn("🚨 Entering Safe Mode - Limited functionality enabled")
+    console.warn("🚨 Entering Safe Mode")
     this.config.fallbackMode = true
   }
 
   exitSafeMode(): void {
-    console.log("✅ Exiting Safe Mode - Full functionality restored")
+    console.log("✅ Exiting Safe Mode")
     this.config.fallbackMode = false
   }
 

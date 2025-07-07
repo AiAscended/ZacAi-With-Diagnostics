@@ -1,14 +1,3 @@
-import { storageManager } from "@/core/storage/manager"
-import { userMemory } from "@/core/memory/user-memory"
-import { cognitiveEngine } from "@/engines/cognitive"
-import { learningEngine } from "@/engines/learning"
-import { reasoningEngine } from "@/engines/reasoning"
-import { vocabularyModule } from "@/modules/vocabulary"
-import { mathematicsModule } from "@/modules/mathematics"
-import { factsModule } from "@/modules/facts"
-import { codingModule } from "@/modules/coding"
-import { philosophyModule } from "@/modules/philosophy"
-import { userInfoModule } from "@/modules/user-info"
 import type { OptimizedLoader } from "./optimized-loader"
 
 interface SystemState {
@@ -41,26 +30,21 @@ export class SystemManager {
 
   private chatLog: ChatLogEntry[] = []
   private modules: Map<string, any> = new Map()
-  private engines: Map<string, any> = new Map()
+  private startTime = Date.now()
 
   async initialize(loader: OptimizedLoader): Promise<void> {
     try {
       console.log("🚀 Initializing ZacAI System Manager...")
 
-      // Phase 1: Critical Systems
-      await this.initializeCriticalSystems(loader)
+      // Get loaded modules from loader
+      const loadedModules = loader.getLoadedModules()
+      for (const [name, instance] of loadedModules) {
+        this.modules.set(name, instance)
+      }
+
       this.state.criticalSystemsReady = true
-
-      // Phase 2: Initialize Engines
-      await this.initializeEngines(loader)
-
-      // Phase 3: Load Core Modules
-      await this.loadCoreModules(loader)
-
-      // Phase 4: Run Health Checks
-      await this.runHealthChecks()
-
       this.state.initialized = true
+
       console.log("✅ System Manager initialized successfully")
     } catch (error) {
       this.state.errors.push(`System initialization failed: ${error}`)
@@ -69,90 +53,26 @@ export class SystemManager {
     }
   }
 
-  private async initializeCriticalSystems(loader: OptimizedLoader): Promise<void> {
-    console.log("🔧 Initializing critical systems...")
-
-    loader.register("storageManager", () => storageManager.initialize(), "critical")
-    loader.register("userMemory", () => userMemory.initialize(), "critical")
-    loader.register("cognitiveEngine", () => cognitiveEngine.initialize(this.modules), "critical")
-  }
-
-  private async initializeEngines(loader: OptimizedLoader): Promise<void> {
-    console.log("🧠 Initializing AI engines...")
-
-    loader.register("learning", () => learningEngine.initialize(), "high")
-    loader.register("reasoning", () => reasoningEngine.initialize(), "high")
-  }
-
-  private async loadCoreModules(loader: OptimizedLoader): Promise<void> {
-    console.log("📦 Loading core modules...")
-
-    loader.register("vocabulary", () => vocabularyModule.initialize(), "high")
-    loader.register("mathematics", () => mathematicsModule.initialize(), "high")
-    loader.register("facts", () => factsModule.initialize(), "medium")
-    loader.register("coding", () => codingModule.initialize(), "medium")
-    loader.register("philosophy", () => philosophyModule.initialize(), "low")
-    loader.register("userInfo", () => userInfoModule.initialize(), "low")
-
-    const loadedModuleNames = loader
-      .getLoadingStatus()
-      .filter((s) => s.status === "loaded")
-      .map((s) => s.name)
-
-    for (const name of loadedModuleNames) {
-      const moduleInstance = loader.getModule(name)
-      if (moduleInstance) {
-        this.modules.set(name, moduleInstance)
-      }
-    }
-
-    // The cognitive engine needs a reference to the loaded modules
-    const engine = this.getModule("cognitiveEngine")
-    if (engine) {
-      engine.registerModules(this.modules)
-    }
-  }
-
-  private async runHealthChecks(): Promise<void> {
-    console.log("🔍 Running system health checks...")
-
-    const health = {
-      core: this.state.criticalSystemsReady,
-      engines: this.engines.size,
-      modules: this.state.modulesLoaded.length,
-      storage: true,
-      memory: true,
-      timestamp: Date.now(),
-    }
-
-    this.state.health = health
-    console.log("✅ Health checks completed")
-  }
-
   async processQuery(input: string): Promise<any> {
     const startTime = Date.now()
 
     if (!this.state.initialized) {
-      return { response: "System is not ready. Please wait.", confidence: 0, sources: ["system"] }
-    }
-
-    const engine = this.getModule("cognitiveEngine")
-    if (!engine) {
       return {
-        response: "Cognitive engine is offline. Cannot process request.",
+        response: "System is not ready. Please wait.",
         confidence: 0,
-        sources: ["system-error"],
+        sources: ["system"],
       }
     }
 
     try {
-      // Extract user's name for personalized responses
-      const userName = userMemory.retrieve("name")?.value
+      // Get cognitive engine
+      const engine = this.modules.get("cognitiveEngine")
 
-      // Store user name if provided
-      userMemory.extractPersonalInfo(input)
+      if (!engine) {
+        return this.generateFallbackResponse(input)
+      }
 
-      // Use cognitive engine to process the query
+      // Process with cognitive engine
       const result = await engine.processInput(input)
       const processingTime = Date.now() - startTime
 
@@ -181,26 +101,19 @@ export class SystemManager {
         sources: result.sources,
         reasoning: result.reasoning,
         processingTime,
-        userName,
       }
     } catch (error) {
       console.error("Query processing error:", error)
-      return {
-        response: "I encountered an error processing your request. Please try again.",
-        confidence: 0,
-        sources: ["error"],
-        processingTime: Date.now() - startTime,
-      }
+      return this.generateFallbackResponse(input)
     }
   }
 
-  private generateFallbackResponse(input: string, userName?: string): any {
+  private generateFallbackResponse(input: string): any {
     const lowerInput = input.toLowerCase()
 
-    // Handle special cases
     if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
       return {
-        response: `👋 Hello${userName ? ` ${userName}` : ""}! I'm ZacAI, your AI assistant. How can I help you today?`,
+        response: "👋 Hello! I'm ZacAI, your AI assistant. How can I help you today?",
         confidence: 0.9,
         sources: ["core"],
         reasoning: ["Simple greeting response"],
@@ -212,10 +125,8 @@ export class SystemManager {
         response: `🆘 **ZacAI Help**
 
 Available Commands:
-• **Define words** - "Define artificial intelligence"
 • **Math calculations** - "5 + 5" or "What is 15 * 8?"
-• **General questions** - Ask me about facts, coding, philosophy
-• **Remember information** - "My name is..." 
+• **General questions** - Ask me about anything
 • **System status** - "Status" or "How are you?"
 
 What would you like to try?`,
@@ -225,7 +136,7 @@ What would you like to try?`,
       }
     }
 
-    // Handle math calculations
+    // Simple math calculation
     if (/^\d+[\s]*[+\-*/][\s]*\d+/.test(input.replace(/\s/g, ""))) {
       try {
         const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
@@ -245,14 +156,11 @@ What would you like to try?`,
       }
     }
 
-    // Default response
     return {
       response: `I received your message: "${input}"
 
 I'm here to help! Try asking me to:
-• Define a word or concept
 • Solve a math problem  
-• Explain something you're curious about
 • Type "help" for more options
 
 What else would you like to explore?`,
@@ -263,38 +171,10 @@ What else would you like to explore?`,
   }
 
   getSystemStats(): any {
-    const moduleStats: any = {}
-    const engineStats: any = {}
-
-    for (const [name, module] of this.modules) {
-      try {
-        moduleStats[name] = module.getStats()
-      } catch (error) {
-        moduleStats[name] = {
-          totalQueries: 0,
-          successRate: 0,
-          averageResponseTime: 0,
-          learntEntries: 0,
-          lastUpdate: 0,
-        }
-      }
-    }
-
-    for (const [name, engine] of this.engines) {
-      try {
-        engineStats[name] = engine.getStats()
-      } catch (error) {
-        engineStats[name] = {
-          initialized: false,
-        }
-      }
-    }
-
     return {
       initialized: this.state.initialized,
-      modules: moduleStats,
-      engines: engineStats,
-      uptime: Date.now() - (this.state.health?.timestamp || Date.now()),
+      modules: Object.fromEntries(this.modules),
+      uptime: Date.now() - this.startTime,
       totalQueries: this.chatLog.length,
       averageResponseTime: this.calculateAverageResponseTime(),
       successRate: this.calculateSuccessRate(),
@@ -320,12 +200,24 @@ What else would you like to explore?`,
     return [...this.chatLog]
   }
 
+  clearChatLog(): void {
+    this.chatLog = []
+  }
+
   isInitialized(): boolean {
     return this.state.initialized
   }
 
   getModule<T>(name: string): T | undefined {
     return this.modules.get(name) as T | undefined
+  }
+
+  async exportData(): Promise<any> {
+    return {
+      chatLog: this.chatLog,
+      systemStats: this.getSystemStats(),
+      timestamp: new Date().toISOString(),
+    }
   }
 }
 
