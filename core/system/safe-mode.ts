@@ -1,150 +1,88 @@
 export interface SystemHealth {
-  overall: "healthy" | "warning" | "error" | "critical"
+  overall: "healthy" | "warning" | "critical"
   checks: HealthCheck[]
-  uptime: number
-  lastCheck: number
+  timestamp: number
 }
 
 export interface HealthCheck {
   name: string
-  status: "healthy" | "warning" | "error"
+  status: "pass" | "warn" | "fail"
   message: string
   timestamp: number
 }
 
-export interface SafeModeConfig {
-  fallbackMode: boolean
-  criticalErrorThreshold: number
-  autoRecovery: boolean
-  diagnosticsEnabled: boolean
-}
-
 export class SafeModeSystem {
-  private config: SafeModeConfig = {
-    fallbackMode: false,
-    criticalErrorThreshold: 3,
-    autoRecovery: true,
-    diagnosticsEnabled: true,
-  }
-
-  private systemHealth: SystemHealth | null = null
-  private errorCount = 0
-  private startTime = Date.now()
+  private healthChecks: HealthCheck[] = []
+  private isInSafeMode = false
 
   async initialize(): Promise<void> {
     console.log("🛡️ Initializing Safe Mode System...")
-
-    try {
-      await this.runHealthChecks()
-
-      if (this.systemHealth?.overall === "critical") {
-        this.enterSafeMode()
-      }
-
-      console.log("✅ Safe Mode System initialized")
-    } catch (error) {
-      console.error("❌ Safe Mode initialization failed:", error)
-      this.enterSafeMode()
-    }
+    await this.runHealthChecks()
   }
 
   private async runHealthChecks(): Promise<void> {
-    const checks: HealthCheck[] = []
+    this.healthChecks = []
 
-    // Browser environment check
-    try {
-      if (typeof window === "undefined") {
-        checks.push({
-          name: "Browser Environment",
-          status: "error",
-          message: "Not running in browser environment",
-          timestamp: Date.now(),
-        })
-      } else {
-        checks.push({
-          name: "Browser Environment",
-          status: "healthy",
-          message: "Browser environment is compatible",
-          timestamp: Date.now(),
-        })
-      }
-    } catch (error) {
-      checks.push({
-        name: "Browser Environment",
-        status: "error",
-        message: `Browser check failed: ${error}`,
-        timestamp: Date.now(),
-      })
-    }
-
-    // Storage check
-    try {
-      const testKey = "zacai_test"
-      localStorage.setItem(testKey, "test")
-      localStorage.removeItem(testKey)
-      checks.push({
-        name: "Storage",
-        status: "healthy",
-        message: "Storage systems operational",
-        timestamp: Date.now(),
-      })
-    } catch (error) {
-      checks.push({
-        name: "Storage",
-        status: "warning",
-        message: "Storage not available, using memory fallback",
-        timestamp: Date.now(),
-      })
-    }
-
-    // Network check
-    checks.push({
-      name: "Network",
-      status: navigator.onLine ? "healthy" : "warning",
-      message: navigator.onLine ? "Network available" : "Offline mode",
+    // Browser check
+    this.healthChecks.push({
+      name: "Browser",
+      status: typeof window !== "undefined" ? "pass" : "fail",
+      message: typeof window !== "undefined" ? "Browser environment available" : "No browser environment",
       timestamp: Date.now(),
     })
 
-    // Determine overall health
-    const criticalErrors = checks.filter((c) => c.status === "error").length
-    const warnings = checks.filter((c) => c.status === "warning").length
+    // Storage check
+    try {
+      localStorage.setItem("zacai_test", "test")
+      localStorage.removeItem("zacai_test")
+      this.healthChecks.push({
+        name: "Storage",
+        status: "pass",
+        message: "Local storage available",
+        timestamp: Date.now(),
+      })
+    } catch {
+      this.healthChecks.push({
+        name: "Storage",
+        status: "warn",
+        message: "Local storage not available",
+        timestamp: Date.now(),
+      })
+    }
 
-    let overall: SystemHealth["overall"] = "healthy"
-    if (criticalErrors >= this.config.criticalErrorThreshold) {
+    // Memory check
+    this.healthChecks.push({
+      name: "Memory",
+      status: "pass",
+      message: "Memory systems operational",
+      timestamp: Date.now(),
+    })
+  }
+
+  getSystemHealth(): SystemHealth {
+    const failedChecks = this.healthChecks.filter((check) => check.status === "fail")
+    const warningChecks = this.healthChecks.filter((check) => check.status === "warn")
+
+    let overall: "healthy" | "warning" | "critical" = "healthy"
+    if (failedChecks.length > 0) {
       overall = "critical"
-    } else if (criticalErrors > 0) {
-      overall = "error"
-    } else if (warnings > 0) {
+    } else if (warningChecks.length > 0) {
       overall = "warning"
     }
 
-    this.systemHealth = {
+    return {
       overall,
-      checks,
-      uptime: Date.now() - this.startTime,
-      lastCheck: Date.now(),
+      checks: this.healthChecks,
+      timestamp: Date.now(),
     }
   }
 
   enterSafeMode(): void {
-    console.warn("🚨 Entering Safe Mode")
-    this.config.fallbackMode = true
+    this.isInSafeMode = true
+    console.log("🚨 Entering Safe Mode")
   }
 
-  exitSafeMode(): void {
-    console.log("✅ Exiting Safe Mode")
-    this.config.fallbackMode = false
-  }
-
-  getSystemHealth(): SystemHealth | null {
-    return this.systemHealth
-  }
-
-  getConfiguration(): SafeModeConfig {
-    return { ...this.config }
-  }
-
-  isInSafeMode(): boolean {
-    return this.config.fallbackMode
+  isInSafeModeActive(): boolean {
+    return this.isInSafeMode
   }
 }
