@@ -3,6 +3,7 @@ export interface VocabularyEntry {
   definition: string
   pronunciation?: string
   partOfSpeech: string
+  phonetics?: string
   examples: string[]
   synonyms: string[]
   antonyms: string[]
@@ -19,7 +20,12 @@ export interface MathConcept {
   category: string
   description: string
   formula?: string
-  examples: MathExample[]
+  examples: Array<{
+    problem: string
+    solution: string
+    steps: string[]
+    explanation: string
+  }>
   difficulty: number
   prerequisites: string[]
   applications: string[]
@@ -45,10 +51,13 @@ export interface FactEntry {
 
 export interface CodingConcept {
   name: string
-  language: string
+  language?: string
   description: string
   syntax: string
-  examples: CodeExample[]
+  examples: Array<{
+    code: string
+    explanation: string
+  }>
   difficulty: number
   category: string
 }

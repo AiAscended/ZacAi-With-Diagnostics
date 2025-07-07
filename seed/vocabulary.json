@@ -1,123 +1,40 @@
 {
-  "metadata": {
-    "version": "1.0.0",
-    "lastUpdated": 1704067200000,
-    "totalEntries": 1000,
-    "source": "comprehensive-dictionary"
-  },
   "words": {
     "algorithm": {
       "definition": "A process or set of rules to be followed in calculations or other problem-solving operations",
       "partOfSpeech": "noun",
-      "examples": [
-        "The sorting algorithm efficiently organized the data",
-        "Machine learning algorithms can recognize patterns"
-      ],
+      "examples": ["The sorting algorithm efficiently organized the data"],
       "synonyms": ["procedure", "method", "process"],
-      "difficulty": 4,
-      "frequency": 3,
-      "etymology": "From Arabic al-Khwarizmi, named after the 9th-century mathematician"
-    },
-    "quantum": {
-      "definition": "The minimum amount of any physical entity involved in an interaction",
-      "partOfSpeech": "noun",
-      "examples": [
-        "Quantum mechanics describes the behavior of matter at atomic scales",
-        "A quantum of light is called a photon"
-      ],
-      "synonyms": ["unit", "amount", "portion"],
-      "difficulty": 5,
-      "frequency": 2,
-      "etymology": "From Latin quantus meaning 'how much'"
-    },
-    "consciousness": {
-      "definition": "The state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings",
-      "partOfSpeech": "noun",
-      "examples": [
-        "Human consciousness remains one of the greatest mysteries",
-        "The patient regained consciousness after surgery"
-      ],
-      "synonyms": ["awareness", "cognition", "perception"],
-      "difficulty": 4,
-      "frequency": 3,
-      "etymology": "From Latin conscientius meaning 'knowing with others'"
+      "antonyms": [],
+      "phonetic": "/ˈælɡəˌrɪðəm/",
+      "frequency": 1,
+      "source": "seed",
+      "dateAdded": "2025-01-08T00:00:00Z",
+      "topics": ["technology", "computer science"]
     },
     "artificial": {
       "definition": "Made or produced by human beings rather than occurring naturally",
       "partOfSpeech": "adjective",
-      "examples": [
-        "Artificial intelligence mimics human cognitive functions",
-        "The artificial flowers looked surprisingly real"
-      ],
+      "examples": ["Artificial intelligence mimics human cognitive functions"],
       "synonyms": ["synthetic", "man-made", "manufactured"],
       "antonyms": ["natural", "organic", "genuine"],
-      "difficulty": 2,
-      "frequency": 4
+      "phonetic": "/ˌɑrtəˈfɪʃəl/",
+      "frequency": 2,
+      "source": "seed",
+      "dateAdded": "2025-01-08T00:00:00Z",
+      "topics": ["general", "technology"]
     },
     "intelligence": {
       "definition": "The ability to acquire and apply knowledge and skills",
       "partOfSpeech": "noun",
-      "examples": [
-        "Emotional intelligence is as important as academic intelligence",
-        "The spy gathered intelligence about enemy movements"
-      ],
-      "synonyms": ["intellect", "wisdom", "understanding"],
-      "difficulty": 3,
-      "frequency": 4
-    },
-    "mathematics": {
-      "definition": "The abstract science of number, quantity, and space",
-      "partOfSpeech": "noun",
-      "examples": ["Mathematics is the language of science", "She excelled in advanced mathematics"],
-      "synonyms": ["math", "arithmetic", "calculation"],
-      "difficulty": 3,
-      "frequency": 4,
-      "etymology": "From Greek mathematikos meaning 'fond of learning'"
-    },
-    "philosophy": {
-      "definition": "The study of the fundamental nature of knowledge, reality, and existence",
-      "partOfSpeech": "noun",
-      "examples": [
-        "Ancient Greek philosophy laid the foundation for Western thought",
-        "His philosophy of life emphasized compassion"
-      ],
-      "synonyms": ["wisdom", "ideology", "worldview"],
-      "difficulty": 4,
+      "examples": ["Her intelligence was evident in her problem-solving abilities"],
+      "synonyms": ["intellect", "wisdom", "cleverness", "acumen"],
+      "antonyms": ["stupidity", "ignorance", "foolishness"],
+      "phonetic": "/ɪnˈtɛlədʒəns/",
       "frequency": 3,
-      "etymology": "From Greek philosophia meaning 'love of wisdom'"
-    },
-    "science": {
-      "definition": "The intellectual and practical activity encompassing the systematic study of the structure and behavior of the physical and natural world",
-      "partOfSpeech": "noun",
-      "examples": [
-        "Science has revolutionized our understanding of the universe",
-        "Computer science combines mathematics and engineering"
-      ],
-      "synonyms": ["knowledge", "research", "study"],
-      "difficulty": 2,
-      "frequency": 5
-    },
-    "technology": {
-      "definition": "The application of scientific knowledge for practical purposes",
-      "partOfSpeech": "noun",
-      "examples": [
-        "Modern technology has transformed communication",
-        "Renewable energy technology is advancing rapidly"
-      ],
-      "synonyms": ["innovation", "engineering", "technique"],
-      "difficulty": 3,
-      "frequency": 5
-    },
-    "programming": {
-      "definition": "The process of creating a set of instructions that tell a computer how to perform a task",
-      "partOfSpeech": "noun",
-      "examples": [
-        "Programming requires logical thinking and attention to detail",
-        "She learned programming to build mobile apps"
-      ],
-      "synonyms": ["coding", "development", "software engineering"],
-      "difficulty": 3,
-      "frequency": 3
+      "source": "seed",
+      "dateAdded": "2025-01-08T00:00:00Z",
+      "topics": ["psychology", "cognition"]
     }
   }
 }

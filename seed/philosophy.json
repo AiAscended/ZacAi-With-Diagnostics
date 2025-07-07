@@ -8,35 +8,38 @@
   },
   "concepts": {
     "consciousness": {
-      "description": "The state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings",
+      "name": "Consciousness",
+      "description": "The state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings. It's one of the most fundamental yet mysterious aspects of human experience.",
       "philosopher": "Various",
       "school": "philosophy of mind",
-      "relatedConcepts": ["awareness", "qualia", "self-awareness", "phenomenology"],
+      "relatedConcepts": ["qualia", "self-awareness", "phenomenology"],
       "arguments": [
-        "Consciousness is fundamental to experience and cannot be reduced to physical processes",
-        "The hard problem of consciousness shows the explanatory gap between brain states and subjective experience",
-        "Consciousness exhibits unity and intentionality that distinguishes it from mere information processing"
+        "Consciousness is fundamental to all experience and cannot be reduced to physical processes",
+        "Consciousness emerges from complex neural activity in the brain",
+        "Consciousness might be a fundamental property of the universe (panpsychism)"
       ],
       "counterArguments": [
-        "Consciousness emerges from complex neural activity and can be explained through materialism",
-        "Neuroscience shows that consciousness can be altered by brain changes, suggesting physical basis",
-        "The illusion of consciousness can be explained by cognitive mechanisms without requiring special properties"
+        "Consciousness is an illusion created by information processing",
+        "We cannot objectively study subjective experience",
+        "The hard problem of consciousness may be unsolvable"
       ]
     },
     "ethics": {
-      "description": "The branch of philosophy that deals with moral principles and values",
+      "name": "Ethics",
+      "description": "The branch of philosophy that deals with moral principles and values, concerning what is right and wrong, good and bad in human behavior.",
       "philosopher": "Aristotle",
       "school": "moral philosophy",
-      "relatedConcepts": ["morality", "virtue", "duty", "consequences", "rights"],
+      "relatedConcepts": ["morality", "virtue", "duty", "justice"],
       "arguments": [
-        "Moral principles are universal and can be discovered through reason",
-        "Ethics provide necessary guidelines for human behavior and social cooperation",
-        "Virtue ethics focuses on character development rather than just actions"
+        "Moral principles are universal and objective (moral realism)",
+        "Ethics should focus on consequences and outcomes (utilitarianism)",
+        "Ethics should focus on duties and rules (deontology)",
+        "Ethics should focus on character and virtues (virtue ethics)"
       ],
       "counterArguments": [
-        "Moral relativism suggests that ethical principles vary across cultures and contexts",
-        "Evolutionary explanations show that moral intuitions may be biological rather than rational",
-        "The is-ought problem shows the difficulty of deriving moral conclusions from factual premises"
+        "Morality is relative to culture and context (moral relativism)",
+        "There are no objective moral facts (moral nihilism)",
+        "Emotions and intuitions, not reason, drive moral judgments"
       ]
     },
     "free will": {

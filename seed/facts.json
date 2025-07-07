@@ -7,10 +7,13 @@
   },
   "facts": {
     "artificial intelligence": {
-      "content": "Artificial Intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans. The term was first coined by John McCarthy in 1956. Modern AI includes machine learning, deep learning, natural language processing, and computer vision.",
+      "content": "Artificial Intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans. It encompasses machine learning, natural language processing, computer vision, and robotics.",
       "source": "scientific-consensus",
       "category": "technology",
-      "relatedTopics": ["machine learning", "neural networks", "robotics", "computer science"]
+      "relatedTopics": ["machine learning", "neural networks", "robotics", "computer science"],
+      "verified": true,
+      "sources": ["academic", "research"],
+      "lastUpdated": "2025-01-08T00:00:00Z"
     },
     "quantum physics": {
       "content": "Quantum physics is the branch of physics that studies matter and energy at the smallest scales, typically at the level of atoms and subatomic particles. It reveals that energy, momentum, angular momentum, and other quantities are restricted to discrete values (quantized).",
@@ -53,6 +56,20 @@
       "source": "scientific-method",
       "category": "science",
       "relatedTopics": ["research", "experimentation", "hypothesis", "theory", "evidence"]
+    },
+    "machine learning": {
+      "content": "Machine Learning is a subset of AI that enables computers to learn and improve from experience without being explicitly programmed. It uses algorithms to analyze data, identify patterns, and make predictions.",
+      "category": "technology",
+      "verified": true,
+      "sources": ["academic", "research"],
+      "lastUpdated": "2025-01-08T00:00:00Z"
+    },
+    "neural networks": {
+      "content": "Neural networks are computing systems inspired by biological neural networks. They consist of interconnected nodes (neurons) that process information and can learn to recognize patterns, classify data, and make decisions.",
+      "category": "technology",
+      "verified": true,
+      "sources": ["academic", "research"],
+      "lastUpdated": "2025-01-08T00:00:00Z"
     }
   }
 }

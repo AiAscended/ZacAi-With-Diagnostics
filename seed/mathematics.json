@@ -11,7 +11,8 @@
       "tesla_math",
       "vortex_math",
       "sacred_geometry",
-      "sequences"
+      "sequences",
+      "arithmetic"
     ],
     "difficulty_levels": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     "source": "comprehensive-math-knowledge"
@@ -123,6 +124,52 @@
         }
       ],
       "applications": ["nature patterns", "computer algorithms", "financial markets"]
+    },
+    "basic_arithmetic": {
+      "name": "Basic Arithmetic",
+      "description": "Fundamental mathematical operations including addition, subtraction, multiplication, and division",
+      "category": "arithmetic",
+      "examples": [
+        {
+          "problem": "2 + 3",
+          "solution": "5",
+          "explanation": "Adding 2 and 3 gives us 5"
+        },
+        {
+          "problem": "10 - 4",
+          "solution": "6",
+          "explanation": "Subtracting 4 from 10 gives us 6"
+        },
+        {
+          "problem": "6 × 7",
+          "solution": "42",
+          "explanation": "Multiplying 6 by 7 gives us 42"
+        },
+        {
+          "problem": "15 ÷ 3",
+          "solution": "5",
+          "explanation": "Dividing 15 by 3 gives us 5"
+        }
+      ],
+      "difficulty": "beginner"
+    },
+    "order_of_operations": {
+      "name": "Order of Operations (PEMDAS)",
+      "description": "The sequence in which mathematical operations should be performed: Parentheses, Exponents, Multiplication/Division, Addition/Subtraction",
+      "category": "arithmetic",
+      "examples": [
+        {
+          "problem": "2 + 3 × 4",
+          "solution": "14",
+          "explanation": "Multiplication is performed before addition: 2 + (3 × 4) = 2 + 12 = 14"
+        },
+        {
+          "problem": "(2 + 3) × 4",
+          "solution": "20",
+          "explanation": "Parentheses are evaluated first: (2 + 3) × 4 = 5 × 4 = 20"
+        }
+      ],
+      "difficulty": "intermediate"
     }
   },
   "operations": {

@@ -1,81 +1,40 @@
 {
-  "metadata": {
-    "version": "1.0.0",
-    "lastUpdated": "2024-01-01T00:00:00Z",
-    "totalEntries": 300,
-    "languages": ["javascript", "python", "java", "html", "css", "react"],
-    "categories": ["fundamentals", "data-structures", "algorithms", "web-development"]
-  },
   "concepts": {
-    "function": {
-      "language": "javascript",
-      "description": "A reusable block of code that performs a specific task",
-      "syntax": "function functionName(parameters) { /* code */ }",
+    "javascript": {
+      "name": "JavaScript",
+      "description": "A high-level, interpreted programming language that is widely used for web development, both on the client-side and server-side.",
+      "category": "programming-language",
       "examples": [
         {
-          "title": "Basic Function",
-          "code": "function greet(name) {\n  return 'Hello, ' + name + '!';\n}\n\nconsole.log(greet('World'));",
-          "explanation": "This function takes a name parameter and returns a greeting message"
-        }
-      ],
-      "difficulty": 2,
-      "category": "fundamentals"
-    },
-    "variable": {
-      "language": "javascript",
-      "description": "A container that stores data values",
-      "syntax": "let variableName = value;",
-      "examples": [
+          "title": "Hello World",
+          "code": "console.log('Hello, World!');",
+          "explanation": "This prints 'Hello, World!' to the console."
+        },
         {
           "title": "Variable Declaration",
-          "code": "let message = 'Hello World';\nconst pi = 3.14159;\nvar count = 0;",
-          "explanation": "Different ways to declare variables in JavaScript"
+          "code": "const message = 'Hello, ZacAI!';\nlet count = 42;\nvar isActive = true;",
+          "explanation": "JavaScript has three ways to declare variables: const (constant), let (block-scoped), and var (function-scoped)."
         }
       ],
-      "difficulty": 1,
-      "category": "fundamentals"
+      "difficulty": "beginner"
     },
-    "array": {
-      "language": "javascript",
-      "description": "A data structure that stores multiple values in a single variable",
-      "syntax": "let arrayName = [item1, item2, item3];",
+    "react": {
+      "name": "React",
+      "description": "A JavaScript library for building user interfaces, particularly web applications. It uses a component-based architecture and virtual DOM for efficient rendering.",
+      "category": "framework",
       "examples": [
         {
-          "title": "Array Operations",
-          "code": "let fruits = ['apple', 'banana', 'orange'];\nfruits.push('grape');\nconsole.log(fruits[0]);",
-          "explanation": "Creating an array, adding elements, and accessing elements by index"
-        }
-      ],
-      "difficulty": 2,
-      "category": "data-structures"
-    },
-    "loop": {
-      "language": "javascript",
-      "description": "A programming construct that repeats a block of code",
-      "syntax": "for (let i = 0; i < length; i++) { /* code */ }",
-      "examples": [
+          "title": "Simple Component",
+          "code": "function Welcome() {\n  return <h1>Hello, World!</h1>;\n}",
+          "explanation": "A basic React functional component that renders a greeting."
+        },
         {
-          "title": "For Loop",
-          "code": "for (let i = 0; i < 5; i++) {\n  console.log('Count: ' + i);\n}",
-          "explanation": "A for loop that prints numbers from 0 to 4"
+          "title": "Component with Props",
+          "code": "function Welcome({ name }) {\n  return <h1>Hello, {name}!</h1>;\n}",
+          "explanation": "A React component that accepts props and displays a personalized greeting."
         }
       ],
-      "difficulty": 2,
-      "category": "fundamentals"
-    },
-    "object": {
-      "language": "javascript",
-      "description": "A collection of key-value pairs that represents an entity",
-      "syntax": "let objectName = { key1: value1, key2: value2 };",
-      "examples": [
-        {
-          "title": "Object Creation",
-          "code": "let person = {\n  name: 'John',\n  age: 30,\n  city: 'New York'\n};\nconsole.log(person.name);",
-          "explanation": "Creating an object with properties and accessing them"
-        }
-      ],
-      "difficulty": 3,
-      "category": "data-structures"
+      "difficulty": "intermediate"
     }
   }
 }
