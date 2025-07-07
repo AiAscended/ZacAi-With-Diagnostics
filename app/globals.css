@@ -53,6 +53,7 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  @apply border-border;
 }
 
 html,
@@ -75,7 +76,7 @@ body {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -112,10 +113,21 @@ body {
   animation: slideIn 0.3s ease-out;
 }
 
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 .glass-effect {
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Scrollbar styling */

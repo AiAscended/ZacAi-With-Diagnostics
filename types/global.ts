@@ -1,23 +1,3 @@
-export interface SystemConfig {
-  version: string
-  environment: "development" | "production" | "test"
-  features: {
-    vocabulary: boolean
-    mathematics: boolean
-    coding: boolean
-    facts: boolean
-    philosophy: boolean
-    userInfo: boolean
-    web3: boolean
-  }
-  apis: {
-    dictionary: string
-    wikipedia: string
-    wolfram: string
-    github: string
-  }
-}
-
 export interface ModuleInterface {
   name: string
   version: string
@@ -45,61 +25,33 @@ export interface ModuleStats {
   lastUpdate: number
 }
 
-export interface SystemStats {
-  initialized: boolean
-  modules: { [key: string]: ModuleStats }
-  learning: any
-  cognitive: any
-  uptime: number
-  totalQueries: number
-  averageResponseTime: number
-}
-
-export interface LearntDataEntry {
-  id: string
-  content: any
-  confidence: number
-  source: string
-  context: string
+export interface ContextMessage {
+  role: "user" | "assistant"
+  content: string
   timestamp: number
-  usageCount: number
-  lastUsed: number
-  verified: boolean
-  tags: string[]
-  relationships: string[]
+  metadata?: any
 }
 
 export interface IntentAnalysis {
   intent: string
   confidence: number
-  entities: any[]
+  entities: string[]
   context: any
   suggestedModules: string[]
-}
-
-export interface ContextMessage {
-  role: "user" | "assistant" | "system"
-  content: string
-  timestamp?: number
-  metadata?: any
 }
 
 export interface ReasoningStep {
   step: number
   reasoning: string
-  input: any
-  output: any
   confidence: number
-  timestamp: number
+  output: any
 }
 
 export interface ReasoningChain {
-  id: string
   input: string
   steps: ReasoningStep[]
   finalOutput: any
   totalConfidence: number
-  processingTime: number
 }
 
 export interface LearningPattern {
@@ -107,10 +59,8 @@ export interface LearningPattern {
   pattern: string
   frequency: number
   confidence: number
-  context: string[]
+  context: any
   timestamp: number
-  category?: string
-  effectiveness?: number
 }
 
 export interface ChatMessage {
@@ -121,23 +71,12 @@ export interface ChatMessage {
   confidence?: number
   sources?: string[]
   reasoning?: string[]
-  thinking?: string[]
+  thinking?: string
 }
 
-export interface AIResponse {
-  response: string
-  confidence: number
-  sources: string[]
-  reasoning: string[]
-  thinking?: string[]
-  timestamp: number
-}
-
-export interface SystemState {
-  initialized: boolean
-  loading: boolean
-  error: string | null
-  modules: string[]
-  activeModules: string[]
-  stats: SystemStats
+export interface SystemHealth {
+  overall: "healthy" | "warning" | "error"
+  components: { [key: string]: any }
+  uptime: number
+  lastCheck: number
 }

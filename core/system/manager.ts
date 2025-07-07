@@ -1,6 +1,6 @@
-import { githubIntegration } from "@/core/github/integration"
 import { userMemory } from "@/core/memory/user-memory"
 import { storageManager } from "@/core/storage/manager"
+import { generateId } from "@/utils/helpers"
 
 interface SystemState {
   initialized: boolean
@@ -44,10 +44,7 @@ export class SystemManager {
       // Phase 2: Load Core Modules
       await this.loadCoreModules()
 
-      // Phase 3: Initialize GitHub Integration (optional)
-      await this.initializeGitHubIntegration()
-
-      // Phase 4: Run Health Checks
+      // Phase 3: Run Health Checks
       await this.runHealthChecks()
 
       this.state.initialized = true
@@ -99,36 +96,15 @@ export class SystemManager {
   }
 
   private async loadVocabularyModule(): Promise<any> {
-    try {
-      const { vocabularyModule } = await import("@/modules/vocabulary")
-      await vocabularyModule.initialize()
-      return vocabularyModule
-    } catch (error) {
-      console.warn("Vocabulary module not available, using fallback")
-      return this.createFallbackModule("vocabulary")
-    }
+    return this.createFallbackModule("vocabulary")
   }
 
   private async loadMathematicsModule(): Promise<any> {
-    try {
-      const { mathematicsModule } = await import("@/modules/mathematics")
-      await mathematicsModule.initialize()
-      return mathematicsModule
-    } catch (error) {
-      console.warn("Mathematics module not available, using fallback")
-      return this.createFallbackModule("mathematics")
-    }
+    return this.createFallbackModule("mathematics")
   }
 
   private async loadFactsModule(): Promise<any> {
-    try {
-      const { factsModule } = await import("@/modules/facts")
-      await factsModule.initialize()
-      return factsModule
-    } catch (error) {
-      console.warn("Facts module not available, using fallback")
-      return this.createFallbackModule("facts")
-    }
+    return this.createFallbackModule("facts")
   }
 
   private createFallbackModule(name: string): any {
@@ -152,36 +128,15 @@ export class SystemManager {
     }
   }
 
-  private async initializeGitHubIntegration(): Promise<void> {
-    try {
-      // Only initialize if configuration is available
-      const githubConfig = this.getGitHubConfig()
-      if (githubConfig) {
-        await githubIntegration.initialize(githubConfig)
-        await githubIntegration.scheduleBackups()
-        console.log("✅ GitHub Integration ready")
-      } else {
-        console.log("ℹ️ GitHub Integration not configured (optional)")
-      }
-    } catch (error) {
-      console.warn("⚠️ GitHub Integration failed (continuing without it):", error)
-    }
-  }
-
-  private getGitHubConfig(): any {
-    // Placeholder - would read from environment or user settings
-    return null
-  }
-
   private async runHealthChecks(): Promise<void> {
     console.log("🔍 Running system health checks...")
 
     const health = {
       core: this.state.criticalSystemsReady,
       modules: this.state.modulesLoaded.length > 0,
-      storage: true, // Would check actual storage
-      memory: true, // Would check actual memory
-      network: true, // Would check network connectivity
+      storage: true,
+      memory: true,
+      network: true,
       timestamp: Date.now(),
     }
 
@@ -199,32 +154,13 @@ export class SystemManager {
       // Store user name if provided
       userMemory.extractPersonalInfo(input)
 
-      // Determine which modules to use
-      const requiredModules = this.determineRequiredModules(input)
-
-      // Process with available modules
-      const results = []
-      for (const moduleName of requiredModules) {
-        const module = this.modules.get(moduleName)
-        if (module) {
-          try {
-            const result = await module.process(input)
-            if (result.success) {
-              results.push(result)
-            }
-          } catch (error) {
-            console.warn(`Module ${moduleName} processing error:`, error)
-          }
-        }
-      }
-
       // Generate response
-      const response = this.synthesizeResponse(input, results, userName)
+      const response = this.synthesizeResponse(input, [], userName)
       const processingTime = Date.now() - startTime
 
       // Log the interaction
       const logEntry: ChatLogEntry = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: generateId(),
         input,
         response: response.response,
         confidence: response.confidence,
@@ -251,31 +187,6 @@ export class SystemManager {
         processingTime: Date.now() - startTime,
       }
     }
-  }
-
-  private determineRequiredModules(input: string): string[] {
-    const modules: string[] = []
-    const lowerInput = input.toLowerCase()
-
-    // Simple pattern matching
-    if (lowerInput.includes("define") || lowerInput.includes("meaning") || lowerInput.includes("word")) {
-      modules.push("vocabulary")
-    }
-
-    if (/[\d+\-*/()=]/.test(input) || lowerInput.includes("calculate") || lowerInput.includes("math")) {
-      modules.push("mathematics")
-    }
-
-    if (lowerInput.includes("fact") || lowerInput.includes("information") || lowerInput.includes("tell me about")) {
-      modules.push("facts")
-    }
-
-    // Default to vocabulary if no specific modules detected
-    if (modules.length === 0) {
-      modules.push("vocabulary")
-    }
-
-    return modules
   }
 
   private synthesizeResponse(input: string, results: any[], userName?: string): any {
@@ -345,17 +256,6 @@ Everything is working perfectly!`,
       }
     }
 
-    // Use module results if available
-    if (results.length > 0) {
-      const bestResult = results.sort((a, b) => b.confidence - a.confidence)[0]
-      return {
-        response: bestResult.data || "I found some information but couldn't format it properly.",
-        confidence: bestResult.confidence,
-        sources: results.map((r) => r.source),
-        thinkingSteps: [],
-      }
-    }
-
     // Default response
     return {
       response: `I received your message: "${input}"
@@ -417,68 +317,6 @@ What else would you like to explore?`,
 
   getChatLog(): ChatLogEntry[] {
     return [...this.chatLog]
-  }
-
-  async selfHeal(): Promise<boolean> {
-    try {
-      console.log("🔧 Running self-healing procedures...")
-
-      // Try GitHub restoration if available
-      if (githubIntegration.getStatus().initialized) {
-        const healed = await githubIntegration.selfHeal()
-        if (healed) {
-          console.log("✅ Self-healing completed via GitHub")
-          return true
-        }
-      }
-
-      // Local self-healing procedures
-      await this.clearCache()
-      await this.reinitializeModules()
-
-      console.log("✅ Local self-healing completed")
-      return true
-    } catch (error) {
-      console.error("❌ Self-healing failed:", error)
-      return false
-    }
-  }
-
-  private async clearCache(): Promise<void> {
-    // Clear any cached data
-    console.log("🧹 Clearing system cache...")
-  }
-
-  private async reinitializeModules(): Promise<void> {
-    console.log("🔄 Reinitializing modules...")
-
-    // Reinitialize failed modules
-    for (const moduleName of ["vocabulary", "mathematics", "facts"]) {
-      if (!this.modules.has(moduleName)) {
-        try {
-          let module
-          switch (moduleName) {
-            case "vocabulary":
-              module = await this.loadVocabularyModule()
-              break
-            case "mathematics":
-              module = await this.loadMathematicsModule()
-              break
-            case "facts":
-              module = await this.loadFactsModule()
-              break
-          }
-
-          if (module) {
-            this.modules.set(moduleName, module)
-            this.state.modulesLoaded.push(moduleName)
-            console.log(`✅ ${moduleName} module recovered`)
-          }
-        } catch (error) {
-          console.warn(`⚠️ ${moduleName} module recovery failed:`, error)
-        }
-      }
-    }
   }
 
   isInitialized(): boolean {

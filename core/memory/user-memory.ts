@@ -29,19 +29,48 @@ class UserMemory {
     return this.memories.get(key)
   }
 
-  getPersonalInfo(): any {
-    const info: any = {}
-    this.personalInfo.forEach((value, key) => {
-      info[key] = value
-    })
-    return info
-  }
+  extractPersonalInfo(message: string): any {
+    const personalInfo = {
+      name: null,
+      age: null,
+      location: null,
+      interests: [],
+      preferences: {},
+      facts: [],
+    }
 
-  extractPersonalInfo(message: string): void {
+    // Extract name
     const nameMatch = message.match(/(?:my name is|i'm|i am|call me)\s+(\w+)/i)
     if (nameMatch) {
+      personalInfo.name = nameMatch[1]
       this.store("name", nameMatch[1], "personal", 0.95, "User introduction")
     }
+
+    // Extract age
+    const ageMatch = message.match(/(?:i am|i'm)\s+(\d+)\s+(?:years old|years)/i)
+    if (ageMatch) {
+      personalInfo.age = Number.parseInt(ageMatch[1])
+      this.store("age", personalInfo.age, "personal", 0.9, "Age information")
+    }
+
+    // Extract location
+    const locationMatch = message.match(/(?:i live in|i'm from|from)\s+([^.!?]+)/i)
+    if (locationMatch) {
+      personalInfo.location = locationMatch[1].trim()
+      this.store("location", personalInfo.location, "personal", 0.8, "Location information")
+    }
+
+    // Extract interests
+    const interestMatch = message.match(/(?:i like|i love|interested in)\s+([^.!?]+)/i)
+    if (interestMatch) {
+      const interests = interestMatch[1].split(/,|\sand\s/).map((s) => s.trim())
+      personalInfo.interests = interests
+      interests.forEach((interest) => {
+        this.store(`interest_${interest}`, interest, "personal", 0.7, "Interest information")
+      })
+    }
+
+    return personalInfo
   }
 
   getPersonalSummary(): string {
@@ -63,6 +92,16 @@ class UserMemory {
       personalEntries: this.personalInfo.size,
       categories: this.getCategories(),
     }
+  }
+
+  search(query: string): any[] {
+    const results: any[] = []
+    this.memories.forEach((memory) => {
+      if (memory.value.toString().toLowerCase().includes(query.toLowerCase())) {
+        results.push(memory)
+      }
+    })
+    return results
   }
 
   private getCategories(): string[] {
