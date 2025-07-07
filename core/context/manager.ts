@@ -3,13 +3,12 @@ import { generateId, calculateSimilarity } from "@/utils/helpers"
 
 export class ContextManager {
   private context: ContextMessage[] = []
-  private maxContextLength = 10
+  private maxContextLength = 50 // Updated max context size
   private currentSessionId = generateId()
 
   createContext(): void {
     this.context = []
-    this.currentSessionId = generateId()
-    console.log("🧠 Context created")
+    console.log("📝 Context manager initialized") // Updated log message
   }
 
   addMessage(message: ContextMessage): void {
@@ -156,6 +155,7 @@ export class ContextManager {
       sessionId: this.currentSessionId,
       oldestMessage: this.context.length > 0 ? this.context[0].timestamp : null,
       newestMessage: this.context.length > 0 ? this.context[this.context.length - 1].timestamp : null,
+      maxSize: this.maxContextLength, // Added max context size to stats
     }
   }
 

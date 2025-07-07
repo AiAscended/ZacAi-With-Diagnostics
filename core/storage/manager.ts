@@ -308,12 +308,28 @@ class StorageManager {
     }
   }
 
-  getPopularEntries(module: string, limit = 10): Promise<StorageEntry[]> {
-    return Promise.resolve([])
+  async getPopularEntries(module: string, limit = 10): Promise<StorageEntry[]> {
+    try {
+      const data = await this.loadLearntData(module)
+      const entries = Object.values(data.entries) as StorageEntry[]
+
+      return entries.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0)).slice(0, limit)
+    } catch (error) {
+      console.error(`Failed to get popular entries for ${module}:`, error)
+      return []
+    }
   }
 
-  getRecentEntries(module: string, limit = 10): Promise<StorageEntry[]> {
-    return Promise.resolve([])
+  async getRecentEntries(module: string, limit = 10): Promise<StorageEntry[]> {
+    try {
+      const data = await this.loadLearntData(module)
+      const entries = Object.values(data.entries) as StorageEntry[]
+
+      return entries.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit)
+    } catch (error) {
+      console.error(`Failed to get recent entries for ${module}:`, error)
+      return []
+    }
   }
 }
 

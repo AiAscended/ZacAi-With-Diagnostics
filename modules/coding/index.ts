@@ -1,8 +1,5 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
 import { storageManager } from "@/core/storage/manager"
-import { MODULE_CONFIG } from "@/config/app"
-import { generateId } from "@/utils/helpers"
-import { NextJSDocsClient } from "./nextjs-docs"
 
 export class CodingModule implements ModuleInterface {
   name = "coding"
@@ -22,17 +19,64 @@ export class CodingModule implements ModuleInterface {
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log("Initializing Coding Module...")
+    console.log("💻 Initializing Coding Module...")
 
     try {
-      this.seedData = await storageManager.loadSeedData(MODULE_CONFIG.coding.seedFile)
-      this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.coding.learntFile)
+      this.seedData = await this.loadSeedData()
+      this.learntData = await this.loadLearntData()
 
       this.initialized = true
-      console.log("Coding Module initialized successfully")
+      console.log("✅ Coding Module initialized successfully")
     } catch (error) {
-      console.error("Error initializing Coding Module:", error)
+      console.error("❌ Error initializing Coding Module:", error)
       throw error
+    }
+  }
+
+  private async loadSeedData(): Promise<any> {
+    try {
+      return await storageManager.loadSeedData("coding")
+    } catch (error) {
+      console.warn("Using fallback coding data")
+      return this.getFallbackCodingData()
+    }
+  }
+
+  private async loadLearntData(): Promise<any> {
+    try {
+      return await storageManager.loadLearntData("coding")
+    } catch (error) {
+      console.warn("No learnt coding data found")
+      return { entries: {} }
+    }
+  }
+
+  private getFallbackCodingData(): any {
+    return {
+      concepts: {
+        javascript: {
+          name: "JavaScript",
+          description: "A high-level, interpreted programming language that is widely used for web development.",
+          examples: [
+            {
+              title: "Hello World",
+              code: 'console.log("Hello, World!");',
+              explanation: "This prints 'Hello, World!' to the console.",
+            },
+          ],
+        },
+        react: {
+          name: "React",
+          description: "A JavaScript library for building user interfaces, particularly web applications.",
+          examples: [
+            {
+              title: "Simple Component",
+              code: "function Welcome() { return <h1>Hello, World!</h1>; }",
+              explanation: "A basic React functional component that renders a greeting.",
+            },
+          ],
+        },
+      },
     }
   }
 
@@ -75,12 +119,7 @@ export class CodingModule implements ModuleInterface {
       const response = this.buildCodingResponse(results)
       const confidence = this.calculateCodingConfidence(results)
 
-      await this.learn({
-        input,
-        results,
-        context,
-        timestamp: Date.now(),
-      })
+      await this.learn({ input, results, context, timestamp: Date.now() })
 
       this.updateStats(Date.now() - startTime, true)
 
@@ -90,10 +129,6 @@ export class CodingModule implements ModuleInterface {
         confidence,
         source: this.name,
         timestamp: Date.now(),
-        metadata: {
-          queriesProcessed: codingQueries.length,
-          resultsFound: results.length,
-        },
       }
     } catch (error) {
       console.error("Error in Coding Module processing:", error)
@@ -112,118 +147,46 @@ export class CodingModule implements ModuleInterface {
   private extractCodingQueries(input: string): string[] {
     const queries: string[] = []
 
-    // Next.js specific queries
-    if (input.match(/next\.?js|app router|server component|client component/i)) {
-      queries.push("nextjs")
+    // Look for programming language mentions
+    const languages = ["javascript", "react", "python", "html", "css"]
+    for (const lang of languages) {
+      if (input.toLowerCase().includes(lang)) {
+        queries.push(lang)
+      }
     }
 
-    // React queries
-    if (input.match(/react|jsx|tsx|component|hook/i)) {
-      queries.push("react")
-    }
-
-    // System file queries
-    if (input.match(/layout\.tsx|page\.tsx|components\/ui/i)) {
-      queries.push("system_files")
-    }
-
-    // General coding queries
-    if (input.match(/how to|code|function|debug|error/i)) {
-      queries.push("general_coding")
-    }
-
-    return queries
+    return [...new Set(queries)]
   }
 
   private async processCodingQuery(query: string): Promise<any> {
-    switch (query) {
-      case "nextjs":
-        return await this.processNextJSQuery()
-      case "react":
-        return await this.processReactQuery()
-      case "system_files":
-        return await this.processSystemFilesQuery()
-      case "general_coding":
-        return await this.processGeneralCodingQuery()
-      default:
-        return null
-    }
-  }
-
-  private async processNextJSQuery(): Promise<any> {
-    const nextjsKnowledge = await NextJSDocsClient.lookupNextJSConcept("app router")
-
-    return {
-      type: "nextjs_knowledge",
-      data: nextjsKnowledge,
-      source: "nextjs_docs",
-    }
-  }
-
-  private async processReactQuery(): Promise<any> {
-    return {
-      type: "react_knowledge",
-      data: {
-        description: "React library for building user interfaces",
-        concepts: ["Components", "Props", "State", "Hooks", "JSX"],
-        hooks: ["useState", "useEffect", "useContext", "useReducer"],
-      },
-      source: "react_docs",
-    }
-  }
-
-  private async processSystemFilesQuery(): Promise<any> {
-    const systemKnowledge = {
-      "app/layout.tsx": NextJSDocsClient.getSystemFileKnowledge("app/layout.tsx"),
-      "app/page.tsx": NextJSDocsClient.getSystemFileKnowledge("app/page.tsx"),
-      "components/ui/*": NextJSDocsClient.getSystemFileKnowledge("components/ui/*"),
-      "modules/*/index.ts": NextJSDocsClient.getSystemFileKnowledge("modules/*/index.ts"),
+    // Check seed data
+    if (this.seedData?.concepts) {
+      const concept = this.seedData.concepts[query.toLowerCase()]
+      if (concept) {
+        return {
+          query,
+          type: "concept",
+          data: concept,
+          confidence: 0.9,
+        }
+      }
     }
 
-    return {
-      type: "system_knowledge",
-      data: systemKnowledge,
-      source: "system_analysis",
-    }
-  }
-
-  private async processGeneralCodingQuery(): Promise<any> {
-    return {
-      type: "general_coding",
-      data: {
-        bestPractices: [
-          "Use TypeScript for type safety",
-          "Follow component composition patterns",
-          "Implement proper error boundaries",
-          "Use proper naming conventions",
-        ],
-        debugging: ["Check console for errors", "Use React DevTools", "Verify prop types and data flow"],
-      },
-      source: "coding_best_practices",
-    }
+    return null
   }
 
   private buildCodingResponse(results: any[]): string {
     let response = "## Coding Knowledge\n\n"
 
     for (const result of results) {
-      if (result.type === "nextjs_knowledge") {
-        response += `**Next.js App Router:**\n${result.data.description}\n\n`
-        response += `**Features:** ${result.data.features.join(", ")}\n\n`
-      } else if (result.type === "system_knowledge") {
-        response += `**System Files:**\n`
-        for (const [file, info] of Object.entries(result.data)) {
-          if (info) {
-            response += `- **${file}:** ${(info as any).purpose}\n`
-          }
+      if (result.type === "concept") {
+        const concept = result.data
+        response += `**${concept.name}**\n\n${concept.description}\n\n`
+
+        if (concept.examples && concept.examples.length > 0) {
+          response += `**Example:**\n\`\`\`\n${concept.examples[0].code}\n\`\`\`\n`
+          response += `${concept.examples[0].explanation}\n\n`
         }
-        response += "\n"
-      } else if (result.type === "general_coding") {
-        response += `**Best Practices:**\n`
-        result.data.bestPractices.forEach((practice: string) => {
-          response += `- ${practice}\n`
-        })
-        response += "\n"
       }
     }
 
@@ -235,44 +198,13 @@ export class CodingModule implements ModuleInterface {
 
     let totalConfidence = 0
     for (const result of results) {
-      if (result.type === "nextjs_knowledge") {
-        totalConfidence += 0.9
-      } else if (result.type === "system_knowledge") {
-        totalConfidence += 0.95
-      } else {
-        totalConfidence += 0.7
-      }
+      totalConfidence += result.confidence
     }
 
     return Math.min(1, totalConfidence / results.length)
   }
 
   async learn(data: any): Promise<void> {
-    if (data.results && data.results.length > 0) {
-      for (const result of data.results) {
-        const learntEntry = {
-          id: generateId(),
-          content: {
-            query: result.type,
-            data: result.data,
-            source: result.source,
-          },
-          confidence: 0.8,
-          source: "coding-module",
-          context: data.input,
-          timestamp: Date.now(),
-          usageCount: 1,
-          lastUsed: Date.now(),
-          verified: true,
-          tags: [result.type, "coding"],
-          relationships: [],
-        }
-
-        await storageManager.addLearntEntry(MODULE_CONFIG.coding.learntFile, learntEntry)
-        this.stats.learntEntries++
-      }
-    }
-
     this.stats.lastUpdate = Date.now()
   }
 

@@ -1,72 +1,128 @@
+interface MemoryEntry {
+  id: string
+  key: string
+  value: any
+  type: "personal" | "preference" | "learning" | "context"
+  confidence: number
+  context: string
+  timestamp: number
+  lastAccessed: number
+  accessCount: number
+  tags: string[]
+}
+
 class UserMemory {
-  private memories: Map<string, any> = new Map()
-  private personalInfo: Map<string, any> = new Map()
+  private memories: Map<string, MemoryEntry> = new Map()
+  private storageKey = "zacai_user_memory"
+  private initialized = false
 
   async initialize(): Promise<void> {
-    this.loadFromStorage()
+    if (this.initialized) return
+
+    console.log("🧠 Initializing User Memory...")
+
+    try {
+      this.loadFromStorage()
+      this.initialized = true
+      console.log("✅ User Memory initialized successfully")
+    } catch (error) {
+      console.error("❌ User Memory initialization failed:", error)
+      throw error
+    }
   }
 
-  store(key: string, value: any, category = "general", confidence = 0.8, context?: string): void {
-    const memory = {
+  private loadFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(this.storageKey)
+      if (stored) {
+        const data = JSON.parse(stored)
+        this.memories = new Map(Object.entries(data))
+        console.log(`📖 Loaded ${this.memories.size} memory entries`)
+      }
+    } catch (error) {
+      console.error("Failed to load user memory:", error)
+    }
+  }
+
+  private saveToStorage(): void {
+    try {
+      const data = Object.fromEntries(this.memories)
+      localStorage.setItem(this.storageKey, JSON.stringify(data))
+    } catch (error) {
+      console.error("Failed to save user memory:", error)
+    }
+  }
+
+  store(key: string, value: any, type: MemoryEntry["type"] = "context", confidence = 0.8, context = ""): void {
+    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
+    const entry: MemoryEntry = {
+      id,
       key,
       value,
-      category,
+      type,
       confidence,
       context,
       timestamp: Date.now(),
+      lastAccessed: Date.now(),
+      accessCount: 1,
+      tags: this.generateTags(key, value, context),
     }
 
-    this.memories.set(key, memory)
-
-    if (category === "personal") {
-      this.personalInfo.set(key, value)
-    }
-
+    this.memories.set(key, entry)
     this.saveToStorage()
+    console.log(`💾 Stored memory: ${key}`)
   }
 
-  retrieve(key: string): any {
-    return this.memories.get(key)
+  retrieve(key: string): MemoryEntry | null {
+    const entry = this.memories.get(key)
+    if (entry) {
+      entry.lastAccessed = Date.now()
+      entry.accessCount++
+      this.saveToStorage()
+      return entry
+    }
+    return null
   }
 
-  extractPersonalInfo(message: string): any {
+  extractPersonalInfo(input: string): any {
     const personalInfo = {
-      name: null,
-      age: null,
-      location: null,
-      interests: [],
-      preferences: {},
-      facts: [],
+      name: null as string | null,
+      age: null as number | null,
+      location: null as string | null,
+      interests: [] as string[],
+      preferences: {} as { [key: string]: string },
+      facts: [] as string[],
     }
 
     // Extract name
-    const nameMatch = message.match(/(?:my name is|i'm|i am|call me)\s+(\w+)/i)
+    const nameMatch = input.match(/(?:my name is|i'm|i am|call me)\s+([a-zA-Z]+)/i)
     if (nameMatch) {
       personalInfo.name = nameMatch[1]
-      this.store("name", nameMatch[1], "personal", 0.95, "User introduction")
+      this.store("name", personalInfo.name, "personal", 0.9, input)
     }
 
     // Extract age
-    const ageMatch = message.match(/(?:i am|i'm)\s+(\d+)\s+(?:years old|years)/i)
+    const ageMatch = input.match(/(?:i am|i'm)\s+(\d+)\s+(?:years old|years)/i)
     if (ageMatch) {
       personalInfo.age = Number.parseInt(ageMatch[1])
-      this.store("age", personalInfo.age, "personal", 0.9, "Age information")
+      this.store("age", personalInfo.age, "personal", 0.9, input)
     }
 
     // Extract location
-    const locationMatch = message.match(/(?:i live in|i'm from|from)\s+([^.!?]+)/i)
+    const locationMatch = input.match(/(?:i live in|i'm from|from)\s+([a-zA-Z\s]+)/i)
     if (locationMatch) {
       personalInfo.location = locationMatch[1].trim()
-      this.store("location", personalInfo.location, "personal", 0.8, "Location information")
+      this.store("location", personalInfo.location, "personal", 0.8, input)
     }
 
     // Extract interests
-    const interestMatch = message.match(/(?:i like|i love|interested in)\s+([^.!?]+)/i)
+    const interestMatch = input.match(/(?:i like|i love|interested in|enjoy)\s+([^.!?]+)/i)
     if (interestMatch) {
       const interests = interestMatch[1].split(/,|\sand\s/).map((s) => s.trim())
       personalInfo.interests = interests
       interests.forEach((interest) => {
-        this.store(`interest_${interest}`, interest, "personal", 0.7, "Interest information")
+        this.store(`interest_${interest}`, interest, "preference", 0.7, input)
       })
     }
 
@@ -74,71 +130,115 @@ class UserMemory {
   }
 
   getPersonalSummary(): string {
-    if (this.personalInfo.size === 0) {
-      return "I don't have any personal information about you yet. Tell me about yourself!"
+    const name = this.retrieve("name")
+    const age = this.retrieve("age")
+    const location = this.retrieve("location")
+
+    let summary = "👤 **Personal Information**\n\n"
+
+    if (name) {
+      summary += `• **Name:** ${name.value}\n`
     }
 
-    let summary = "Here's what I remember about you:\n\n"
-    this.personalInfo.forEach((value, key) => {
-      summary += `• **${key}**: ${value}\n`
-    })
+    if (age) {
+      summary += `• **Age:** ${age.value} years old\n`
+    }
+
+    if (location) {
+      summary += `• **Location:** ${location.value}\n`
+    }
+
+    // Get interests
+    const interests = Array.from(this.memories.values())
+      .filter((entry) => entry.key.startsWith("interest_"))
+      .map((entry) => entry.value)
+
+    if (interests.length > 0) {
+      summary += `• **Interests:** ${interests.join(", ")}\n`
+    }
+
+    if (!name && !age && !location && interests.length === 0) {
+      summary +=
+        'No personal information stored yet.\n\nTell me about yourself! You can say things like:\n• "My name is..."\n• "I\'m ... years old"\n• "I live in..."\n• "I like..."'
+    }
 
     return summary
   }
 
+  search(query: string): MemoryEntry[] {
+    const results: MemoryEntry[] = []
+    const lowerQuery = query.toLowerCase()
+
+    for (const entry of this.memories.values()) {
+      if (
+        entry.key.toLowerCase().includes(lowerQuery) ||
+        String(entry.value).toLowerCase().includes(lowerQuery) ||
+        entry.context.toLowerCase().includes(lowerQuery) ||
+        entry.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
+      ) {
+        results.push(entry)
+      }
+    }
+
+    return results.sort((a, b) => b.confidence - a.confidence)
+  }
+
+  private generateTags(key: string, value: any, context: string): string[] {
+    const tags = [typeof value]
+
+    if (key.includes("name")) tags.push("identity")
+    if (key.includes("age")) tags.push("demographic")
+    if (key.includes("location")) tags.push("geographic")
+    if (key.includes("interest")) tags.push("preference")
+
+    // Add context-based tags
+    if (context.toLowerCase().includes("learn")) tags.push("learning")
+    if (context.toLowerCase().includes("remember")) tags.push("memory")
+
+    return tags
+  }
+
   getStats(): any {
-    return {
-      totalEntries: this.memories.size,
-      personalEntries: this.personalInfo.size,
-      categories: this.getCategories(),
+    const stats = {
+      totalMemories: this.memories.size,
+      byType: {} as { [key: string]: number },
+      averageConfidence: 0,
+      mostAccessed: null as MemoryEntry | null,
+      recentMemories: 0,
     }
-  }
 
-  search(query: string): any[] {
-    const results: any[] = []
-    this.memories.forEach((memory) => {
-      if (memory.value.toString().toLowerCase().includes(query.toLowerCase())) {
-        results.push(memory)
+    let totalConfidence = 0
+    let maxAccess = 0
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+
+    for (const entry of this.memories.values()) {
+      // Count by type
+      stats.byType[entry.type] = (stats.byType[entry.type] || 0) + 1
+
+      // Calculate average confidence
+      totalConfidence += entry.confidence
+
+      // Find most accessed
+      if (entry.accessCount > maxAccess) {
+        maxAccess = entry.accessCount
+        stats.mostAccessed = entry
       }
-    })
-    return results
-  }
 
-  private getCategories(): string[] {
-    const categories = new Set<string>()
-    this.memories.forEach((memory) => {
-      categories.add(memory.category)
-    })
-    return Array.from(categories)
-  }
-
-  private loadFromStorage(): void {
-    try {
-      const stored = localStorage.getItem("zacai_user_memory")
-      if (stored) {
-        const data = JSON.parse(stored)
-        data.memories?.forEach((memory: any) => {
-          this.memories.set(memory.key, memory)
-        })
-        data.personalInfo?.forEach((info: any) => {
-          this.personalInfo.set(info.key, info.value)
-        })
+      // Count recent memories
+      if (entry.timestamp > weekAgo) {
+        stats.recentMemories++
       }
-    } catch (error) {
-      console.warn("Failed to load user memory:", error)
     }
+
+    stats.averageConfidence = this.memories.size > 0 ? totalConfidence / this.memories.size : 0
+
+    return stats
   }
 
-  private saveToStorage(): void {
-    try {
-      const data = {
-        memories: Array.from(this.memories.values()),
-        personalInfo: Array.from(this.personalInfo.entries()).map(([key, value]) => ({ key, value })),
-      }
-      localStorage.setItem("zacai_user_memory", JSON.stringify(data))
-    } catch (error) {
-      console.warn("Failed to save user memory:", error)
-    }
+  clear(): void {
+    this.memories.clear()
+    localStorage.removeItem(this.storageKey)
+    console.log("🗑️ User memory cleared")
   }
 }
 

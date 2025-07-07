@@ -1,9 +1,5 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
-import type { FactEntry } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
-import { MODULE_CONFIG } from "@/config/app"
-import { generateId } from "@/utils/helpers"
-import { wikipediaAPI } from "./wikipedia-api"
 
 export class FactsModule implements ModuleInterface {
   name = "facts"
@@ -26,14 +22,51 @@ export class FactsModule implements ModuleInterface {
     console.log("🌍 Initializing Facts Module...")
 
     try {
-      this.seedData = await storageManager.loadSeedData(MODULE_CONFIG.facts.seedFile)
-      this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.facts.learntFile)
+      this.seedData = await this.loadSeedData()
+      this.learntData = await this.loadLearntData()
 
       this.initialized = true
       console.log("✅ Facts Module initialized successfully")
     } catch (error) {
       console.error("❌ Error initializing Facts Module:", error)
       throw error
+    }
+  }
+
+  private async loadSeedData(): Promise<any> {
+    try {
+      return await storageManager.loadSeedData("facts")
+    } catch (error) {
+      console.warn("Using fallback facts data")
+      return this.getFallbackFactsData()
+    }
+  }
+
+  private async loadLearntData(): Promise<any> {
+    try {
+      return await storageManager.loadLearntData("facts")
+    } catch (error) {
+      console.warn("No learnt facts data found")
+      return { entries: {} }
+    }
+  }
+
+  private getFallbackFactsData(): any {
+    return {
+      facts: {
+        "artificial intelligence": {
+          content:
+            "Artificial Intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans.",
+          category: "technology",
+          verified: true,
+        },
+        "machine learning": {
+          content:
+            "Machine Learning is a subset of AI that enables computers to learn and improve from experience without being explicitly programmed.",
+          category: "technology",
+          verified: true,
+        },
+      },
     }
   }
 
@@ -54,27 +87,10 @@ export class FactsModule implements ModuleInterface {
         }
       }
 
-      const facts: FactEntry[] = []
+      const facts: any[] = []
 
       for (const topic of topics) {
-        // Check learnt data first
-        let fact = await this.getFactFromLearnt(topic)
-
-        if (!fact) {
-          // Check seed data
-          fact = await this.getFactFromSeed(topic)
-        }
-
-        if (!fact) {
-          // Look up online via Wikipedia
-          fact = await wikipediaAPI.lookupTopic(topic)
-
-          if (fact) {
-            // Save to learnt data for future use
-            await this.saveFactToLearnt(fact, input)
-          }
-        }
-
+        const fact = await this.getFactFromData(topic)
         if (fact) {
           facts.push(fact)
         }
@@ -93,12 +109,7 @@ export class FactsModule implements ModuleInterface {
       const response = this.buildFactResponse(facts)
       const confidence = this.calculateFactConfidence(facts)
 
-      await this.learn({
-        input,
-        facts,
-        context,
-        timestamp: Date.now(),
-      })
+      await this.learn({ input, facts, context, timestamp: Date.now() })
 
       this.updateStats(Date.now() - startTime, true)
 
@@ -108,11 +119,6 @@ export class FactsModule implements ModuleInterface {
         confidence,
         source: this.name,
         timestamp: Date.now(),
-        metadata: {
-          topicsProcessed: topics.length,
-          factsFound: facts.length,
-          sources: facts.map((f) => f.source),
-        },
       }
     } catch (error) {
       console.error("❌ Error in Facts Module processing:", error)
@@ -143,119 +149,41 @@ export class FactsModule implements ModuleInterface {
       topics.push(whatIsMatch[1].trim())
     }
 
-    // Look for "information about X" patterns
-    const infoMatch = input.match(/information about (.+?)(?:\.|$|\?)/i)
-    if (infoMatch) {
-      topics.push(infoMatch[1].trim())
-    }
+    return [...new Set(topics)]
+  }
 
-    // Look for "explain X" patterns
-    const explainMatch = input.match(/explain (.+?)(?:\.|$|\?)/i)
-    if (explainMatch) {
-      topics.push(explainMatch[1].trim())
-    }
-
-    // Look for "who is X" patterns
-    const whoIsMatch = input.match(/who is (.+?)(?:\?|$|\.|,)/i)
-    if (whoIsMatch) {
-      topics.push(whoIsMatch[1].trim())
-    }
-
-    // Extract potential topics from keywords
-    const keywords = [
-      "science",
-      "history",
-      "technology",
-      "nature",
-      "space",
-      "earth",
-      "biology",
-      "physics",
-      "chemistry",
-      "astronomy",
-      "geography",
-      "mathematics",
-      "philosophy",
-      "psychology",
-      "sociology",
-      "economics",
-    ]
-
-    for (const keyword of keywords) {
-      if (input.toLowerCase().includes(keyword)) {
-        topics.push(keyword)
+  private async getFactFromData(topic: string): Promise<any> {
+    // Check seed data first
+    if (this.seedData?.facts) {
+      const factData = this.seedData.facts[topic.toLowerCase()]
+      if (factData) {
+        return {
+          topic,
+          content: factData.content,
+          source: "seed-data",
+          category: factData.category || "general",
+          verified: factData.verified || false,
+        }
       }
     }
 
-    return [...new Set(topics)] // Remove duplicates
-  }
-
-  private async getFactFromLearnt(topic: string): Promise<FactEntry | null> {
-    if (!this.learntData || !this.learntData.entries) return null
-
-    for (const entry of Object.values(this.learntData.entries)) {
-      const entryData = entry as any
-      if (
-        entryData.content &&
-        (entryData.content.topic?.toLowerCase() === topic.toLowerCase() ||
-          entryData.content.content?.toLowerCase().includes(topic.toLowerCase()))
-      ) {
-        return entryData.content
+    // Check learnt data
+    if (this.learntData?.entries) {
+      for (const entry of Object.values(this.learntData.entries)) {
+        const entryData = entry as any
+        if (entryData.content?.topic?.toLowerCase() === topic.toLowerCase()) {
+          return entryData.content
+        }
       }
     }
 
     return null
   }
 
-  private async getFactFromSeed(topic: string): Promise<FactEntry | null> {
-    if (!this.seedData || !this.seedData.facts) return null
-
-    const factData = this.seedData.facts[topic.toLowerCase()]
-    if (factData) {
-      return {
-        topic,
-        content: factData.content || factData.description,
-        source: "seed-data",
-        category: factData.category || "general",
-        verified: true,
-        lastUpdated: Date.now(),
-        relatedTopics: factData.relatedTopics || [],
-      }
-    }
-
-    return null
-  }
-
-  private async saveFactToLearnt(fact: FactEntry, context: string): Promise<void> {
-    const learntEntry = {
-      id: generateId(),
-      content: fact,
-      confidence: 0.8, // Wikipedia data is generally reliable
-      source: "wikipedia-api",
-      context: `Looked up information about "${fact.topic}" - ${context}`,
-      timestamp: Date.now(),
-      usageCount: 1,
-      lastUsed: Date.now(),
-      verified: true,
-      tags: ["api-lookup", fact.category, "wikipedia"],
-      relationships: fact.relatedTopics || [],
-    }
-
-    await storageManager.addLearntEntry(MODULE_CONFIG.facts.learntFile, learntEntry)
-    this.stats.learntEntries++
-
-    console.log(`💾 Saved new fact to learnt data: ${fact.topic}`)
-  }
-
-  private buildFactResponse(facts: FactEntry[]): string {
+  private buildFactResponse(facts: any[]): string {
     if (facts.length === 1) {
       const fact = facts[0]
       let response = `**${fact.topic}**\n\n${fact.content}`
-
-      if (fact.relatedTopics && fact.relatedTopics.length > 0) {
-        response += `\n\n**Related topics:** ${fact.relatedTopics.slice(0, 3).join(", ")}`
-      }
-
       response += `\n\n*Source: ${fact.source}*`
       return response
     } else {
@@ -263,18 +191,16 @@ export class FactsModule implements ModuleInterface {
       facts.forEach((fact, index) => {
         response += `**${index + 1}. ${fact.topic}**\n${fact.content}\n\n`
       })
-      response += `*Sources: ${[...new Set(facts.map((f) => f.source))].join(", ")}*`
       return response
     }
   }
 
-  private calculateFactConfidence(facts: FactEntry[]): number {
+  private calculateFactConfidence(facts: any[]): number {
     if (facts.length === 0) return 0
 
     let totalConfidence = 0
     for (const fact of facts) {
-      if (fact.source === "wikipedia") totalConfidence += 0.9
-      else if (fact.source === "seed-data") totalConfidence += 0.95
+      if (fact.source === "seed-data") totalConfidence += 0.95
       else totalConfidence += 0.7
     }
 
@@ -298,10 +224,6 @@ export class FactsModule implements ModuleInterface {
 
   getStats(): ModuleStats {
     return { ...this.stats }
-  }
-
-  async getRandomFact(): Promise<FactEntry | null> {
-    return await wikipediaAPI.getRandomFact()
   }
 }
 

@@ -1,8 +1,5 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
-import type { PhilosophicalConcept } from "@/types/modules"
 import { storageManager } from "@/core/storage/manager"
-import { MODULE_CONFIG } from "@/config/app"
-import { generateId } from "@/utils/helpers"
 
 export class PhilosophyModule implements ModuleInterface {
   name = "philosophy"
@@ -22,17 +19,57 @@ export class PhilosophyModule implements ModuleInterface {
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log("Initializing Philosophy Module...")
+    console.log("🤔 Initializing Philosophy Module...")
 
     try {
-      this.seedData = await storageManager.loadSeedData(MODULE_CONFIG.philosophy.seedFile)
-      this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.philosophy.learntFile)
+      this.seedData = await this.loadSeedData()
+      this.learntData = await this.loadLearntData()
 
       this.initialized = true
-      console.log("Philosophy Module initialized successfully")
+      console.log("✅ Philosophy Module initialized successfully")
     } catch (error) {
-      console.error("Error initializing Philosophy Module:", error)
+      console.error("❌ Error initializing Philosophy Module:", error)
       throw error
+    }
+  }
+
+  private async loadSeedData(): Promise<any> {
+    try {
+      return await storageManager.loadSeedData("philosophy")
+    } catch (error) {
+      console.warn("Using fallback philosophy data")
+      return this.getFallbackPhilosophyData()
+    }
+  }
+
+  private async loadLearntData(): Promise<any> {
+    try {
+      return await storageManager.loadLearntData("philosophy")
+    } catch (error) {
+      console.warn("No learnt philosophy data found")
+      return { entries: {} }
+    }
+  }
+
+  private getFallbackPhilosophyData(): any {
+    return {
+      concepts: {
+        consciousness: {
+          name: "Consciousness",
+          description:
+            "The state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings",
+          school: "philosophy of mind",
+          arguments: ["Consciousness is fundamental to experience"],
+          counterArguments: ["Consciousness emerges from complex neural activity"],
+        },
+        ethics: {
+          name: "Ethics",
+          description: "The branch of philosophy that deals with moral principles and values",
+          school: "moral philosophy",
+          arguments: ["Moral principles are universal"],
+          counterArguments: ["Morality is relative to culture"],
+        },
+      },
     }
   }
 
@@ -53,7 +90,7 @@ export class PhilosophyModule implements ModuleInterface {
         }
       }
 
-      const concepts: PhilosophicalConcept[] = []
+      const concepts: any[] = []
 
       for (const query of philosophicalQueries) {
         const concept = await this.getPhilosophicalConcept(query)
@@ -75,12 +112,7 @@ export class PhilosophyModule implements ModuleInterface {
       const response = this.buildPhilosophyResponse(concepts)
       const confidence = this.calculatePhilosophyConfidence(concepts)
 
-      await this.learn({
-        input,
-        concepts,
-        context,
-        timestamp: Date.now(),
-      })
+      await this.learn({ input, concepts, context, timestamp: Date.now() })
 
       this.updateStats(Date.now() - startTime, true)
 
@@ -90,10 +122,6 @@ export class PhilosophyModule implements ModuleInterface {
         confidence,
         source: this.name,
         timestamp: Date.now(),
-        metadata: {
-          queriesProcessed: philosophicalQueries.length,
-          conceptsFound: concepts.length,
-        },
       }
     } catch (error) {
       console.error("Error in Philosophy Module processing:", error)
@@ -113,191 +141,43 @@ export class PhilosophyModule implements ModuleInterface {
     const queries: string[] = []
 
     // Look for philosophical concepts
-    const concepts = [
-      "consciousness",
-      "ethics",
-      "morality",
-      "existence",
-      "reality",
-      "truth",
-      "knowledge",
-      "meaning",
-      "free will",
-      "determinism",
-    ]
+    const concepts = ["consciousness", "ethics", "morality", "existence", "reality", "truth"]
     for (const concept of concepts) {
       if (input.toLowerCase().includes(concept)) {
         queries.push(concept)
       }
     }
 
-    // Look for philosophical questions
-    const philosophicalPatterns = [
-      /what is the meaning of (.+?)(?:\?|$)/i,
-      /what does it mean to (.+?)(?:\?|$)/i,
-      /is (.+?) moral(?:\?|$)/i,
-      /what is (.+?) philosophy(?:\?|$)/i,
-    ]
-
-    for (const pattern of philosophicalPatterns) {
-      const match = input.match(pattern)
-      if (match) {
-        queries.push(match[1].trim())
-      }
-    }
-
-    return [...new Set(queries)] // Remove duplicates
+    return [...new Set(queries)]
   }
 
-  private async getPhilosophicalConcept(query: string): Promise<PhilosophicalConcept | null> {
-    // Check learnt data first
-    const learntConcept = this.searchLearntData(query)
-    if (learntConcept) {
-      return learntConcept
-    }
-
+  private async getPhilosophicalConcept(query: string): Promise<any> {
     // Check seed data
-    const seedConcept = this.searchSeedData(query)
-    if (seedConcept) {
-      return seedConcept
-    }
-
-    // Generate basic concept if it's a common philosophical term
-    const generatedConcept = this.generateBasicConcept(query)
-    if (generatedConcept) {
-      await this.saveToLearntData(query, generatedConcept)
-      return generatedConcept
-    }
-
-    return null
-  }
-
-  private searchLearntData(query: string): PhilosophicalConcept | null {
-    if (!this.learntData || !this.learntData.entries) return null
-
-    for (const entry of Object.values(this.learntData.entries)) {
-      const entryData = entry as any
-      if (entryData.content && entryData.content.name === query) {
-        return entryData.content
+    if (this.seedData?.concepts) {
+      const concept = this.seedData.concepts[query.toLowerCase()]
+      if (concept) {
+        return concept
       }
     }
 
     return null
   }
 
-  private searchSeedData(query: string): PhilosophicalConcept | null {
-    if (!this.seedData || !this.seedData.concepts) return null
-
-    const conceptData = this.seedData.concepts[query.toLowerCase()]
-    if (conceptData) {
-      return {
-        name: query,
-        description: conceptData.description,
-        philosopher: conceptData.philosopher,
-        school: conceptData.school || "general",
-        relatedConcepts: conceptData.relatedConcepts || [],
-        arguments: conceptData.arguments || [],
-        counterArguments: conceptData.counterArguments || [],
-      }
-    }
-
-    return null
-  }
-
-  private generateBasicConcept(query: string): PhilosophicalConcept | null {
-    const basicConcepts: { [key: string]: Partial<PhilosophicalConcept> } = {
-      consciousness: {
-        description:
-          "The state of being aware of and able to think about one's existence, sensations, thoughts, and surroundings",
-        school: "philosophy of mind",
-        relatedConcepts: ["awareness", "self-awareness", "qualia"],
-        arguments: ["Consciousness is fundamental to experience", "It cannot be reduced to physical processes"],
-        counterArguments: [
-          "Consciousness emerges from complex neural activity",
-          "It can be explained through materialism",
-        ],
-      },
-      ethics: {
-        description: "The branch of philosophy that deals with moral principles and values",
-        school: "moral philosophy",
-        relatedConcepts: ["morality", "virtue", "duty", "consequences"],
-        arguments: ["Moral principles are universal", "Ethics guide human behavior"],
-        counterArguments: ["Morality is relative to culture", "Ethical systems can conflict"],
-      },
-      existence: {
-        description: "The fact or state of being; the nature of what it means to exist",
-        school: "metaphysics",
-        relatedConcepts: ["being", "reality", "essence", "ontology"],
-        arguments: ["Existence precedes essence", "Being is the fundamental question"],
-        counterArguments: ["Essence defines existence", "Existence is an illusion"],
-      },
-      "free will": {
-        description: "The ability to make choices that are genuinely one's own and not determined by prior causes",
-        school: "philosophy of action",
-        relatedConcepts: ["determinism", "choice", "responsibility", "agency"],
-        arguments: ["We experience making free choices", "Moral responsibility requires free will"],
-        counterArguments: ["All events are causally determined", "Free will is incompatible with physics"],
-      },
-    }
-
-    const concept = basicConcepts[query.toLowerCase()]
-    if (concept) {
-      return {
-        name: query,
-        description: concept.description!,
-        philosopher: concept.philosopher,
-        school: concept.school!,
-        relatedConcepts: concept.relatedConcepts!,
-        arguments: concept.arguments!,
-        counterArguments: concept.counterArguments!,
-      }
-    }
-
-    return null
-  }
-
-  private async saveToLearntData(query: string, concept: PhilosophicalConcept): Promise<void> {
-    const learntEntry = {
-      id: generateId(),
-      content: concept,
-      confidence: 0.7,
-      source: "philosophy-module",
-      context: `Generated concept for "${query}"`,
-      timestamp: Date.now(),
-      usageCount: 1,
-      lastUsed: Date.now(),
-      verified: false,
-      tags: ["generated", concept.school],
-      relationships: [],
-    }
-
-    await storageManager.addLearntEntry(MODULE_CONFIG.philosophy.learntFile, learntEntry)
-    this.stats.learntEntries++
-  }
-
-  private buildPhilosophyResponse(concepts: PhilosophicalConcept[]): string {
+  private buildPhilosophyResponse(concepts: any[]): string {
     if (concepts.length === 1) {
       const concept = concepts[0]
       let response = `**${concept.name}**\n\n${concept.description}`
-
-      if (concept.philosopher) {
-        response += `\n\n**Key Philosopher:** ${concept.philosopher}`
-      }
 
       if (concept.school) {
         response += `\n\n**Philosophical School:** ${concept.school}`
       }
 
       if (concept.arguments && concept.arguments.length > 0) {
-        response += `\n\n**Arguments:**\n${concept.arguments.map((arg) => `• ${arg}`).join("\n")}`
+        response += `\n\n**Arguments:**\n${concept.arguments.map((arg: string) => `• ${arg}`).join("\n")}`
       }
 
       if (concept.counterArguments && concept.counterArguments.length > 0) {
-        response += `\n\n**Counter-arguments:**\n${concept.counterArguments.map((arg) => `• ${arg}`).join("\n")}`
-      }
-
-      if (concept.relatedConcepts && concept.relatedConcepts.length > 0) {
-        response += `\n\n**Related concepts:** ${concept.relatedConcepts.join(", ")}`
+        response += `\n\n**Counter-arguments:**\n${concept.counterArguments.map((arg: string) => `• ${arg}`).join("\n")}`
       }
 
       return response
@@ -310,16 +190,9 @@ export class PhilosophyModule implements ModuleInterface {
     }
   }
 
-  private calculatePhilosophyConfidence(concepts: PhilosophicalConcept[]): number {
+  private calculatePhilosophyConfidence(concepts: any[]): number {
     if (concepts.length === 0) return 0
-
-    let totalConfidence = 0
-    for (const concept of concepts) {
-      if (concept.arguments && concept.arguments.length > 0) totalConfidence += 0.8
-      else totalConfidence += 0.6
-    }
-
-    return Math.min(1, totalConfidence / concepts.length)
+    return 0.8 // Philosophy concepts have moderate confidence
   }
 
   async learn(data: any): Promise<void> {

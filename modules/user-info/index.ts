@@ -1,7 +1,5 @@
 import type { ModuleInterface, ModuleResponse, ModuleStats } from "@/types/global"
 import { storageManager } from "@/core/storage/manager"
-import { MODULE_CONFIG } from "@/config/app"
-import { generateId } from "@/utils/helpers"
 import { userMemory } from "@/core/memory/user-memory"
 
 export class UserInfoModule implements ModuleInterface {
@@ -24,12 +22,21 @@ export class UserInfoModule implements ModuleInterface {
     console.log("👤 Initializing User Info Module...")
 
     try {
-      this.learntData = await storageManager.loadLearntData(MODULE_CONFIG.userInfo.learntFile)
+      this.learntData = await this.loadLearntData()
       this.initialized = true
       console.log("✅ User Info Module initialized successfully")
     } catch (error) {
       console.error("❌ Error initializing User Info Module:", error)
       throw error
+    }
+  }
+
+  private async loadLearntData(): Promise<any> {
+    try {
+      return await storageManager.loadLearntData("user-info")
+    } catch (error) {
+      console.warn("No learnt user info data found")
+      return { entries: {} }
     }
   }
 
@@ -58,10 +65,6 @@ export class UserInfoModule implements ModuleInterface {
           confidence: 0.9,
           source: this.name,
           timestamp: Date.now(),
-          metadata: {
-            queryType: "personal_summary",
-            memoryStats: userMemory.getStats(),
-          },
         }
       }
 
@@ -78,9 +81,6 @@ export class UserInfoModule implements ModuleInterface {
       // Build response about learned information
       const response = this.buildPersonalInfoResponse(personalInfo)
 
-      // Save to learnt data
-      await this.savePersonalInfo(personalInfo, input)
-
       this.updateStats(Date.now() - startTime, true)
 
       return {
@@ -89,10 +89,6 @@ export class UserInfoModule implements ModuleInterface {
         confidence: 0.9,
         source: this.name,
         timestamp: Date.now(),
-        metadata: {
-          extractedInfo: personalInfo,
-          queryType: "personal_extraction",
-        },
       }
     } catch (error) {
       console.error("❌ Error in User Info Module processing:", error)
@@ -127,10 +123,6 @@ export class UserInfoModule implements ModuleInterface {
       /what do you know about me/i,
       /my profile/i,
       /my information/i,
-      /remember.*about me/i,
-      /what.*remember.*me/i,
-      /my details/i,
-      /personal information/i,
     ]
 
     return personalQueries.some((pattern) => pattern.test(input))
@@ -155,48 +147,9 @@ export class UserInfoModule implements ModuleInterface {
       response += `• You're interested in: **${personalInfo.interests.join(", ")}**\n`
     }
 
-    if (Object.keys(personalInfo.preferences).length > 0) {
-      response += `• Your preferences:\n`
-      Object.entries(personalInfo.preferences).forEach(([key, value]) => {
-        response += `  - ${key}: **${value}**\n`
-      })
-    }
-
-    if (personalInfo.facts.length > 0) {
-      response += `• Additional facts:\n`
-      personalInfo.facts.forEach((fact: string) => {
-        response += `  - ${fact}\n`
-      })
-    }
-
     response += "\n✅ I'll remember this information for our future conversations!"
 
     return response
-  }
-
-  private async savePersonalInfo(personalInfo: any, context: string): Promise<void> {
-    const learntEntry = {
-      id: generateId(),
-      content: {
-        type: "personal_info_extraction",
-        data: personalInfo,
-        extractedFrom: context,
-      },
-      confidence: 0.9,
-      source: "user-input",
-      context: context,
-      timestamp: Date.now(),
-      usageCount: 1,
-      lastUsed: Date.now(),
-      verified: false,
-      tags: ["personal-info", "user-data", "extraction"],
-      relationships: [],
-    }
-
-    await storageManager.addLearntEntry(MODULE_CONFIG.userInfo.learntFile, learntEntry)
-    this.stats.learntEntries++
-
-    console.log(`💾 Saved personal info extraction to learnt data`)
   }
 
   async learn(data: any): Promise<void> {
@@ -215,18 +168,7 @@ export class UserInfoModule implements ModuleInterface {
   }
 
   getStats(): ModuleStats {
-    return {
-      ...this.stats,
-      memoryStats: userMemory.getStats(),
-    }
-  }
-
-  getUserProfile(): any {
-    return {
-      summary: userMemory.getPersonalSummary(),
-      stats: userMemory.getStats(),
-      recentMemories: userMemory.search("").slice(0, 10),
-    }
+    return { ...this.stats }
   }
 }
 

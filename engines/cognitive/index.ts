@@ -9,18 +9,23 @@ export class CognitiveEngine {
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log("Initializing Cognitive Engine...")
+    console.log("🧠 Initializing Cognitive Engine...")
 
-    // Initialize context manager
-    contextManager.createContext()
+    try {
+      // Initialize context manager
+      contextManager.createContext()
 
-    this.initialized = true
-    console.log("Cognitive Engine initialized successfully")
+      this.initialized = true
+      console.log("✅ Cognitive Engine initialized successfully")
+    } catch (error) {
+      console.error("❌ Cognitive Engine initialization failed:", error)
+      throw error
+    }
   }
 
   registerModule(module: ModuleInterface): void {
     this.modules.set(module.name, module)
-    console.log(`Module registered: ${module.name}`)
+    console.log(`📦 Module registered: ${module.name}`)
   }
 
   async processInput(input: string): Promise<{
@@ -105,6 +110,14 @@ export class CognitiveEngine {
       intent = "philosophical"
       confidence = 0.8
       suggestedModules.push("philosophy")
+    } else if (
+      lowercaseInput.includes("my name") ||
+      lowercaseInput.includes("i am") ||
+      lowercaseInput.includes("remember")
+    ) {
+      intent = "personal"
+      confidence = 0.9
+      suggestedModules.push("user-info")
     }
 
     return {

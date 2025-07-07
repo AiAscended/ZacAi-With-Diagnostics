@@ -1,133 +1,253 @@
 "use client"
-
-import type React from "react"
-import { useState, useEffect } from "react"
-import { EnhancedAIChat } from "@/components/enhanced-ai-chat"
+import { useState, useEffect, useRef } from "react"
+import { systemManager } from "@/core/system/manager"
+import { ChatWindow } from "@/ui/chat/chat-window"
+import { AdminDashboard } from "@/ui/admin/dashboard"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Brain, Loader2, CheckCircle, XCircle, RefreshCw } from "lucide-react"
 
-// Simple UI Components
-const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`bg-white rounded-lg border shadow-sm ${className}`}>{children}</div>
-)
+type AppMode = "loading" | "chat" | "admin" | "error"
 
-const Button = ({
-  children,
-  onClick,
-  disabled = false,
-  className = "",
-  variant = "default",
-}: {
-  children: React.ReactNode
-  onClick?: () => void
-  disabled?: boolean
-  className?: string
-  variant?: "default" | "outline"
-}) => {
-  const baseClass = "px-4 py-2 rounded-md font-medium transition-all duration-200 btn-hover"
-  const variantClass =
-    variant === "outline"
-      ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
-      : "bg-blue-600 text-white hover:bg-blue-700"
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`${baseClass} ${variantClass} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
-    >
-      {children}
-    </button>
-  )
+interface SystemStatus {
+  initialized: boolean
+  loading: boolean
+  error: string | null
+  progress: number
+  stage: string
+  modules: string[]
+  health: any
 }
 
-const Badge = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
-    {children}
-  </span>
-)
+export default function ZacAIApp() {
+  const [appMode, setAppMode] = useState<AppMode>("loading")
+  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
+    initialized: false,
+    loading: true,
+    error: null,
+    progress: 0,
+    stage: "Initializing...",
+    modules: [],
+    health: null,
+  })
+  const [initializationLog, setInitializationLog] = useState<string[]>([])
+  const initializationRef = useRef(false)
 
-// Icons
-const Brain = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-    />
-  </svg>
-)
+  const addLogEntry = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString()
+    const logEntry = `${timestamp}: ${message}`
+    setInitializationLog((prev) => [...prev, logEntry])
+    console.log(`🔧 ${logEntry}`)
+  }
 
-const Send = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-  </svg>
-)
+  const updateProgress = (progress: number, stage: string) => {
+    setSystemStatus((prev) => ({ ...prev, progress, stage }))
+  }
 
-const Settings = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c.426 1.756 2.924 1.756 0 3.35a1.724 1.724 0 00-2.573 1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37.996.608 2.296.07 2.572-1.065z"
-    />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-)
+  const initializeSystem = async () => {
+    if (initializationRef.current) return
+    initializationRef.current = true
 
-const Loader = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={`${className} animate-spin`} fill="none" viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-    ></path>
-  </svg>
-)
+    try {
+      addLogEntry("🚀 Starting ZacAI System Manager...")
+      updateProgress(10, "Starting system initialization...")
 
-const CheckCircle = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-)
+      // Initialize core system
+      addLogEntry("🔧 Initializing core systems...")
+      updateProgress(25, "Loading core systems...")
+      await systemManager.initialize()
 
-// Types
-interface Message {
-  id: string
-  type: "user" | "assistant"
-  content: string
-  timestamp: number
-}
+      addLogEntry("✅ Core systems online")
+      updateProgress(50, "Core systems ready")
 
-// Main App Component
-export default function HomePage() {
-  const [mounted, setMounted] = useState(false)
+      // Check system health
+      addLogEntry("🔍 Running system health checks...")
+      updateProgress(75, "Performing health checks...")
+      const stats = systemManager.getSystemStats()
+
+      setSystemStatus((prev) => ({
+        ...prev,
+        modules: stats.modules ? Object.keys(stats.modules) : [],
+        health: stats,
+      }))
+
+      addLogEntry(`📦 Loaded ${Object.keys(stats.modules || {}).length} modules`)
+      updateProgress(90, "Finalizing initialization...")
+
+      // Final setup
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      addLogEntry("🎉 ZacAI System fully operational!")
+      updateProgress(100, "System ready")
+
+      setSystemStatus((prev) => ({
+        ...prev,
+        initialized: true,
+        loading: false,
+        error: null,
+      }))
+
+      // Switch to chat mode after brief delay
+      setTimeout(() => {
+        setAppMode("chat")
+      }, 1000)
+    } catch (error) {
+      console.error("❌ System initialization failed:", error)
+      addLogEntry(`❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`)
+
+      setSystemStatus((prev) => ({
+        ...prev,
+        loading: false,
+        error: error instanceof Error ? error.message : "System initialization failed",
+      }))
+
+      setAppMode("error")
+    }
+  }
 
   useEffect(() => {
-    setMounted(true)
+    initializeSystem()
   }, [])
 
-  if (!mounted) {
+  const handleRetryInitialization = () => {
+    initializationRef.current = false
+    setInitializationLog([])
+    setSystemStatus({
+      initialized: false,
+      loading: true,
+      error: null,
+      progress: 0,
+      stage: "Initializing...",
+      modules: [],
+      health: null,
+    })
+    setAppMode("loading")
+    initializeSystem()
+  }
+
+  // Loading Screen
+  if (appMode === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading ZacAI...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-2xl shadow-2xl border-0 glass-effect animate-fadeIn">
+          <CardHeader className="text-center pb-4">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg">
+              <Brain className="w-10 h-10 text-white animate-pulse" />
+            </div>
+            <CardTitle className="text-3xl font-bold gradient-text">ZacAI System v2.0.8</CardTitle>
+            <p className="text-gray-600 text-lg">Initializing advanced AI assistant...</p>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {/* Progress */}
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>{systemStatus.stage}</span>
+                <span>{systemStatus.progress}%</span>
+              </div>
+              <Progress value={systemStatus.progress} className="h-3" />
+            </div>
+
+            {/* Status Badge */}
+            <div className="flex items-center justify-center">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700 animate-pulse px-4 py-2">
+                <Loader2 className="w-4 h-4 mr-2" />
+                {systemStatus.stage}
+                <span className="loading-dots"></span>
+              </Badge>
+            </div>
+
+            {/* Module Status */}
+            {systemStatus.modules.length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-semibold mb-3 text-gray-700">Loaded Modules:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {systemStatus.modules.map((module) => (
+                    <Badge key={module} variant="outline" className="text-xs">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      {module}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Initialization Log */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">System Log:</h4>
+              <div className="h-32 w-full border rounded-lg p-3 bg-white/80 overflow-y-auto">
+                <div className="space-y-1">
+                  {initializationLog.map((entry, index) => (
+                    <div key={index} className="text-xs text-gray-600 font-mono leading-relaxed animate-slideIn">
+                      {entry}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
+  // Error Screen
+  if (appMode === "error") {
+    return (
+      <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-red-200 shadow-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-700">
+              <XCircle className="h-6 w-6" />
+              System Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-red-600">
+              {systemStatus.error || "The system encountered an error during initialization."}
+            </p>
+
+            {/* Error Log */}
+            {initializationLog.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold mb-2 text-red-700">Error Log:</h4>
+                <div className="h-24 w-full border border-red-200 rounded p-2 bg-red-50 overflow-y-auto">
+                  <div className="space-y-1">
+                    {initializationLog.slice(-5).map((entry, index) => (
+                      <div key={index} className="text-xs text-red-600 font-mono">
+                        {entry}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Button onClick={handleRetryInitialization} className="w-full bg-red-600 hover:bg-red-700">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry Initialization
+              </Button>
+              <Button onClick={() => window.location.reload()} variant="outline" className="w-full">
+                Refresh Application
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Main Application
   return (
     <ErrorBoundary>
-      <EnhancedAIChat />
+      {appMode === "admin" ? (
+        <AdminDashboard onToggleChat={() => setAppMode("chat")} />
+      ) : (
+        <ChatWindow onToggleAdmin={() => setAppMode("admin")} />
+      )}
     </ErrorBoundary>
   )
 }

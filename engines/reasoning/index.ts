@@ -1,12 +1,21 @@
-import type { IntentAnalysis, ReasoningChain, ReasoningStep } from "@/types/global"
+import type { IntentAnalysis, ReasoningChain } from "@/types/global"
 
 export class ReasoningEngine {
   private initialized = false
   private reasoningHistory: ReasoningChain[] = []
 
   async initialize(): Promise<void> {
-    this.initialized = true
-    console.log("✅ Reasoning Engine initialized")
+    if (this.initialized) return
+
+    console.log("🤔 Initializing Reasoning Engine...")
+
+    try {
+      this.initialized = true
+      console.log("✅ Reasoning Engine initialized successfully")
+    } catch (error) {
+      console.error("❌ Reasoning Engine initialization failed:", error)
+      throw error
+    }
   }
 
   async analyze(input: string): Promise<IntentAnalysis> {
@@ -75,105 +84,8 @@ export class ReasoningEngine {
     }
   }
 
-  async synthesize(input: string, analysis: IntentAnalysis, moduleResponses: any[]): Promise<any> {
-    if (moduleResponses.length === 0) {
-      return {
-        response: "I'm not sure how to help with that. Could you please rephrase your question?",
-        confidence: 0.1,
-        sources: [],
-        reasoning: ["No relevant modules found a suitable response"],
-      }
-    }
-
-    // Sort responses by confidence
-    const sortedResponses = moduleResponses.filter((r) => r && r.success).sort((a, b) => b.confidence - a.confidence)
-
-    if (sortedResponses.length === 0) {
-      return {
-        response: "I couldn't find a reliable answer to your question. Please try rephrasing it.",
-        confidence: 0.2,
-        sources: [],
-        reasoning: ["All module responses had low confidence or failed"],
-      }
-    }
-
-    const bestResponse = sortedResponses[0]
-    const avgConfidence = sortedResponses.reduce((sum, r) => sum + r.confidence, 0) / sortedResponses.length
-
-    let finalResponse = ""
-    if (typeof bestResponse.data === "string") {
-      finalResponse = bestResponse.data
-    } else if (bestResponse.data && typeof bestResponse.data === "object") {
-      if (bestResponse.data.answer) {
-        finalResponse = bestResponse.data.answer
-      } else if (bestResponse.data.definition) {
-        finalResponse = bestResponse.data.definition
-      } else if (bestResponse.data.result !== undefined) {
-        finalResponse = bestResponse.data.result.toString()
-      } else {
-        finalResponse = JSON.stringify(bestResponse.data, null, 2)
-      }
-    }
-
-    const reasoning = [
-      `Intent analyzed as: ${analysis.intent} (confidence: ${analysis.confidence})`,
-      `Best response from: ${bestResponse.source} (confidence: ${bestResponse.confidence})`,
-      `Considered ${sortedResponses.length} module responses`,
-    ]
-
-    return {
-      response: finalResponse || "I found some information but couldn't format it properly.",
-      confidence: avgConfidence,
-      sources: sortedResponses.map((r) => r.source),
-      reasoning,
-      mathAnalysis: bestResponse.source === "mathematics" ? bestResponse.metadata : undefined,
-    }
-  }
-
-  async createReasoningChain(input: string, context: any, moduleResponses: any[]): Promise<ReasoningChain> {
-    const steps: ReasoningStep[] = []
-
-    // Step 1: Input analysis
-    steps.push({
-      step: 1,
-      reasoning: "Analyzing user input for intent and entities",
-      confidence: 0.8,
-      output: { intent: "analysis", entities: this.extractEntities(input) },
-    })
-
-    // Step 2: Module selection
-    steps.push({
-      step: 2,
-      reasoning: "Selecting relevant knowledge modules",
-      confidence: 0.9,
-      output: { suggestedModules: this.determineModules(input) },
-    })
-
-    // Step 3: Response synthesis
-    if (moduleResponses.length > 0) {
-      steps.push({
-        step: 3,
-        reasoning: "Synthesizing responses from knowledge modules",
-        confidence: 0.7,
-        output: { responseCount: moduleResponses.length },
-      })
-    }
-
-    const totalConfidence = steps.reduce((sum, step) => sum + step.confidence, 0) / steps.length
-
-    const chain: ReasoningChain = {
-      input,
-      steps,
-      finalOutput: moduleResponses.length > 0 ? moduleResponses[0] : null,
-      totalConfidence,
-    }
-
-    this.reasoningHistory.push(chain)
-    return chain
-  }
-
   private isMathQuery(input: string): boolean {
-    return /\d+\s*[+\-*/×÷]\s*\d+|calculate|math|multiply|divide|add|subtract|tesla|vortex|369/.test(input)
+    return /\d+\s*[+\-*/×÷]\s*\d+|calculate|math|multiply|divide|add|subtract/.test(input)
   }
 
   private isVocabularyQuery(input: string): boolean {
@@ -248,41 +160,10 @@ export class ReasoningEngine {
     return []
   }
 
-  private extractEntities(input: string): string[] {
-    return input
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .split(/\s+/)
-      .filter((word) => word.length > 2)
-      .slice(0, 5)
-  }
-
-  private determineModules(input: string): string[] {
-    const modules = []
-    const lower = input.toLowerCase()
-
-    if (this.isMathQuery(lower)) modules.push("mathematics")
-    if (this.isVocabularyQuery(lower)) modules.push("vocabulary")
-    if (this.isFactsQuery(lower)) modules.push("facts")
-    if (this.isCodingQuery(lower)) modules.push("coding")
-    if (this.isPhilosophyQuery(lower)) modules.push("philosophy")
-    if (this.isUserInfoQuery(lower)) modules.push("user-info")
-
-    return modules.length > 0 ? modules : ["vocabulary", "facts"]
-  }
-
   getStats() {
     return {
       initialized: this.initialized,
       totalReasoningChains: this.reasoningHistory.length,
-      averageSteps:
-        this.reasoningHistory.length > 0
-          ? this.reasoningHistory.reduce((sum, chain) => sum + chain.steps.length, 0) / this.reasoningHistory.length
-          : 0,
-      averageConfidence:
-        this.reasoningHistory.length > 0
-          ? this.reasoningHistory.reduce((sum, chain) => sum + chain.totalConfidence, 0) / this.reasoningHistory.length
-          : 0,
     }
   }
 }

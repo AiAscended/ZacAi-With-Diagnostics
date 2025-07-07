@@ -1,6 +1,5 @@
 import type { LearningPattern } from "@/types/global"
 import { generateId, calculateSimilarity } from "@/utils/helpers"
-import { storageManager } from "@/core/storage/manager"
 
 interface LearningEntry {
   id: string
@@ -19,18 +18,20 @@ export class LearningEngine {
   private patterns: LearningPattern[] = []
   private isProcessing = false
   private learningRate = 0.1
-  private learningStats = {
-    totalInteractions: 0,
-    successfulLearning: 0,
-    averageConfidence: 0,
-    learningRate: 0,
-  }
 
   async initialize(): Promise<void> {
     if (this.initialized) return
-    console.log("Initializing Learning Engine...")
-    this.initialized = true
-    this.startProcessingQueue()
+
+    console.log("📚 Initializing Learning Engine...")
+
+    try {
+      this.initialized = true
+      this.startProcessingQueue()
+      console.log("✅ Learning Engine initialized successfully")
+    } catch (error) {
+      console.error("❌ Learning Engine initialization failed:", error)
+      throw error
+    }
   }
 
   async learnFromInteraction(
@@ -51,29 +52,11 @@ export class LearningEngine {
     }
 
     this.learningQueue.push(learningEntry)
-    this.updateStats(learningEntry)
 
     // Process immediately if queue is getting large
     if (this.learningQueue.length > 10) {
       this.processLearningQueue()
     }
-  }
-
-  async learn(input: string, response: any): Promise<void> {
-    if (!response) return
-
-    const learningEntry: LearningEntry = {
-      id: generateId(),
-      input,
-      output: typeof response === "string" ? response : JSON.stringify(response),
-      confidence: response.confidence || 0.5,
-      source: response.source || "unknown",
-      context: { timestamp: Date.now() },
-      timestamp: Date.now(),
-    }
-
-    this.learningQueue.push(learningEntry)
-    this.updateStats(learningEntry)
   }
 
   private startProcessingQueue(): void {
@@ -170,116 +153,13 @@ export class LearningEngine {
     return this.patterns.slice(0, 20) // Return top 20 patterns
   }
 
-  async forceProcessQueue(): Promise<void> {
-    while (this.learningQueue.length > 0) {
-      await this.processLearningQueue()
-      await new Promise((resolve) => setTimeout(resolve, 100))
-    }
-  }
-
-  private groupEntriesBySource(entries: LearningEntry[]): { [source: string]: LearningEntry[] } {
-    return entries.reduce(
-      (groups, entry) => {
-        const source = entry.source || "general"
-        if (!groups[source]) groups[source] = []
-        groups[source].push(entry)
-        return groups
-      },
-      {} as { [source: string]: LearningEntry[] },
-    )
-  }
-
-  private async saveLearningEntries(source: string, entries: LearningEntry[]): Promise<void> {
-    try {
-      const filePath = this.getFilePath(source)
-
-      for (const entry of entries) {
-        const learntEntry = {
-          id: entry.id,
-          content: {
-            input: entry.input,
-            output: entry.output,
-            confidence: entry.confidence,
-            context: entry.context,
-          },
-          confidence: entry.confidence,
-          source: entry.source,
-          context: entry.input,
-          timestamp: entry.timestamp,
-          usageCount: 1,
-          lastUsed: entry.timestamp,
-          verified: entry.confidence > 0.7,
-          tags: this.generateTags(entry),
-          relationships: [],
-        }
-
-        await storageManager.addLearntEntry(filePath, learntEntry)
-      }
-    } catch (error) {
-      console.error(`Error saving learning entries for ${source}:`, error)
-    }
-  }
-
-  private getFilePath(source: string): string {
-    const fileMap: { [key: string]: string } = {
-      vocabulary: "/learnt/vocabulary.json",
-      mathematics: "/learnt/mathematics.json",
-      facts: "/learnt/facts.json",
-      coding: "/learnt/coding.json",
-      philosophy: "/learnt/philosophy.json",
-      "user-info": "/learnt/user-profile.json",
-    }
-
-    return fileMap[source] || "/learnt/general.json"
-  }
-
-  private generateTags(entry: LearningEntry): string[] {
-    const tags = [entry.source]
-
-    if (entry.confidence > 0.8) tags.push("high-confidence")
-    if (entry.confidence < 0.5) tags.push("low-confidence")
-
-    // Add content-based tags
-    const input = entry.input.toLowerCase()
-    if (input.includes("define")) tags.push("definition")
-    if (input.includes("calculate")) tags.push("calculation")
-    if (input.includes("explain")) tags.push("explanation")
-
-    return tags
-  }
-
-  private updateStats(entry: LearningEntry): void {
-    this.learningStats.totalInteractions++
-
-    if (entry.confidence > 0.7) {
-      this.learningStats.successfulLearning++
-    }
-
-    // Update average confidence
-    this.learningStats.averageConfidence =
-      (this.learningStats.averageConfidence * (this.learningStats.totalInteractions - 1) + entry.confidence) /
-      this.learningStats.totalInteractions
-
-    // Update learning rate (successful learning / total interactions)
-    this.learningStats.learningRate = this.learningStats.successfulLearning / this.learningStats.totalInteractions
-  }
-
-  getLearningStats() {
-    return {
-      ...this.learningStats,
-      queueSize: this.learningQueue.length,
-      initialized: this.initialized,
-    }
-  }
-
   getStats() {
-    return this.getLearningStats()
-  }
-
-  destroy(): void {
-    this.learningQueue = []
-    this.patterns = []
-    this.initialized = false
+    return {
+      initialized: this.initialized,
+      queueSize: this.learningQueue.length,
+      totalPatterns: this.patterns.length,
+      isProcessing: this.isProcessing,
+    }
   }
 }
 

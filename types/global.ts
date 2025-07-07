@@ -1,3 +1,16 @@
+export interface SystemConfig {
+  version: string
+  environment: "development" | "production" | "test"
+  features: {
+    vocabulary: boolean
+    mathematics: boolean
+    coding: boolean
+    facts: boolean
+    philosophy: boolean
+    userInfo: boolean
+  }
+}
+
 export interface ModuleInterface {
   name: string
   version: string
@@ -25,33 +38,51 @@ export interface ModuleStats {
   lastUpdate: number
 }
 
-export interface ContextMessage {
-  role: "user" | "assistant"
-  content: string
+export interface LearntDataEntry {
+  id: string
+  content: any
+  confidence: number
+  source: string
+  context: string
   timestamp: number
-  metadata?: any
+  usageCount: number
+  lastUsed: number
+  verified: boolean
+  tags: string[]
+  relationships: string[]
 }
 
 export interface IntentAnalysis {
   intent: string
   confidence: number
-  entities: string[]
+  entities: any[]
   context: any
   suggestedModules: string[]
+}
+
+export interface ContextMessage {
+  role: "user" | "assistant" | "system"
+  content: string
+  timestamp?: number
+  metadata?: any
 }
 
 export interface ReasoningStep {
   step: number
   reasoning: string
-  confidence: number
+  input: any
   output: any
+  confidence: number
+  timestamp: number
 }
 
 export interface ReasoningChain {
+  id: string
   input: string
   steps: ReasoningStep[]
   finalOutput: any
   totalConfidence: number
+  processingTime: number
 }
 
 export interface LearningPattern {
@@ -59,8 +90,10 @@ export interface LearningPattern {
   pattern: string
   frequency: number
   confidence: number
-  context: any
+  context: string[]
   timestamp: number
+  category?: string
+  effectiveness?: number
 }
 
 export interface ChatMessage {
@@ -71,12 +104,23 @@ export interface ChatMessage {
   confidence?: number
   sources?: string[]
   reasoning?: string[]
-  thinking?: string
+  thinking?: string[]
 }
 
-export interface SystemHealth {
-  overall: "healthy" | "warning" | "error"
-  components: { [key: string]: any }
-  uptime: number
-  lastCheck: number
+export interface AIResponse {
+  response: string
+  confidence: number
+  sources: string[]
+  reasoning: string[]
+  thinking?: string[]
+  timestamp: number
+}
+
+export interface SystemState {
+  initialized: boolean
+  loading: boolean
+  error: string | null
+  modules: string[]
+  activeModules: string[]
+  stats: any
 }
