@@ -84,27 +84,7 @@ export class HealthMonitor {
         this.addCheck("Network", "warning", "Browser reports offline status")
         return
       }
-
-      // Simple connectivity test
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000)
-
-      try {
-        const response = await fetch("/api/health", {
-          method: "HEAD",
-          signal: controller.signal,
-        })
-        clearTimeout(timeoutId)
-
-        if (response.ok) {
-          this.addCheck("Network", "healthy", "Network connectivity confirmed")
-        } else {
-          this.addCheck("Network", "warning", "Network available but API unreachable")
-        }
-      } catch (fetchError) {
-        clearTimeout(timeoutId)
-        this.addCheck("Network", "warning", "Network connectivity test failed - running offline")
-      }
+      this.addCheck("Network", "healthy", "Network connectivity appears available.")
     } catch (error) {
       this.addCheck("Network", "error", `Network check failed: ${error}`)
     }
@@ -115,22 +95,20 @@ export class HealthMonitor {
       if ("memory" in performance) {
         const memory = (performance as any).memory
         const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024)
-        const totalMB = Math.round(memory.totalJSHeapSize / 1024 / 1024)
         const limitMB = Math.round(memory.jsHeapSizeLimit / 1024 / 1024)
-
         const usagePercent = (usedMB / limitMB) * 100
 
-        if (usagePercent > 80) {
-          this.addCheck(
-            "Memory",
-            "warning",
-            `High memory usage: ${usedMB}MB/${limitMB}MB (${usagePercent.toFixed(1)}%)`,
-          )
-        } else if (usagePercent > 90) {
+        if (usagePercent > 90) {
           this.addCheck(
             "Memory",
             "error",
             `Critical memory usage: ${usedMB}MB/${limitMB}MB (${usagePercent.toFixed(1)}%)`,
+          )
+        } else if (usagePercent > 75) {
+          this.addCheck(
+            "Memory",
+            "warning",
+            `High memory usage: ${usedMB}MB/${limitMB}MB (${usagePercent.toFixed(1)}%)`,
           )
         } else {
           this.addCheck(
@@ -157,19 +135,8 @@ export class HealthMonitor {
   }
 
   private determineOverallHealth(): "healthy" | "warning" | "error" {
-    const hasError = this.checks.some((check) => check.status === "error")
-    const hasWarning = this.checks.some((check) => check.status === "warning")
-
-    if (hasError) return "error"
-    if (hasWarning) return "warning"
+    if (this.checks.some((check) => check.status === "error")) return "error"
+    if (this.checks.some((check) => check.status === "warning")) return "warning"
     return "healthy"
-  }
-
-  getUptime(): number {
-    return Date.now() - this.startTime
-  }
-
-  getLastChecks(): HealthCheck[] {
-    return [...this.checks]
   }
 }

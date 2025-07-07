@@ -16,8 +16,8 @@ export class FactsModule implements ModuleInterface {
     lastUpdate: 0,
   }
 
-  async initialize(): Promise<void> {
-    if (this.initialized) return
+  async initialize(): Promise<FactsModule> {
+    if (this.initialized) return this
 
     console.log("🌍 Initializing Facts Module...")
 
@@ -31,6 +31,8 @@ export class FactsModule implements ModuleInterface {
       console.error("❌ Error initializing Facts Module:", error)
       throw error
     }
+
+    return this
   }
 
   private async loadSeedData(): Promise<any> {

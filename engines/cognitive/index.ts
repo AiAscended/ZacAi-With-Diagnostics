@@ -6,8 +6,8 @@ export class CognitiveEngine {
   private modules: Map<string, ModuleInterface> = new Map()
   private initialized = false
 
-  async initialize(): Promise<void> {
-    if (this.initialized) return
+  async initialize(modules: Map<string, ModuleInterface>): Promise<CognitiveEngine> {
+    if (this.initialized) return this
 
     console.log("🧠 Initializing Cognitive Engine...")
 
@@ -15,17 +15,20 @@ export class CognitiveEngine {
       // Initialize context manager
       contextManager.createContext()
 
+      this.modules = modules
       this.initialized = true
       console.log("✅ Cognitive Engine initialized successfully")
     } catch (error) {
       console.error("❌ Cognitive Engine initialization failed:", error)
       throw error
     }
+
+    return this
   }
 
-  registerModule(module: ModuleInterface): void {
-    this.modules.set(module.name, module)
-    console.log(`📦 Module registered: ${module.name}`)
+  registerModules(modules: Map<string, ModuleInterface>): void {
+    this.modules = modules
+    console.log(`📦 Modules registered: ${Array.from(modules.keys()).join(", ")}`)
   }
 
   async processInput(input: string): Promise<{
@@ -35,7 +38,7 @@ export class CognitiveEngine {
     reasoning: string[]
   }> {
     if (!this.initialized) {
-      await this.initialize()
+      await this.initialize(this.modules)
     }
 
     // Add user message to context

@@ -25,59 +25,55 @@ export interface LoadingBottleneck {
 }
 
 export class PerformanceMonitor {
-  private metrics: PerformanceMetrics = {
-    loadingStages: {},
-    moduleInitTimes: {},
-    memoryUsage: { used: 0, total: 0, limit: 0 },
-    networkRequests: { count: 0, totalTime: 0, failed: 0 },
-    bundleSize: 0,
-    renderTime: 0,
+  private timers = new Map<string, number>()
+  private metrics = {
+    moduleInitTimes: {} as { [key: string]: number },
+    loadingStages: {} as { [key: string]: number },
+    networkRequests: { count: 0, totalTime: 0 },
     totalLoadTime: 0,
   }
-
-  private startTimes: Map<string, number> = new Map()
   private bottlenecks: LoadingBottleneck[] = []
+  private startTimes: Map<string, number> = new Map()
 
-  startTimer(name: string): void {
-    this.startTimes.set(name, performance.now())
+  startTimer(name: string) {
+    this.timers.set(name, performance.now())
   }
 
   endTimer(name: string): number {
-    const startTime = this.startTimes.get(name)
+    const startTime = this.timers.get(name)
     if (!startTime) return 0
-
     const duration = performance.now() - startTime
-    this.startTimes.delete(name)
+    this.timers.delete(name)
     return duration
   }
 
-  recordStage(stage: string, duration: number): void {
-    this.metrics.loadingStages[stage] = duration
+  recordModuleInit(name: string, duration: number) {
+    this.metrics.moduleInitTimes[name] = duration
+
+    if (duration > 500) {
+      // > 500ms
+      this.bottlenecks.push({
+        type: "module",
+        name: name,
+        duration,
+        impact: duration > 1500 ? "high" : "medium",
+        recommendation: `Lazy load ${name} module or optimize initialization`,
+      })
+    }
+  }
+
+  recordStage(name: string, duration: number) {
+    this.metrics.loadingStages[name] = duration
 
     // Identify bottlenecks
     if (duration > 1000) {
       // > 1 second
       this.bottlenecks.push({
         type: "computation",
-        name: stage,
+        name: name,
         duration,
         impact: duration > 3000 ? "high" : "medium",
-        recommendation: `Optimize ${stage} - consider lazy loading or caching`,
-      })
-    }
-  }
-
-  recordModuleInit(module: string, duration: number): void {
-    this.metrics.moduleInitTimes[module] = duration
-
-    if (duration > 500) {
-      // > 500ms
-      this.bottlenecks.push({
-        type: "module",
-        name: module,
-        duration,
-        impact: duration > 1500 ? "high" : "medium",
-        recommendation: `Lazy load ${module} module or optimize initialization`,
+        recommendation: `Optimize ${name} - consider lazy loading or caching`,
       })
     }
   }
@@ -85,7 +81,10 @@ export class PerformanceMonitor {
   recordNetworkRequest(duration: number, failed = false): void {
     this.metrics.networkRequests.count++
     this.metrics.networkRequests.totalTime += duration
-    if (failed) this.metrics.networkRequests.failed++
+    if (failed) {
+      // Increment failed requests count
+      this.metrics.networkRequests.failed = (this.metrics.networkRequests.failed || 0) + 1
+    }
 
     if (duration > 2000) {
       // > 2 seconds
@@ -172,14 +171,12 @@ export class PerformanceMonitor {
     this.metrics = {
       loadingStages: {},
       moduleInitTimes: {},
-      memoryUsage: { used: 0, total: 0, limit: 0 },
-      networkRequests: { count: 0, totalTime: 0, failed: 0 },
-      bundleSize: 0,
-      renderTime: 0,
+      networkRequests: { count: 0, totalTime: 0 },
       totalLoadTime: 0,
     }
     this.bottlenecks = []
     this.startTimes.clear()
+    this.timers.clear()
   }
 }
 

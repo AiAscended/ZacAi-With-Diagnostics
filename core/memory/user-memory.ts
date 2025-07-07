@@ -16,8 +16,8 @@ class UserMemory {
   private storageKey = "zacai_user_memory"
   private initialized = false
 
-  async initialize(): Promise<void> {
-    if (this.initialized) return
+  async initialize(): Promise<UserMemory> {
+    if (this.initialized) return this
 
     console.log("🧠 Initializing User Memory...")
 
@@ -29,6 +29,8 @@ class UserMemory {
       console.error("❌ User Memory initialization failed:", error)
       throw error
     }
+
+    return this
   }
 
   private loadFromStorage(): void {

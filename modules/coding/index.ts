@@ -16,8 +16,8 @@ export class CodingModule implements ModuleInterface {
     lastUpdate: 0,
   }
 
-  async initialize(): Promise<void> {
-    if (this.initialized) return
+  async initialize(): Promise<CodingModule> {
+    if (this.initialized) return this
 
     console.log("💻 Initializing Coding Module...")
 
@@ -31,6 +31,8 @@ export class CodingModule implements ModuleInterface {
       console.error("❌ Error initializing Coding Module:", error)
       throw error
     }
+
+    return this
   }
 
   private async loadSeedData(): Promise<any> {

@@ -1,217 +1,82 @@
 import { performanceMonitor } from "@/core/performance/monitor"
 
-interface CacheEntry {
-  data: any
-  timestamp: number
-  ttl: number
-}
+type LoadingPriority = "critical" | "high" | "medium" | "low"
 
-interface LoadingStrategy {
-  priority: "critical" | "high" | "medium" | "low"
-  lazy: boolean
-  cache: boolean
-  preload: boolean
+interface LoadableItem {
+  name: string
+  loader: () => Promise<any>
+  priority: LoadingPriority
+  status: "pending" | "loading" | "loaded" | "failed"
+  error?: any
+  module?: any
 }
 
 export class OptimizedLoader {
-  private cache = new Map<string, CacheEntry>()
-  private loadingQueue: Array<{ name: string; loader: () => Promise<any>; strategy: LoadingStrategy }> = []
-  private loadedModules = new Set<string>()
-  private isProcessing = false
+  private queue: LoadableItem[] = []
+  private loadedModules = new Map<string, any>()
+  public logs: string[] = []
 
-  private strategies: { [key: string]: LoadingStrategy } = {
-    "safe-mode": { priority: "critical", lazy: false, cache: true, preload: true },
-    "user-memory": { priority: "critical", lazy: false, cache: true, preload: true },
-    "storage-manager": { priority: "critical", lazy: false, cache: true, preload: true },
-    vocabulary: { priority: "high", lazy: true, cache: true, preload: false },
-    mathematics: { priority: "high", lazy: true, cache: true, preload: false },
-    facts: { priority: "medium", lazy: true, cache: true, preload: false },
-    coding: { priority: "medium", lazy: true, cache: true, preload: false },
-    philosophy: { priority: "low", lazy: true, cache: true, preload: false },
+  private log(message: string) {
+    console.log(message)
+    this.logs.push(message)
   }
 
-  async loadCriticalSystems(): Promise<void> {
-    performanceMonitor.startTimer("critical-systems")
-
-    const criticalLoaders = this.loadingQueue.filter(
-      (item) => item.strategy.priority === "critical" && !item.strategy.lazy,
-    )
-
-    // Load critical systems in parallel
-    const promises = criticalLoaders.map(async (item) => {
-      performanceMonitor.startTimer(item.name)
-      try {
-        const result = await this.loadWithCache(item.name, item.loader, item.strategy)
-        const duration = performanceMonitor.endTimer(item.name)
-        performanceMonitor.recordModuleInit(item.name, duration)
-        this.loadedModules.add(item.name)
-        return result
-      } catch (error) {
-        console.error(`Failed to load critical system ${item.name}:`, error)
-        throw error
-      }
-    })
-
-    await Promise.all(promises)
-
-    const duration = performanceMonitor.endTimer("critical-systems")
-    performanceMonitor.recordStage("critical-systems", duration)
+  register(name: string, loader: () => Promise<any>, priority: LoadingPriority) {
+    this.queue.push({ name, loader, priority, status: "pending" })
   }
 
-  async loadHighPrioritySystems(): Promise<void> {
-    performanceMonitor.startTimer("high-priority-systems")
+  async load(onProgress: (progress: number, stage: string) => void): Promise<void> {
+    this.log("🚀 Starting optimized loading sequence...")
+    performanceMonitor.startTimer("total-load-time")
 
-    const highPriorityLoaders = this.loadingQueue.filter(
-      (item) => item.strategy.priority === "high" && !item.strategy.lazy,
-    )
+    const priorities: LoadingPriority[] = ["critical", "high", "medium", "low"]
+    const totalItems = this.queue.length
+    let loadedCount = 0
 
-    // Load high priority systems in parallel but with concurrency limit
-    await this.loadWithConcurrencyLimit(highPriorityLoaders, 2)
+    for (const priority of priorities) {
+      const itemsToLoad = this.queue.filter((item) => item.priority === priority)
+      if (itemsToLoad.length === 0) continue
 
-    const duration = performanceMonitor.endTimer("high-priority-systems")
-    performanceMonitor.recordStage("high-priority-systems", duration)
-  }
+      this.log(`- Loading ${priority} priority items...`)
+      onProgress((loadedCount / totalItems) * 100, `Loading ${priority} priority modules...`)
 
-  async loadModuleOnDemand(moduleName: string): Promise<any> {
-    if (this.loadedModules.has(moduleName)) {
-      return this.getFromCache(moduleName)
+      const promises = itemsToLoad.map(async (item) => {
+        item.status = "loading"
+        performanceMonitor.startTimer(item.name)
+        try {
+          const module = await item.loader()
+          item.module = module
+          item.status = "loaded"
+          this.loadedModules.set(item.name, module)
+          const duration = performanceMonitor.endTimer(item.name)
+          performanceMonitor.recordModuleInit(item.name, duration)
+          this.log(`  ✅ ${item.name} loaded successfully in ${duration.toFixed(2)}ms.`)
+        } catch (error) {
+          item.status = "failed"
+          item.error = error
+          performanceMonitor.endTimer(item.name)
+          this.log(`  ❌ ${item.name} failed to load. Bypassing. Error: ${error}`)
+          if (priority === "critical") {
+            // If a critical module fails, we must stop and throw the error.
+            throw new Error(`Critical module "${item.name}" failed to load.`)
+          }
+        }
+        loadedCount++
+        onProgress((loadedCount / totalItems) * 100, `${item.name} ${item.status}`)
+      })
+      await Promise.all(promises)
     }
 
-    const moduleLoader = this.loadingQueue.find((item) => item.name === moduleName)
-    if (!moduleLoader) {
-      throw new Error(`Module ${moduleName} not found`)
-    }
-
-    performanceMonitor.startTimer(`lazy-${moduleName}`)
-
-    try {
-      const result = await this.loadWithCache(moduleName, moduleLoader.loader, moduleLoader.strategy)
-      const duration = performanceMonitor.endTimer(`lazy-${moduleName}`)
-      performanceMonitor.recordModuleInit(`lazy-${moduleName}`, duration)
-      this.loadedModules.add(moduleName)
-      return result
-    } catch (error) {
-      console.error(`Failed to lazy load ${moduleName}:`, error)
-      throw error
-    }
+    const totalTime = performanceMonitor.endTimer("total-load-time")
+    this.log(`🏁 Loading sequence complete in ${totalTime.toFixed(2)}ms.`)
+    performanceMonitor.recordStage("total-load-time", totalTime)
   }
 
-  private async loadWithCache(name: string, loader: () => Promise<any>, strategy: LoadingStrategy): Promise<any> {
-    // Check cache first
-    if (strategy.cache) {
-      const cached = this.getFromCache(name)
-      if (cached) {
-        console.log(`Cache hit for ${name}`)
-        return cached
-      }
-    }
-
-    // Load fresh data
-    const startTime = performance.now()
-    const data = await loader()
-    const duration = performance.now() - startTime
-
-    // Cache if strategy allows
-    if (strategy.cache) {
-      this.setCache(name, data, 300000) // 5 minutes TTL
-    }
-
-    // Record network request if this was an API call
-    if (name.includes("api") || name.includes("fetch")) {
-      performanceMonitor.recordNetworkRequest(duration)
-    }
-
-    return data
+  getModule<T>(name: string): T | undefined {
+    return this.loadedModules.get(name) as T | undefined
   }
 
-  private async loadWithConcurrencyLimit(loaders: any[], limit: number): Promise<void> {
-    const executing: Promise<any>[] = []
-
-    for (const loader of loaders) {
-      const promise = this.loadWithCache(loader.name, loader.loader, loader.strategy)
-        .then((result) => {
-          this.loadedModules.add(loader.name)
-          return result
-        })
-        .finally(() => {
-          executing.splice(executing.indexOf(promise), 1)
-        })
-
-      executing.push(promise)
-
-      if (executing.length >= limit) {
-        await Promise.race(executing)
-      }
-    }
-
-    await Promise.all(executing)
-  }
-
-  private getFromCache(key: string): any | null {
-    const entry = this.cache.get(key)
-    if (!entry) return null
-
-    if (Date.now() - entry.timestamp > entry.ttl) {
-      this.cache.delete(key)
-      return null
-    }
-
-    return entry.data
-  }
-
-  private setCache(key: string, data: any, ttl: number): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl,
-    })
-  }
-
-  registerLoader(name: string, loader: () => Promise<any>, customStrategy?: Partial<LoadingStrategy>): void {
-    const strategy = {
-      ...(this.strategies[name] ||
-        this.strategies["default"] || { priority: "medium", lazy: true, cache: true, preload: false }),
-      ...customStrategy,
-    }
-
-    this.loadingQueue.push({ name, loader, strategy })
-  }
-
-  async preloadModules(): Promise<void> {
-    const preloadModules = this.loadingQueue.filter(
-      (item) => item.strategy.preload && !this.loadedModules.has(item.name),
-    )
-
-    if (preloadModules.length === 0) return
-
-    performanceMonitor.startTimer("preload-modules")
-
-    // Preload in background with low priority
-    setTimeout(async () => {
-      try {
-        await this.loadWithConcurrencyLimit(preloadModules, 1)
-        const duration = performanceMonitor.endTimer("preload-modules")
-        performanceMonitor.recordStage("preload-modules", duration)
-      } catch (error) {
-        console.warn("Preload failed:", error)
-      }
-    }, 100) // Small delay to not block main thread
-  }
-
-  getLoadedModules(): string[] {
-    return Array.from(this.loadedModules)
-  }
-
-  getCacheStats(): { size: number; hitRate: number } {
-    return {
-      size: this.cache.size,
-      hitRate: 0.75, // Would need to track hits/misses for real rate
-    }
-  }
-
-  clearCache(): void {
-    this.cache.clear()
+  getLoadingStatus(): LoadableItem[] {
+    return this.queue.map(({ loader, ...rest }) => rest) // Don't expose the loader function itself
   }
 }
-
-export const optimizedLoader = new OptimizedLoader()

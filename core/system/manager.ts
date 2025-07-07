@@ -9,6 +9,7 @@ import { factsModule } from "@/modules/facts"
 import { codingModule } from "@/modules/coding"
 import { philosophyModule } from "@/modules/philosophy"
 import { userInfoModule } from "@/modules/user-info"
+import type { OptimizedLoader } from "./optimized-loader"
 
 interface SystemState {
   initialized: boolean
@@ -42,19 +43,19 @@ export class SystemManager {
   private modules: Map<string, any> = new Map()
   private engines: Map<string, any> = new Map()
 
-  async initialize(): Promise<void> {
+  async initialize(loader: OptimizedLoader): Promise<void> {
     try {
       console.log("🚀 Initializing ZacAI System Manager...")
 
       // Phase 1: Critical Systems
-      await this.initializeCriticalSystems()
+      await this.initializeCriticalSystems(loader)
       this.state.criticalSystemsReady = true
 
       // Phase 2: Initialize Engines
-      await this.initializeEngines()
+      await this.initializeEngines(loader)
 
       // Phase 3: Load Core Modules
-      await this.loadCoreModules()
+      await this.loadCoreModules(loader)
 
       // Phase 4: Run Health Checks
       await this.runHealthChecks()
@@ -68,73 +69,47 @@ export class SystemManager {
     }
   }
 
-  private async initializeCriticalSystems(): Promise<void> {
+  private async initializeCriticalSystems(loader: OptimizedLoader): Promise<void> {
     console.log("🔧 Initializing critical systems...")
 
-    try {
-      // Initialize storage manager
-      await storageManager.initialize()
-      console.log("✅ Storage Manager ready")
-
-      // Initialize user memory
-      await userMemory.initialize()
-      console.log("✅ User Memory ready")
-    } catch (error) {
-      console.error("❌ Critical systems failed:", error)
-      throw error
-    }
+    loader.register("storageManager", () => storageManager.initialize(), "critical")
+    loader.register("userMemory", () => userMemory.initialize(), "critical")
+    loader.register("cognitiveEngine", () => cognitiveEngine.initialize(this.modules), "critical")
   }
 
-  private async initializeEngines(): Promise<void> {
+  private async initializeEngines(loader: OptimizedLoader): Promise<void> {
     console.log("🧠 Initializing AI engines...")
 
-    const engineLoaders = [
-      { name: "cognitive", engine: cognitiveEngine },
-      { name: "learning", engine: learningEngine },
-      { name: "reasoning", engine: reasoningEngine },
-    ]
-
-    for (const { name, engine } of engineLoaders) {
-      try {
-        await engine.initialize()
-        this.engines.set(name, engine)
-        console.log(`✅ ${name} engine ready`)
-      } catch (error) {
-        console.warn(`⚠️ ${name} engine failed to load:`, error)
-        this.state.errors.push(`${name} engine failed: ${error}`)
-      }
-    }
+    loader.register("learning", () => learningEngine.initialize(), "high")
+    loader.register("reasoning", () => reasoningEngine.initialize(), "high")
   }
 
-  private async loadCoreModules(): Promise<void> {
+  private async loadCoreModules(loader: OptimizedLoader): Promise<void> {
     console.log("📦 Loading core modules...")
 
-    const moduleLoaders = [
-      { name: "vocabulary", module: vocabularyModule },
-      { name: "mathematics", module: mathematicsModule },
-      { name: "facts", module: factsModule },
-      { name: "coding", module: codingModule },
-      { name: "philosophy", module: philosophyModule },
-      { name: "user-info", module: userInfoModule },
-    ]
+    loader.register("vocabulary", () => vocabularyModule.initialize(), "high")
+    loader.register("mathematics", () => mathematicsModule.initialize(), "high")
+    loader.register("facts", () => factsModule.initialize(), "medium")
+    loader.register("coding", () => codingModule.initialize(), "medium")
+    loader.register("philosophy", () => philosophyModule.initialize(), "low")
+    loader.register("userInfo", () => userInfoModule.initialize(), "low")
 
-    for (const { name, module } of moduleLoaders) {
-      try {
-        await module.initialize()
-        this.modules.set(name, module)
+    const loadedModuleNames = loader
+      .getLoadingStatus()
+      .filter((s) => s.status === "loaded")
+      .map((s) => s.name)
 
-        // Register module with cognitive engine
-        const cognitive = this.engines.get("cognitive")
-        if (cognitive) {
-          cognitive.registerModule(module)
-        }
-
-        this.state.modulesLoaded.push(name)
-        console.log(`✅ ${name} module loaded`)
-      } catch (error) {
-        console.warn(`⚠️ ${name} module failed to load:`, error)
-        this.state.errors.push(`${name} module failed: ${error}`)
+    for (const name of loadedModuleNames) {
+      const moduleInstance = loader.getModule(name)
+      if (moduleInstance) {
+        this.modules.set(name, moduleInstance)
       }
+    }
+
+    // The cognitive engine needs a reference to the loaded modules
+    const engine = this.getModule("cognitiveEngine")
+    if (engine) {
+      engine.registerModules(this.modules)
     }
   }
 
@@ -157,6 +132,19 @@ export class SystemManager {
   async processQuery(input: string): Promise<any> {
     const startTime = Date.now()
 
+    if (!this.state.initialized) {
+      return { response: "System is not ready. Please wait.", confidence: 0, sources: ["system"] }
+    }
+
+    const engine = this.getModule("cognitiveEngine")
+    if (!engine) {
+      return {
+        response: "Cognitive engine is offline. Cannot process request.",
+        confidence: 0,
+        sources: ["system-error"],
+      }
+    }
+
     try {
       // Extract user's name for personalized responses
       const userName = userMemory.retrieve("name")?.value
@@ -165,42 +153,36 @@ export class SystemManager {
       userMemory.extractPersonalInfo(input)
 
       // Use cognitive engine to process the query
-      const cognitive = this.engines.get("cognitive")
-      if (cognitive) {
-        const result = await cognitive.processInput(input)
-        const processingTime = Date.now() - startTime
+      const result = await engine.processInput(input)
+      const processingTime = Date.now() - startTime
 
-        // Log the interaction
-        const logEntry: ChatLogEntry = {
-          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          input,
-          response: result.response,
-          confidence: result.confidence,
-          sources: result.sources,
-          timestamp: Date.now(),
-          processingTime,
-          thinkingSteps: result.reasoning,
-        }
-
-        this.chatLog.push(logEntry)
-
-        // Keep only last 100 entries
-        if (this.chatLog.length > 100) {
-          this.chatLog = this.chatLog.slice(-100)
-        }
-
-        return {
-          response: result.response,
-          confidence: result.confidence,
-          sources: result.sources,
-          reasoning: result.reasoning,
-          processingTime,
-          userName,
-        }
+      // Log the interaction
+      const logEntry: ChatLogEntry = {
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        input,
+        response: result.response,
+        confidence: result.confidence,
+        sources: result.sources,
+        timestamp: Date.now(),
+        processingTime,
+        thinkingSteps: result.reasoning,
       }
 
-      // Fallback response if cognitive engine not available
-      return this.generateFallbackResponse(input, userName)
+      this.chatLog.push(logEntry)
+
+      // Keep only last 100 entries
+      if (this.chatLog.length > 100) {
+        this.chatLog = this.chatLog.slice(-100)
+      }
+
+      return {
+        response: result.response,
+        confidence: result.confidence,
+        sources: result.sources,
+        reasoning: result.reasoning,
+        processingTime,
+        userName,
+      }
     } catch (error) {
       console.error("Query processing error:", error)
       return {
@@ -342,28 +324,8 @@ What else would you like to explore?`,
     return this.state.initialized
   }
 
-  getModuleStatus(): any {
-    const status: any = {}
-    for (const [name, module] of this.modules) {
-      status[name] = {
-        loaded: true,
-        initialized: module.initialized || true,
-        status: "active",
-      }
-    }
-    return status
-  }
-
-  getEngineStatus(): any {
-    const status: any = {}
-    for (const [name, engine] of this.engines) {
-      status[name] = {
-        loaded: true,
-        initialized: engine.initialized || true,
-        status: "active",
-      }
-    }
-    return status
+  getModule<T>(name: string): T | undefined {
+    return this.modules.get(name) as T | undefined
   }
 }
 

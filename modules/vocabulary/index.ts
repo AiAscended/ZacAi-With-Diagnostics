@@ -16,8 +16,8 @@ export class VocabularyModule implements ModuleInterface {
     lastUpdate: 0,
   }
 
-  async initialize(): Promise<void> {
-    if (this.initialized) return
+  async initialize(): Promise<VocabularyModule> {
+    if (this.initialized) return this
 
     console.log("📚 Initializing Vocabulary Module...")
 
@@ -31,6 +31,8 @@ export class VocabularyModule implements ModuleInterface {
       console.error("❌ Error initializing Vocabulary Module:", error)
       throw error
     }
+
+    return this
   }
 
   private async loadSeedData(): Promise<any> {

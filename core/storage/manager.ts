@@ -24,8 +24,8 @@ class StorageManager {
   private storagePrefix = "zacai_"
   private initialized = false
 
-  async initialize(): Promise<void> {
-    if (this.initialized) return
+  async initialize(): Promise<this> {
+    if (this.initialized) return this
 
     console.log("🗄️ Initializing Storage Manager...")
 
@@ -51,6 +51,8 @@ class StorageManager {
       console.error("❌ Storage Manager initialization failed:", error)
       throw error
     }
+
+    return this
   }
 
   async loadSeedData(category: string): Promise<any[]> {
