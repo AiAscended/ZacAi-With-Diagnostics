@@ -101,7 +101,6 @@ export default function HomePage() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Progress */}
             <div className="space-y-3">
               <div className="flex justify-between text-sm font-medium text-gray-700">
                 <span>{stage}</span>
@@ -110,7 +109,6 @@ export default function HomePage() {
               <Progress value={progress} className="h-3" />
             </div>
 
-            {/* Status Badge */}
             <div className="flex items-center justify-center">
               <Badge variant="secondary" className="bg-blue-100 text-blue-700 animate-pulse px-4 py-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
@@ -118,7 +116,6 @@ export default function HomePage() {
               </Badge>
             </div>
 
-            {/* System Log */}
             <div>
               <h4 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />

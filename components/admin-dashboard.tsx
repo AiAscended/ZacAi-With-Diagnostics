@@ -52,7 +52,6 @@ export function AdminDashboard({ onToggleChat, messages }: AdminDashboardProps) 
   })
 
   useEffect(() => {
-    // Calculate stats from messages
     const userMessages = messages.filter((m) => m.sender === "user")
     const aiMessages = messages.filter((m) => m.sender === "ai")
     const successfulResponses = aiMessages.filter((m) => m.confidence && m.confidence > 0.5)
@@ -102,7 +101,6 @@ export function AdminDashboard({ onToggleChat, messages }: AdminDashboardProps) 
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-gray-50">
-        {/* Sidebar */}
         <Sidebar className="border-r bg-white">
           <SidebarHeader className="p-4 border-b bg-white">
             <div className="flex items-center gap-3">
@@ -168,9 +166,7 @@ export function AdminDashboard({ onToggleChat, messages }: AdminDashboardProps) 
           </SidebarContent>
         </Sidebar>
 
-        {/* Main Content */}
         <SidebarInset className="flex-1">
-          {/* Header */}
           <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -195,7 +191,6 @@ export function AdminDashboard({ onToggleChat, messages }: AdminDashboardProps) 
             </div>
           </header>
 
-          {/* Content */}
           <div className="flex-1 p-4">
             {activeTab === "overview" && (
               <div className="space-y-6">

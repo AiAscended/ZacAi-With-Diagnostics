@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -30,7 +29,6 @@ export function EnhancedAIChat() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    // Add welcome message
     const welcomeMessage: Message = {
       id: "welcome",
       content: `👋 **Welcome to ZacAI v100**
@@ -49,7 +47,6 @@ What would you like to explore today?`,
 
     setMessages([welcomeMessage])
 
-    // Focus input
     if (inputRef.current) {
       inputRef.current.focus()
     }
@@ -66,7 +63,6 @@ What would you like to explore today?`,
   const processQuery = async (input: string): Promise<any> => {
     const lowerInput = input.toLowerCase()
 
-    // Handle greetings
     if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
       return {
         response: "👋 Hello! I'm ZacAI, your AI assistant. How can I help you today?",
@@ -75,7 +71,6 @@ What would you like to explore today?`,
       }
     }
 
-    // Handle help
     if (lowerInput.includes("help")) {
       return {
         response: `🆘 **ZacAI Help**
@@ -91,7 +86,6 @@ What would you like to try?`,
       }
     }
 
-    // Handle status
     if (lowerInput.includes("status") || lowerInput.includes("how are you")) {
       return {
         response: `🟢 **System Status: Operational**
@@ -107,7 +101,6 @@ I'm ready to help! What can I do for you?`,
       }
     }
 
-    // Handle math calculations
     if (/^\d+[\s]*[+\-*/][\s]*\d+/.test(input.replace(/\s/g, ""))) {
       try {
         const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
@@ -127,7 +120,6 @@ Calculation completed successfully!`,
       }
     }
 
-    // Default response
     return {
       response: `I received your message: "${input}"
 
@@ -158,9 +150,7 @@ What else would you like to explore?`,
     setIsLoading(true)
 
     try {
-      // Simulate processing time
       await new Promise((resolve) => setTimeout(resolve, 500))
-
       const result = await processQuery(input.trim())
 
       const aiMessage: Message = {
@@ -208,7 +198,6 @@ What else would you like to explore?`,
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
       <div className="bg-white/90 backdrop-blur-sm border-b shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
@@ -245,7 +234,6 @@ What else would you like to explore?`,
         </div>
       </div>
 
-      {/* Chat Area */}
       <div className="max-w-4xl mx-auto p-4">
         <Card className="h-[calc(100vh-200px)] flex flex-col shadow-xl border-0 bg-white/90 backdrop-blur-sm">
           <CardHeader className="pb-3">
@@ -256,7 +244,6 @@ What else would you like to explore?`,
           </CardHeader>
 
           <CardContent className="flex-1 flex flex-col p-0">
-            {/* Messages */}
             <ScrollArea className="flex-1 px-6">
               <div className="space-y-4 py-4">
                 {messages.map((message) => (
@@ -277,7 +264,6 @@ What else would you like to explore?`,
                     >
                       <div className="whitespace-pre-wrap">{message.content}</div>
 
-                      {/* Message metadata */}
                       <div className="flex items-center gap-2 mt-2 text-xs opacity-70">
                         <Clock className="w-3 h-3" />
                         <span>{formatTimestamp(message.timestamp)}</span>
@@ -318,7 +304,6 @@ What else would you like to explore?`,
 
             <Separator />
 
-            {/* Input Form */}
             <form onSubmit={handleSubmit} className="p-4">
               <div className="flex gap-3">
                 <Input
