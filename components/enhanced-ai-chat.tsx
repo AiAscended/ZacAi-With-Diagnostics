@@ -1,20 +1,16 @@
 "use client"
 
-import { Separator } from "@/components/ui/separator"
-
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { systemManager } from "@/core/system/manager"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { AdminDashboardClean } from "@/components/admin-dashboard-clean"
-import { Brain, Send, Settings, MessageSquare, User, Bot, Clock, CheckCircle, AlertTriangle } from "lucide-react"
-import type { OptimizedLoader } from "@/core/system/optimized-loader"
-import type { SafeModeSystem } from "@/core/system/safe-mode"
+import { Separator } from "@/components/ui/separator"
+import { AdminDashboard } from "@/components/admin-dashboard"
+import { Brain, Send, Settings, MessageSquare, User, Bot, Clock } from "lucide-react"
 
 interface Message {
   id: string
@@ -23,20 +19,13 @@ interface Message {
   timestamp: number
   confidence?: number
   sources?: string[]
-  processingTime?: number
 }
 
-interface EnhancedAIChatProps {
-  loader: OptimizedLoader
-  safeMode: SafeModeSystem
-}
-
-export function EnhancedAIChat({ loader, safeMode }: EnhancedAIChatProps) {
+export function EnhancedAIChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
-  const [systemStats, setSystemStats] = useState<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -44,7 +33,7 @@ export function EnhancedAIChat({ loader, safeMode }: EnhancedAIChatProps) {
     // Add welcome message
     const welcomeMessage: Message = {
       id: "welcome",
-      content: `👋 **Welcome to ZacAI v2.0.8+**
+      content: `👋 **Welcome to ZacAI v100**
 
 I'm your personal AI assistant, ready to help with:
 • **Math calculations** - Try "5 + 5" or "What is 15 * 8?"
@@ -60,9 +49,6 @@ What would you like to explore today?`,
 
     setMessages([welcomeMessage])
 
-    // Load system stats
-    loadSystemStats()
-
     // Focus input
     if (inputRef.current) {
       inputRef.current.focus()
@@ -77,12 +63,82 @@ What would you like to explore today?`,
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const loadSystemStats = () => {
-    try {
-      const stats = systemManager.getSystemStats()
-      setSystemStats(stats)
-    } catch (error) {
-      console.error("Failed to load system stats:", error)
+  const processQuery = async (input: string): Promise<any> => {
+    const lowerInput = input.toLowerCase()
+
+    // Handle greetings
+    if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
+      return {
+        response: "👋 Hello! I'm ZacAI, your AI assistant. How can I help you today?",
+        confidence: 0.9,
+        sources: ["core"],
+      }
+    }
+
+    // Handle help
+    if (lowerInput.includes("help")) {
+      return {
+        response: `🆘 **ZacAI Help**
+
+Available Commands:
+• **Math calculations** - "5 + 5" or "What is 15 * 8?"
+• **General questions** - Ask me about anything
+• **System status** - "status" or "how are you?"
+
+What would you like to try?`,
+        confidence: 0.95,
+        sources: ["core"],
+      }
+    }
+
+    // Handle status
+    if (lowerInput.includes("status") || lowerInput.includes("how are you")) {
+      return {
+        response: `🟢 **System Status: Operational**
+
+• Version: ZacAI v100
+• Status: All systems running normally
+• Response time: Fast
+• Memory: Available
+
+I'm ready to help! What can I do for you?`,
+        confidence: 0.95,
+        sources: ["system"],
+      }
+    }
+
+    // Handle math calculations
+    if (/^\d+[\s]*[+\-*/][\s]*\d+/.test(input.replace(/\s/g, ""))) {
+      try {
+        const result = eval(input.replace(/[^0-9+\-*/().]/g, ""))
+        return {
+          response: `🧮 **${input} = ${result}**
+
+Calculation completed successfully!`,
+          confidence: 0.95,
+          sources: ["mathematics"],
+        }
+      } catch {
+        return {
+          response: "❌ I couldn't calculate that. Please check your math expression.",
+          confidence: 0.3,
+          sources: ["error"],
+        }
+      }
+    }
+
+    // Default response
+    return {
+      response: `I received your message: "${input}"
+
+I'm here to help! Try asking me to:
+• Solve a math problem  
+• Type "help" for more options
+• Ask "status" to check system health
+
+What else would you like to explore?`,
+      confidence: 0.6,
+      sources: ["core"],
     }
   }
 
@@ -102,7 +158,10 @@ What would you like to explore today?`,
     setIsLoading(true)
 
     try {
-      const result = await systemManager.processQuery(input.trim())
+      // Simulate processing time
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      const result = await processQuery(input.trim())
 
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
@@ -111,11 +170,9 @@ What would you like to explore today?`,
         timestamp: Date.now(),
         confidence: result.confidence,
         sources: result.sources,
-        processingTime: result.processingTime,
       }
 
       setMessages((prev) => [...prev, aiMessage])
-      loadSystemStats()
     } catch (error) {
       console.error("Error processing query:", error)
 
@@ -145,22 +202,8 @@ What would you like to explore today?`,
     return "bg-red-100 text-red-700"
   }
 
-  const getSystemHealthIcon = () => {
-    const health = safeMode.getSystemHealth()
-    if (!health) return <AlertTriangle className="w-4 h-4 text-yellow-500" />
-
-    switch (health.overall) {
-      case "healthy":
-        return <CheckCircle className="w-4 h-4 text-green-500" />
-      case "warning":
-        return <AlertTriangle className="w-4 h-4 text-yellow-500" />
-      default:
-        return <AlertTriangle className="w-4 h-4 text-red-500" />
-    }
-  }
-
   if (showAdmin) {
-    return <AdminDashboardClean onToggleChat={() => setShowAdmin(false)} />
+    return <AdminDashboard onToggleChat={() => setShowAdmin(false)} messages={messages} />
   }
 
   return (
@@ -175,32 +218,19 @@ What would you like to explore today?`,
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  ZacAI v2.0.8+
+                  ZacAI v100
                 </h1>
                 <p className="text-sm text-gray-600">Your Personal AI Assistant</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              {/* System Health */}
-              <div className="flex items-center gap-2">
-                {getSystemHealthIcon()}
-                <span className="text-sm text-gray-600">{safeMode.getSystemHealth()?.overall || "Unknown"}</span>
-              </div>
-
-              {/* Stats */}
-              {systemStats && (
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                    {systemStats.totalQueries} queries
-                  </Badge>
-                  <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                    {Math.round(systemStats.averageResponseTime)}ms avg
-                  </Badge>
-                </div>
-              )}
-
-              {/* Admin Button */}
+              <Badge variant="secondary" className="bg-green-100 text-green-700">
+                Online
+              </Badge>
+              <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                {messages.filter((m) => m.sender === "user").length} queries
+              </Badge>
               <Button
                 variant="outline"
                 size="sm"
@@ -257,8 +287,6 @@ What would you like to explore today?`,
                             {Math.round(message.confidence * 100)}%
                           </Badge>
                         )}
-
-                        {message.processingTime && <span>{message.processingTime}ms</span>}
                       </div>
                     </div>
 

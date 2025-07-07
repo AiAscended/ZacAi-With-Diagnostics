@@ -25,7 +25,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo)
+    console.error("Error caught by boundary:", error, errorInfo)
   }
 
   render() {
@@ -42,16 +42,21 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <CardContent className="space-y-4">
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-800 font-medium">Error Details:</p>
-                <p className="text-red-700 text-sm mt-1">{this.state.error?.message || "Unknown error occurred"}</p>
+                <p className="text-red-700 text-sm mt-1">
+                  {this.state.error?.message || "An unexpected error occurred"}
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Button onClick={() => window.location.reload()} className="w-full bg-red-600 hover:bg-red-700">
+                <Button
+                  onClick={() => this.setState({ hasError: false })}
+                  className="w-full bg-red-600 hover:bg-red-700"
+                >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Reload Application
-                </Button>
-                <Button onClick={() => this.setState({ hasError: false })} variant="outline" className="w-full">
                   Try Again
+                </Button>
+                <Button onClick={() => window.location.reload()} variant="outline" className="w-full">
+                  Reload Application
                 </Button>
               </div>
             </CardContent>

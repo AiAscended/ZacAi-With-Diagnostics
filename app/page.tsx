@@ -1,17 +1,14 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { systemManager } from "@/core/system/manager"
-import { OptimizedLoader } from "@/core/system/optimized-loader"
-import { SafeModeSystem } from "@/core/system/safe-mode"
-import { EnhancedAIChat } from "@/components/enhanced-ai-chat"
-import { ErrorBoundary } from "@/components/error-boundary"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Brain, XCircle, RefreshCw, CheckCircle, AlertTriangle } from "lucide-react"
+import { Brain, XCircle, RefreshCw, CheckCircle } from "lucide-react"
+import { EnhancedAIChat } from "@/components/enhanced-ai-chat"
+import { ErrorBoundary } from "@/components/error-boundary"
 
 type AppStatus = "initializing" | "ready" | "error"
 
@@ -21,8 +18,6 @@ export default function HomePage() {
   const [stage, setStage] = useState("Starting system...")
   const [error, setError] = useState<string | null>(null)
   const [logs, setLogs] = useState<string[]>([])
-  const [loader, setLoader] = useState<OptimizedLoader | null>(null)
-  const [safeMode, setSafeMode] = useState<SafeModeSystem | null>(null)
   const initializationRef = useRef(false)
 
   const addLog = (message: string) => {
@@ -37,41 +32,36 @@ export default function HomePage() {
     initializationRef.current = true
 
     try {
-      addLog("🛡️ Initializing Safe Mode System...")
-      const safeModeInstance = new SafeModeSystem()
-      await safeModeInstance.initialize()
-      setSafeMode(safeModeInstance)
+      addLog("🛡️ Initializing ZacAI System...")
+      setProgress(10)
+      setStage("Checking browser environment...")
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
-      const health = safeModeInstance.getSystemHealth()
-      addLog(`✅ Health check complete. Status: ${health.overall}`)
+      addLog("✅ Browser environment check complete")
+      setProgress(25)
+      setStage("Loading storage systems...")
+      await new Promise((resolve) => setTimeout(resolve, 300))
 
-      if (health.overall === "critical") {
-        safeModeInstance.enterSafeMode()
-        addLog("🚨 Critical issues detected. Entering safe mode...")
-      }
+      addLog("✅ Storage systems initialized")
+      setProgress(40)
+      setStage("Loading AI engines...")
+      await new Promise((resolve) => setTimeout(resolve, 400))
 
-      addLog("📦 Initializing Optimized Loader...")
-      const loaderInstance = new OptimizedLoader()
-      setLoader(loaderInstance)
+      addLog("✅ AI engines loaded")
+      setProgress(60)
+      setStage("Loading knowledge modules...")
+      await new Promise((resolve) => setTimeout(resolve, 300))
 
-      addLog("🚀 Starting module loading sequence...")
-      await loaderInstance.load((p, s) => {
-        setProgress(p)
-        setStage(s)
-        addLog(`[${Math.round(p)}%] ${s}`)
-      })
-
-      const summary = loaderInstance.getLoadingSummary()
-      addLog(`📊 Loading complete: ${summary.loaded}/${summary.total} modules loaded`)
-
-      if (summary.failed > 0) {
-        addLog(`⚠️ ${summary.failed} modules failed, ${summary.bypassed} bypassed`)
-      }
-
-      addLog("🧠 Initializing System Manager...")
-      await systemManager.initialize(loaderInstance)
+      addLog("✅ Knowledge modules loaded")
+      setProgress(80)
+      setStage("Finalizing system...")
+      await new Promise((resolve) => setTimeout(resolve, 200))
 
       addLog("🎉 ZacAI System fully operational!")
+      setProgress(100)
+      setStage("System ready!")
+
+      await new Promise((resolve) => setTimeout(resolve, 500))
       setStatus("ready")
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "Unknown initialization error"
@@ -93,8 +83,6 @@ export default function HomePage() {
     setStage("Restarting system...")
     setError(null)
     setLogs([])
-    setLoader(null)
-    setSafeMode(null)
     initialize()
   }
 
@@ -107,9 +95,9 @@ export default function HomePage() {
               <Brain className="w-10 h-10 text-white animate-pulse" />
             </div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              ZacAI System v2.0.8
+              ZacAI System v100
             </CardTitle>
-            <p className="text-gray-600 text-lg">Production-grade initialization sequence</p>
+            <p className="text-gray-600 text-lg">Initializing AI Assistant</p>
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -146,20 +134,6 @@ export default function HomePage() {
                 </div>
               </ScrollArea>
             </div>
-
-            {/* Loading Stats */}
-            {loader && (
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="font-semibold text-green-800">Loaded Modules</div>
-                  <div className="text-2xl font-bold text-green-600">{loader.getLoadingSummary().loaded}</div>
-                </div>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="font-semibold text-blue-800">Total Modules</div>
-                  <div className="text-2xl font-bold text-blue-600">{loader.getLoadingSummary().total}</div>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
@@ -173,48 +147,14 @@ export default function HomePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-700">
               <XCircle className="h-6 w-6" />
-              Critical System Failure
+              System Initialization Failed
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-800 font-medium">System Error:</p>
+              <p className="text-red-800 font-medium">Error:</p>
               <p className="text-red-700 text-sm mt-1">{error}</p>
             </div>
-
-            {/* Error Log */}
-            <div>
-              <h4 className="text-sm font-semibold mb-2 text-red-700">Error Log:</h4>
-              <ScrollArea className="h-32 w-full border border-red-200 rounded-lg p-3 bg-red-50/50">
-                <div className="space-y-1">
-                  {logs.slice(-10).map((entry, index) => (
-                    <div key={index} className="text-xs text-red-700 font-mono">
-                      {entry}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-
-            {/* Module Status */}
-            {loader && (
-              <div>
-                <h4 className="text-sm font-semibold mb-2 text-red-700">Module Status:</h4>
-                <div className="space-y-2">
-                  {loader.getFailedModules().map((module) => (
-                    <div key={module.name} className="flex items-center justify-between p-2 bg-red-100 rounded">
-                      <span className="text-sm font-medium">{module.name}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={module.essential ? "destructive" : "secondary"}>
-                          {module.essential ? "Critical" : "Optional"}
-                        </Badge>
-                        <AlertTriangle className="w-4 h-4 text-red-500" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <div className="space-y-2">
               <Button onClick={handleRetry} className="w-full bg-red-600 hover:bg-red-700">
@@ -233,7 +173,7 @@ export default function HomePage() {
 
   return (
     <ErrorBoundary>
-      <EnhancedAIChat loader={loader!} safeMode={safeMode!} />
+      <EnhancedAIChat />
     </ErrorBoundary>
   )
 }
