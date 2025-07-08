@@ -8,15 +8,24 @@ import { DiagnosticEngine } from "../engines/DiagnosticEngine"
 import { KnowledgeManager } from "../managers/KnowledgeManager"
 import { StorageManager } from "../managers/StorageManager"
 import { ContextManager } from "../managers/ContextManager"
-import type { SystemConfig } from "./config"
+import { SystemConfig } from "./config"
 
 export interface SystemResponse {
   content: string
   confidence: number
-  reasoning: string[]
-  pathways: string[]
-  synthesis: any
+  thinkingProcess?: string[]
   mathAnalysis?: any
+  knowledgeUsed?: string[]
+  memoryUpdates?: string[]
+  diagnostics?: any
+}
+
+export interface ChatMessage {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: number
+  confidence?: number
 }
 
 export class SystemManager {
@@ -31,10 +40,9 @@ export class SystemManager {
   private storageManager: StorageManager
   private contextManager: ContextManager
   private isInitialized = false
-  private config: SystemConfig
 
-  constructor(config: SystemConfig) {
-    this.config = config
+  constructor() {
+    console.log("🚀 SystemManager initializing...")
 
     // Initialize managers first
     this.storageManager = new StorageManager()
@@ -63,27 +71,35 @@ export class SystemManager {
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
 
-    console.log("🚀 Initializing ZacAI System Manager...")
+    console.log("🔧 SystemManager: Starting full system initialization...")
+    const startTime = performance.now()
 
     try {
-      // Initialize all components in proper order
+      // Initialize in dependency order
       await this.storageManager.initialize()
       await this.knowledgeManager.initialize()
       await this.contextManager.initialize()
 
-      await this.memoryEngine.initialize()
-      await this.knowledgeEngine.initialize()
+      // Initialize engines
       await this.languageEngine.initialize()
+      await this.knowledgeEngine.initialize()
+      await this.memoryEngine.initialize()
       await this.mathEngine.initialize()
       await this.thinkingEngine.initialize()
       await this.diagnosticEngine.initialize()
 
+      // Initialize cognitive router
       await this.cognitiveRouter.initialize()
 
       this.isInitialized = true
-      console.log("✅ ZacAI System Manager initialized successfully!")
+      const duration = performance.now() - startTime
+
+      console.log(`✅ SystemManager: Full initialization completed in ${duration.toFixed(2)}ms`)
+
+      // Log system status
+      this.logSystemStatus()
     } catch (error) {
-      console.error("❌ System Manager initialization failed:", error)
+      console.error("❌ SystemManager initialization failed:", error)
       throw error
     }
   }
@@ -93,67 +109,145 @@ export class SystemManager {
       await this.initialize()
     }
 
-    console.log("🧠 Processing message through System Manager:", userMessage)
+    console.log(`🤖 SystemManager: Processing message: "${userMessage}"`)
+    const startTime = performance.now()
 
     try {
-      // Get conversation context
-      const context = await this.contextManager.getContext()
+      // Update context with user message
+      await this.contextManager.addMessage({
+        id: Date.now().toString(),
+        role: "user",
+        content: userMessage,
+        timestamp: Date.now(),
+      })
 
-      // Route through cognitive router
-      const response = await this.cognitiveRouter.route(userMessage, context)
+      // Route message through cognitive router
+      const response = await this.cognitiveRouter.processMessage(userMessage)
 
-      // Update context with new interaction
-      await this.contextManager.updateContext(userMessage, response)
+      // Update context with AI response
+      await this.contextManager.addMessage({
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: response.content,
+        timestamp: Date.now(),
+        confidence: response.confidence,
+      })
 
-      // Log diagnostics
-      this.diagnosticEngine.logInteraction(userMessage, response)
+      // Learn from the interaction
+      await this.knowledgeManager.learnFromMessage(userMessage, response.content)
 
-      return response
+      const duration = performance.now() - startTime
+      console.log(`✅ SystemManager: Message processed in ${duration.toFixed(2)}ms`)
+
+      return {
+        ...response,
+        diagnostics: {
+          processingTime: duration,
+          systemStatus: this.getSystemStatus(),
+        },
+      }
     } catch (error) {
-      console.error("❌ Error processing message:", error)
+      console.error("❌ SystemManager: Error processing message:", error)
+
       return {
         content: "I encountered an error processing your message. Please try again.",
         confidence: 0.1,
-        reasoning: [`Error: ${error}`],
-        pathways: ["error"],
-        synthesis: null,
+        diagnostics: {
+          error: error.message,
+          systemStatus: this.getSystemStatus(),
+        },
       }
     }
   }
 
-  public getStats(): any {
-    return {
-      isInitialized: this.isInitialized,
-      memoryStats: this.memoryEngine.getStats(),
-      knowledgeStats: this.knowledgeEngine.getStats(),
-      languageStats: this.languageEngine.getStats(),
-      mathStats: this.mathEngine.getStats(),
-      diagnosticStats: this.diagnosticEngine.getStats(),
-      systemConfig: this.config,
-    }
+  public async getConversationHistory(): Promise<ChatMessage[]> {
+    return await this.contextManager.getConversationHistory()
   }
 
   public async exportData(): Promise<any> {
     return {
-      memory: await this.memoryEngine.exportData(),
-      knowledge: await this.knowledgeEngine.exportData(),
-      context: await this.contextManager.exportData(),
-      diagnostics: this.diagnosticEngine.exportData(),
-      timestamp: Date.now(),
+      knowledge: await this.knowledgeManager.exportKnowledge(),
+      memory: await this.memoryEngine.exportMemory(),
+      context: await this.contextManager.exportContext(),
+      diagnostics: this.diagnosticEngine.getSystemStats(),
+      exportDate: new Date().toISOString(),
+      version: SystemConfig.VERSION,
     }
   }
 
   public async importData(data: any): Promise<void> {
-    if (data.memory) await this.memoryEngine.importData(data.memory)
-    if (data.knowledge) await this.knowledgeEngine.importData(data.knowledge)
-    if (data.context) await this.contextManager.importData(data.context)
-    if (data.diagnostics) this.diagnosticEngine.importData(data.diagnostics)
+    if (data.knowledge) {
+      await this.knowledgeManager.importKnowledge(data.knowledge)
+    }
+    if (data.memory) {
+      await this.memoryEngine.importMemory(data.memory)
+    }
+    if (data.context) {
+      await this.contextManager.importContext(data.context)
+    }
+    console.log("✅ SystemManager: Data import completed")
   }
 
   public async clearAllData(): Promise<void> {
-    await this.memoryEngine.clearData()
-    await this.knowledgeEngine.clearData()
-    await this.contextManager.clearData()
-    this.diagnosticEngine.clearData()
+    await this.knowledgeManager.clearAllKnowledge()
+    await this.memoryEngine.clearMemory()
+    await this.contextManager.clearContext()
+    await this.storageManager.clearAllData()
+    console.log("✅ SystemManager: All data cleared")
+  }
+
+  public getSystemStatus(): any {
+    return {
+      initialized: this.isInitialized,
+      engines: {
+        thinking: this.thinkingEngine.getStatus(),
+        math: this.mathEngine.getStatus(),
+        knowledge: this.knowledgeEngine.getStatus(),
+        language: this.languageEngine.getStatus(),
+        memory: this.memoryEngine.getStatus(),
+        diagnostic: this.diagnosticEngine.getStatus(),
+      },
+      managers: {
+        knowledge: this.knowledgeManager.getStats(),
+        storage: this.storageManager.getStats(),
+        context: this.contextManager.getStats(),
+      },
+      config: SystemConfig,
+    }
+  }
+
+  private logSystemStatus(): void {
+    const status = this.getSystemStatus()
+    console.log("📊 System Status:", {
+      version: SystemConfig.VERSION,
+      engines: Object.keys(status.engines).length,
+      managers: Object.keys(status.managers).length,
+      memoryUsage: status.managers.storage,
+      knowledgeBase: status.managers.knowledge,
+    })
+  }
+
+  public async optimizeSystem(): Promise<void> {
+    console.log("🔧 SystemManager: Starting system optimization...")
+
+    await this.knowledgeManager.optimizeKnowledge()
+    await this.memoryEngine.optimizeMemory()
+    await this.contextManager.optimizeContext()
+    await this.storageManager.optimize()
+
+    console.log("✅ SystemManager: System optimization completed")
+  }
+
+  public async retrain(): Promise<void> {
+    console.log("🔄 SystemManager: Starting system retraining...")
+
+    // Reload seed data
+    await this.knowledgeManager.loadSeedData()
+
+    // Retrain engines
+    await this.languageEngine.retrain()
+    await this.thinkingEngine.retrain()
+
+    console.log("✅ SystemManager: System retraining completed")
   }
 }
