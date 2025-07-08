@@ -19,10 +19,12 @@ export const SystemConfig = {
   CLEANUP_INTERVAL: 300000, // 5 minutes
 
   // Learning Settings
-  VOCABULARY_LEARNING_ENABLED: true,
-  MATH_LEARNING_ENABLED: true,
-  MEMORY_LEARNING_ENABLED: true,
-  ONLINE_LEARNING_ENABLED: true,
+  LEARNING_SETTINGS: {
+    VOCABULARY_LEARNING_ENABLED: true,
+    MATH_LEARNING_ENABLED: true,
+    MEMORY_LEARNING_ENABLED: true,
+    ONLINE_LEARNING_ENABLED: true,
+  },
 
   // API Endpoints
   APIS: {
