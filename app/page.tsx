@@ -1,17 +1,28 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Brain } from "lucide-react"
 
-type AppStatus = "initializing" | "ready" | "error"
-
 export default function HomePage() {
-  const [status, setStatus] = useState<AppStatus>("ready")
+  const [messages, setMessages] = useState<Array<{ id: string; text: string; sender: "user" | "ai" }>>([])
+  const [input, setInput] = useState("")
 
-  // Skip initialization - go straight to chat
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim()) return
+
+    const userMessage = { id: Date.now().toString(), text: input, sender: "user" as const }
+    const aiResponse = { id: (Date.now() + 1).toString(), text: `You said: ${input}`, sender: "ai" as const }
+
+    setMessages((prev) => [...prev, userMessage, aiResponse])
+    setInput("")
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
@@ -31,9 +42,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="bg-green-100 text-green-700">
-                Online
-              </Badge>
+              <Badge className="bg-green-100 text-green-700">Online</Badge>
             </div>
           </div>
         </div>
@@ -47,32 +56,56 @@ export default function HomePage() {
           </CardHeader>
 
           <CardContent className="flex-1 flex flex-col p-6">
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
-                  <Brain className="w-8 h-8 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">Welcome to ZacAI</h2>
-                <p className="text-gray-600 max-w-md">
-                  Your personal AI assistant is ready to help with math calculations, general questions, and more.
-                </p>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">Try asking:</p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    <Badge variant="outline">"Hello"</Badge>
-                    <Badge variant="outline">"5 + 5"</Badge>
-                    <Badge variant="outline">"Help"</Badge>
-                    <Badge variant="outline">"Status"</Badge>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto mb-4">
+              {messages.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
+                      <Brain className="w-8 h-8 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Welcome to ZacAI</h2>
+                    <p className="text-gray-600 max-w-md">
+                      Your personal AI assistant is ready to help with math calculations, general questions, and more.
+                    </p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-500">Try asking:</p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        <Badge variant="outline">"Hello"</Badge>
+                        <Badge variant="outline">"5 + 5"</Badge>
+                        <Badge variant="outline">"Help"</Badge>
+                        <Badge variant="outline">"Status"</Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          message.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
+                        }`}
+                      >
+                        {message.text}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Input Form */}
-            <form className="mt-6">
+            <form onSubmit={handleSubmit}>
               <div className="flex gap-3">
                 <input
                   type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask me anything..."
                   className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
