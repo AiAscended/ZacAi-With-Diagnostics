@@ -57,6 +57,16 @@ export class CognitiveRouter {
       }
     }
 
+    // ENHANCED: Personal info sharing detection
+    if (/(?:my name is|i'm|i am|call me|i have|i work|i live)/.test(lowerMessage)) {
+      return {
+        primaryEngine: "memory",
+        secondaryEngines: ["thinking", "language"],
+        confidence: 0.95,
+        reasoning: "Personal information sharing detected",
+      }
+    }
+
     // Knowledge query detection
     if (/what is|tell me about|explain|define/.test(lowerMessage)) {
       return {
@@ -67,13 +77,13 @@ export class CognitiveRouter {
       }
     }
 
-    // Memory/personal detection
-    if (/remember|my name|i am|recall/.test(lowerMessage)) {
+    // ENHANCED: Memory recall detection
+    if (/remember|what.*know.*about.*me|do you know|recall|who am i/.test(lowerMessage)) {
       return {
         primaryEngine: "memory",
         secondaryEngines: ["thinking", "language"],
         confidence: 0.85,
-        reasoning: "Memory-related query detected",
+        reasoning: "Memory recall query detected",
       }
     }
 
@@ -109,9 +119,16 @@ export class CognitiveRouter {
         enhancedContent = `Based on my knowledge: ${this.generateKnowledgeResponse(userMessage)}`
       }
     } else if (routingDecision.primaryEngine === "memory") {
+      // ENHANCED: Handle both storing and recalling personal info
       const memories = await this.engines.memoryEngine.retrieveMemories(userMessage)
-      if (memories.length > 0) {
-        enhancedContent = `I remember our previous conversations. ${this.generateMemoryResponse(userMessage)}`
+
+      // Check if this is a recall query
+      if (/remember|what.*know.*about.*me|do you know|recall|who am i/.test(userMessage.toLowerCase())) {
+        const personalSummary = this.engines.memoryEngine.getPersonalInfoSummary()
+        enhancedContent = `Here's what I remember about you: ${personalSummary}`
+      } else {
+        // This is likely sharing new personal info
+        enhancedContent = this.generatePersonalInfoResponse(userMessage)
       }
     } else {
       // Language processing
@@ -142,6 +159,28 @@ export class CognitiveRouter {
       "I have some memories related to this topic.",
     ]
     return responses[Math.floor(Math.random() * responses.length)]
+  }
+
+  // ENHANCED: Better personal info response generation
+  private generatePersonalInfoResponse(input: string): string {
+    const lowerInput = input.toLowerCase()
+
+    if (lowerInput.includes("my name is")) {
+      return "Thank you for telling me your name! I'll remember that for our future conversations."
+    }
+
+    if (
+      lowerInput.includes("i have") &&
+      (lowerInput.includes("cat") || lowerInput.includes("dog") || lowerInput.includes("pet"))
+    ) {
+      return "That's wonderful! I love hearing about pets. I'll remember this information about your furry friends."
+    }
+
+    if (lowerInput.includes("i work") || lowerInput.includes("i am")) {
+      return "Thanks for sharing that with me! I'll keep this information in mind for our conversations."
+    }
+
+    return "I've noted this information and will remember it for our future chats!"
   }
 
   private generateLanguageResponse(input: string, thinkingResult: any): string {

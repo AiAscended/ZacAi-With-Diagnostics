@@ -10,6 +10,10 @@ export class MemoryEngine {
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
+
+    // Load existing personal info from storage
+    await this.loadPersonalInfo()
+
     console.log("🧠 MemoryEngine: Initialized")
     this.isInitialized = true
   }
@@ -22,7 +26,7 @@ export class MemoryEngine {
 
     // Extract personal info from the memory if it's a conversation
     if (memory.type === "conversation" && memory.userMessage) {
-      this.extractAndStorePersonalInfo(memory.userMessage)
+      await this.extractPersonalInfo(memory.userMessage)
     }
   }
 
@@ -30,70 +34,32 @@ export class MemoryEngine {
     return this.memories
   }
 
-  public getPersonalInfo(): Map<string, PersonalInfoEntry> {
-    return this.personalInfo
-  }
-
-  public async extractAndStorePersonalInfo(message: string): Promise<void> {
+  // GOLDEN CODE: Personal info extraction from ReliableAISystem
+  private async extractPersonalInfo(message: string): Promise<void> {
     const personalPatterns = [
-      {
-        pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i,
-        key: "name",
-        importance: 0.9,
-        extract: (match: RegExpMatchArray) => match[1],
-      },
-      {
-        pattern: /i have (\d+)\s+(cats?|dogs?|pets?)/i,
-        key: "pets",
-        importance: 0.7,
-        extract: (match: RegExpMatchArray) => `${match[1]} ${match[2]}`,
-      },
-      {
-        pattern: /i have a wife/i,
-        key: "marital_status",
-        importance: 0.8,
-        extract: () => "married",
-      },
-      {
-        pattern: /one is named (\w+)/i,
-        key: "pet_name_1",
-        importance: 0.6,
-        extract: (match: RegExpMatchArray) => match[1],
-      },
-      {
-        pattern: /(?:the other|another) is.*named (\w+)/i,
-        key: "pet_name_2",
-        importance: 0.6,
-        extract: (match: RegExpMatchArray) => match[1],
-      },
-      {
-        pattern: /i work as (?:a |an )?(.+)/i,
-        key: "job",
-        importance: 0.8,
-        extract: (match: RegExpMatchArray) => match[1].trim(),
-      },
-      {
-        pattern: /i live in (.+)/i,
-        key: "location",
-        importance: 0.7,
-        extract: (match: RegExpMatchArray) => match[1].trim(),
-      },
+      { pattern: /my name is (\w+)/i, key: "name", importance: 0.9 },
+      { pattern: /i have (\d+) (cats?|dogs?|pets?)/i, key: "pets", importance: 0.7 },
+      { pattern: /i have a wife/i, key: "marital_status", value: "married", importance: 0.8 },
+      { pattern: /one is named (\w+)/i, key: "pet_name_1", importance: 0.6 },
+      { pattern: /the other is.*named (\w+)/i, key: "pet_name_2", importance: 0.6 },
+      { pattern: /i work as (?:a |an )?(.+)/i, key: "job", importance: 0.8 },
+      { pattern: /i live in (.+)/i, key: "location", importance: 0.7 },
     ]
 
-    personalPatterns.forEach(({ pattern, key, importance, extract }) => {
+    personalPatterns.forEach(({ pattern, key, value, importance }) => {
       const match = message.match(pattern)
-      if (match) {
-        const value = extract(match)
+      if (match && match[1]) {
+        const extractedValue = value || match[1]
         const entry: PersonalInfoEntry = {
           key,
-          value,
+          value: extractedValue.trim(),
           timestamp: Date.now(),
-          importance,
+          importance: importance || 0.7,
           type: "personal_info",
           source: "conversation",
         }
         this.personalInfo.set(key, entry)
-        console.log(`📝 MemoryEngine: Stored personal info: ${key} = ${value}`)
+        console.log(`📝 MemoryEngine: Stored personal info: ${key} = ${extractedValue}`)
       }
     })
 
@@ -101,6 +67,7 @@ export class MemoryEngine {
     await this.savePersonalInfo()
   }
 
+  // GOLDEN CODE: Personal info retrieval and summary
   public getPersonalInfoSummary(): string {
     if (this.personalInfo.size === 0) {
       return "I don't have any personal information stored about you yet."
@@ -132,9 +99,18 @@ export class MemoryEngine {
       info.push(`You live in ${this.personalInfo.get("location")?.value}`)
     }
 
+    if (this.personalInfo.has("marital_status")) {
+      info.push(`You are ${this.personalInfo.get("marital_status")?.value}`)
+    }
+
     return info.join(". ") + "."
   }
 
+  public getPersonalInfo(): Map<string, PersonalInfoEntry> {
+    return this.personalInfo
+  }
+
+  // Storage methods for personal info persistence
   private async loadPersonalInfo(): Promise<void> {
     try {
       const stored = localStorage.getItem("zacai-personal-info")
