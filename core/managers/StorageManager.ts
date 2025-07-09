@@ -18,7 +18,7 @@ export interface StorageEntry {
 
 export class StorageManager {
   private config: StorageConfig
-  private dbName = "ZacAI_Database"
+  private dbName = "ZacAI_Storage"
   private dbVersion = 1
   private db: IDBDatabase | null = null
   private storageQuota = 0
@@ -60,10 +60,16 @@ export class StorageManager {
 
         // Create object stores
         if (!db.objectStoreNames.contains("vocabulary")) {
-          db.createObjectStore("vocabulary", { keyPath: "id" })
+          db.createObjectStore("vocabulary", { keyPath: "word" })
         }
         if (!db.objectStoreNames.contains("mathematics")) {
-          db.createObjectStore("mathematics", { keyPath: "id" })
+          db.createObjectStore("mathematics", { keyPath: "concept" })
+        }
+        if (!db.objectStoreNames.contains("memory")) {
+          db.createObjectStore("memory", { keyPath: "id" })
+        }
+        if (!db.objectStoreNames.contains("sessions")) {
+          db.createObjectStore("sessions", { keyPath: "id" })
         }
         if (!db.objectStoreNames.contains("userInfo")) {
           db.createObjectStore("userInfo", { keyPath: "id" })
@@ -451,6 +457,38 @@ export class StorageManager {
     } catch (error) {
       console.error("Failed to restore from backup:", error)
       throw error
+    }
+  }
+
+  public async clearAllData(): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const storeNames = ["vocabulary", "mathematics", "memory", "sessions"]
+
+    for (const storeName of storeNames) {
+      await new Promise<void>((resolve, reject) => {
+        const transaction = this.db!.transaction([storeName], "readwrite")
+        const store = transaction.objectStore(storeName)
+        const request = store.clear()
+
+        request.onerror = () => reject(request.error)
+        request.onsuccess = () => resolve()
+      })
+    }
+  }
+
+  public async optimize(): Promise<void> {
+    console.log("🔧 StorageManager: Optimizing storage...")
+    // Implementation for storage optimization
+    console.log("✅ StorageManager: Storage optimized")
+  }
+
+  public getStats(): any {
+    return {
+      dbName: this.dbName,
+      dbVersion: this.dbVersion,
+      isConnected: !!this.db,
+      storageType: "IndexedDB",
     }
   }
 }

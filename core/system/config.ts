@@ -4,6 +4,17 @@ export const SystemConfig = {
   VERSION: "2.0.0",
   BUILD_DATE: "2025-01-07",
 
+  // File paths
+  SEED_FILES: {
+    VOCABULARY: "/seed_vocab.json",
+    MATHEMATICS: "/seed_maths.json",
+    SCIENCE: "/seed_science.json",
+    SYSTEM: "/seed_system.json",
+    LEARNING: "/seed_learning.json",
+    TOOLS: "/seed_tools.json",
+    KNOWLEDGE: "/seed_knowledge.json",
+  },
+
   // Core Settings
   DEBUG_MODE: process.env.NODE_ENV === "development",
   PERFORMANCE_MONITORING: true,
@@ -14,7 +25,7 @@ export const SystemConfig = {
     USE_INDEXED_DB: true,
     USE_LOCAL_STORAGE: true,
     MAX_STORAGE_SIZE: 100 * 1024 * 1024, // 100MB
-    COMPRESSION_ENABLED: true,
+    COMPRESSION_ENABLED: false,
     ENCRYPTION_ENABLED: false,
     AUTO_BACKUP: true,
     BACKUP_INTERVAL: 24 * 60 * 60 * 1000, // 24 hours
@@ -28,6 +39,14 @@ export const SystemConfig = {
     CONSOLIDATION_INTERVAL: 60 * 60 * 1000, // 1 hour
     PATTERN_RECOGNITION: true,
     ONLINE_LEARNING: true,
+  },
+
+  // Learning settings
+  LEARNING_SETTINGS: {
+    VOCABULARY_LEARNING_ENABLED: true,
+    AUTO_SAVE_INTERVAL: 30000, // 30 seconds
+    MAX_MEMORY_ENTRIES: 10000,
+    CONFIDENCE_THRESHOLD: 0.7,
   },
 
   // Context Management
