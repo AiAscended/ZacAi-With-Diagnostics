@@ -114,9 +114,6 @@ export class SystemManager {
     console.log(`🤖 SystemManager: Processing with ThinkingEngine: "${userMessage}"`)
 
     try {
-      // Extract personal info FIRST before any other processing
-      await this.memoryEngine.extractAndStorePersonalInfo(userMessage)
-
       // Get conversation context
       const context = await this.contextManager.getContext()
 
@@ -189,7 +186,6 @@ export class SystemManager {
 
   public getSystemStatus(): any {
     const thinkingStats = this.isInitialized ? this.thinkingEngine.getThoughtStream().length : 0
-    const memoryStats = this.memoryEngine.getStats()
 
     return {
       initialized: this.isInitialized,
@@ -207,8 +203,7 @@ export class SystemManager {
           totalEntries: this.knowledgeBase.length,
         },
         memory: {
-          totalMemories: memoryStats.totalMemories,
-          personalInfoEntries: memoryStats.personalInfoEntries,
+          totalMemories: this.conversationHistory.filter((m) => m.role === "user").length,
         },
         thinking: {
           totalThoughts: thinkingStats,

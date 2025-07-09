@@ -10,11 +10,7 @@ export class MemoryEngine {
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
-
-    // Load existing personal info from storage
-    await this.loadPersonalInfo()
-
-    console.log("🧠 MemoryEngine: Initialized with personal info extraction")
+    console.log("🧠 MemoryEngine: Initialized")
     this.isInitialized = true
   }
 
