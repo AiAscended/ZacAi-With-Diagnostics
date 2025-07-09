@@ -4,6 +4,7 @@ export interface RoutingDecision {
   confidence: number
   reasoning: string
   personalInfo?: any
+  immediateResponse?: string
 }
 
 export class CognitiveRouter {
@@ -16,21 +17,35 @@ export class CognitiveRouter {
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
-    console.log("🧭 CognitiveRouter: Initialized")
+    console.log("🧭 CognitiveRouter: Initialized with golden code integration")
     this.isInitialized = true
   }
 
   public async route(userMessage: string, context: any): Promise<any> {
-    console.log(`🧭 CognitiveRouter: Routing message: "${userMessage}"`)
+    console.log(`🧭 CognitiveRouter: Processing with golden code: "${userMessage}"`)
 
-    // GOLDEN CODE: Extract personal info IMMEDIATELY before processing
-    const extractedPersonalInfo = await this.extractPersonalInfoImmediate(userMessage)
+    // GOLDEN CODE: Extract personal info IMMEDIATELY and generate instant response if needed
+    const personalContext = await this.extractAndProcessPersonalInfoImmediate(userMessage)
+
+    // If we have an immediate response (like name recognition), use it
+    if (personalContext.immediateResponse) {
+      return {
+        content: personalContext.immediateResponse,
+        confidence: 0.95,
+        reasoning: ["Immediate personal info recognition and response"],
+        pathways: ["personal_info_immediate"],
+        synthesis: { primaryInsight: "Personal information processed immediately" },
+        thinkingProcess: ["🧠 Recognized personal information", "💭 Generated immediate personalized response"],
+        mathAnalysis: null,
+        knowledgeUsed: ["personal_memory"],
+      }
+    }
 
     // Determine routing decision with personal info context
-    const routingDecision = this.determineRouting(userMessage, extractedPersonalInfo)
+    const routingDecision = this.determineRouting(userMessage, personalContext.extractedInfo)
     console.log(`🧭 Primary engine: ${routingDecision.primaryEngine}`)
 
-    // Process through ThinkingEngine first with personal context
+    // Process through ThinkingEngine with personal context
     const thinkingResult = await this.engines.thinkingEngine.processThought(userMessage, context, routingDecision)
 
     // Enhance with specific engine processing
@@ -38,7 +53,7 @@ export class CognitiveRouter {
       userMessage,
       thinkingResult,
       routingDecision,
-      extractedPersonalInfo,
+      personalContext.extractedInfo,
     )
 
     return {
@@ -53,42 +68,126 @@ export class CognitiveRouter {
     }
   }
 
-  // GOLDEN CODE: Immediate personal info extraction for instant usage
-  private async extractPersonalInfoImmediate(message: string): Promise<any> {
-    const personalInfo: any = {}
+  // GOLDEN CODE: Merged from CognitiveAISystem + EnhancedAISystemV2 - Immediate extraction and response
+  private async extractAndProcessPersonalInfoImmediate(message: string): Promise<any> {
+    const lowerMessage = message.toLowerCase()
+    const extractedInfo: any = {}
+    let immediateResponse: string | null = null
 
-    // Enhanced patterns for immediate extraction
-    const patterns = [
-      { pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i, key: "name" },
-      { pattern: /i have (\d+)\s+(cats?|dogs?|pets?)/i, key: "pets", multi: true },
-      { pattern: /(?:one|first)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i, key: "pet_name_1" },
-      { pattern: /(?:other|second|another)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i, key: "pet_name_2" },
-      { pattern: /(?:and|,)\s*(\w+)\s+(?:is\s+)?(?:the\s+)?(?:other|second)/i, key: "pet_name_2" },
-      { pattern: /i work as (?:a |an )?(.+)/i, key: "job" },
-      { pattern: /i live in (.+)/i, key: "location" },
+    // GOLDEN PATTERNS: Enhanced from multiple old systems
+    const personalPatterns = [
+      {
+        pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i,
+        key: "name",
+        importance: 0.9,
+        immediateResponseGenerator: (name: string) =>
+          `Nice to meet you, ${name}! I'll remember your name for all our future conversations. How can I help you today?`,
+      },
+      {
+        pattern: /i have (\d+)\s+(cats?|dogs?|pets?)/i,
+        key: "pets",
+        importance: 0.7,
+        multiCapture: true,
+        immediateResponseGenerator: (count: string, type: string, fullMessage: string) => {
+          const petNames = this.extractPetNamesFromMessage(fullMessage)
+          let response = `That's wonderful! You have ${count} ${type}.`
+
+          if (petNames.length > 0) {
+            if (petNames.length === 1) {
+              response += ` ${petNames[0]} sounds like a great companion!`
+            } else if (petNames.length === 2) {
+              response += ` ${petNames[0]} and ${petNames[1]} sound like wonderful companions!`
+            }
+          }
+
+          response += " I love hearing about pets and I'll remember this information about your furry friends."
+          return response
+        },
+      },
+      {
+        pattern: /i work as (?:a |an )?(.+)/i,
+        key: "job",
+        importance: 0.8,
+        immediateResponseGenerator: (job: string, fullMessage: string) => {
+          const name = this.extractNameFromContext(fullMessage)
+          return `Thanks for sharing that${name ? `, ${name}` : ""}! Working as ${job.trim()} must be interesting. I'll keep this information in mind for our conversations.`
+        },
+      },
+      {
+        pattern: /i live in (.+)/i,
+        key: "location",
+        importance: 0.7,
+        immediateResponseGenerator: (location: string, fullMessage: string) => {
+          const name = this.extractNameFromContext(fullMessage)
+          return `${location.trim()} sounds like a nice place to live${name ? `, ${name}` : ""}! I'll remember this for our future chats.`
+        },
+      },
     ]
 
-    patterns.forEach(({ pattern, key, multi }) => {
-      const match = message.match(pattern)
+    // Process each pattern
+    for (const patternConfig of personalPatterns) {
+      const match = message.match(patternConfig.pattern)
       if (match && match[1]) {
-        if (multi && key === "pets") {
-          personalInfo[key] = `${match[1]} ${match[2]}`
+        if (patternConfig.multiCapture && match[2]) {
+          extractedInfo[patternConfig.key] = `${match[1]} ${match[2]}`
+          if (patternConfig.immediateResponseGenerator) {
+            immediateResponse = patternConfig.immediateResponseGenerator(match[1], match[2], message)
+          }
         } else {
-          personalInfo[key] = match[1].trim()
+          extractedInfo[patternConfig.key] = match[1].trim()
+          if (patternConfig.immediateResponseGenerator) {
+            immediateResponse = patternConfig.immediateResponseGenerator(match[1], message)
+          }
         }
+
+        // Store in memory engine immediately
+        await this.engines.memoryEngine.storeMemory({
+          type: "conversation",
+          userMessage: message,
+          extractedInfo: { [patternConfig.key]: extractedInfo[patternConfig.key] },
+          immediate: true,
+        })
+
+        console.log(
+          `📝 CognitiveRouter: Immediately processed: ${patternConfig.key} = ${extractedInfo[patternConfig.key]}`,
+        )
+        break // Use first match for immediate response
+      }
+    }
+
+    return {
+      extractedInfo,
+      immediateResponse,
+    }
+  }
+
+  // GOLDEN CODE: Enhanced pet name extraction from multiple old systems
+  private extractPetNamesFromMessage(message: string): string[] {
+    const petNames: string[] = []
+
+    const petNamePatterns = [
+      /(?:one|first|older)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
+      /(?:other|second|younger|another)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
+      /(?:and|,)\s*(\w+)\s+(?:is\s+)?(?:the\s+)?(?:other|second)/i,
+      /named\s+(\w+)\s+and\s+(\w+)/i,
+      /(\w+)\s+and\s+(\w+)\s+are\s+(?:my|their)\s+names/i,
+    ]
+
+    petNamePatterns.forEach((pattern) => {
+      const match = message.match(pattern)
+      if (match) {
+        if (match[1]) petNames.push(match[1])
+        if (match[2]) petNames.push(match[2])
       }
     })
 
-    // Store in memory engine for persistence
-    if (Object.keys(personalInfo).length > 0) {
-      await this.engines.memoryEngine.storeMemory({
-        type: "conversation",
-        userMessage: message,
-        extractedInfo: personalInfo,
-      })
-    }
+    return [...new Set(petNames)] // Remove duplicates
+  }
 
-    return personalInfo
+  // GOLDEN CODE: Extract name from current context (if mentioned in same message)
+  private extractNameFromContext(message: string): string | null {
+    const nameMatch = message.match(/(?:my name is|i'm|i am|call me)\s+(\w+)/i)
+    return nameMatch ? nameMatch[1] : null
   }
 
   private determineRouting(userMessage: string, personalInfo: any): RoutingDecision {
@@ -105,7 +204,7 @@ export class CognitiveRouter {
       }
     }
 
-    // ENHANCED: Personal info sharing detection with immediate context
+    // ENHANCED: Personal info sharing detection
     if (/(?:my name is|i'm|i am|call me|i have|i work|i live)/.test(lowerMessage)) {
       return {
         primaryEngine: "memory",
@@ -116,7 +215,7 @@ export class CognitiveRouter {
       }
     }
 
-    // GOLDEN CODE: Dictionary/definition request detection
+    // GOLDEN CODE: Dictionary/definition request detection with fallback
     if (/(?:what\s+(?:is|does|means?)|define|meaning\s+of|explain)\s+(.+)/i.test(lowerMessage)) {
       return {
         primaryEngine: "knowledge",
@@ -138,7 +237,7 @@ export class CognitiveRouter {
       }
     }
 
-    // ENHANCED: Memory recall detection
+    // Memory recall detection
     if (/remember|what.*know.*about.*me|do you know|recall|who am i/.test(lowerMessage)) {
       return {
         primaryEngine: "memory",
@@ -169,35 +268,42 @@ export class CognitiveRouter {
     let mathAnalysis = null
     let knowledgeUsed: string[] = []
 
+    // Get stored personal info for context
+    const storedPersonalInfo = this.engines.memoryEngine.getPersonalInfo()
+    const userName = storedPersonalInfo.get("name")?.value || personalInfo.name
+
     // Process with primary engine
     if (routingDecision.primaryEngine === "math") {
       const mathResult = await this.engines.mathEngine.processMath(userMessage)
       if (mathResult) {
-        enhancedContent = this.generateMathResponseWithPersonalTouch(mathResult, personalInfo)
+        enhancedContent = `I can help you with that calculation${userName ? `, ${userName}` : ""}! ${mathResult.calculation}`
         mathAnalysis = mathResult
       }
     } else if (routingDecision.primaryEngine === "knowledge") {
-      // GOLDEN CODE: Enhanced knowledge processing with dictionary lookup
+      // GOLDEN CODE: Enhanced knowledge processing with thinking fallback
       const knowledgeResult = await this.engines.knowledgeEngine.processKnowledge(userMessage)
       if (knowledgeResult.found) {
         knowledgeUsed = knowledgeResult.results.map((r: any) => r.key)
-        enhancedContent = this.generateKnowledgeResponseWithPersonalTouch(knowledgeResult, personalInfo)
+        enhancedContent = `Based on my knowledge${userName ? `, ${userName}` : ""}: ${this.generateKnowledgeResponse("")}`
       } else {
-        // GOLDEN CODE: Fallback to thinking when knowledge not found
-        enhancedContent = this.generateThinkingFallbackResponse(userMessage, personalInfo)
+        // GOLDEN CODE: Thinking fallback when knowledge lookup fails
+        const wordMatch = userMessage.match(/(?:what\s+(?:is|does|means?)|define|meaning\s+of|explain)\s+(.+)/i)
+        const word = wordMatch ? wordMatch[1].trim().replace(/[?!.]/g, "") : "that"
+
+        enhancedContent = `I don't have a definition for "${word}" in my current knowledge base${userName ? `, ${userName}` : ""}, but let me think about this... Based on the context and structure of the word, I can try to help you understand it better. Could you provide more context about where you encountered this word, or would you like me to break down what I can infer about it?`
       }
     } else if (routingDecision.primaryEngine === "memory") {
-      // ENHANCED: Handle both storing and recalling personal info with immediate usage
+      // Handle memory recall
       if (/remember|what.*know.*about.*me|do you know|recall|who am i/.test(userMessage.toLowerCase())) {
         const personalSummary = this.engines.memoryEngine.getPersonalInfoSummary()
         enhancedContent = `Here's what I remember about you: ${personalSummary}`
       } else {
-        // GOLDEN CODE: Immediate personal info acknowledgment
-        enhancedContent = this.generatePersonalInfoResponseWithImmediateUsage(userMessage, personalInfo)
+        // This should have been handled by immediate response, but fallback
+        enhancedContent = `I've noted this information${userName ? `, ${userName}` : ""} and will remember it for our future chats!`
       }
     } else {
       // Language processing with personal touch
-      enhancedContent = this.generateLanguageResponseWithPersonalTouch(userMessage, thinkingResult, personalInfo)
+      enhancedContent = this.generateLanguageResponseWithPersonalTouch(userMessage, thinkingResult, userName)
     }
 
     return {
@@ -208,81 +314,20 @@ export class CognitiveRouter {
     }
   }
 
-  // GOLDEN CODE: Math response with personal touch
-  private generateMathResponseWithPersonalTouch(mathResult: any, personalInfo: any): string {
-    const name = personalInfo.name ? `, ${personalInfo.name}` : ""
-    return `I can help you with that calculation${name}! ${mathResult.calculation}`
-  }
-
-  // GOLDEN CODE: Knowledge response with personal touch
-  private generateKnowledgeResponseWithPersonalTouch(knowledgeResult: any, personalInfo: any): string {
-    const name = personalInfo.name ? `, ${personalInfo.name}` : ""
-    return `Based on my knowledge${name}: ${this.generateKnowledgeResponse("")}`
-  }
-
-  // GOLDEN CODE: Thinking fallback when knowledge lookup fails
-  private generateThinkingFallbackResponse(userMessage: string, personalInfo: any): string {
-    const name = personalInfo.name ? `, ${personalInfo.name}` : ""
-
-    // Extract the word/concept they're asking about
-    const wordMatch = userMessage.match(/(?:what\s+(?:is|does|means?)|define|meaning\s+of|explain)\s+(.+)/i)
-    const word = wordMatch ? wordMatch[1].trim().replace(/[?!.]/g, "") : "that"
-
-    return `I don't have a definition for "${word}" in my current knowledge base${name}, but let me think about this... Based on the context and structure of the word, I can try to help you understand it better. Could you provide more context about where you encountered this word, or would you like me to break down what I can infer about it?`
-  }
-
-  // GOLDEN CODE: Personal info response with immediate name usage
-  private generatePersonalInfoResponseWithImmediateUsage(input: string, personalInfo: any): string {
+  private generateLanguageResponseWithPersonalTouch(input: string, thinkingResult: any, userName?: string): string {
     const lowerInput = input.toLowerCase()
-
-    if (personalInfo.name) {
-      if (lowerInput.includes("my name is")) {
-        return `Nice to meet you, ${personalInfo.name}! I'll remember your name for our future conversations.`
-      }
-    }
-
-    if (personalInfo.pets) {
-      let response = `That's wonderful${personalInfo.name ? `, ${personalInfo.name}` : ""}! You have ${personalInfo.pets}.`
-
-      if (personalInfo.pet_name_1) {
-        response += ` ${personalInfo.pet_name_1} sounds like a great companion!`
-      }
-
-      if (personalInfo.pet_name_2) {
-        response += ` And ${personalInfo.pet_name_2} too!`
-      }
-
-      response += " I love hearing about pets and I'll remember this information about your furry friends."
-      return response
-    }
-
-    if (personalInfo.job) {
-      return `Thanks for sharing that${personalInfo.name ? `, ${personalInfo.name}` : ""}! Working as ${personalInfo.job} must be interesting. I'll keep this information in mind for our conversations.`
-    }
-
-    if (personalInfo.location) {
-      return `${personalInfo.location} sounds like a nice place to live${personalInfo.name ? `, ${personalInfo.name}` : ""}! I'll remember this for our future chats.`
-    }
-
-    const name = personalInfo.name ? `, ${personalInfo.name}` : ""
-    return `I've noted this information${name} and will remember it for our future chats!`
-  }
-
-  // GOLDEN CODE: Language response with personal touch
-  private generateLanguageResponseWithPersonalTouch(input: string, thinkingResult: any, personalInfo: any): string {
-    const lowerInput = input.toLowerCase()
-    const name = personalInfo.name ? `, ${personalInfo.name}` : ""
+    const nameGreeting = userName ? `, ${userName}` : ""
 
     if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
-      return `Hello${name}! I'm ZacAI, and I'm here to help you. I can think through problems, remember our conversations, and learn from our interactions!`
+      return `Hello${nameGreeting}! I'm ZacAI, and I'm here to help you. I can think through problems, remember our conversations, and learn from our interactions!`
     }
 
     if (lowerInput.includes("how are you")) {
-      return `I'm doing well, thank you${name}! My thinking processes are running smoothly, and I'm ready to help you with whatever you need.`
+      return `I'm doing well, thank you${nameGreeting}! My thinking processes are running smoothly, and I'm ready to help you with whatever you need.`
     }
 
     if (lowerInput.includes("what can you do")) {
-      return `I can engage in thoughtful conversations${name}, solve mathematical problems, remember our discussions, and learn from every interaction. I use advanced reasoning to understand context and provide helpful responses!`
+      return `I can engage in thoughtful conversations${nameGreeting}, solve mathematical problems, remember our discussions, and learn from every interaction. I use advanced reasoning to understand context and provide helpful responses!`
     }
 
     // Use thinking result as base with personal touch
@@ -290,7 +335,7 @@ export class CognitiveRouter {
       thinkingResult.synthesis?.primaryInsight ||
       "I understand what you're saying. Let me think about this and provide a thoughtful response."
 
-    return `${baseResponse}${name ? ` I'm glad we're chatting, ${personalInfo.name}!` : ""}`
+    return `${baseResponse}${userName ? ` I'm glad we're chatting, ${userName}!` : ""}`
   }
 
   private generateKnowledgeResponse(input: string): string {

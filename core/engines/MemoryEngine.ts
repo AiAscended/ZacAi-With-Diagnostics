@@ -23,7 +23,7 @@ export class MemoryEngine {
     // Load existing personal info from storage
     await this.loadPersonalInfo()
 
-    console.log("🧠 MemoryEngine: Initialized with enhanced personal info system")
+    console.log("🧠 MemoryEngine: Initialized with golden code personal info system")
     this.isInitialized = true
   }
 
@@ -33,19 +33,20 @@ export class MemoryEngine {
       timestamp: Date.now(),
     })
 
-    // GOLDEN CODE: Enhanced extraction with immediate storage
+    // GOLDEN CODE: Handle immediate extraction from CognitiveRouter
     if (memory.type === "conversation") {
-      if (memory.userMessage) {
+      if (memory.extractedInfo && memory.immediate) {
+        // This was already processed by CognitiveRouter, just store it
+        await this.storeExtractedInfoImmediate(memory.extractedInfo)
+      } else if (memory.userMessage) {
+        // Fallback extraction for any missed patterns
         await this.extractPersonalInfo(memory.userMessage)
-      }
-      if (memory.extractedInfo) {
-        await this.storeExtractedInfo(memory.extractedInfo)
       }
     }
   }
 
-  // GOLDEN CODE: Store immediately extracted personal info
-  private async storeExtractedInfo(extractedInfo: any): Promise<void> {
+  // GOLDEN CODE: Store immediately extracted personal info from CognitiveRouter
+  private async storeExtractedInfoImmediate(extractedInfo: any): Promise<void> {
     for (const [key, value] of Object.entries(extractedInfo)) {
       if (value && typeof value === "string") {
         const entry: PersonalInfoEntry = {
@@ -57,7 +58,7 @@ export class MemoryEngine {
           source: "immediate_extraction",
         }
         this.personalInfo.set(key, entry)
-        console.log(`📝 MemoryEngine: Immediately stored: ${key} = ${value}`)
+        console.log(`📝 MemoryEngine: Stored immediate extraction: ${key} = ${value}`)
       }
     }
     await this.savePersonalInfo()
@@ -81,7 +82,7 @@ export class MemoryEngine {
     return this.memories
   }
 
-  // GOLDEN CODE: Enhanced personal info extraction with better pet name patterns
+  // GOLDEN CODE: Enhanced personal info extraction with comprehensive patterns
   private async extractPersonalInfo(message: string): Promise<void> {
     const personalPatterns = [
       { pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i, key: "name", importance: 0.9 },
@@ -89,7 +90,7 @@ export class MemoryEngine {
       { pattern: /i have a wife/i, key: "marital_status", value: "married", importance: 0.8 },
       { pattern: /i have a husband/i, key: "marital_status", value: "married", importance: 0.8 },
 
-      // ENHANCED: Better pet name patterns
+      // ENHANCED: Comprehensive pet name patterns from all old systems
       { pattern: /(?:one|first|older)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i, key: "pet_name_1", importance: 0.6 },
       {
         pattern: /(?:other|second|younger|another)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
@@ -99,6 +100,7 @@ export class MemoryEngine {
       { pattern: /(?:and|,)\s*(\w+)\s+(?:is\s+)?(?:the\s+)?(?:other|second)/i, key: "pet_name_2", importance: 0.6 },
       { pattern: /(\w+)\s+and\s+(\w+)\s+are\s+(?:my|their)\s+names/i, key: "pet_names_both", importance: 0.6 },
       { pattern: /named\s+(\w+)\s+and\s+(\w+)/i, key: "pet_names_both", importance: 0.6 },
+      { pattern: /they're\s+called\s+(\w+)\s+and\s+(\w+)/i, key: "pet_names_both", importance: 0.6 },
 
       { pattern: /i work as (?:a |an )?(.+)/i, key: "job", importance: 0.8 },
       { pattern: /i live in (.+)/i, key: "location", importance: 0.7 },
@@ -154,7 +156,7 @@ export class MemoryEngine {
     await this.savePersonalInfo()
   }
 
-  // GOLDEN CODE: Enhanced personal info retrieval and summary
+  // GOLDEN CODE: Enhanced personal info summary with better formatting
   public getPersonalInfoSummary(): string {
     if (this.personalInfo.size === 0) {
       return "I don't have any personal information stored about you yet."
@@ -188,7 +190,7 @@ export class MemoryEngine {
             info.push(`Your name is ${entry.value}`)
             break
           case "age":
-            info.push(`You are ${entry.value}`)
+            info.push(`You are ${entry.value} years old`)
             break
           case "location":
             info.push(`You live in ${entry.value}`)
