@@ -1,38 +1,41 @@
 {
   "alphabet": {
-    "definition": "The set of letters or symbols in a fixed order used to represent the basic sounds of a language",
+    "word": "alphabet",
+    "definition": "A set of letters or symbols in a fixed order used to represent the basic sounds of a language",
     "part_of_speech": "noun",
-    "examples": ["The English alphabet has 26 letters", "Children learn the alphabet in school"],
+    "examples": ["The English alphabet has 26 letters.", "Children learn the alphabet in school."],
     "synonyms": ["letters", "characters", "script"],
     "antonyms": [],
     "phonetic": "/ˈælfəˌbɛt/",
     "frequency": 1,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["language", "education"]
   },
   "a": {
+    "word": "a",
     "definition": "The first letter of the English alphabet",
     "part_of_speech": "noun",
-    "examples": ["A is for apple", "The word 'cat' starts with the letter A"],
+    "examples": ["A is the first letter.", "The word 'apple' starts with A."],
     "synonyms": [],
     "antonyms": [],
     "phonetic": "/eɪ/",
     "frequency": 2,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["alphabet", "letters"]
   },
   "b": {
+    "word": "b",
     "definition": "The second letter of the English alphabet",
     "part_of_speech": "noun",
-    "examples": ["B is for ball", "The word 'book' starts with B"],
+    "examples": ["B comes after A.", "The word 'ball' starts with B."],
     "synonyms": [],
     "antonyms": [],
     "phonetic": "/biː/",
     "frequency": 3,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["alphabet", "letters"]
   },
   "c": {
@@ -348,15 +351,16 @@
     "spelling_importance": "Final letter of alphabet, voiced sibilant consonant"
   },
   "the": {
-    "definition": "Used to refer to one or more people or things already mentioned or assumed to be common knowledge",
-    "part_of_speech": "article",
-    "examples": ["The cat sat on the mat", "I saw the movie yesterday"],
+    "word": "the",
+    "definition": "Used to point forward to a following qualifying or defining clause or phrase",
+    "part_of_speech": "determiner",
+    "examples": ["The book on the table.", "The man who called yesterday."],
     "synonyms": [],
     "antonyms": [],
     "phonetic": "/ðə/",
-    "frequency": 4,
+    "frequency": 5,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["grammar", "articles"]
   },
   "be": {
@@ -369,39 +373,42 @@
     "frequency": 100
   },
   "to": {
+    "word": "to",
     "definition": "Expressing motion in the direction of a particular location",
     "part_of_speech": "preposition",
-    "examples": ["I'm going to school", "Give it to me"],
-    "synonyms": ["toward", "in the direction of"],
-    "antonyms": ["from", "away from"],
+    "examples": ["Go to school.", "From here to there."],
+    "synonyms": ["toward", "until"],
+    "antonyms": ["from", "away"],
     "phonetic": "/tuː/",
-    "frequency": 7,
+    "frequency": 9,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["grammar", "prepositions"]
   },
   "of": {
+    "word": "of",
     "definition": "Expressing the relationship between a part and a whole",
     "part_of_speech": "preposition",
-    "examples": ["A piece of cake", "The color of the sky"],
+    "examples": ["A piece of cake.", "The color of the sky."],
     "synonyms": ["from", "belonging to"],
     "antonyms": [],
     "phonetic": "/ʌv/",
     "frequency": 10,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["grammar", "prepositions"]
   },
   "and": {
+    "word": "and",
     "definition": "Used to connect words of the same part of speech, clauses, or sentences",
     "part_of_speech": "conjunction",
-    "examples": ["Tom and Jerry", "I like apples and oranges"],
-    "synonyms": ["plus", "also", "as well as"],
+    "examples": ["Bread and butter.", "He ran and jumped."],
+    "synonyms": ["plus", "also", "furthermore"],
     "antonyms": ["or", "but"],
     "phonetic": "/ænd/",
-    "frequency": 5,
+    "frequency": 6,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["grammar", "conjunctions"]
   },
   "in": {
@@ -489,15 +496,16 @@
     "frequency": 92
   },
   "you": {
+    "word": "you",
     "definition": "Used to refer to the person or people that the speaker is addressing",
     "part_of_speech": "pronoun",
-    "examples": ["How are you?", "You are my friend"],
+    "examples": ["How are you?", "You are welcome."],
     "synonyms": ["yourself", "thou"],
     "antonyms": ["I", "me"],
     "phonetic": "/juː/",
     "frequency": 8,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["grammar", "pronouns"]
   },
   "do": {
@@ -2076,15 +2084,29 @@
     "frequency": 4
   },
   "is": {
+    "word": "is",
     "definition": "Third person singular present of be",
     "part_of_speech": "verb",
-    "examples": ["She is happy", "The sky is blue"],
+    "examples": ["She is happy.", "The sky is blue."],
     "synonyms": ["exists", "equals"],
-    "antonyms": ["is not", "isn't"],
+    "antonyms": ["isn't", "was not"],
     "phonetic": "/ɪz/",
-    "frequency": 6,
+    "frequency": 7,
     "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
+    "date_added": "2025-01-09T11:35:00+10:00",
     "topics": ["grammar", "verbs"]
+  },
+  "hello": {
+    "word": "hello",
+    "definition": "Used as a greeting or to begin a phone conversation",
+    "part_of_speech": "exclamation",
+    "examples": ["Hello, how are you?", "She said hello to her neighbor."],
+    "synonyms": ["hi", "greetings", "hey"],
+    "antonyms": ["goodbye", "farewell"],
+    "phonetic": "/həˈloʊ/",
+    "frequency": 4,
+    "source": "seed",
+    "date_added": "2025-01-09T11:35:00+10:00",
+    "topics": ["greetings", "social"]
   }
 }
