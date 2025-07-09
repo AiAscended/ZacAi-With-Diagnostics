@@ -23,7 +23,7 @@ export class MemoryEngine {
     // Load existing personal info from storage
     await this.loadPersonalInfo()
 
-    console.log("🧠 MemoryEngine: Initialized with golden code personal info system")
+    console.log("🧠 MemoryEngine: Initialized with true golden code personal info system")
     this.isInitialized = true
   }
 
@@ -33,7 +33,7 @@ export class MemoryEngine {
       timestamp: Date.now(),
     })
 
-    // GOLDEN CODE: Handle immediate extraction from CognitiveRouter
+    // Handle immediate extraction from CognitiveRouter
     if (memory.type === "conversation") {
       if (memory.extractedInfo && memory.immediate) {
         // This was already processed by CognitiveRouter, just store it
@@ -45,7 +45,7 @@ export class MemoryEngine {
     }
   }
 
-  // GOLDEN CODE: Store immediately extracted personal info from CognitiveRouter
+  // Store immediately extracted personal info from CognitiveRouter
   private async storeExtractedInfoImmediate(extractedInfo: any): Promise<void> {
     for (const [key, value] of Object.entries(extractedInfo)) {
       if (value && typeof value === "string") {
@@ -82,7 +82,7 @@ export class MemoryEngine {
     return this.memories
   }
 
-  // GOLDEN CODE: Enhanced personal info extraction with comprehensive patterns
+  // Enhanced personal info extraction with comprehensive patterns
   private async extractPersonalInfo(message: string): Promise<void> {
     const personalPatterns = [
       { pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i, key: "name", importance: 0.9 },
@@ -90,7 +90,7 @@ export class MemoryEngine {
       { pattern: /i have a wife/i, key: "marital_status", value: "married", importance: 0.8 },
       { pattern: /i have a husband/i, key: "marital_status", value: "married", importance: 0.8 },
 
-      // ENHANCED: Comprehensive pet name patterns from all old systems
+      // Enhanced pet name patterns
       { pattern: /(?:one|first|older)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i, key: "pet_name_1", importance: 0.6 },
       {
         pattern: /(?:other|second|younger|another)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
@@ -156,7 +156,7 @@ export class MemoryEngine {
     await this.savePersonalInfo()
   }
 
-  // GOLDEN CODE: Enhanced personal info summary with better formatting
+  // Enhanced personal info summary with better formatting
   public getPersonalInfoSummary(): string {
     if (this.personalInfo.size === 0) {
       return "I don't have any personal information stored about you yet."

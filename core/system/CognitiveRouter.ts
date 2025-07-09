@@ -4,7 +4,6 @@ export interface RoutingDecision {
   confidence: number
   reasoning: string
   personalInfo?: any
-  immediateResponse?: string
 }
 
 export class CognitiveRouter {
@@ -17,20 +16,32 @@ export class CognitiveRouter {
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
-    console.log("🧭 CognitiveRouter: Initialized with golden code integration")
+    console.log("🧭 CognitiveRouter: Initialized with true golden code")
     this.isInitialized = true
   }
 
   public async route(userMessage: string, context: any): Promise<any> {
-    console.log(`🧭 CognitiveRouter: Processing with golden code: "${userMessage}"`)
+    console.log(`🧭 CognitiveRouter: Processing with true golden code: "${userMessage}"`)
 
-    // GOLDEN CODE: Extract personal info IMMEDIATELY and generate instant response if needed
-    const personalContext = await this.extractAndProcessPersonalInfoImmediate(userMessage)
+    // GOLDEN CODE: Extract personal info FIRST (synchronously) like CognitiveAISystem did
+    const extractedPersonalInfo = this.extractAndStorePersonalInfoImmediate(userMessage)
 
-    // If we have an immediate response (like name recognition), use it
-    if (personalContext.immediateResponse) {
+    // GOLDEN CODE: Check for immediate personal info responses (like the original CognitiveAISystem)
+    const immediateResponse = this.generateImmediatePersonalResponse(userMessage, extractedPersonalInfo)
+
+    if (immediateResponse) {
+      // Store the extracted info in memory engine
+      if (Object.keys(extractedPersonalInfo).length > 0) {
+        await this.engines.memoryEngine.storeMemory({
+          type: "conversation",
+          userMessage: userMessage,
+          extractedInfo: extractedPersonalInfo,
+          immediate: true,
+        })
+      }
+
       return {
-        content: personalContext.immediateResponse,
+        content: immediateResponse,
         confidence: 0.95,
         reasoning: ["Immediate personal info recognition and response"],
         pathways: ["personal_info_immediate"],
@@ -41,11 +52,11 @@ export class CognitiveRouter {
       }
     }
 
-    // Determine routing decision with personal info context
-    const routingDecision = this.determineRouting(userMessage, personalContext.extractedInfo)
+    // Continue with normal routing if no immediate response
+    const routingDecision = this.determineRouting(userMessage, extractedPersonalInfo)
     console.log(`🧭 Primary engine: ${routingDecision.primaryEngine}`)
 
-    // Process through ThinkingEngine with personal context
+    // Process through ThinkingEngine
     const thinkingResult = await this.engines.thinkingEngine.processThought(userMessage, context, routingDecision)
 
     // Enhance with specific engine processing
@@ -53,7 +64,7 @@ export class CognitiveRouter {
       userMessage,
       thinkingResult,
       routingDecision,
-      personalContext.extractedInfo,
+      extractedPersonalInfo,
     )
 
     return {
@@ -68,126 +79,119 @@ export class CognitiveRouter {
     }
   }
 
-  // GOLDEN CODE: Merged from CognitiveAISystem + EnhancedAISystemV2 - Immediate extraction and response
-  private async extractAndProcessPersonalInfoImmediate(message: string): Promise<any> {
-    const lowerMessage = message.toLowerCase()
+  // GOLDEN CODE: Exact extraction pattern from CognitiveAISystem
+  private extractAndStorePersonalInfoImmediate(message: string): any {
     const extractedInfo: any = {}
-    let immediateResponse: string | null = null
 
-    // GOLDEN PATTERNS: Enhanced from multiple old systems
+    // GOLDEN CODE: Personal patterns from the working CognitiveAISystem
     const personalPatterns = [
       {
         pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i,
         key: "name",
         importance: 0.9,
-        immediateResponseGenerator: (name: string) =>
-          `Nice to meet you, ${name}! I'll remember your name for all our future conversations. How can I help you today?`,
+        extract: (match: RegExpMatchArray) => match[1],
       },
       {
         pattern: /i have (\d+)\s+(cats?|dogs?|pets?)/i,
         key: "pets",
         importance: 0.7,
-        multiCapture: true,
-        immediateResponseGenerator: (count: string, type: string, fullMessage: string) => {
-          const petNames = this.extractPetNamesFromMessage(fullMessage)
-          let response = `That's wonderful! You have ${count} ${type}.`
-
-          if (petNames.length > 0) {
-            if (petNames.length === 1) {
-              response += ` ${petNames[0]} sounds like a great companion!`
-            } else if (petNames.length === 2) {
-              response += ` ${petNames[0]} and ${petNames[1]} sound like wonderful companions!`
-            }
-          }
-
-          response += " I love hearing about pets and I'll remember this information about your furry friends."
-          return response
-        },
+        extract: (match: RegExpMatchArray) => `${match[1]} ${match[2]}`,
+      },
+      {
+        pattern: /(?:one|first)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
+        key: "pet_name_1",
+        importance: 0.6,
+        extract: (match: RegExpMatchArray) => match[1],
+      },
+      {
+        pattern: /(?:other|second|another)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
+        key: "pet_name_2",
+        importance: 0.6,
+        extract: (match: RegExpMatchArray) => match[1],
+      },
+      {
+        pattern: /named\s+(\w+)\s+and\s+(\w+)/i,
+        key: "pet_names_both",
+        importance: 0.6,
+        extract: (match: RegExpMatchArray) => ({ name1: match[1], name2: match[2] }),
       },
       {
         pattern: /i work as (?:a |an )?(.+)/i,
         key: "job",
         importance: 0.8,
-        immediateResponseGenerator: (job: string, fullMessage: string) => {
-          const name = this.extractNameFromContext(fullMessage)
-          return `Thanks for sharing that${name ? `, ${name}` : ""}! Working as ${job.trim()} must be interesting. I'll keep this information in mind for our conversations.`
-        },
+        extract: (match: RegExpMatchArray) => match[1],
       },
       {
         pattern: /i live in (.+)/i,
         key: "location",
         importance: 0.7,
-        immediateResponseGenerator: (location: string, fullMessage: string) => {
-          const name = this.extractNameFromContext(fullMessage)
-          return `${location.trim()} sounds like a nice place to live${name ? `, ${name}` : ""}! I'll remember this for our future chats.`
-        },
+        extract: (match: RegExpMatchArray) => match[1],
       },
     ]
 
-    // Process each pattern
-    for (const patternConfig of personalPatterns) {
-      const match = message.match(patternConfig.pattern)
-      if (match && match[1]) {
-        if (patternConfig.multiCapture && match[2]) {
-          extractedInfo[patternConfig.key] = `${match[1]} ${match[2]}`
-          if (patternConfig.immediateResponseGenerator) {
-            immediateResponse = patternConfig.immediateResponseGenerator(match[1], match[2], message)
-          }
-        } else {
-          extractedInfo[patternConfig.key] = match[1].trim()
-          if (patternConfig.immediateResponseGenerator) {
-            immediateResponse = patternConfig.immediateResponseGenerator(match[1], message)
-          }
-        }
-
-        // Store in memory engine immediately
-        await this.engines.memoryEngine.storeMemory({
-          type: "conversation",
-          userMessage: message,
-          extractedInfo: { [patternConfig.key]: extractedInfo[patternConfig.key] },
-          immediate: true,
-        })
-
-        console.log(
-          `📝 CognitiveRouter: Immediately processed: ${patternConfig.key} = ${extractedInfo[patternConfig.key]}`,
-        )
-        break // Use first match for immediate response
-      }
-    }
-
-    return {
-      extractedInfo,
-      immediateResponse,
-    }
-  }
-
-  // GOLDEN CODE: Enhanced pet name extraction from multiple old systems
-  private extractPetNamesFromMessage(message: string): string[] {
-    const petNames: string[] = []
-
-    const petNamePatterns = [
-      /(?:one|first|older)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
-      /(?:other|second|younger|another)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
-      /(?:and|,)\s*(\w+)\s+(?:is\s+)?(?:the\s+)?(?:other|second)/i,
-      /named\s+(\w+)\s+and\s+(\w+)/i,
-      /(\w+)\s+and\s+(\w+)\s+are\s+(?:my|their)\s+names/i,
-    ]
-
-    petNamePatterns.forEach((pattern) => {
+    personalPatterns.forEach(({ pattern, key, importance, extract }) => {
       const match = message.match(pattern)
       if (match) {
-        if (match[1]) petNames.push(match[1])
-        if (match[2]) petNames.push(match[2])
+        const value = extract(match)
+        if (key === "pet_names_both" && typeof value === "object") {
+          extractedInfo["pet_name_1"] = value.name1
+          extractedInfo["pet_name_2"] = value.name2
+        } else {
+          extractedInfo[key] = value
+        }
+        console.log(`📝 CognitiveRouter: Extracted ${key} = ${JSON.stringify(value)}`)
       }
     })
 
-    return [...new Set(petNames)] // Remove duplicates
+    return extractedInfo
   }
 
-  // GOLDEN CODE: Extract name from current context (if mentioned in same message)
-  private extractNameFromContext(message: string): string | null {
-    const nameMatch = message.match(/(?:my name is|i'm|i am|call me)\s+(\w+)/i)
-    return nameMatch ? nameMatch[1] : null
+  // GOLDEN CODE: Immediate response generation like CognitiveAISystem did
+  private generateImmediatePersonalResponse(userMessage: string, extractedInfo: any): string | null {
+    const lowerMessage = userMessage.toLowerCase()
+
+    // GOLDEN CODE: Name recognition with immediate usage
+    if (extractedInfo.name) {
+      if (lowerMessage.includes("my name is")) {
+        return `Nice to meet you, ${extractedInfo.name}! I'll remember your name for all our future conversations. How can I help you today?`
+      }
+      if (lowerMessage.includes("i'm") || lowerMessage.includes("i am")) {
+        return `Hello ${extractedInfo.name}! Thank you for introducing yourself. I'll remember your name and use it in our conversations. What would you like to explore together?`
+      }
+    }
+
+    // GOLDEN CODE: Pet information with immediate name usage
+    if (extractedInfo.pets) {
+      let response = `That's wonderful${extractedInfo.name ? `, ${extractedInfo.name}` : ""}! You have ${extractedInfo.pets}.`
+
+      if (extractedInfo.pet_name_1) {
+        response += ` ${extractedInfo.pet_name_1} sounds like a great companion!`
+      }
+
+      if (extractedInfo.pet_name_2) {
+        response += ` And ${extractedInfo.pet_name_2} too!`
+      }
+
+      response += " I love hearing about pets and I'll remember this information about your furry friends."
+      return response
+    }
+
+    // GOLDEN CODE: Job information with immediate name usage
+    if (extractedInfo.job) {
+      return `Thanks for sharing that${extractedInfo.name ? `, ${extractedInfo.name}` : ""}! Working as ${extractedInfo.job.trim()} must be interesting. I'll keep this information in mind for our conversations.`
+    }
+
+    // GOLDEN CODE: Location information with immediate name usage
+    if (extractedInfo.location) {
+      return `${extractedInfo.location.trim()} sounds like a nice place to live${extractedInfo.name ? `, ${extractedInfo.name}` : ""}! I'll remember this for our future chats.`
+    }
+
+    // GOLDEN CODE: General personal info sharing (from CognitiveAISystem)
+    if (lowerMessage.includes("my name is") || lowerMessage.includes("i am") || lowerMessage.includes("i have")) {
+      return `Thank you for sharing that information with me! I'll remember this in my personal memory system. I'm constantly learning and can now help with math problems, look up word definitions online, and even explore scientific concepts together!`
+    }
+
+    return null // No immediate response needed
   }
 
   private determineRouting(userMessage: string, personalInfo: any): RoutingDecision {
@@ -204,7 +208,7 @@ export class CognitiveRouter {
       }
     }
 
-    // ENHANCED: Personal info sharing detection
+    // Personal info sharing detection
     if (/(?:my name is|i'm|i am|call me|i have|i work|i live)/.test(lowerMessage)) {
       return {
         primaryEngine: "memory",
@@ -215,7 +219,7 @@ export class CognitiveRouter {
       }
     }
 
-    // GOLDEN CODE: Dictionary/definition request detection with fallback
+    // Dictionary/definition request detection
     if (/(?:what\s+(?:is|does|means?)|define|meaning\s+of|explain)\s+(.+)/i.test(lowerMessage)) {
       return {
         primaryEngine: "knowledge",
@@ -280,13 +284,13 @@ export class CognitiveRouter {
         mathAnalysis = mathResult
       }
     } else if (routingDecision.primaryEngine === "knowledge") {
-      // GOLDEN CODE: Enhanced knowledge processing with thinking fallback
+      // Enhanced knowledge processing with thinking fallback
       const knowledgeResult = await this.engines.knowledgeEngine.processKnowledge(userMessage)
       if (knowledgeResult.found) {
         knowledgeUsed = knowledgeResult.results.map((r: any) => r.key)
         enhancedContent = `Based on my knowledge${userName ? `, ${userName}` : ""}: ${this.generateKnowledgeResponse("")}`
       } else {
-        // GOLDEN CODE: Thinking fallback when knowledge lookup fails
+        // GOLDEN CODE: Thinking fallback when knowledge lookup fails (from CognitiveAISystem)
         const wordMatch = userMessage.match(/(?:what\s+(?:is|does|means?)|define|meaning\s+of|explain)\s+(.+)/i)
         const word = wordMatch ? wordMatch[1].trim().replace(/[?!.]/g, "") : "that"
 
