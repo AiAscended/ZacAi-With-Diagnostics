@@ -1,3 +1,12 @@
+export interface PersonalInfoEntry {
+  key: string
+  value: string
+  timestamp: number
+  importance: number
+  type: string
+  source: string
+}
+
 export class MemoryEngine {
   private isInitialized = false
   private storageManager: any
@@ -14,7 +23,7 @@ export class MemoryEngine {
     // Load existing personal info from storage
     await this.loadPersonalInfo()
 
-    console.log("🧠 MemoryEngine: Initialized")
+    console.log("🧠 MemoryEngine: Initialized with personal info system")
     this.isInitialized = true
   }
 
@@ -34,16 +43,25 @@ export class MemoryEngine {
     return this.memories
   }
 
-  // GOLDEN CODE: Personal info extraction from ReliableAISystem
+  // GOLDEN CODE: Enhanced personal info extraction with all patterns
   private async extractPersonalInfo(message: string): Promise<void> {
     const personalPatterns = [
       { pattern: /my name is (\w+)/i, key: "name", importance: 0.9 },
       { pattern: /i have (\d+) (cats?|dogs?|pets?)/i, key: "pets", importance: 0.7 },
       { pattern: /i have a wife/i, key: "marital_status", value: "married", importance: 0.8 },
+      { pattern: /i have a husband/i, key: "marital_status", value: "married", importance: 0.8 },
       { pattern: /one is named (\w+)/i, key: "pet_name_1", importance: 0.6 },
       { pattern: /the other is.*named (\w+)/i, key: "pet_name_2", importance: 0.6 },
       { pattern: /i work as (?:a |an )?(.+)/i, key: "job", importance: 0.8 },
       { pattern: /i live in (.+)/i, key: "location", importance: 0.7 },
+      { pattern: /i am (\d+)\s*years?\s*old/i, key: "age", importance: 0.6 },
+      { pattern: /i like (.+)/i, key: "likes", importance: 0.5 },
+      { pattern: /i don't like (.+)/i, key: "dislikes", importance: 0.5 },
+      { pattern: /i love (.+)/i, key: "loves", importance: 0.6 },
+      { pattern: /i hate (.+)/i, key: "hates", importance: 0.6 },
+      { pattern: /i'm from (.+)/i, key: "origin", importance: 0.7 },
+      { pattern: /i study (.+)/i, key: "studies", importance: 0.7 },
+      { pattern: /i'm studying (.+)/i, key: "studies", importance: 0.7 },
     ]
 
     personalPatterns.forEach(({ pattern, key, value, importance }) => {
@@ -67,7 +85,7 @@ export class MemoryEngine {
     await this.savePersonalInfo()
   }
 
-  // GOLDEN CODE: Personal info retrieval and summary
+  // GOLDEN CODE: Enhanced personal info retrieval and summary
   public getPersonalInfoSummary(): string {
     if (this.personalInfo.size === 0) {
       return "I don't have any personal information stored about you yet."
@@ -75,32 +93,72 @@ export class MemoryEngine {
 
     const info: string[] = []
 
-    if (this.personalInfo.has("name")) {
-      info.push(`Your name is ${this.personalInfo.get("name")?.value}`)
-    }
+    // Prioritized information display
+    const priorityOrder = [
+      "name",
+      "age",
+      "location",
+      "job",
+      "pets",
+      "pet_name_1",
+      "pet_name_2",
+      "marital_status",
+      "studies",
+      "likes",
+      "loves",
+      "dislikes",
+      "hates",
+      "origin",
+    ]
 
-    if (this.personalInfo.has("pets")) {
-      info.push(`You have ${this.personalInfo.get("pets")?.value}`)
-    }
-
-    if (this.personalInfo.has("pet_name_1")) {
-      info.push(`One is named ${this.personalInfo.get("pet_name_1")?.value}`)
-    }
-
-    if (this.personalInfo.has("pet_name_2")) {
-      info.push(`The other is named ${this.personalInfo.get("pet_name_2")?.value}`)
-    }
-
-    if (this.personalInfo.has("job")) {
-      info.push(`You work as ${this.personalInfo.get("job")?.value}`)
-    }
-
-    if (this.personalInfo.has("location")) {
-      info.push(`You live in ${this.personalInfo.get("location")?.value}`)
-    }
-
-    if (this.personalInfo.has("marital_status")) {
-      info.push(`You are ${this.personalInfo.get("marital_status")?.value}`)
+    for (const key of priorityOrder) {
+      if (this.personalInfo.has(key)) {
+        const entry = this.personalInfo.get(key)!
+        switch (key) {
+          case "name":
+            info.push(`Your name is ${entry.value}`)
+            break
+          case "age":
+            info.push(`You are ${entry.value}`)
+            break
+          case "location":
+            info.push(`You live in ${entry.value}`)
+            break
+          case "job":
+            info.push(`You work as ${entry.value}`)
+            break
+          case "pets":
+            info.push(`You have ${entry.value}`)
+            break
+          case "pet_name_1":
+            info.push(`One is named ${entry.value}`)
+            break
+          case "pet_name_2":
+            info.push(`The other is named ${entry.value}`)
+            break
+          case "marital_status":
+            info.push(`You are ${entry.value}`)
+            break
+          case "studies":
+            info.push(`You study ${entry.value}`)
+            break
+          case "likes":
+            info.push(`You like ${entry.value}`)
+            break
+          case "loves":
+            info.push(`You love ${entry.value}`)
+            break
+          case "dislikes":
+            info.push(`You don't like ${entry.value}`)
+            break
+          case "hates":
+            info.push(`You hate ${entry.value}`)
+            break
+          case "origin":
+            info.push(`You're from ${entry.value}`)
+            break
+        }
+      }
     }
 
     return info.join(". ") + "."
@@ -110,7 +168,19 @@ export class MemoryEngine {
     return this.personalInfo
   }
 
-  // Storage methods for personal info persistence
+  public getPersonalInfoByKey(key: string): PersonalInfoEntry | undefined {
+    return this.personalInfo.get(key)
+  }
+
+  public hasPersonalInfo(): boolean {
+    return this.personalInfo.size > 0
+  }
+
+  public getPersonalInfoCount(): number {
+    return this.personalInfo.size
+  }
+
+  // Enhanced storage methods for personal info persistence
   private async loadPersonalInfo(): Promise<void> {
     try {
       const stored = localStorage.getItem("zacai-personal-info")
@@ -139,6 +209,7 @@ export class MemoryEngine {
       initialized: this.isInitialized,
       totalMemories: this.memories.length,
       personalInfoEntries: this.personalInfo.size,
+      personalInfoTypes: Array.from(new Set(Array.from(this.personalInfo.values()).map((entry) => entry.key))),
     }
   }
 
@@ -164,13 +235,33 @@ export class MemoryEngine {
     this.personalInfo = new Map()
     localStorage.removeItem("zacai-personal-info")
   }
-}
 
-interface PersonalInfoEntry {
-  key: string
-  value: string
-  timestamp: number
-  importance: number
-  type: string
-  source: string
+  // Additional utility methods for personal info management
+  public async addPersonalInfo(key: string, value: string, importance = 0.7): Promise<void> {
+    const entry: PersonalInfoEntry = {
+      key,
+      value,
+      timestamp: Date.now(),
+      importance,
+      type: "personal_info",
+      source: "manual",
+    }
+    this.personalInfo.set(key, entry)
+    await this.savePersonalInfo()
+  }
+
+  public async removePersonalInfo(key: string): Promise<void> {
+    this.personalInfo.delete(key)
+    await this.savePersonalInfo()
+  }
+
+  public async updatePersonalInfo(key: string, value: string): Promise<void> {
+    const existing = this.personalInfo.get(key)
+    if (existing) {
+      existing.value = value
+      existing.timestamp = Date.now()
+      this.personalInfo.set(key, existing)
+      await this.savePersonalInfo()
+    }
+  }
 }
