@@ -1,92 +1,164 @@
-export interface EngineCollection {
-  thinkingEngine: any
-  mathEngine: any
-  knowledgeEngine: any
-  languageEngine: any
-  memoryEngine: any
-  diagnosticEngine: any
+import type { ThinkingEngine } from "../engines/ThinkingEngine"
+import type { MathEngine } from "../engines/MathEngine"
+import type { KnowledgeEngine } from "../engines/KnowledgeEngine"
+import type { LanguageEngine } from "../engines/LanguageEngine"
+import type { MemoryEngine } from "../engines/MemoryEngine"
+import type { DiagnosticEngine } from "../engines/DiagnosticEngine"
+
+export interface CognitiveRouterConfig {
+  thinkingEngine: ThinkingEngine
+  mathEngine: MathEngine
+  knowledgeEngine: KnowledgeEngine
+  languageEngine: LanguageEngine
+  memoryEngine: MemoryEngine
+  diagnosticEngine: DiagnosticEngine
+}
+
+export interface RoutingDecision {
+  primaryEngine: string
+  secondaryEngines: string[]
+  confidence: number
+  reasoning: string[]
 }
 
 export class CognitiveRouter {
-  private engines: EngineCollection
+  private engines: CognitiveRouterConfig
+  private routingHistory: RoutingDecision[] = []
 
-  constructor(engines: EngineCollection) {
-    console.log("🧠 CognitiveRouter: Initializing...")
+  constructor(engines: CognitiveRouterConfig) {
     this.engines = engines
   }
 
   public async initialize(): Promise<void> {
-    console.log("✅ CognitiveRouter: Initialized successfully")
+    console.log("🛤️ Cognitive Router initialized")
   }
 
-  public async processMessage(message: string): Promise<any> {
-    console.log(`🔀 CognitiveRouter: Routing message: "${message}"`)
+  public async route(input: string, context: any): Promise<any> {
+    console.log("🧭 Routing message through cognitive pathways...")
 
-    try {
-      // Determine which engines to use based on message content
-      const routingDecision = this.analyzeMessage(message)
+    // Analyze input to determine routing
+    const routingDecision = this.analyzeInput(input, context)
+    this.routingHistory.push(routingDecision)
 
-      // Process through thinking engine first
-      const thinkingResult = await this.engines.thinkingEngine.process(message)
+    console.log(`🎯 Primary engine: ${routingDecision.primaryEngine}`)
+    console.log(`🔗 Secondary engines: ${routingDecision.secondaryEngines.join(", ")}`)
 
-      // Route to appropriate engines based on content
-      const response = {
-        content: "I understand your message.",
-        confidence: 0.7,
-        thinkingProcess: thinkingResult.steps || [],
-        knowledgeUsed: [],
-        mathAnalysis: null,
-      }
+    // Route to primary engine with thinking process
+    const thinkingResult = await this.engines.thinkingEngine.processThought(input, context, routingDecision)
 
-      // Math processing
-      if (routingDecision.needsMath) {
-        const mathResult = await this.engines.mathEngine.process(message)
-        if (mathResult.success) {
-          response.content = mathResult.result
-          response.confidence = mathResult.confidence
-          response.mathAnalysis = mathResult.analysis
-        }
-      }
+    // Process through selected engines
+    let finalResult = thinkingResult
 
-      // Language processing
-      if (routingDecision.needsLanguage) {
-        const langResult = await this.engines.languageEngine.processLanguage(message)
-        response.content = langResult.response
-        response.confidence = langResult.confidence
-      }
+    switch (routingDecision.primaryEngine) {
+      case "math":
+        finalResult = await this.engines.mathEngine.process(input, thinkingResult)
+        break
+      case "knowledge":
+        finalResult = await this.engines.knowledgeEngine.process(input, thinkingResult)
+        break
+      case "language":
+        finalResult = await this.engines.languageEngine.process(input, thinkingResult)
+        break
+      case "memory":
+        finalResult = await this.engines.memoryEngine.process(input, thinkingResult)
+        break
+      default:
+        // Use thinking engine result as-is for conversational responses
+        break
+    }
 
-      // Knowledge lookup
-      if (routingDecision.needsKnowledge) {
-        const knowledgeResult = await this.engines.knowledgeEngine.search(message)
-        if (knowledgeResult.length > 0) {
-          response.knowledgeUsed = knowledgeResult.map((k) => k.type + ": " + k.key)
-        }
-      }
-
-      // Memory storage
-      await this.engines.memoryEngine.storeInteraction(message, response.content)
-
-      return response
-    } catch (error) {
-      console.error("❌ CognitiveRouter: Error processing message:", error)
-      return {
-        content: "I encountered an error processing your message.",
-        confidence: 0.1,
-        thinkingProcess: ["Error occurred during processing"],
-        knowledgeUsed: [],
-        mathAnalysis: null,
+    // Enhance with secondary engines if needed
+    for (const engineName of routingDecision.secondaryEngines) {
+      switch (engineName) {
+        case "memory":
+          finalResult = await this.engines.memoryEngine.enhance(finalResult)
+          break
+        case "language":
+          finalResult = await this.engines.languageEngine.enhance(finalResult)
+          break
+        case "knowledge":
+          finalResult = await this.engines.knowledgeEngine.enhance(finalResult)
+          break
       }
     }
+
+    return finalResult
   }
 
-  private analyzeMessage(message: string): any {
-    const lowerMessage = message.toLowerCase()
+  private analyzeInput(input: string, context: any): RoutingDecision {
+    const reasoning: string[] = []
+    const inputLower = input.toLowerCase()
+
+    reasoning.push(`🔍 Analyzing input: "${input}"`)
+
+    // Mathematical detection
+    const hasMath =
+      /\d+\s*[+\-×*÷/]\s*\d+/.test(input) || /calculate|solve|math|multiply|divide|add|subtract/.test(inputLower)
+
+    // Knowledge request detection
+    const hasKnowledgeRequest = /what is|tell me about|explain|define|meaning/.test(inputLower)
+
+    // Personal/memory detection
+    const hasPersonalInfo = /my name|i am|remember|recall/.test(inputLower)
+
+    // Language/vocabulary detection
+    const hasLanguageRequest = /define|meaning|synonym|antonym|pronunciation/.test(inputLower)
+
+    let primaryEngine = "thinking" // Default to thinking engine
+    const secondaryEngines: string[] = []
+
+    if (hasMath) {
+      primaryEngine = "math"
+      reasoning.push("🧮 Mathematical content detected - routing to Math Engine")
+    } else if (hasKnowledgeRequest) {
+      primaryEngine = "knowledge"
+      reasoning.push("📚 Knowledge request detected - routing to Knowledge Engine")
+      secondaryEngines.push("language")
+    } else if (hasLanguageRequest) {
+      primaryEngine = "language"
+      reasoning.push("📝 Language request detected - routing to Language Engine")
+    } else if (hasPersonalInfo) {
+      primaryEngine = "memory"
+      reasoning.push("👤 Personal information detected - routing to Memory Engine")
+    } else {
+      reasoning.push("💭 General conversation - using Thinking Engine")
+    }
+
+    // Always include memory for context
+    if (primaryEngine !== "memory") {
+      secondaryEngines.push("memory")
+    }
+
+    const confidence = this.calculateRoutingConfidence(primaryEngine, input)
+    reasoning.push(`📊 Routing confidence: ${Math.round(confidence * 100)}%`)
 
     return {
-      needsMath: /\d+|\+|-|\*|\/|=|calculate|math|plus|minus|times|divided/.test(lowerMessage),
-      needsLanguage: /define|meaning|spell|pronunciation|what does|what is/.test(lowerMessage),
-      needsKnowledge: /tell me|explain|what|how|why|when|where/.test(lowerMessage),
-      needsMemory: true, // Always store interactions
+      primaryEngine,
+      secondaryEngines,
+      confidence,
+      reasoning,
     }
+  }
+
+  private calculateRoutingConfidence(engine: string, input: string): number {
+    // Simple confidence calculation based on keyword matches
+    const inputLower = input.toLowerCase()
+
+    switch (engine) {
+      case "math":
+        return /\d+\s*[+\-×*÷/]\s*\d+/.test(input) ? 0.95 : 0.7
+      case "knowledge":
+        return /what is|tell me about|explain/.test(inputLower) ? 0.9 : 0.6
+      case "language":
+        return /define|meaning/.test(inputLower) ? 0.9 : 0.6
+      case "memory":
+        return /my name|i am|remember/.test(inputLower) ? 0.9 : 0.6
+      default:
+        return 0.8
+    }
+  }
+
+  public getRoutingHistory(): RoutingDecision[] {
+    return [...this.routingHistory]
   }
 }

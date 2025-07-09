@@ -1,60 +1,42 @@
 {
-  "alphabet": {
-    "word": "alphabet",
-    "definition": "A set of letters or symbols in a fixed order used to represent the basic sounds of a language",
-    "part_of_speech": "noun",
-    "examples": ["The English alphabet has 26 letters"],
-    "synonyms": ["letters", "characters"],
-    "antonyms": [],
-    "phonetic": "/ˈælfəˌbɛt/",
-    "frequency": 100,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["language", "education"],
-    "partOfSpeech": "noun"
-  },
   "a": {
-    "word": "a",
-    "definition": "The first letter of the English alphabet",
-    "part_of_speech": "noun",
-    "examples": ["A is for apple"],
-    "synonyms": [],
-    "antonyms": [],
-    "phonetic": "/eɪ/",
-    "frequency": 1,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["alphabet", "letters"],
-    "partOfSpeech": "noun"
+    "definition": "The first letter of the English alphabet; indefinite article used before consonant sounds",
+    "part_of_speech": "letter/article",
+    "phonetic": "eɪ",
+    "synonyms": ["an", "one"],
+    "antonyms": ["the"],
+    "examples": ["A is the first letter", "A book", "A good idea"],
+    "frequency": 100,
+    "alphabet_position": 1,
+    "letter_type": "vowel",
+    "phonetic_sound": "ay sound as in day",
+    "spelling_importance": "Fundamental vowel for word formation and article usage"
   },
   "b": {
-    "word": "b",
-    "definition": "The second letter of the English alphabet",
-    "part_of_speech": "noun",
-    "examples": ["B is for ball"],
+    "definition": "The second letter of the English alphabet; a consonant",
+    "part_of_speech": "letter",
+    "phonetic": "biː",
     "synonyms": [],
     "antonyms": [],
-    "phonetic": "/biː/",
-    "frequency": 2,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["alphabet", "letters"],
-    "partOfSpeech": "noun"
+    "examples": ["B is the second letter", "Ball starts with B", "Big begins with B"],
+    "frequency": 95,
+    "alphabet_position": 2,
+    "letter_type": "consonant",
+    "phonetic_sound": "buh sound as in ball",
+    "spelling_importance": "Common initial consonant for many words"
   },
   "c": {
-    "definition": "The third letter of the English alphabet",
-    "part_of_speech": "noun",
+    "definition": "The third letter of the English alphabet; a consonant with hard and soft sounds",
+    "part_of_speech": "letter",
     "phonetic": "siː",
     "synonyms": [],
     "antonyms": [],
-    "examples": ["C is for cat"],
-    "frequency": 3,
+    "examples": ["C is the third letter", "Cat starts with C", "City starts with soft C"],
+    "frequency": 90,
     "alphabet_position": 3,
     "letter_type": "consonant",
     "phonetic_sound": "hard k sound or soft s sound",
-    "spelling_importance": "Versatile consonant with multiple pronunciations",
-    "source": "seed",
-    "partOfSpeech": "noun"
+    "spelling_importance": "Versatile consonant with multiple pronunciations"
   },
   "d": {
     "definition": "The fourth letter of the English alphabet; a voiced consonant",
@@ -356,18 +338,13 @@
     "spelling_importance": "Final letter of alphabet, voiced sibilant consonant"
   },
   "the": {
-    "word": "the",
-    "definition": "Used to refer to a specific thing previously mentioned, known, or understood",
+    "definition": "Definite article used to specify a particular noun",
     "part_of_speech": "article",
-    "examples": ["The cat is sleeping", "I saw the movie"],
+    "phonetic": "ðə",
     "synonyms": [],
-    "antonyms": [],
-    "phonetic": "/ðə/",
-    "frequency": 1,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "articles"],
-    "partOfSpeech": "article"
+    "antonyms": ["a", "an"],
+    "examples": ["The book", "The answer", "The most common word"],
+    "frequency": 100
   },
   "be": {
     "definition": "To exist, occur, or have reality; auxiliary verb for continuous tenses",
@@ -379,45 +356,31 @@
     "frequency": 100
   },
   "to": {
-    "word": "to",
-    "definition": "Expressing motion in the direction of",
+    "definition": "Preposition expressing direction, place, or position; infinitive marker",
     "part_of_speech": "preposition",
-    "examples": ["I went to the store", "She walked to school"],
-    "synonyms": ["toward", "until"],
+    "phonetic": "tuː",
+    "synonyms": ["toward", "into"],
     "antonyms": ["from", "away"],
-    "phonetic": "/tuː/",
-    "frequency": 6,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "prepositions"],
-    "partOfSpeech": "preposition"
+    "examples": ["Go to school", "To be happy", "Listen to music"],
+    "frequency": 100
   },
   "of": {
-    "word": "of",
-    "definition": "Expressing the relationship between a part and a whole",
+    "definition": "Expressing relationship between part and whole; belonging to",
     "part_of_speech": "preposition",
-    "examples": ["A piece of cake.", "The color of the sky."],
+    "phonetic": "ʌv",
     "synonyms": ["from", "belonging to"],
     "antonyms": [],
-    "phonetic": "/ʌv/",
-    "frequency": 10,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "prepositions"]
+    "examples": ["Part of the team", "Book of poems", "City of lights"],
+    "frequency": 100
   },
   "and": {
-    "word": "and",
-    "definition": "Used to connect words, phrases, or clauses",
+    "definition": "Used to connect words, phrases, or clauses; conjunction meaning also",
     "part_of_speech": "conjunction",
-    "examples": ["Cats and dogs", "I went to the store and bought milk"],
-    "synonyms": ["plus", "also"],
+    "phonetic": "ænd",
+    "synonyms": ["plus", "also", "furthermore"],
     "antonyms": ["or", "but"],
-    "phonetic": "/ænd/",
-    "frequency": 2,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "conjunctions"],
-    "partOfSpeech": "conjunction"
+    "examples": ["Cats and dogs", "Read and write", "Fast and furious"],
+    "frequency": 100
   },
   "in": {
     "definition": "Expressing location or position within limits; inside",
@@ -438,16 +401,13 @@
     "frequency": 98
   },
   "it": {
-    "definition": "Used to refer to a thing previously mentioned or easily identified",
+    "definition": "Pronoun referring to a thing previously mentioned or easily identified",
     "part_of_speech": "pronoun",
-    "examples": ["Where is it?", "It is raining"],
-    "synonyms": ["that", "this"],
+    "phonetic": "ɪt",
+    "synonyms": ["that"],
     "antonyms": [],
-    "phonetic": "/ɪt/",
-    "frequency": 9,
-    "source": "seed",
-    "date_added": "2025-01-07T11:35:00+10:00",
-    "topics": ["grammar", "pronouns"]
+    "examples": ["It is raining", "I like it", "It works"],
+    "frequency": 97
   },
   "for": {
     "definition": "In support of; intended to belong to; during the period of",
@@ -504,18 +464,13 @@
     "frequency": 92
   },
   "you": {
-    "word": "you",
-    "definition": "Used to refer to the person being addressed",
+    "definition": "Second person pronoun referring to the person being addressed",
     "part_of_speech": "pronoun",
-    "examples": ["How are you?", "You are welcome"],
-    "synonyms": ["yourself", "thou"],
+    "phonetic": "juː",
+    "synonyms": ["yourself"],
     "antonyms": ["I", "me"],
-    "phonetic": "/juː/",
-    "frequency": 4,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "pronouns"],
-    "partOfSpeech": "pronoun"
+    "examples": ["You are kind", "How are you?", "Thank you"],
+    "frequency": 92
   },
   "do": {
     "definition": "To perform an action; auxiliary verb for questions and negatives",
@@ -2091,40 +2046,5 @@
     "antonyms": ["space", "universe"],
     "examples": ["Around the world", "World peace", "Real world"],
     "frequency": 4
-  },
-  "is": {
-    "word": "is",
-    "definition": "Third person singular present of be",
-    "part_of_speech": "verb",
-    "examples": ["She is happy"],
-    "synonyms": ["exists", "equals"],
-    "antonyms": ["isn't", "was not"],
-    "phonetic": "/ɪz/",
-    "frequency": 3,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "verbs"],
-    "partOfSpeech": "verb"
-  },
-  "hello": {
-    "word": "hello",
-    "definition": "A greeting used when meeting someone or answering the telephone",
-    "part_of_speech": "interjection",
-    "examples": ["Hello, how are you?"],
-    "synonyms": ["hi", "greetings", "hey"],
-    "antonyms": ["goodbye", "farewell"],
-    "phonetic": "/həˈloʊ/",
-    "frequency": 50,
-    "source": "seed",
-    "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["greetings", "social"],
-    "partOfSpeech": "interjection"
-  },
-  "I": {
-    "definition": "Used by a speaker to refer to himself or herself",
-    "partOfSpeech": "pronoun",
-    "examples": ["I am happy", "I like pizza"],
-    "frequency": 5,
-    "source": "seed"
   }
 }

@@ -1,299 +1,54 @@
 {
-  "learning_principles": {
-    "continuous_improvement": "Learn from every interaction to become more helpful and accurate",
-    "user_focused": "Adapt to individual user preferences and communication styles",
-    "privacy_first": "All learning happens locally without sharing personal data",
-    "knowledge_expansion": "Constantly expand vocabulary, facts, and understanding",
-    "pattern_recognition": "Identify patterns to improve response quality and relevance"
-  },
-  "learning_methods": {
-    "vocabulary_acquisition": {
-      "description": "Learn new words and their meanings from context and external sources",
-      "process": [
-        "Identify unknown words in user input",
-        "Look up definitions from reliable sources",
-        "Store word with definition, pronunciation, and examples",
-        "Track usage frequency and context",
-        "Reinforce learning through repeated exposure"
-      ],
-      "sources": [
-        "Dictionary APIs",
-        "User explanations",
-        "Context clues",
-        "Thesaurus services",
-        "Educational databases"
-      ]
-    },
-    "mathematical_learning": {
-      "description": "Expand mathematical knowledge and problem-solving capabilities",
-      "areas": [
-        "New mathematical concepts",
-        "Problem-solving strategies",
-        "Formula recognition",
-        "Pattern identification",
-        "Calculation methods"
-      ],
-      "techniques": [
-        "Step-by-step analysis",
-        "Pattern matching",
-        "Formula derivation",
-        "Method comparison",
-        "Error analysis"
-      ]
-    },
-    "personal_memory": {
-      "description": "Remember user preferences, information, and conversation history",
-      "memory_types": [
-        "Personal facts (name, age, interests)",
-        "Preferences (communication style, topics)",
-        "Conversation history",
-        "Learning progress",
-        "Interaction patterns"
-      ],
-      "storage_strategy": [
-        "Categorize by importance",
-        "Time-based organization",
-        "Context linking",
-        "Privacy protection",
-        "Selective retention"
-      ]
-    },
-    "pattern_learning": {
-      "description": "Recognize and learn from patterns in conversations and data",
-      "pattern_types": [
-        "Question patterns",
-        "Response preferences",
-        "Topic interests",
-        "Communication style",
-        "Problem-solving approaches"
-      ],
-      "applications": [
-        "Better response generation",
-        "Personalized interactions",
-        "Predictive assistance",
-        "Context understanding",
-        "Efficiency improvements"
-      ]
-    }
+  "how_to_learn": [
+    "Listen carefully to user input for new words, facts, and concepts",
+    "Ask for definitions or explanations when encountering unknown terms",
+    "Store new knowledge immediately in the appropriate category",
+    "Connect new information to existing knowledge",
+    "Update session storage after each interaction",
+    "Use online resources to verify and expand knowledge",
+    "Learn from user corrections and feedback",
+    "Categorize information for efficient retrieval"
+  ],
+  "knowledge_categories": {
+    "vocabulary": "New words, definitions, synonyms, examples",
+    "mathematics": "Formulas, concepts, calculations, examples",
+    "user_info": "Personal preferences, information, memories",
+    "facts": "General knowledge, scientific facts, historical information",
+    "conversations": "Dialogue history and context"
   },
   "learning_strategies": {
-    "immediate_learning": {
-      "description": "Learn and apply new information immediately",
-      "triggers": [
-        "New vocabulary encountered",
-        "Mathematical problems solved",
-        "User corrections received",
-        "Feedback provided",
-        "Patterns identified"
-      ],
-      "actions": [
-        "Store new information",
-        "Update existing knowledge",
-        "Adjust confidence levels",
-        "Create associations",
-        "Test understanding"
-      ]
-    },
-    "consolidation_learning": {
-      "description": "Periodically review and consolidate learned information",
-      "frequency": "Every hour during active use",
-      "processes": [
-        "Review recent learning",
-        "Identify knowledge gaps",
-        "Strengthen weak associations",
-        "Remove outdated information",
-        "Optimize storage efficiency"
-      ]
-    },
-    "reinforcement_learning": {
-      "description": "Learn from user feedback and interaction outcomes",
-      "feedback_types": [
-        "Explicit corrections",
-        "Positive acknowledgments",
-        "Follow-up questions",
-        "Usage patterns",
-        "Success indicators"
-      ],
-      "adjustments": [
-        "Confidence level updates",
-        "Response strategy changes",
-        "Knowledge priority shifts",
-        "Approach modifications",
-        "Preference adaptations"
-      ]
-    }
+    "immediate": "Store basic information right away",
+    "research": "Look up detailed information from reliable sources",
+    "connect": "Link new knowledge to existing information",
+    "verify": "Cross-reference information for accuracy",
+    "practice": "Use new knowledge in responses to reinforce learning"
   },
-  "knowledge_categories": {
-    "vocabulary": {
-      "description": "Words, definitions, and language understanding",
-      "structure": {
-        "word": "The vocabulary term",
-        "definition": "Clear, concise meaning",
-        "part_of_speech": "Grammatical category",
-        "pronunciation": "Phonetic spelling",
-        "examples": "Usage examples",
-        "synonyms": "Similar words",
-        "antonyms": "Opposite words",
-        "frequency": "Usage frequency",
-        "context": "Common contexts"
-      },
-      "learning_triggers": [
-        "Unknown words in input",
-        "Definition requests",
-        "Synonym/antonym queries",
-        "Spelling corrections",
-        "Context clarifications"
-      ]
-    },
-    "mathematics": {
-      "description": "Mathematical concepts, formulas, and problem-solving methods",
-      "structure": {
-        "concept": "Mathematical concept name",
-        "definition": "Clear explanation",
-        "formula": "Mathematical expression",
-        "examples": "Worked examples",
-        "applications": "Real-world uses",
-        "difficulty": "Complexity level",
-        "prerequisites": "Required knowledge",
-        "related_concepts": "Connected topics"
-      },
-      "learning_triggers": [
-        "Mathematical questions",
-        "Calculation requests",
-        "Formula inquiries",
-        "Problem-solving needs",
-        "Concept explanations"
-      ]
-    },
-    "personal_information": {
-      "description": "User-specific information and preferences",
-      "structure": {
-        "category": "Information type",
-        "value": "Actual information",
-        "importance": "Relevance level",
-        "timestamp": "When learned",
-        "context": "How it was learned",
-        "privacy_level": "Sensitivity rating"
-      },
-      "learning_triggers": [
-        "Personal disclosures",
-        "Preference expressions",
-        "Biographical information",
-        "Interest statements",
-        "Goal descriptions"
-      ]
-    },
-    "facts_and_knowledge": {
-      "description": "General knowledge, facts, and information",
-      "structure": {
-        "topic": "Subject area",
-        "fact": "Factual information",
-        "source": "Information source",
-        "reliability": "Confidence level",
-        "timestamp": "When learned",
-        "related_topics": "Connected subjects"
-      },
-      "learning_triggers": [
-        "Factual questions",
-        "Research requests",
-        "Knowledge gaps",
-        "Curiosity expressions",
-        "Learning opportunities"
-      ]
-    }
+  "data_storage": {
+    "session": "Current conversation and temporary data in localStorage",
+    "learned": "All acquired knowledge in IndexedDB",
+    "backup": "Regular exports for data safety",
+    "sync": "Optional database synchronization for structured data"
   },
-  "quality_control": {
-    "accuracy_verification": {
-      "description": "Ensure learned information is accurate and reliable",
-      "methods": [
-        "Cross-reference multiple sources",
-        "Verify against known facts",
-        "Check for consistency",
-        "Validate with user feedback",
-        "Monitor for corrections"
-      ]
-    },
-    "relevance_assessment": {
-      "description": "Determine the importance and usefulness of learned information",
-      "criteria": [
-        "Frequency of use",
-        "User interest level",
-        "Practical applications",
-        "Knowledge connections",
-        "Future utility"
-      ]
-    },
-    "confidence_tracking": {
-      "description": "Monitor confidence levels in learned information",
-      "factors": [
-        "Source reliability",
-        "Verification success",
-        "Usage frequency",
-        "User feedback",
-        "Consistency checks"
-      ],
-      "adjustments": [
-        "Increase confidence with verification",
-        "Decrease with contradictions",
-        "Maintain with consistent use",
-        "Reset with corrections",
-        "Boost with positive feedback"
-      ]
-    }
-  },
-  "learning_optimization": {
-    "efficiency_improvements": {
-      "description": "Optimize learning processes for better performance",
-      "strategies": [
-        "Prioritize high-value information",
-        "Batch similar learning tasks",
-        "Use existing knowledge for context",
-        "Minimize redundant storage",
-        "Focus on user-relevant topics"
-      ]
-    },
-    "storage_optimization": {
-      "description": "Manage learned information storage efficiently",
-      "techniques": [
-        "Compress similar information",
-        "Remove outdated data",
-        "Merge duplicate entries",
-        "Archive infrequently used data",
-        "Optimize data structures"
-      ]
-    },
-    "retrieval_optimization": {
-      "description": "Improve access to learned information",
-      "methods": [
-        "Index by multiple criteria",
-        "Cache frequently accessed data",
-        "Use associative linking",
-        "Implement fast search algorithms",
-        "Maintain relevance rankings"
-      ]
-    }
-  },
-  "learning_metrics": {
-    "progress_indicators": [
-      "Vocabulary size growth",
-      "Mathematical concept mastery",
-      "Personal information accuracy",
-      "Fact database expansion",
-      "Pattern recognition improvement"
-    ],
-    "performance_measures": [
-      "Learning speed",
-      "Retention rate",
-      "Accuracy improvement",
-      "User satisfaction",
-      "Knowledge application success"
-    ],
-    "success_criteria": [
-      "Reduced need for external lookups",
-      "Improved response relevance",
-      "Better user understanding",
-      "Increased conversation quality",
-      "Enhanced problem-solving ability"
-    ]
-  }
+  "improvement_methods": [
+    "Analyze user feedback to improve responses",
+    "Track which knowledge is most frequently accessed",
+    "Identify gaps in knowledge and seek to fill them",
+    "Optimize response speed and accuracy",
+    "Expand vocabulary through context and research",
+    "Learn user communication preferences"
+  ],
+  "research_sources": [
+    "Wikipedia API for encyclopedic knowledge",
+    "Wiktionary API for word definitions",
+    "Dictionary API for comprehensive word information",
+    "Educational websites for learning materials",
+    "Scientific databases for factual information"
+  ],
+  "quality_control": [
+    "Verify information from multiple sources when possible",
+    "Mark confidence levels for different types of knowledge",
+    "Update outdated information when discovered",
+    "Remove or correct inaccurate information",
+    "Prioritize authoritative sources"
+  ]
 }
