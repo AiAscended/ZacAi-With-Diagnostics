@@ -1,29 +1,39 @@
 {
-  "a": {
-    "definition": "The first letter of the English alphabet; indefinite article used before consonant sounds",
-    "part_of_speech": "letter/article",
-    "phonetic": "eɪ",
-    "synonyms": ["an", "one"],
-    "antonyms": ["the"],
-    "examples": ["A is the first letter", "A book", "A good idea"],
-    "frequency": 100,
-    "alphabet_position": 1,
-    "letter_type": "vowel",
-    "phonetic_sound": "ay sound as in day",
-    "spelling_importance": "Fundamental vowel for word formation and article usage"
+  "alphabet": {
+    "definition": "The set of letters or symbols in a fixed order used to represent the basic sounds of a language",
+    "part_of_speech": "noun",
+    "examples": ["The English alphabet has 26 letters", "Children learn the alphabet in school"],
+    "synonyms": ["letters", "characters", "script"],
+    "antonyms": [],
+    "phonetic": "/ˈælfəˌbɛt/",
+    "frequency": 1,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["language", "education"]
   },
-  "b": {
-    "definition": "The second letter of the English alphabet; a consonant",
-    "part_of_speech": "letter",
-    "phonetic": "biː",
+  "a": {
+    "definition": "The first letter of the English alphabet",
+    "part_of_speech": "noun",
+    "examples": ["A is for apple", "The word 'cat' starts with the letter A"],
     "synonyms": [],
     "antonyms": [],
-    "examples": ["B is the second letter", "Ball starts with B", "Big begins with B"],
-    "frequency": 95,
-    "alphabet_position": 2,
-    "letter_type": "consonant",
-    "phonetic_sound": "buh sound as in ball",
-    "spelling_importance": "Common initial consonant for many words"
+    "phonetic": "/eɪ/",
+    "frequency": 2,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["alphabet", "letters"]
+  },
+  "b": {
+    "definition": "The second letter of the English alphabet",
+    "part_of_speech": "noun",
+    "examples": ["B is for ball", "The word 'book' starts with B"],
+    "synonyms": [],
+    "antonyms": [],
+    "phonetic": "/biː/",
+    "frequency": 3,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["alphabet", "letters"]
   },
   "c": {
     "definition": "The third letter of the English alphabet; a consonant with hard and soft sounds",
@@ -338,13 +348,16 @@
     "spelling_importance": "Final letter of alphabet, voiced sibilant consonant"
   },
   "the": {
-    "definition": "Definite article used to specify a particular noun",
+    "definition": "Used to refer to one or more people or things already mentioned or assumed to be common knowledge",
     "part_of_speech": "article",
-    "phonetic": "ðə",
+    "examples": ["The cat sat on the mat", "I saw the movie yesterday"],
     "synonyms": [],
-    "antonyms": ["a", "an"],
-    "examples": ["The book", "The answer", "The most common word"],
-    "frequency": 100
+    "antonyms": [],
+    "phonetic": "/ðə/",
+    "frequency": 4,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["grammar", "articles"]
   },
   "be": {
     "definition": "To exist, occur, or have reality; auxiliary verb for continuous tenses",
@@ -356,31 +369,40 @@
     "frequency": 100
   },
   "to": {
-    "definition": "Preposition expressing direction, place, or position; infinitive marker",
+    "definition": "Expressing motion in the direction of a particular location",
     "part_of_speech": "preposition",
-    "phonetic": "tuː",
-    "synonyms": ["toward", "into"],
-    "antonyms": ["from", "away"],
-    "examples": ["Go to school", "To be happy", "Listen to music"],
-    "frequency": 100
+    "examples": ["I'm going to school", "Give it to me"],
+    "synonyms": ["toward", "in the direction of"],
+    "antonyms": ["from", "away from"],
+    "phonetic": "/tuː/",
+    "frequency": 7,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["grammar", "prepositions"]
   },
   "of": {
-    "definition": "Expressing relationship between part and whole; belonging to",
+    "definition": "Expressing the relationship between a part and a whole",
     "part_of_speech": "preposition",
-    "phonetic": "ʌv",
+    "examples": ["A piece of cake", "The color of the sky"],
     "synonyms": ["from", "belonging to"],
     "antonyms": [],
-    "examples": ["Part of the team", "Book of poems", "City of lights"],
-    "frequency": 100
+    "phonetic": "/ʌv/",
+    "frequency": 10,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["grammar", "prepositions"]
   },
   "and": {
-    "definition": "Used to connect words, phrases, or clauses; conjunction meaning also",
+    "definition": "Used to connect words of the same part of speech, clauses, or sentences",
     "part_of_speech": "conjunction",
-    "phonetic": "ænd",
-    "synonyms": ["plus", "also", "furthermore"],
+    "examples": ["Tom and Jerry", "I like apples and oranges"],
+    "synonyms": ["plus", "also", "as well as"],
     "antonyms": ["or", "but"],
-    "examples": ["Cats and dogs", "Read and write", "Fast and furious"],
-    "frequency": 100
+    "phonetic": "/ænd/",
+    "frequency": 5,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["grammar", "conjunctions"]
   },
   "in": {
     "definition": "Expressing location or position within limits; inside",
@@ -401,13 +423,16 @@
     "frequency": 98
   },
   "it": {
-    "definition": "Pronoun referring to a thing previously mentioned or easily identified",
+    "definition": "Used to refer to a thing previously mentioned or easily identified",
     "part_of_speech": "pronoun",
-    "phonetic": "ɪt",
-    "synonyms": ["that"],
+    "examples": ["Where is it?", "It is raining"],
+    "synonyms": ["that", "this"],
     "antonyms": [],
-    "examples": ["It is raining", "I like it", "It works"],
-    "frequency": 97
+    "phonetic": "/ɪt/",
+    "frequency": 9,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["grammar", "pronouns"]
   },
   "for": {
     "definition": "In support of; intended to belong to; during the period of",
@@ -464,13 +489,16 @@
     "frequency": 92
   },
   "you": {
-    "definition": "Second person pronoun referring to the person being addressed",
+    "definition": "Used to refer to the person or people that the speaker is addressing",
     "part_of_speech": "pronoun",
-    "phonetic": "juː",
-    "synonyms": ["yourself"],
+    "examples": ["How are you?", "You are my friend"],
+    "synonyms": ["yourself", "thou"],
     "antonyms": ["I", "me"],
-    "examples": ["You are kind", "How are you?", "Thank you"],
-    "frequency": 92
+    "phonetic": "/juː/",
+    "frequency": 8,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["grammar", "pronouns"]
   },
   "do": {
     "definition": "To perform an action; auxiliary verb for questions and negatives",
@@ -2046,5 +2074,17 @@
     "antonyms": ["space", "universe"],
     "examples": ["Around the world", "World peace", "Real world"],
     "frequency": 4
+  },
+  "is": {
+    "definition": "Third person singular present of be",
+    "part_of_speech": "verb",
+    "examples": ["She is happy", "The sky is blue"],
+    "synonyms": ["exists", "equals"],
+    "antonyms": ["is not", "isn't"],
+    "phonetic": "/ɪz/",
+    "frequency": 6,
+    "source": "seed",
+    "date_added": "2025-01-07T11:35:00+10:00",
+    "topics": ["grammar", "verbs"]
   }
 }
