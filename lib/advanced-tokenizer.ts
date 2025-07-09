@@ -1,159 +1,212 @@
-import { type VocabularyLoader, type VocabularyEntry, vocabularyLoader } from "./vocabulary-loader"
+import { VocabularyLoader, type VocabularyEntry } from "./vocabulary-loader"
 
-export interface Token {
-  text: string
-  type: "word" | "number" | "punctuation" | "whitespace" | "unknown"
+export interface TokenInfo {
+  token: string
+  type: "word" | "punctuation" | "number" | "whitespace" | "unknown"
   position: number
   length: number
+  vocabularyEntry?: VocabularyEntry
   confidence: number
-  metadata?: {
-    partOfSpeech?: string
-    definition?: string
-    synonyms?: string[]
-    frequency?: number
-  }
 }
 
 export interface TokenizationResult {
-  tokens: Token[]
+  tokens: TokenInfo[]
   totalTokens: number
-  processingTime: number
+  knownWords: number
+  unknownWords: number
   confidence: number
 }
 
 export class AdvancedTokenizer {
-  private vocabulary: VocabularyLoader
+  private static instance: AdvancedTokenizer
+  private vocabularyLoader: VocabularyLoader
   private isInitialized = false
 
-  constructor() {
-    this.vocabulary = vocabularyLoader
+  private constructor() {
+    this.vocabularyLoader = VocabularyLoader.getInstance()
   }
 
-  async initialize(): Promise<void> {
+  public static getInstance(): AdvancedTokenizer {
+    if (!AdvancedTokenizer.instance) {
+      AdvancedTokenizer.instance = new AdvancedTokenizer()
+    }
+    return AdvancedTokenizer.instance
+  }
+
+  public async initialize(): Promise<void> {
     if (this.isInitialized) return
 
-    await this.vocabulary.initialize()
-    this.isInitialized = true
-    console.log("✅ AdvancedTokenizer initialized")
+    try {
+      await this.vocabularyLoader.loadSeedVocabulary()
+      await this.vocabularyLoader.loadLearntVocabulary()
+      this.isInitialized = true
+      console.log("✅ AdvancedTokenizer initialized")
+    } catch (error) {
+      console.error("Failed to initialize AdvancedTokenizer:", error)
+      this.isInitialized = true // Continue with basic functionality
+    }
   }
 
-  async tokenize(text: string): Promise<TokenizationResult> {
-    const startTime = performance.now()
-
+  public async tokenize(text: string): Promise<TokenizationResult> {
     if (!this.isInitialized) {
       await this.initialize()
     }
 
-    const tokens: Token[] = []
+    const tokens: TokenInfo[] = []
+    let knownWords = 0
+    let unknownWords = 0
     let position = 0
 
-    // Enhanced tokenization patterns
-    const patterns = [
-      { type: "number", regex: /\d+\.?\d*/g },
-      { type: "word", regex: /[a-zA-Z]+(?:'[a-zA-Z]+)?/g },
-      { type: "punctuation", regex: /[.,!?;:()[\]{}'"]/g },
-      { type: "whitespace", regex: /\s+/g },
-    ]
+    // Enhanced tokenization regex
+    const tokenRegex = /(\w+)|([^\w\s])|(\s+)/g
+    let match
 
-    // Process text character by character for precise tokenization
-    let remainingText = text
-    position = 0
+    while ((match = tokenRegex.exec(text)) !== null) {
+      const [fullMatch, word, punctuation, whitespace] = match
+      const token = fullMatch
+      const tokenStart = match.index
 
-    while (remainingText.length > 0) {
-      let matched = false
+      let tokenType: TokenInfo["type"]
+      let vocabularyEntry: VocabularyEntry | undefined
+      let confidence = 0
 
-      for (const pattern of patterns) {
-        const regex = new RegExp(pattern.regex.source, "g")
-        regex.lastIndex = 0
-        const match = regex.exec(remainingText)
+      if (word) {
+        tokenType = /^\d+$/.test(word) ? "number" : "word"
 
-        if (match && match.index === 0) {
-          const tokenText = match[0]
-          const token: Token = {
-            text: tokenText,
-            type: pattern.type as Token["type"],
-            position,
-            length: tokenText.length,
-            confidence: this.calculateConfidence(tokenText, pattern.type as Token["type"]),
+        if (tokenType === "word") {
+          vocabularyEntry = this.vocabularyLoader.getVocabularyEntry(word.toLowerCase())
+          if (vocabularyEntry) {
+            knownWords++
+            confidence = 0.9
+          } else {
+            unknownWords++
+            confidence = 0.3
           }
-
-          // Add metadata for words
-          if (pattern.type === "word") {
-            const vocabEntry = this.vocabulary.getWord(tokenText.toLowerCase())
-            if (vocabEntry) {
-              token.metadata = {
-                partOfSpeech: vocabEntry.part_of_speech,
-                definition: vocabEntry.definition,
-                synonyms: vocabEntry.synonyms,
-                frequency: vocabEntry.frequency,
-              }
-              token.confidence = Math.min(token.confidence + 0.2, 1.0)
-            }
-          }
-
-          tokens.push(token)
-          remainingText = remainingText.slice(tokenText.length)
-          position += tokenText.length
-          matched = true
-          break
+        } else {
+          confidence = 1.0 // Numbers are always recognized
         }
+      } else if (punctuation) {
+        tokenType = "punctuation"
+        confidence = 1.0
+      } else if (whitespace) {
+        tokenType = "whitespace"
+        confidence = 1.0
+      } else {
+        tokenType = "unknown"
+        confidence = 0.1
       }
 
-      if (!matched) {
-        // Handle unknown characters
-        const unknownChar = remainingText[0]
-        tokens.push({
-          text: unknownChar,
-          type: "unknown",
-          position,
-          length: 1,
-          confidence: 0.1,
-        })
-        remainingText = remainingText.slice(1)
-        position += 1
+      const tokenInfo: TokenInfo = {
+        token,
+        type: tokenType,
+        position: tokenStart,
+        length: token.length,
+        vocabularyEntry,
+        confidence,
       }
+
+      tokens.push(tokenInfo)
+      position = tokenStart + token.length
     }
 
-    const processingTime = performance.now() - startTime
-    const averageConfidence = tokens.reduce((sum, token) => sum + token.confidence, 0) / tokens.length
+    const totalTokens = tokens.length
+    const overallConfidence =
+      totalTokens > 0 ? tokens.reduce((sum, token) => sum + token.confidence, 0) / totalTokens : 0
 
     return {
       tokens,
-      totalTokens: tokens.length,
-      processingTime,
-      confidence: averageConfidence || 0,
+      totalTokens,
+      knownWords,
+      unknownWords,
+      confidence: overallConfidence,
     }
   }
 
-  private calculateConfidence(text: string, type: Token["type"]): number {
-    switch (type) {
-      case "word":
-        // Higher confidence for known words
-        const vocabEntry = this.vocabulary.getWord(text.toLowerCase())
-        return vocabEntry ? 0.9 : 0.6
-      case "number":
-        return 0.95
-      case "punctuation":
-        return 0.99
-      case "whitespace":
-        return 1.0
-      default:
-        return 0.3
+  public async analyzeText(text: string): Promise<{
+    tokenization: TokenizationResult
+    wordFrequency: Map<string, number>
+    readabilityScore: number
+    suggestions: string[]
+  }> {
+    const tokenization = await this.tokenize(text)
+    const wordFrequency = new Map<string, number>()
+    const suggestions: string[] = []
+
+    // Calculate word frequency
+    for (const token of tokenization.tokens) {
+      if (token.type === "word") {
+        const word = token.token.toLowerCase()
+        wordFrequency.set(word, (wordFrequency.get(word) || 0) + 1)
+      }
+    }
+
+    // Calculate readability score (simplified)
+    const avgWordsPerSentence = this.calculateAverageWordsPerSentence(text)
+    const avgSyllablesPerWord = this.estimateAverageSyllables(tokenization.tokens)
+    const readabilityScore = Math.max(
+      0,
+      Math.min(100, 206.835 - 1.015 * avgWordsPerSentence - 84.6 * avgSyllablesPerWord),
+    )
+
+    // Generate suggestions for unknown words
+    for (const token of tokenization.tokens) {
+      if (token.type === "word" && !token.vocabularyEntry) {
+        suggestions.push(`Consider defining: "${token.token}"`)
+      }
+    }
+
+    return {
+      tokenization,
+      wordFrequency,
+      readabilityScore,
+      suggestions: suggestions.slice(0, 5), // Limit suggestions
     }
   }
 
-  getVocabularySize(): number {
-    return this.vocabulary.getVocabularySize()
+  private calculateAverageWordsPerSentence(text: string): number {
+    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0)
+    const words = text.split(/\s+/).filter((w) => w.trim().length > 0)
+    return sentences.length > 0 ? words.length / sentences.length : 0
   }
 
-  async addWord(word: string, entry: VocabularyEntry): Promise<void> {
-    this.vocabulary.addLearntWord(word, entry)
+  private estimateAverageSyllables(tokens: TokenInfo[]): number {
+    const wordTokens = tokens.filter((t) => t.type === "word")
+    if (wordTokens.length === 0) return 0
+
+    const totalSyllables = wordTokens.reduce((sum, token) => {
+      return sum + this.estimateSyllables(token.token)
+    }, 0)
+
+    return totalSyllables / wordTokens.length
   }
 
-  getWordInfo(word: string): VocabularyEntry | null {
-    return this.vocabulary.getWord(word)
+  private estimateSyllables(word: string): number {
+    // Simple syllable estimation
+    const vowels = word.toLowerCase().match(/[aeiouy]+/g)
+    let syllables = vowels ? vowels.length : 1
+
+    // Adjust for silent 'e'
+    if (word.toLowerCase().endsWith("e")) {
+      syllables--
+    }
+
+    return Math.max(1, syllables)
+  }
+
+  public getStats(): {
+    initialized: boolean
+    vocabularySize: number
+    totalProcessed: number
+  } {
+    const vocabStats = this.vocabularyLoader.getVocabularyStats()
+
+    return {
+      initialized: this.isInitialized,
+      vocabularySize: vocabStats.total,
+      totalProcessed: 0, // Could track this if needed
+    }
   }
 }
 
 // Export singleton instance
-export const advancedTokenizer = new AdvancedTokenizer()
+export const advancedTokenizer = AdvancedTokenizer.getInstance()
