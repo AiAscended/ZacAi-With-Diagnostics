@@ -1,146 +1,152 @@
-export interface WordEntry {
-  word: string
-  definitions: string[]
-  partOfSpeech: string[]
+export interface VocabularyEntry {
+  definition: string
+  part_of_speech: string
+  examples: string[]
   synonyms: string[]
   antonyms: string[]
+  phonetic: string
   frequency: number
-  examples: string[]
+  source: "seed" | "learnt"
+  date_added: string
+  last_used?: string
+  topics?: string[]
+  notes?: string
 }
 
-export interface VocabularyStats {
-  totalWords: number
-  seedWords: number
-  learnedWords: number
-  categories: { [key: string]: number }
+export interface VocabularyData {
+  [word: string]: VocabularyEntry
 }
 
 export class VocabularyLoader {
-  private vocabulary: Map<string, WordEntry> = new Map()
-  private seedVocabulary: Map<string, WordEntry> = new Map()
-  private learnedVocabulary: Map<string, WordEntry> = new Map()
+  private seedVocabulary: VocabularyData = {}
+  private learntVocabulary: VocabularyData = {}
+  private isLoaded = false
 
-  constructor() {
-    this.vocabulary = new Map()
-    this.seedVocabulary = new Map()
-    this.learnedVocabulary = new Map()
-  }
+  async loadSeedVocabulary(): Promise<VocabularyData> {
+    if (this.isLoaded && Object.keys(this.seedVocabulary).length > 0) {
+      return this.seedVocabulary
+    }
 
-  public async loadVocabulary(): Promise<void> {
     try {
-      // Load seed vocabulary
       const response = await fetch("/seed_vocab.json")
-      if (response.ok) {
-        const seedData = await response.json()
-        if (Array.isArray(seedData)) {
-          seedData.forEach((item) => {
-            if (item && item.word && item.definition) {
-              const entry: WordEntry = {
-                word: item.word,
-                definitions: Array.isArray(item.definitions) ? item.definitions : [item.definition],
-                partOfSpeech: Array.isArray(item.partOfSpeech) ? item.partOfSpeech : [item.partOfSpeech || "unknown"],
-                synonyms: Array.isArray(item.synonyms) ? item.synonyms : [],
-                antonyms: Array.isArray(item.antonyms) ? item.antonyms : [],
-                frequency: typeof item.frequency === "number" ? item.frequency : 1,
-                examples: Array.isArray(item.examples) ? item.examples : [],
-              }
-              this.vocabulary.set(item.word.toLowerCase(), entry)
-              this.seedVocabulary.set(item.word.toLowerCase(), entry)
-            }
-          })
-        }
+      if (!response.ok) {
+        throw new Error(`Failed to load seed vocabulary: ${response.statusText}`)
       }
 
-      // Load learned vocabulary from localStorage
-      const learnedData = localStorage.getItem("learned-vocabulary")
-      if (learnedData) {
-        try {
-          const parsed = JSON.parse(learnedData)
-          if (Array.isArray(parsed)) {
-            parsed.forEach((item) => {
-              if (item && item.word) {
-                const entry: WordEntry = {
-                  word: item.word,
-                  definitions: Array.isArray(item.definitions) ? item.definitions : [item.definition || "Learned word"],
-                  partOfSpeech: Array.isArray(item.partOfSpeech) ? item.partOfSpeech : [item.partOfSpeech || "unknown"],
-                  synonyms: Array.isArray(item.synonyms) ? item.synonyms : [],
-                  antonyms: Array.isArray(item.antonyms) ? item.antonyms : [],
-                  frequency: typeof item.frequency === "number" ? item.frequency : 1,
-                  examples: Array.isArray(item.examples) ? item.examples : [],
-                }
-                this.vocabulary.set(item.word.toLowerCase(), entry)
-                this.learnedVocabulary.set(item.word.toLowerCase(), entry)
-              }
-            })
-          }
-        } catch (error) {
-          console.warn("Failed to load learned vocabulary:", error)
-        }
-      }
-
-      console.log(
-        `Loaded ${this.vocabulary.size} words (${this.seedVocabulary.size} seed, ${this.learnedVocabulary.size} learned)`,
-      )
+      this.seedVocabulary = await response.json()
+      console.log(`✅ Loaded ${Object.keys(this.seedVocabulary).length} seed vocabulary words`)
+      return this.seedVocabulary
     } catch (error) {
-      console.error("Error loading vocabulary:", error)
+      console.error("❌ Error loading seed vocabulary:", error)
+
+      // Fallback to basic vocabulary
+      this.seedVocabulary = this.getBasicVocabulary()
+      return this.seedVocabulary
     }
   }
 
-  public getWord(word: string): WordEntry | undefined {
-    return this.vocabulary.get(word.toLowerCase())
-  }
-
-  public addWord(wordEntry: WordEntry): void {
-    const key = wordEntry.word.toLowerCase()
-    this.vocabulary.set(key, wordEntry)
-    this.learnedVocabulary.set(key, wordEntry)
-    this.saveLearnedVocabulary()
-  }
-
-  public searchWords(query: string, limit = 10): WordEntry[] {
-    const results: WordEntry[] = []
-    const queryLower = query.toLowerCase()
-
-    for (const [word, entry] of this.vocabulary) {
-      if (results.length >= limit) break
-
-      if (word.includes(queryLower) || entry.definitions.some((def) => def.toLowerCase().includes(queryLower))) {
-        results.push(entry)
-      }
-    }
-
-    return results
-  }
-
-  public getRandomWords(count = 5): WordEntry[] {
-    const words = Array.from(this.vocabulary.values())
-    const shuffled = words.sort(() => 0.5 - Math.random())
-    return shuffled.slice(0, count)
-  }
-
-  public getVocabularyStats(): VocabularyStats {
-    const categories: { [key: string]: number } = {}
-
-    for (const entry of this.vocabulary.values()) {
-      for (const pos of entry.partOfSpeech) {
-        categories[pos] = (categories[pos] || 0) + 1
-      }
-    }
-
-    return {
-      totalWords: this.vocabulary.size,
-      seedWords: this.seedVocabulary.size,
-      learnedWords: this.learnedVocabulary.size,
-      categories,
-    }
-  }
-
-  private saveLearnedVocabulary(): void {
+  async loadLearntVocabulary(): Promise<VocabularyData> {
     try {
-      const learnedArray = Array.from(this.learnedVocabulary.values())
-      localStorage.setItem("learned-vocabulary", JSON.stringify(learnedArray))
+      const stored = localStorage.getItem("zacai_learnt_vocab")
+      if (stored) {
+        this.learntVocabulary = JSON.parse(stored)
+        console.log(`✅ Loaded ${Object.keys(this.learntVocabulary).length} learnt vocabulary words`)
+      }
+      return this.learntVocabulary
     } catch (error) {
-      console.warn("Failed to save learned vocabulary:", error)
+      console.error("❌ Error loading learnt vocabulary:", error)
+      this.learntVocabulary = {}
+      return this.learntVocabulary
     }
+  }
+
+  async saveLearntVocabulary(): Promise<void> {
+    try {
+      localStorage.setItem("zacai_learnt_vocab", JSON.stringify(this.learntVocabulary))
+      console.log(`✅ Saved ${Object.keys(this.learntVocabulary).length} learnt vocabulary words`)
+    } catch (error) {
+      console.error("❌ Error saving learnt vocabulary:", error)
+    }
+  }
+
+  addLearntWord(word: string, entry: VocabularyEntry): void {
+    this.learntVocabulary[word.toLowerCase()] = {
+      ...entry,
+      source: "learnt",
+      date_added: new Date().toISOString(),
+      last_used: new Date().toISOString(),
+    }
+    this.saveLearntVocabulary()
+  }
+
+  getWord(word: string): VocabularyEntry | null {
+    const normalizedWord = word.toLowerCase()
+    return this.seedVocabulary[normalizedWord] || this.learntVocabulary[normalizedWord] || null
+  }
+
+  getAllVocabulary(): VocabularyData {
+    return { ...this.seedVocabulary, ...this.learntVocabulary }
+  }
+
+  getVocabularySize(): number {
+    return Object.keys(this.seedVocabulary).length + Object.keys(this.learntVocabulary).length
+  }
+
+  getSeedVocabularySize(): number {
+    return Object.keys(this.seedVocabulary).length
+  }
+
+  getLearntVocabularySize(): number {
+    return Object.keys(this.learntVocabulary).length
+  }
+
+  private getBasicVocabulary(): VocabularyData {
+    return {
+      hello: {
+        definition: "A greeting used when meeting someone",
+        part_of_speech: "interjection",
+        examples: ["Hello, how are you?", "She said hello to her neighbor"],
+        synonyms: ["hi", "greetings", "hey"],
+        antonyms: ["goodbye", "farewell"],
+        phonetic: "həˈloʊ",
+        frequency: 1,
+        source: "seed",
+        date_added: new Date().toISOString(),
+      },
+      the: {
+        definition: "Used to refer to a specific thing or person",
+        part_of_speech: "article",
+        examples: ["The cat is sleeping", "I saw the movie yesterday"],
+        synonyms: [],
+        antonyms: [],
+        phonetic: "ðə",
+        frequency: 1,
+        source: "seed",
+        date_added: new Date().toISOString(),
+      },
+      and: {
+        definition: "Used to connect words, phrases, or clauses",
+        part_of_speech: "conjunction",
+        examples: ["Bread and butter", "He ran and jumped"],
+        synonyms: ["plus", "also", "furthermore"],
+        antonyms: ["or", "but"],
+        phonetic: "ænd",
+        frequency: 2,
+        source: "seed",
+        date_added: new Date().toISOString(),
+      },
+    }
+  }
+
+  async initialize(): Promise<void> {
+    if (this.isLoaded) return
+
+    await Promise.all([this.loadSeedVocabulary(), this.loadLearntVocabulary()])
+
+    this.isLoaded = true
+    console.log(`✅ VocabularyLoader initialized with ${this.getVocabularySize()} total words`)
   }
 }
+
+// Export a singleton instance
+export const vocabularyLoader = new VocabularyLoader()
