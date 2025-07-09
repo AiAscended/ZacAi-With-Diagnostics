@@ -3,53 +3,58 @@
     "word": "alphabet",
     "definition": "A set of letters or symbols in a fixed order used to represent the basic sounds of a language",
     "part_of_speech": "noun",
-    "examples": ["The English alphabet has 26 letters.", "Children learn the alphabet in school."],
-    "synonyms": ["letters", "characters", "script"],
+    "examples": ["The English alphabet has 26 letters"],
+    "synonyms": ["letters", "characters"],
     "antonyms": [],
     "phonetic": "/ˈælfəˌbɛt/",
-    "frequency": 1,
+    "frequency": 100,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["language", "education"]
+    "topics": ["language", "education"],
+    "partOfSpeech": "noun"
   },
   "a": {
     "word": "a",
     "definition": "The first letter of the English alphabet",
     "part_of_speech": "noun",
-    "examples": ["A is the first letter.", "The word 'apple' starts with A."],
+    "examples": ["A is for apple"],
     "synonyms": [],
     "antonyms": [],
     "phonetic": "/eɪ/",
-    "frequency": 2,
+    "frequency": 1,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["alphabet", "letters"]
+    "topics": ["alphabet", "letters"],
+    "partOfSpeech": "noun"
   },
   "b": {
     "word": "b",
     "definition": "The second letter of the English alphabet",
     "part_of_speech": "noun",
-    "examples": ["B comes after A.", "The word 'ball' starts with B."],
+    "examples": ["B is for ball"],
     "synonyms": [],
     "antonyms": [],
     "phonetic": "/biː/",
-    "frequency": 3,
+    "frequency": 2,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["alphabet", "letters"]
+    "topics": ["alphabet", "letters"],
+    "partOfSpeech": "noun"
   },
   "c": {
-    "definition": "The third letter of the English alphabet; a consonant with hard and soft sounds",
-    "part_of_speech": "letter",
+    "definition": "The third letter of the English alphabet",
+    "part_of_speech": "noun",
     "phonetic": "siː",
     "synonyms": [],
     "antonyms": [],
-    "examples": ["C is the third letter", "Cat starts with C", "City starts with soft C"],
-    "frequency": 90,
+    "examples": ["C is for cat"],
+    "frequency": 3,
     "alphabet_position": 3,
     "letter_type": "consonant",
     "phonetic_sound": "hard k sound or soft s sound",
-    "spelling_importance": "Versatile consonant with multiple pronunciations"
+    "spelling_importance": "Versatile consonant with multiple pronunciations",
+    "source": "seed",
+    "partOfSpeech": "noun"
   },
   "d": {
     "definition": "The fourth letter of the English alphabet; a voiced consonant",
@@ -352,16 +357,17 @@
   },
   "the": {
     "word": "the",
-    "definition": "Used to point forward to a following qualifying or defining clause or phrase",
-    "part_of_speech": "determiner",
-    "examples": ["The book on the table.", "The man who called yesterday."],
+    "definition": "Used to refer to a specific thing previously mentioned, known, or understood",
+    "part_of_speech": "article",
+    "examples": ["The cat is sleeping", "I saw the movie"],
     "synonyms": [],
     "antonyms": [],
     "phonetic": "/ðə/",
-    "frequency": 5,
+    "frequency": 1,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "articles"]
+    "topics": ["grammar", "articles"],
+    "partOfSpeech": "article"
   },
   "be": {
     "definition": "To exist, occur, or have reality; auxiliary verb for continuous tenses",
@@ -374,16 +380,17 @@
   },
   "to": {
     "word": "to",
-    "definition": "Expressing motion in the direction of a particular location",
+    "definition": "Expressing motion in the direction of",
     "part_of_speech": "preposition",
-    "examples": ["Go to school.", "From here to there."],
+    "examples": ["I went to the store", "She walked to school"],
     "synonyms": ["toward", "until"],
     "antonyms": ["from", "away"],
     "phonetic": "/tuː/",
-    "frequency": 9,
+    "frequency": 6,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "prepositions"]
+    "topics": ["grammar", "prepositions"],
+    "partOfSpeech": "preposition"
   },
   "of": {
     "word": "of",
@@ -400,16 +407,17 @@
   },
   "and": {
     "word": "and",
-    "definition": "Used to connect words of the same part of speech, clauses, or sentences",
+    "definition": "Used to connect words, phrases, or clauses",
     "part_of_speech": "conjunction",
-    "examples": ["Bread and butter.", "He ran and jumped."],
-    "synonyms": ["plus", "also", "furthermore"],
+    "examples": ["Cats and dogs", "I went to the store and bought milk"],
+    "synonyms": ["plus", "also"],
     "antonyms": ["or", "but"],
     "phonetic": "/ænd/",
-    "frequency": 6,
+    "frequency": 2,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "conjunctions"]
+    "topics": ["grammar", "conjunctions"],
+    "partOfSpeech": "conjunction"
   },
   "in": {
     "definition": "Expressing location or position within limits; inside",
@@ -497,16 +505,17 @@
   },
   "you": {
     "word": "you",
-    "definition": "Used to refer to the person or people that the speaker is addressing",
+    "definition": "Used to refer to the person being addressed",
     "part_of_speech": "pronoun",
-    "examples": ["How are you?", "You are welcome."],
+    "examples": ["How are you?", "You are welcome"],
     "synonyms": ["yourself", "thou"],
     "antonyms": ["I", "me"],
     "phonetic": "/juː/",
-    "frequency": 8,
+    "frequency": 4,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "pronouns"]
+    "topics": ["grammar", "pronouns"],
+    "partOfSpeech": "pronoun"
   },
   "do": {
     "definition": "To perform an action; auxiliary verb for questions and negatives",
@@ -2087,26 +2096,35 @@
     "word": "is",
     "definition": "Third person singular present of be",
     "part_of_speech": "verb",
-    "examples": ["She is happy.", "The sky is blue."],
+    "examples": ["She is happy"],
     "synonyms": ["exists", "equals"],
     "antonyms": ["isn't", "was not"],
     "phonetic": "/ɪz/",
-    "frequency": 7,
+    "frequency": 3,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["grammar", "verbs"]
+    "topics": ["grammar", "verbs"],
+    "partOfSpeech": "verb"
   },
   "hello": {
     "word": "hello",
-    "definition": "Used as a greeting or to begin a phone conversation",
-    "part_of_speech": "exclamation",
-    "examples": ["Hello, how are you?", "She said hello to her neighbor."],
+    "definition": "A greeting used when meeting someone or answering the telephone",
+    "part_of_speech": "interjection",
+    "examples": ["Hello, how are you?"],
     "synonyms": ["hi", "greetings", "hey"],
     "antonyms": ["goodbye", "farewell"],
     "phonetic": "/həˈloʊ/",
-    "frequency": 4,
+    "frequency": 50,
     "source": "seed",
     "date_added": "2025-01-09T11:35:00+10:00",
-    "topics": ["greetings", "social"]
+    "topics": ["greetings", "social"],
+    "partOfSpeech": "interjection"
+  },
+  "I": {
+    "definition": "Used by a speaker to refer to himself or herself",
+    "partOfSpeech": "pronoun",
+    "examples": ["I am happy", "I like pizza"],
+    "frequency": 5,
+    "source": "seed"
   }
 }
