@@ -12,6 +12,7 @@ export class MathEngine {
   private teslaMap: Map<number, any> = new Map()
   private vortexCycle = [1, 2, 4, 8, 7, 5]
   private isInitialized = false
+  private calculations = 0
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
@@ -39,6 +40,43 @@ export class MathEngine {
     }
 
     return thinkingResult
+  }
+
+  public async processMath(input: string): Promise<any> {
+    // Basic math processing - will be enhanced later
+    const mathPattern = /(\d+)\s*([+\-*/])\s*(\d+)/
+    const match = input.match(mathPattern)
+
+    if (match) {
+      const [, num1, operator, num2] = match
+      const a = Number.parseFloat(num1)
+      const b = Number.parseFloat(num2)
+      let result = 0
+
+      switch (operator) {
+        case "+":
+          result = a + b
+          break
+        case "-":
+          result = a - b
+          break
+        case "*":
+          result = a * b
+          break
+        case "/":
+          result = b !== 0 ? a / b : Number.NaN
+          break
+      }
+
+      this.calculations++
+      return {
+        calculation: `${a} ${operator} ${b} = ${result}`,
+        result,
+        confidence: 0.95,
+      }
+    }
+
+    return null
   }
 
   private initializeMathPatterns(): void {
@@ -185,6 +223,7 @@ export class MathEngine {
       patternsLoaded: this.mathPatterns.length,
       teslaMapSize: this.teslaMap.size,
       isInitialized: this.isInitialized,
+      calculations: this.calculations,
     }
   }
 }

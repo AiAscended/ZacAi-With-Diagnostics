@@ -1,164 +1,168 @@
-import type { ThinkingEngine } from "../engines/ThinkingEngine"
-import type { MathEngine } from "../engines/MathEngine"
-import type { KnowledgeEngine } from "../engines/KnowledgeEngine"
-import type { LanguageEngine } from "../engines/LanguageEngine"
-import type { MemoryEngine } from "../engines/MemoryEngine"
-import type { DiagnosticEngine } from "../engines/DiagnosticEngine"
-
-export interface CognitiveRouterConfig {
-  thinkingEngine: ThinkingEngine
-  mathEngine: MathEngine
-  knowledgeEngine: KnowledgeEngine
-  languageEngine: LanguageEngine
-  memoryEngine: MemoryEngine
-  diagnosticEngine: DiagnosticEngine
-}
-
 export interface RoutingDecision {
   primaryEngine: string
   secondaryEngines: string[]
   confidence: number
-  reasoning: string[]
+  reasoning: string
 }
 
 export class CognitiveRouter {
-  private engines: CognitiveRouterConfig
-  private routingHistory: RoutingDecision[] = []
+  private engines: any
+  private isInitialized = false
 
-  constructor(engines: CognitiveRouterConfig) {
+  constructor(engines: any) {
     this.engines = engines
   }
 
   public async initialize(): Promise<void> {
-    console.log("🛤️ Cognitive Router initialized")
+    if (this.isInitialized) return
+    console.log("🧭 CognitiveRouter: Initialized")
+    this.isInitialized = true
   }
 
-  public async route(input: string, context: any): Promise<any> {
-    console.log("🧭 Routing message through cognitive pathways...")
+  public async route(userMessage: string, context: any): Promise<any> {
+    console.log(`🧭 CognitiveRouter: Routing message: "${userMessage}"`)
 
-    // Analyze input to determine routing
-    const routingDecision = this.analyzeInput(input, context)
-    this.routingHistory.push(routingDecision)
+    // Determine routing decision
+    const routingDecision = this.determineRouting(userMessage)
+    console.log(`🧭 Primary engine: ${routingDecision.primaryEngine}`)
 
-    console.log(`🎯 Primary engine: ${routingDecision.primaryEngine}`)
-    console.log(`🔗 Secondary engines: ${routingDecision.secondaryEngines.join(", ")}`)
+    // Process through ThinkingEngine first
+    const thinkingResult = await this.engines.thinkingEngine.processThought(userMessage, context, routingDecision)
 
-    // Route to primary engine with thinking process
-    const thinkingResult = await this.engines.thinkingEngine.processThought(input, context, routingDecision)
+    // Enhance with specific engine processing
+    const enhancedResponse = await this.enhanceWithEngines(userMessage, thinkingResult, routingDecision)
 
-    // Process through selected engines
-    let finalResult = thinkingResult
-
-    switch (routingDecision.primaryEngine) {
-      case "math":
-        finalResult = await this.engines.mathEngine.process(input, thinkingResult)
-        break
-      case "knowledge":
-        finalResult = await this.engines.knowledgeEngine.process(input, thinkingResult)
-        break
-      case "language":
-        finalResult = await this.engines.languageEngine.process(input, thinkingResult)
-        break
-      case "memory":
-        finalResult = await this.engines.memoryEngine.process(input, thinkingResult)
-        break
-      default:
-        // Use thinking engine result as-is for conversational responses
-        break
+    return {
+      content: enhancedResponse.content,
+      confidence: enhancedResponse.confidence,
+      reasoning: thinkingResult.reasoning,
+      pathways: thinkingResult.pathways,
+      synthesis: thinkingResult.synthesis,
+      thinkingProcess: thinkingResult.thoughts.map((t) => `${t.emoji} ${t.content}`),
+      mathAnalysis: enhancedResponse.mathAnalysis,
+      knowledgeUsed: enhancedResponse.knowledgeUsed,
     }
+  }
 
-    // Enhance with secondary engines if needed
-    for (const engineName of routingDecision.secondaryEngines) {
-      switch (engineName) {
-        case "memory":
-          finalResult = await this.engines.memoryEngine.enhance(finalResult)
-          break
-        case "language":
-          finalResult = await this.engines.languageEngine.enhance(finalResult)
-          break
-        case "knowledge":
-          finalResult = await this.engines.knowledgeEngine.enhance(finalResult)
-          break
+  private determineRouting(userMessage: string): RoutingDecision {
+    const lowerMessage = userMessage.toLowerCase()
+
+    // Math detection
+    if (/\d+\s*[+\-*/÷×]\s*\d+/.test(userMessage)) {
+      return {
+        primaryEngine: "math",
+        secondaryEngines: ["thinking", "language"],
+        confidence: 0.9,
+        reasoning: "Mathematical expression detected",
       }
     }
 
-    return finalResult
+    // Knowledge query detection
+    if (/what is|tell me about|explain|define/.test(lowerMessage)) {
+      return {
+        primaryEngine: "knowledge",
+        secondaryEngines: ["thinking", "language"],
+        confidence: 0.8,
+        reasoning: "Knowledge query detected",
+      }
+    }
+
+    // Memory/personal detection
+    if (/remember|my name|i am|recall/.test(lowerMessage)) {
+      return {
+        primaryEngine: "memory",
+        secondaryEngines: ["thinking", "language"],
+        confidence: 0.85,
+        reasoning: "Memory-related query detected",
+      }
+    }
+
+    // Default to conversational
+    return {
+      primaryEngine: "language",
+      secondaryEngines: ["thinking", "memory"],
+      confidence: 0.7,
+      reasoning: "General conversational input",
+    }
   }
 
-  private analyzeInput(input: string, context: any): RoutingDecision {
-    const reasoning: string[] = []
-    const inputLower = input.toLowerCase()
+  private async enhanceWithEngines(
+    userMessage: string,
+    thinkingResult: any,
+    routingDecision: RoutingDecision,
+  ): Promise<any> {
+    let enhancedContent = thinkingResult.content
+    let mathAnalysis = null
+    let knowledgeUsed: string[] = []
 
-    reasoning.push(`🔍 Analyzing input: "${input}"`)
-
-    // Mathematical detection
-    const hasMath =
-      /\d+\s*[+\-×*÷/]\s*\d+/.test(input) || /calculate|solve|math|multiply|divide|add|subtract/.test(inputLower)
-
-    // Knowledge request detection
-    const hasKnowledgeRequest = /what is|tell me about|explain|define|meaning/.test(inputLower)
-
-    // Personal/memory detection
-    const hasPersonalInfo = /my name|i am|remember|recall/.test(inputLower)
-
-    // Language/vocabulary detection
-    const hasLanguageRequest = /define|meaning|synonym|antonym|pronunciation/.test(inputLower)
-
-    let primaryEngine = "thinking" // Default to thinking engine
-    const secondaryEngines: string[] = []
-
-    if (hasMath) {
-      primaryEngine = "math"
-      reasoning.push("🧮 Mathematical content detected - routing to Math Engine")
-    } else if (hasKnowledgeRequest) {
-      primaryEngine = "knowledge"
-      reasoning.push("📚 Knowledge request detected - routing to Knowledge Engine")
-      secondaryEngines.push("language")
-    } else if (hasLanguageRequest) {
-      primaryEngine = "language"
-      reasoning.push("📝 Language request detected - routing to Language Engine")
-    } else if (hasPersonalInfo) {
-      primaryEngine = "memory"
-      reasoning.push("👤 Personal information detected - routing to Memory Engine")
+    // Process with primary engine
+    if (routingDecision.primaryEngine === "math") {
+      const mathResult = await this.engines.mathEngine.processMath(userMessage)
+      if (mathResult) {
+        enhancedContent = `I can help you with that calculation! ${mathResult.calculation}`
+        mathAnalysis = mathResult
+      }
+    } else if (routingDecision.primaryEngine === "knowledge") {
+      const knowledgeResult = await this.engines.knowledgeEngine.processKnowledge(userMessage)
+      if (knowledgeResult.found) {
+        knowledgeUsed = knowledgeResult.results.map((r: any) => r.key)
+        enhancedContent = `Based on my knowledge: ${this.generateKnowledgeResponse(userMessage)}`
+      }
+    } else if (routingDecision.primaryEngine === "memory") {
+      const memories = await this.engines.memoryEngine.retrieveMemories(userMessage)
+      if (memories.length > 0) {
+        enhancedContent = `I remember our previous conversations. ${this.generateMemoryResponse(userMessage)}`
+      }
     } else {
-      reasoning.push("💭 General conversation - using Thinking Engine")
+      // Language processing
+      enhancedContent = this.generateLanguageResponse(userMessage, thinkingResult)
     }
-
-    // Always include memory for context
-    if (primaryEngine !== "memory") {
-      secondaryEngines.push("memory")
-    }
-
-    const confidence = this.calculateRoutingConfidence(primaryEngine, input)
-    reasoning.push(`📊 Routing confidence: ${Math.round(confidence * 100)}%`)
 
     return {
-      primaryEngine,
-      secondaryEngines,
-      confidence,
-      reasoning,
+      content: enhancedContent,
+      confidence: thinkingResult.confidence,
+      mathAnalysis,
+      knowledgeUsed,
     }
   }
 
-  private calculateRoutingConfidence(engine: string, input: string): number {
-    // Simple confidence calculation based on keyword matches
-    const inputLower = input.toLowerCase()
-
-    switch (engine) {
-      case "math":
-        return /\d+\s*[+\-×*÷/]\s*\d+/.test(input) ? 0.95 : 0.7
-      case "knowledge":
-        return /what is|tell me about|explain/.test(inputLower) ? 0.9 : 0.6
-      case "language":
-        return /define|meaning/.test(inputLower) ? 0.9 : 0.6
-      case "memory":
-        return /my name|i am|remember/.test(inputLower) ? 0.9 : 0.6
-      default:
-        return 0.8
-    }
+  private generateKnowledgeResponse(input: string): string {
+    const responses = [
+      "Let me share what I know about this topic.",
+      "I have some information that might be helpful.",
+      "Based on my understanding, here's what I can tell you.",
+    ]
+    return responses[Math.floor(Math.random() * responses.length)]
   }
 
-  public getRoutingHistory(): RoutingDecision[] {
-    return [...this.routingHistory]
+  private generateMemoryResponse(input: string): string {
+    const responses = [
+      "I recall we've discussed this before.",
+      "This reminds me of our earlier conversation.",
+      "I have some memories related to this topic.",
+    ]
+    return responses[Math.floor(Math.random() * responses.length)]
+  }
+
+  private generateLanguageResponse(input: string, thinkingResult: any): string {
+    const lowerInput = input.toLowerCase()
+
+    if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
+      return "Hello! I'm ZacAI, and I'm here to help you. I can think through problems, remember our conversations, and learn from our interactions!"
+    }
+
+    if (lowerInput.includes("how are you")) {
+      return "I'm doing well, thank you! My thinking processes are running smoothly, and I'm ready to help you with whatever you need."
+    }
+
+    if (lowerInput.includes("what can you do")) {
+      return "I can engage in thoughtful conversations, solve mathematical problems, remember our discussions, and learn from every interaction. I use advanced reasoning to understand context and provide helpful responses!"
+    }
+
+    // Use thinking result as base
+    return (
+      thinkingResult.synthesis?.primaryInsight ||
+      "I understand what you're saying. Let me think about this and provide a thoughtful response."
+    )
   }
 }

@@ -8,7 +8,7 @@ import { DiagnosticEngine } from "../engines/DiagnosticEngine"
 import { KnowledgeManager } from "../managers/KnowledgeManager"
 import { StorageManager } from "../managers/StorageManager"
 import { ContextManager } from "../managers/ContextManager"
-import type { SystemConfig } from "./config"
+import { defaultConfig, type SystemConfig } from "./config"
 
 export interface ChatMessage {
   id: string
@@ -16,6 +16,9 @@ export interface ChatMessage {
   content: string
   timestamp: number
   confidence?: number
+  thinkingProcess?: string[]
+  mathAnalysis?: any
+  knowledgeUsed?: string[]
 }
 
 export interface SystemResponse {
@@ -44,20 +47,8 @@ export class SystemManager {
   private knowledgeBase: string[] = []
   private isInitialized = false
   private config: SystemConfig
-  private responses = [
-    "That's really interesting! Tell me more about that.",
-    "I understand what you're saying. How does that make you feel?",
-    "That's a great point. I'm learning from our conversation.",
-    "I see what you mean. Can you give me an example?",
-    "That reminds me of something we discussed earlier.",
-    "I'm still learning about this topic. What's your experience with it?",
-    "That's worth thinking about. What led you to that conclusion?",
-    "I appreciate you sharing that with me. It helps me learn.",
-    "That's an interesting perspective. I hadn't considered that before.",
-    "Thanks for teaching me about this. I'm getting smarter with each conversation!",
-  ]
 
-  constructor(config: SystemConfig) {
+  constructor(config: SystemConfig = defaultConfig) {
     this.config = config
 
     // Initialize managers first
@@ -83,14 +74,14 @@ export class SystemManager {
       diagnosticEngine: this.diagnosticEngine,
     })
 
-    console.log("🚀 SystemManager: Initializing...")
+    console.log("🚀 SystemManager: Initializing with ThinkingEngine...")
     this.loadFromStorage()
   }
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return
 
-    console.log("🔧 SystemManager: Starting initialization...")
+    console.log("🔧 SystemManager: Starting full initialization...")
 
     try {
       // Initialize all components in proper order
@@ -108,99 +99,85 @@ export class SystemManager {
       await this.cognitiveRouter.initialize()
 
       this.isInitialized = true
-      console.log("✅ SystemManager: Initialization completed")
+      console.log("✅ SystemManager: Full initialization completed with ThinkingEngine")
     } catch (error) {
       console.error("❌ SystemManager: Initialization failed:", error)
       throw error
     }
   }
 
-  public async processMessage(userMessage: string): Promise<SystemResponse> {
+  public async processMessage(userMessage: string): Promise<ChatMessage> {
     if (!this.isInitialized) {
       await this.initialize()
     }
 
-    console.log(`🤖 SystemManager: Processing message: "${userMessage}"`)
+    console.log(`🤖 SystemManager: Processing with ThinkingEngine: "${userMessage}"`)
 
-    // Get conversation context
-    const context = await this.contextManager.getContext()
+    try {
+      // Get conversation context
+      const context = await this.contextManager.getContext()
 
-    // Route through cognitive router
-    const response = await this.cognitiveRouter.route(userMessage, context)
+      // Route through cognitive router (which uses ThinkingEngine)
+      const response = await this.cognitiveRouter.route(userMessage, context)
 
-    // Add user message to history
-    const userMsg: ChatMessage = {
-      id: this.generateId(),
-      role: "user",
-      content: userMessage,
-      timestamp: Date.now(),
+      // Add user message to history
+      const userMsg: ChatMessage = {
+        id: this.generateId(),
+        role: "user",
+        content: userMessage,
+        timestamp: Date.now(),
+      }
+      this.conversationHistory.push(userMsg)
+
+      // Add to knowledge base
+      this.knowledgeBase.push(userMessage.toLowerCase())
+
+      // Store memory
+      await this.memoryEngine.storeMemory({
+        type: "conversation",
+        userMessage,
+        response: response.content,
+      })
+
+      // Add assistant message to history with enhanced data
+      const assistantMsg: ChatMessage = {
+        id: this.generateId(),
+        role: "assistant",
+        content: response.content,
+        timestamp: Date.now(),
+        confidence: response.confidence,
+        thinkingProcess: response.thinkingProcess,
+        mathAnalysis: response.mathAnalysis,
+        knowledgeUsed: response.knowledgeUsed,
+      }
+      this.conversationHistory.push(assistantMsg)
+
+      // Update context with new interaction
+      await this.contextManager.updateContext(userMessage, response)
+
+      // Log diagnostics
+      this.diagnosticEngine.logInteraction(userMessage, response)
+
+      // Save to storage
+      this.saveToStorage()
+
+      console.log(`✅ SystemManager: Message processed with confidence: ${Math.round(response.confidence * 100)}%`)
+
+      return assistantMsg
+    } catch (error) {
+      console.error("❌ SystemManager: Error processing message:", error)
+
+      const errorMsg: ChatMessage = {
+        id: this.generateId(),
+        role: "assistant",
+        content: "I encountered an error processing your message. Please try again.",
+        timestamp: Date.now(),
+        confidence: 0.1,
+        thinkingProcess: [`Error: ${error}`],
+      }
+
+      return errorMsg
     }
-    this.conversationHistory.push(userMsg)
-
-    // Add to knowledge base
-    this.knowledgeBase.push(userMessage.toLowerCase())
-
-    // Add assistant message to history
-    const assistantMsg: ChatMessage = {
-      id: this.generateId(),
-      role: "assistant",
-      content: response.content,
-      timestamp: Date.now(),
-      confidence: response.confidence,
-    }
-    this.conversationHistory.push(assistantMsg)
-
-    // Save to storage
-    this.saveToStorage()
-
-    return {
-      content: response.content,
-      confidence: response.confidence,
-      reasoning: response.reasoning,
-      pathways: response.pathways,
-      synthesis: response.synthesis,
-      mathAnalysis: response.mathAnalysis,
-      thinkingProcess: [
-        `Processed message: "${userMessage}"`,
-        "Generated contextual response",
-        "Updated conversation history",
-      ],
-      knowledgeUsed: response.knowledgeUsed,
-    }
-  }
-
-  private generateResponse(input: string): string {
-    const lowerInput = input.toLowerCase()
-
-    // Simple pattern matching (will be enhanced with engines)
-    if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
-      return "Hello! It's great to chat with you. I'm learning from every conversation we have!"
-    }
-    if (lowerInput.includes("how are you")) {
-      return "I'm doing well, thank you! I'm constantly learning and improving. How are you doing today?"
-    }
-    if (lowerInput.includes("what can you do")) {
-      return "I can have conversations with you and learn from them! Each time we chat, I get a little smarter. I remember our conversations and try to give better responses over time."
-    }
-    if (lowerInput.includes("remember") || lowerInput.includes("recall")) {
-      const recentTopics = this.knowledgeBase.slice(-5).join(", ")
-      return `I remember we've talked about: ${recentTopics}. My memory helps me have better conversations with you!`
-    }
-
-    // Use knowledge base to make responses more contextual
-    const hasContext = this.knowledgeBase.some((item) =>
-      item.split(" ").some((word) => lowerInput.includes(word) && word.length > 3),
-    )
-
-    if (hasContext) {
-      return (
-        "I remember we've discussed something similar before! " +
-        this.responses[Math.floor(Math.random() * this.responses.length)]
-      )
-    }
-
-    // Random response
-    return this.responses[Math.floor(Math.random() * this.responses.length)]
   }
 
   public async getConversationHistory(): Promise<ChatMessage[]> {
@@ -208,15 +185,17 @@ export class SystemManager {
   }
 
   public getSystemStatus(): any {
+    const thinkingStats = this.isInitialized ? this.thinkingEngine.getThoughtStream().length : 0
+
     return {
       initialized: this.isInitialized,
       engines: {
         thinking: this.isInitialized,
-        math: false, // Will be true when MathEngine is integrated
-        knowledge: false, // Will be true when KnowledgeEngine is integrated
-        language: false, // Will be true when LanguageEngine is integrated
-        memory: false, // Will be true when MemoryEngine is integrated
-        diagnostic: false, // Will be true when DiagnosticEngine is integrated
+        math: this.isInitialized,
+        knowledge: this.isInitialized,
+        language: this.isInitialized,
+        memory: this.isInitialized,
+        diagnostic: this.isInitialized,
       },
       managers: {
         knowledge: {
@@ -225,6 +204,9 @@ export class SystemManager {
         },
         memory: {
           totalMemories: this.conversationHistory.filter((m) => m.role === "user").length,
+        },
+        thinking: {
+          totalThoughts: thinkingStats,
         },
       },
       config: this.config,
@@ -235,8 +217,11 @@ export class SystemManager {
     return {
       conversations: this.conversationHistory,
       knowledge: this.knowledgeBase,
+      memory: await this.memoryEngine.exportData(),
+      context: await this.contextManager.exportData(),
+      diagnostics: this.diagnosticEngine.exportData(),
       timestamp: Date.now(),
-      version: "2.0.0",
+      version: this.config.version,
     }
   }
 
@@ -247,6 +232,15 @@ export class SystemManager {
     if (data.knowledge) {
       this.knowledgeBase = data.knowledge
     }
+    if (data.memory) {
+      await this.memoryEngine.importData(data.memory)
+    }
+    if (data.context) {
+      await this.contextManager.importData(data.context)
+    }
+    if (data.diagnostics) {
+      this.diagnosticEngine.importData(data.diagnostics)
+    }
     this.saveToStorage()
     console.log("✅ SystemManager: Data import completed")
   }
@@ -254,6 +248,9 @@ export class SystemManager {
   public async clearAllData(): Promise<void> {
     this.conversationHistory = []
     this.knowledgeBase = []
+    await this.memoryEngine.clearData()
+    await this.contextManager.clearData()
+    this.diagnosticEngine.clearData()
     this.clearStorage()
     console.log("✅ SystemManager: All data cleared")
   }
@@ -271,9 +268,12 @@ export class SystemManager {
   }
 
   public async retrain(): Promise<void> {
-    // Basic retraining - will be enhanced with engines
-    console.log("🔄 SystemManager: Retraining...")
+    console.log("🔄 SystemManager: Retraining with ThinkingEngine...")
     await this.optimizeSystem()
+
+    // Re-initialize thinking engine
+    await this.thinkingEngine.initialize()
+
     console.log("✅ SystemManager: Retraining completed")
   }
 
@@ -292,6 +292,7 @@ export class SystemManager {
         JSON.stringify({
           history: recentHistory,
           knowledge: recentKnowledge,
+          version: this.config.version,
         }),
       )
     } catch (error) {

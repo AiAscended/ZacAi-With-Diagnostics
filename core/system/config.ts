@@ -1,73 +1,33 @@
 export interface SystemConfig {
-  name: string
   version: string
-  debug: boolean
-  performance: {
-    enableMetrics: boolean
-    logLevel: "error" | "warn" | "info" | "debug"
-  }
   engines: {
-    thinking: {
-      maxIterations: number
-      confidenceThreshold: number
-    }
-    math: {
-      enableVortexMath: boolean
-      enableTeslaMath: boolean
-      precision: number
-    }
-    knowledge: {
-      enableOnlineLookup: boolean
-      cacheTimeout: number
-    }
-    language: {
-      vocabularySize: number
-      enableLearning: boolean
-    }
-    memory: {
-      maxEntries: number
-      compressionEnabled: boolean
-    }
+    thinking: boolean
+    math: boolean
+    knowledge: boolean
+    language: boolean
+    memory: boolean
+    diagnostic: boolean
   }
-  storage: {
-    provider: "localStorage" | "indexedDB"
-    encryptionEnabled: boolean
+  settings: {
+    maxMemoryItems: number
+    maxHistoryItems: number
+    confidenceThreshold: number
   }
 }
 
 export const defaultConfig: SystemConfig = {
-  name: "ZacAI",
   version: "2.0.0",
-  debug: false,
-  performance: {
-    enableMetrics: true,
-    logLevel: "info",
-  },
   engines: {
-    thinking: {
-      maxIterations: 5,
-      confidenceThreshold: 0.8,
-    },
-    math: {
-      enableVortexMath: true,
-      enableTeslaMath: true,
-      precision: 10,
-    },
-    knowledge: {
-      enableOnlineLookup: true,
-      cacheTimeout: 3600000, // 1 hour
-    },
-    language: {
-      vocabularySize: 10000,
-      enableLearning: true,
-    },
-    memory: {
-      maxEntries: 1000,
-      compressionEnabled: true,
-    },
+    thinking: true,
+    math: true,
+    knowledge: true,
+    language: true,
+    memory: true,
+    diagnostic: true,
   },
-  storage: {
-    provider: "indexedDB",
-    encryptionEnabled: false,
+  settings: {
+    maxMemoryItems: 100,
+    maxHistoryItems: 50,
+    confidenceThreshold: 0.6,
   },
 }
