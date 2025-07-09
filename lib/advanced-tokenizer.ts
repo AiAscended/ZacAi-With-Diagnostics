@@ -1,212 +1,202 @@
-import { VocabularyLoader, type VocabularyEntry } from "./vocabulary-loader"
+import type { VocabularyLoader, WordEntry } from "./vocabulary-loader"
 
 export interface TokenInfo {
   token: string
-  type: "word" | "punctuation" | "number" | "whitespace" | "unknown"
-  position: number
-  length: number
-  vocabularyEntry?: VocabularyEntry
-  confidence: number
-}
-
-export interface TokenizationResult {
-  tokens: TokenInfo[]
-  totalTokens: number
-  knownWords: number
-  unknownWords: number
-  confidence: number
+  id: number
+  wordEntry?: WordEntry
+  isKnown: boolean
+  subwords?: string[]
 }
 
 export class AdvancedTokenizer {
-  private static instance: AdvancedTokenizer
   private vocabularyLoader: VocabularyLoader
-  private isInitialized = false
-
-  private constructor() {
-    this.vocabularyLoader = VocabularyLoader.getInstance()
+  private tokenToId: Map<string, number> = new Map()
+  private idToToken: Map<number, string> = new Map()
+  private nextId = 0
+  private specialTokens = {
+    PAD: 0,
+    UNK: 1,
+    START: 2,
+    END: 3,
   }
 
-  public static getInstance(): AdvancedTokenizer {
-    if (!AdvancedTokenizer.instance) {
-      AdvancedTokenizer.instance = new AdvancedTokenizer()
-    }
-    return AdvancedTokenizer.instance
+  constructor(vocabularyLoader: VocabularyLoader) {
+    this.vocabularyLoader = vocabularyLoader
+    this.initializeSpecialTokens()
+  }
+
+  private initializeSpecialTokens(): void {
+    const tokens = ["<PAD>", "<UNK>", "<START>", "<END>"]
+    tokens.forEach((token, index) => {
+      this.tokenToId.set(token, index)
+      this.idToToken.set(index, token)
+    })
+    this.nextId = tokens.length
   }
 
   public async initialize(): Promise<void> {
-    if (this.isInitialized) return
+    await this.vocabularyLoader.loadVocabulary()
+    console.log("Advanced tokenizer initialized with vocabulary")
+  }
 
-    try {
-      await this.vocabularyLoader.loadSeedVocabulary()
-      await this.vocabularyLoader.loadLearntVocabulary()
-      this.isInitialized = true
-      console.log("✅ AdvancedTokenizer initialized")
-    } catch (error) {
-      console.error("Failed to initialize AdvancedTokenizer:", error)
-      this.isInitialized = true // Continue with basic functionality
+  public tokenize(text: string): TokenInfo[] {
+    const words = this.preprocessText(text)
+    const tokens: TokenInfo[] = []
+
+    for (const word of words) {
+      const tokenInfo = this.processWord(word)
+      tokens.push(tokenInfo)
+    }
+
+    return tokens
+  }
+
+  private preprocessText(text: string): string[] {
+    // Advanced text preprocessing
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s'-]/g, " ") // Keep apostrophes and hyphens
+      .replace(/\s+/g, " ")
+      .trim()
+      .split(" ")
+      .filter((word) => word.length > 0)
+  }
+
+  private processWord(word: string): TokenInfo {
+    // Check if word exists in vocabulary
+    const wordEntry = this.vocabularyLoader.getWord(word)
+
+    if (wordEntry) {
+      // Known word
+      const id = this.getOrCreateTokenId(word)
+      return {
+        token: word,
+        id,
+        wordEntry,
+        isKnown: true,
+      }
+    }
+
+    // Unknown word - try subword tokenization
+    const subwords = this.subwordTokenize(word)
+    if (subwords.length > 1) {
+      const id = this.getOrCreateTokenId(word)
+      return {
+        token: word,
+        id,
+        isKnown: false,
+        subwords,
+      }
+    }
+
+    // Completely unknown
+    return {
+      token: word,
+      id: this.specialTokens.UNK,
+      isKnown: false,
     }
   }
 
-  public async tokenize(text: string): Promise<TokenizationResult> {
-    if (!this.isInitialized) {
-      await this.initialize()
-    }
+  private subwordTokenize(word: string): string[] {
+    const subwords: string[] = []
+    let remaining = word
 
-    const tokens: TokenInfo[] = []
-    let knownWords = 0
-    let unknownWords = 0
-    let position = 0
+    // Try to break down unknown words into known parts
+    while (remaining.length > 0) {
+      let found = false
 
-    // Enhanced tokenization regex
-    const tokenRegex = /(\w+)|([^\w\s])|(\s+)/g
-    let match
-
-    while ((match = tokenRegex.exec(text)) !== null) {
-      const [fullMatch, word, punctuation, whitespace] = match
-      const token = fullMatch
-      const tokenStart = match.index
-
-      let tokenType: TokenInfo["type"]
-      let vocabularyEntry: VocabularyEntry | undefined
-      let confidence = 0
-
-      if (word) {
-        tokenType = /^\d+$/.test(word) ? "number" : "word"
-
-        if (tokenType === "word") {
-          vocabularyEntry = this.vocabularyLoader.getVocabularyEntry(word.toLowerCase())
-          if (vocabularyEntry) {
-            knownWords++
-            confidence = 0.9
-          } else {
-            unknownWords++
-            confidence = 0.3
-          }
-        } else {
-          confidence = 1.0 // Numbers are always recognized
+      // Try progressively shorter prefixes
+      for (let i = Math.min(remaining.length, 8); i >= 2; i--) {
+        const prefix = remaining.substring(0, i)
+        if (this.vocabularyLoader.getWord(prefix)) {
+          subwords.push(prefix)
+          remaining = remaining.substring(i)
+          found = true
+          break
         }
-      } else if (punctuation) {
-        tokenType = "punctuation"
-        confidence = 1.0
-      } else if (whitespace) {
-        tokenType = "whitespace"
-        confidence = 1.0
-      } else {
-        tokenType = "unknown"
-        confidence = 0.1
       }
 
-      const tokenInfo: TokenInfo = {
-        token,
-        type: tokenType,
-        position: tokenStart,
-        length: token.length,
-        vocabularyEntry,
-        confidence,
+      if (!found) {
+        // If no prefix found, take first character and continue
+        subwords.push(remaining[0])
+        remaining = remaining.substring(1)
       }
-
-      tokens.push(tokenInfo)
-      position = tokenStart + token.length
     }
 
-    const totalTokens = tokens.length
-    const overallConfidence =
-      totalTokens > 0 ? tokens.reduce((sum, token) => sum + token.confidence, 0) / totalTokens : 0
+    return subwords
+  }
+
+  private getOrCreateTokenId(token: string): number {
+    if (this.tokenToId.has(token)) {
+      return this.tokenToId.get(token)!
+    }
+
+    const id = this.nextId++
+    this.tokenToId.set(token, id)
+    this.idToToken.set(id, token)
+    return id
+  }
+
+  public encode(text: string, maxLength = 128): number[] {
+    const tokens = this.tokenize(text)
+    const encoded = [this.specialTokens.START]
+
+    for (const tokenInfo of tokens) {
+      if (encoded.length >= maxLength - 1) break
+
+      if (tokenInfo.subwords && tokenInfo.subwords.length > 1) {
+        // Add subword tokens
+        for (const subword of tokenInfo.subwords) {
+          const subwordEntry = this.vocabularyLoader.getWord(subword)
+          if (subwordEntry) {
+            encoded.push(this.getOrCreateTokenId(subword))
+          } else {
+            encoded.push(this.specialTokens.UNK)
+          }
+          if (encoded.length >= maxLength - 1) break
+        }
+      } else {
+        encoded.push(tokenInfo.id)
+      }
+    }
+
+    encoded.push(this.specialTokens.END)
+
+    // Pad to maxLength
+    while (encoded.length < maxLength) {
+      encoded.push(this.specialTokens.PAD)
+    }
+
+    return encoded.slice(0, maxLength)
+  }
+
+  public decode(tokenIds: number[]): string {
+    const tokens = tokenIds
+      .filter((id) => id !== this.specialTokens.PAD && id !== this.specialTokens.START && id !== this.specialTokens.END)
+      .map((id) => this.idToToken.get(id) || "<UNK>")
+
+    return tokens.join(" ")
+  }
+
+  public getTokenInfo(text: string): {
+    tokens: TokenInfo[]
+    knownWords: number
+    unknownWords: number
+    totalTokens: number
+  } {
+    const tokens = this.tokenize(text)
+    const knownWords = tokens.filter((t) => t.isKnown).length
+    const unknownWords = tokens.filter((t) => !t.isKnown).length
 
     return {
       tokens,
-      totalTokens,
       knownWords,
       unknownWords,
-      confidence: overallConfidence,
+      totalTokens: tokens.length,
     }
   }
 
-  public async analyzeText(text: string): Promise<{
-    tokenization: TokenizationResult
-    wordFrequency: Map<string, number>
-    readabilityScore: number
-    suggestions: string[]
-  }> {
-    const tokenization = await this.tokenize(text)
-    const wordFrequency = new Map<string, number>()
-    const suggestions: string[] = []
-
-    // Calculate word frequency
-    for (const token of tokenization.tokens) {
-      if (token.type === "word") {
-        const word = token.token.toLowerCase()
-        wordFrequency.set(word, (wordFrequency.get(word) || 0) + 1)
-      }
-    }
-
-    // Calculate readability score (simplified)
-    const avgWordsPerSentence = this.calculateAverageWordsPerSentence(text)
-    const avgSyllablesPerWord = this.estimateAverageSyllables(tokenization.tokens)
-    const readabilityScore = Math.max(
-      0,
-      Math.min(100, 206.835 - 1.015 * avgWordsPerSentence - 84.6 * avgSyllablesPerWord),
-    )
-
-    // Generate suggestions for unknown words
-    for (const token of tokenization.tokens) {
-      if (token.type === "word" && !token.vocabularyEntry) {
-        suggestions.push(`Consider defining: "${token.token}"`)
-      }
-    }
-
-    return {
-      tokenization,
-      wordFrequency,
-      readabilityScore,
-      suggestions: suggestions.slice(0, 5), // Limit suggestions
-    }
-  }
-
-  private calculateAverageWordsPerSentence(text: string): number {
-    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0)
-    const words = text.split(/\s+/).filter((w) => w.trim().length > 0)
-    return sentences.length > 0 ? words.length / sentences.length : 0
-  }
-
-  private estimateAverageSyllables(tokens: TokenInfo[]): number {
-    const wordTokens = tokens.filter((t) => t.type === "word")
-    if (wordTokens.length === 0) return 0
-
-    const totalSyllables = wordTokens.reduce((sum, token) => {
-      return sum + this.estimateSyllables(token.token)
-    }, 0)
-
-    return totalSyllables / wordTokens.length
-  }
-
-  private estimateSyllables(word: string): number {
-    // Simple syllable estimation
-    const vowels = word.toLowerCase().match(/[aeiouy]+/g)
-    let syllables = vowels ? vowels.length : 1
-
-    // Adjust for silent 'e'
-    if (word.toLowerCase().endsWith("e")) {
-      syllables--
-    }
-
-    return Math.max(1, syllables)
-  }
-
-  public getStats(): {
-    initialized: boolean
-    vocabularySize: number
-    totalProcessed: number
-  } {
-    const vocabStats = this.vocabularyLoader.getVocabularyStats()
-
-    return {
-      initialized: this.isInitialized,
-      vocabularySize: vocabStats.total,
-      totalProcessed: 0, // Could track this if needed
-    }
+  public getVocabularySize(): number {
+    return this.nextId
   }
 }
-
-// Export singleton instance
-export const advancedTokenizer = AdvancedTokenizer.getInstance()
