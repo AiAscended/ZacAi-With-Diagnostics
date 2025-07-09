@@ -23,7 +23,7 @@ export class MemoryEngine {
     // Load existing personal info from storage
     await this.loadPersonalInfo()
 
-    console.log("🧠 MemoryEngine: Initialized with personal info system")
+    console.log("🧠 MemoryEngine: Initialized with enhanced personal info system")
     this.isInitialized = true
   }
 
@@ -33,25 +33,73 @@ export class MemoryEngine {
       timestamp: Date.now(),
     })
 
-    // Extract personal info from the memory if it's a conversation
-    if (memory.type === "conversation" && memory.userMessage) {
-      await this.extractPersonalInfo(memory.userMessage)
+    // GOLDEN CODE: Enhanced extraction with immediate storage
+    if (memory.type === "conversation") {
+      if (memory.userMessage) {
+        await this.extractPersonalInfo(memory.userMessage)
+      }
+      if (memory.extractedInfo) {
+        await this.storeExtractedInfo(memory.extractedInfo)
+      }
     }
+  }
+
+  // GOLDEN CODE: Store immediately extracted personal info
+  private async storeExtractedInfo(extractedInfo: any): Promise<void> {
+    for (const [key, value] of Object.entries(extractedInfo)) {
+      if (value && typeof value === "string") {
+        const entry: PersonalInfoEntry = {
+          key,
+          value: value.trim(),
+          timestamp: Date.now(),
+          importance: this.getImportanceForKey(key),
+          type: "personal_info",
+          source: "immediate_extraction",
+        }
+        this.personalInfo.set(key, entry)
+        console.log(`📝 MemoryEngine: Immediately stored: ${key} = ${value}`)
+      }
+    }
+    await this.savePersonalInfo()
+  }
+
+  private getImportanceForKey(key: string): number {
+    const importanceMap: { [key: string]: number } = {
+      name: 0.9,
+      pets: 0.7,
+      pet_name_1: 0.6,
+      pet_name_2: 0.6,
+      job: 0.8,
+      location: 0.7,
+      age: 0.6,
+      marital_status: 0.8,
+    }
+    return importanceMap[key] || 0.5
   }
 
   public async retrieveMemories(query?: string): Promise<any[]> {
     return this.memories
   }
 
-  // GOLDEN CODE: Enhanced personal info extraction with all patterns
+  // GOLDEN CODE: Enhanced personal info extraction with better pet name patterns
   private async extractPersonalInfo(message: string): Promise<void> {
     const personalPatterns = [
-      { pattern: /my name is (\w+)/i, key: "name", importance: 0.9 },
-      { pattern: /i have (\d+) (cats?|dogs?|pets?)/i, key: "pets", importance: 0.7 },
+      { pattern: /(?:my name is|i'm|i am|call me)\s+(\w+)/i, key: "name", importance: 0.9 },
+      { pattern: /i have (\d+)\s+(cats?|dogs?|pets?)/i, key: "pets", importance: 0.7 },
       { pattern: /i have a wife/i, key: "marital_status", value: "married", importance: 0.8 },
       { pattern: /i have a husband/i, key: "marital_status", value: "married", importance: 0.8 },
-      { pattern: /one is named (\w+)/i, key: "pet_name_1", importance: 0.6 },
-      { pattern: /the other is.*named (\w+)/i, key: "pet_name_2", importance: 0.6 },
+
+      // ENHANCED: Better pet name patterns
+      { pattern: /(?:one|first|older)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i, key: "pet_name_1", importance: 0.6 },
+      {
+        pattern: /(?:other|second|younger|another)\s+(?:is\s+)?(?:named|called)\s+(\w+)/i,
+        key: "pet_name_2",
+        importance: 0.6,
+      },
+      { pattern: /(?:and|,)\s*(\w+)\s+(?:is\s+)?(?:the\s+)?(?:other|second)/i, key: "pet_name_2", importance: 0.6 },
+      { pattern: /(\w+)\s+and\s+(\w+)\s+are\s+(?:my|their)\s+names/i, key: "pet_names_both", importance: 0.6 },
+      { pattern: /named\s+(\w+)\s+and\s+(\w+)/i, key: "pet_names_both", importance: 0.6 },
+
       { pattern: /i work as (?:a |an )?(.+)/i, key: "job", importance: 0.8 },
       { pattern: /i live in (.+)/i, key: "location", importance: 0.7 },
       { pattern: /i am (\d+)\s*years?\s*old/i, key: "age", importance: 0.6 },
@@ -66,18 +114,39 @@ export class MemoryEngine {
 
     personalPatterns.forEach(({ pattern, key, value, importance }) => {
       const match = message.match(pattern)
-      if (match && match[1]) {
-        const extractedValue = value || match[1]
-        const entry: PersonalInfoEntry = {
-          key,
-          value: extractedValue.trim(),
-          timestamp: Date.now(),
-          importance: importance || 0.7,
-          type: "personal_info",
-          source: "conversation",
+      if (match) {
+        if (key === "pet_names_both" && match[1] && match[2]) {
+          // Handle both pet names at once
+          this.personalInfo.set("pet_name_1", {
+            key: "pet_name_1",
+            value: match[1].trim(),
+            timestamp: Date.now(),
+            importance: 0.6,
+            type: "personal_info",
+            source: "conversation",
+          })
+          this.personalInfo.set("pet_name_2", {
+            key: "pet_name_2",
+            value: match[2].trim(),
+            timestamp: Date.now(),
+            importance: 0.6,
+            type: "personal_info",
+            source: "conversation",
+          })
+          console.log(`📝 MemoryEngine: Stored both pet names: ${match[1]} and ${match[2]}`)
+        } else if (match[1]) {
+          const extractedValue = value || match[1]
+          const entry: PersonalInfoEntry = {
+            key,
+            value: extractedValue.trim(),
+            timestamp: Date.now(),
+            importance: importance || 0.7,
+            type: "personal_info",
+            source: "conversation",
+          }
+          this.personalInfo.set(key, entry)
+          console.log(`📝 MemoryEngine: Stored personal info: ${key} = ${extractedValue}`)
         }
-        this.personalInfo.set(key, entry)
-        console.log(`📝 MemoryEngine: Stored personal info: ${key} = ${extractedValue}`)
       }
     })
 
